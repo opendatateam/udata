@@ -5,23 +5,33 @@ from datetime import date
 
 import pytest
 from flask import current_app, url_for
+from rdflib import BNode, Graph, Literal, URIRef
+from rdflib.namespace import RDF
 
 from udata.core.access_type.constants import AccessType, InspireLimitationCategory
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.constants import UpdateFrequency
+from udata.core.dataset.constants import DCAT_EXTRAS_KEY, UpdateFrequency
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceSchemaMockData
+from udata.core.dataset.rdf import get_dcat_extra
 from udata.core.organization.factories import OrganizationFactory
+from udata.harvest.backends import dcat as dcat_module
 from udata.harvest.backends import get_backend
-from udata.harvest.backends.dcat import CswDcatBackend
-from udata.harvest.models import HarvestJob
+from udata.harvest.models import HarvestItem, HarvestJob
 from udata.models import Dataset
+from udata.rdf import DCAT
 from udata.storage.s3 import get_from_json
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import argvalues, assert200
 
 from .. import actions
-from ..backends.dcat import URIS_TO_REPLACE
+from ..backends.dcat import (
+    DCAT_EXTRAS_PARENT_KEY,
+    URIS_TO_REPLACE,
+    CswDcatBackend,
+    DcatBackend,
+    custom_iso19139_parent_record_id_from_rdf,
+)
 from .factories import HarvestSourceFactory
 
 log = logging.getLogger(__name__)
@@ -31,6 +41,10 @@ TEST_DOMAIN = "data.test.org"  # Need to be used in fixture file
 TEST_URL_PATTERN = "http://{domain}/{path}"
 DCAT_FILES_DIR = os.path.join(os.path.dirname(__file__), "dcat")
 CSW_DCAT_FILES_DIR = os.path.join(os.path.dirname(__file__), "csw_dcat")
+
+
+def _get_dataset(**kwargs) -> Dataset:
+    return Dataset.objects(**kwargs).first()
 
 
 def _mock_single(rmock, method, filesdir, filename, path=None):
@@ -82,6 +96,20 @@ def mock_xslt(rmock, filename="iso-19139-to-dcat-ap.xsl"):
     with open(os.path.join(CSW_DCAT_FILES_DIR, filename), "r") as f:
         xslt = f.read()
     rmock.get(current_app.config.get("HARVEST_ISO19139_XSLT_URL"), text=xslt)
+
+
+def _backend_with_items(*harvest_items, **kwargs):
+    source = HarvestSourceFactory(backend="dcat")
+    job = HarvestJob(source=source, status="initialized")
+    job.items = list(harvest_items)
+    backend = DcatBackend(job, **kwargs)
+    for harvest_item in job.items:
+        item = harvest_item.dataset or harvest_item.dataservice
+        item.set_harvested()
+        item.harvest.record_id = getattr(item, "record_id", None)
+        item.harvest.source_id = str(source.id)
+        item.save()
+    return backend
 
 
 @pytest.mark.options(HARVESTER_BACKENDS=["dcat"])
@@ -1091,6 +1119,460 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert Dataset.objects.count() == 0
         assert Dataservice.objects.count() == 0
 
+    def test_resolve_parents_failure_is_recorded(self, mocker):
+        """A failure in `resolve_parents` is recorded and swallowed."""
+        backend = DcatBackend(HarvestJob(source=HarvestSourceFactory(backend="dcat")))
+        mocker.patch.object(
+            DcatBackend, "format", new_callable=mocker.PropertyMock, return_value="xml"
+        )
+        mocker.patch.object(backend, "walk_paginated_graph", return_value=iter([]))
+        mocker.patch.object(backend, "resolve_parents", side_effect=RuntimeError("boom"))
+
+        backend.inner_harvest()
+
+        assert len(backend.job.errors) == 1
+        assert "boom" in backend.job.errors[0].message
+        assert backend.job.errors[0].details is not None
+
+    def test_store_graphs_failure_is_recorded(self, mocker):
+        """A failure in `store_graphs` is recorded and swallowed."""
+        backend = DcatBackend(HarvestJob(source=HarvestSourceFactory(backend="dcat")))
+        mocker.patch.object(
+            DcatBackend, "format", new_callable=mocker.PropertyMock, return_value="xml"
+        )
+        mocker.patch.object(backend, "walk_paginated_graph", return_value=iter([]))
+        mocker.patch.object(backend, "store_graphs", side_effect=RuntimeError("boom"))
+
+        backend.inner_harvest()
+
+        assert len(backend.job.errors) == 1
+        assert "boom" in backend.job.errors[0].message
+        assert backend.job.errors[0].details is not None
+
+    def test_resolve_parents_base(self):
+        """A child dataset records its parent `dataset.id` in `extras["dcat"]["parent"]`, and the
+        update is persisted in mongo.
+        """
+        parent = DatasetFactory(record_id="parent-record")
+        child = DatasetFactory()
+
+        backend = _backend_with_items(
+            HarvestItem(remote_id="parent", status="done", dataset=parent),
+            HarvestItem(
+                remote_id="child",
+                status="done",
+                dataset=child,
+                kwargs={"parent_record_id": parent.record_id},
+            ),
+        )
+        backend.resolve_parents()
+
+        for hi in backend.job.items:
+            assert hi.status == "done"
+            assert len(hi.errors) == 0
+
+        assert get_dcat_extra(child, DCAT_EXTRAS_PARENT_KEY) == str(parent.id)
+        assert get_dcat_extra(_get_dataset(id=child.id), DCAT_EXTRAS_PARENT_KEY) == str(parent.id)
+
+    def test_resolve_parents_order_independent(self):
+        """A parent is resolved even when it is harvested after its children."""
+        parent = DatasetFactory(record_id="parent-record")
+        child = DatasetFactory()
+
+        backend = _backend_with_items(
+            HarvestItem(
+                remote_id="child",
+                status="done",
+                dataset=child,
+                kwargs={"parent_record_id": parent.record_id},
+            ),
+            HarvestItem(remote_id="parent", status="done", dataset=parent),
+        )
+        backend.resolve_parents()
+
+        for hi in backend.job.items:
+            assert hi.status == "done"
+            assert len(hi.errors) == 0
+
+        assert get_dcat_extra(child, DCAT_EXTRAS_PARENT_KEY) == str(parent.id)
+
+    def test_resolve_parents_unresolved(self):
+        """A child whose parent doesn't exist removes its extra, records a warning, but stays `done`."""
+        child = DatasetFactory(extras={DCAT_EXTRAS_KEY: {DCAT_EXTRAS_PARENT_KEY: "some-parent"}})
+        hi = HarvestItem(
+            remote_id="child",
+            status="done",
+            dataset=child,
+            errors=[],
+            kwargs={"parent_record_id": "missing-parent"},
+        )
+        assert get_dcat_extra(hi.dataset, DCAT_EXTRAS_PARENT_KEY) == "some-parent"
+
+        _backend_with_items(hi).resolve_parents()
+
+        assert hi.status == "done"
+        assert len(hi.errors) == 1
+        assert "missing-parent" in hi.errors[0].message
+
+        assert get_dcat_extra(child, DCAT_EXTRAS_PARENT_KEY) is None
+        assert get_dcat_extra(_get_dataset(id=child.id), DCAT_EXTRAS_PARENT_KEY) is None
+
+    def test_resolve_parents_no_parent(self):
+        """A dataset with no `parent_record_id` is left untouched."""
+        child = DatasetFactory(record_id="child-record", extras={"some": "value"})
+        hi = HarvestItem(remote_id="child", status="done", dataset=child, errors=[])
+
+        _backend_with_items(hi).resolve_parents()
+
+        assert hi.status == "done"
+        assert len(hi.errors) == 0
+
+        assert get_dcat_extra(child, DCAT_EXTRAS_PARENT_KEY) is None
+
+    @pytest.mark.parametrize("status", ["skipped", "failed"])
+    def test_resolve_parents_failed_child(self, status):
+        """A non-`done` child doesn't resolve its parent."""
+        parent = DatasetFactory(record_id="parent-record")
+        child = DatasetFactory()
+
+        _backend_with_items(
+            HarvestItem(remote_id="parent", status="done", dataset=parent),
+            HarvestItem(
+                remote_id="child",
+                status=status,
+                dataset=child,
+                kwargs={"parent_record_id": parent.record_id},
+            ),
+        ).resolve_parents()
+
+        assert get_dcat_extra(child, DCAT_EXTRAS_PARENT_KEY) is None
+
+    @pytest.mark.parametrize("status", ["skipped", "failed"])
+    def test_resolve_parents_failed_parent(self, status):
+        """A non-`done` parent is still a resolvable parent."""
+        parent = DatasetFactory(record_id="parent-record")
+        child = DatasetFactory()
+
+        _backend_with_items(
+            HarvestItem(remote_id="parent", status=status, dataset=parent),
+            HarvestItem(
+                remote_id="child",
+                status="done",
+                dataset=child,
+                kwargs={"parent_record_id": parent.record_id},
+            ),
+        ).resolve_parents()
+
+        assert get_dcat_extra(child, DCAT_EXTRAS_PARENT_KEY) == str(parent.id)
+
+    @pytest.mark.parametrize("visible", [True, False])
+    def test_resolve_parents_same_source(self, visible):
+        """A parent from the same source is resolvable, as long as it is visible."""
+        parent = DatasetFactory(record_id="parent-record", private=not visible)
+        child = DatasetFactory()
+
+        backend = _backend_with_items(
+            # parent not in harvest run...
+            HarvestItem(
+                remote_id="child",
+                status="done",
+                dataset=child,
+                kwargs={"parent_record_id": parent.record_id},
+            ),
+        )
+
+        # ...but present in mongo
+        parent.set_harvested()
+        parent.harvest.record_id = parent.record_id
+        parent.harvest.source_id = str(backend.source.id)
+        parent.save()
+        assert _get_dataset(id=parent.id) is not None
+
+        backend.resolve_parents()
+
+        expected_id = str(parent.id) if visible else None
+        assert get_dcat_extra(child, DCAT_EXTRAS_PARENT_KEY) == expected_id
+
+    def test_resolve_parents_other_source(self):
+        """A parent from another source is not resolvable."""
+        parent = DatasetFactory(record_id="parent-record")
+        child = DatasetFactory()
+
+        _backend_with_items(
+            HarvestItem(remote_id="parent", status="done", dataset=parent),
+        )
+        assert _get_dataset(id=parent.id) is not None
+
+        _backend_with_items(
+            HarvestItem(
+                remote_id="child",
+                status="done",
+                dataset=child,
+                kwargs={"parent_record_id": parent.record_id},
+            ),
+        ).resolve_parents()
+
+        assert get_dcat_extra(child, DCAT_EXTRAS_PARENT_KEY) is None
+
+    def test_resolve_parents_partial_harvest(self, mocker):
+        """Parents are resolved even when the harvest loop is interrupted."""
+        backend = DcatBackend(HarvestJob(source=HarvestSourceFactory(backend="dcat")))
+        mocker.patch.object(
+            DcatBackend, "format", new_callable=mocker.PropertyMock, return_value="xml"
+        )
+        mocker.patch.object(backend, "walk_paginated_graph")
+        mocker.patch.object(backend, "store_graphs")
+
+        resolve_parents_mock = mocker.patch.object(backend, "resolve_parents")
+
+        backend.inner_harvest()
+
+        resolve_parents_mock.assert_called_once()
+
+    def test_resolve_parents_targeted_update(self):
+        """The targeted extras update preserves unrelated `extras["dcat"]` keys."""
+        parent = DatasetFactory(record_id="parent-record")
+        child = DatasetFactory(
+            extras={"dcat": {"license": "odc-odbl", DCAT_EXTRAS_PARENT_KEY: "old"}}
+        )
+
+        _backend_with_items(
+            HarvestItem(remote_id="parent", status="done", dataset=parent),
+            HarvestItem(
+                remote_id="child",
+                status="done",
+                dataset=child,
+                kwargs={"parent_record_id": parent.record_id},
+            ),
+        ).resolve_parents()
+
+        persisted = _get_dataset(id=child.id)
+        assert get_dcat_extra(persisted, DCAT_EXTRAS_PARENT_KEY) == str(parent.id)
+        assert get_dcat_extra(persisted, "license") == "odc-odbl"
+
+    def test_resolve_parents_targeted_update_stale(self):
+        """Stale `extras["dcat"]["parent"]` is cleaned up on child with no parent"""
+        child = DatasetFactory(
+            record_id="child-record",
+            extras={DCAT_EXTRAS_KEY: {DCAT_EXTRAS_PARENT_KEY: "old"}},
+        )
+        hi = HarvestItem(remote_id="child", status="done", dataset=child, errors=[])
+
+        _backend_with_items(hi).resolve_parents()
+
+        assert hi.status == "done"
+        assert len(hi.errors) == 0
+
+        # Recursive empty dict removal up to and including `extras["dcat"]`.
+        assert DCAT_EXTRAS_KEY not in child.extras
+        assert DCAT_EXTRAS_KEY not in _get_dataset(id=child.id).extras
+
+    def test_resolve_parents_isolate_item_error(self, mocker):
+        """An error while updating one item is logged and does not prevent others from resolving."""
+        parent = DatasetFactory(record_id="parent-record")
+        child1 = DatasetFactory()
+        child2 = DatasetFactory()
+        hi1 = HarvestItem(
+            remote_id="child1",
+            status="done",
+            dataset=child1,
+            errors=[],
+            kwargs={"parent_record_id": parent.record_id},
+        )
+        hi2 = HarvestItem(
+            remote_id="child2",
+            status="done",
+            dataset=child2,
+            errors=[],
+            kwargs={"parent_record_id": parent.record_id},
+        )
+
+        original = dcat_module.set_dcat_extra
+
+        def flaky_set(obj, key, value):
+            if obj.id == child1.id:
+                raise RuntimeError("boom")
+            return original(obj, key, value)
+
+        mocker.patch.object(dcat_module, "set_dcat_extra", side_effect=flaky_set)
+
+        _backend_with_items(
+            HarvestItem(remote_id="parent", status="done", dataset=parent),
+            hi1,
+            hi2,
+        ).resolve_parents()
+
+        assert len(hi1.errors) == 1
+        assert "boom" in hi1.errors[0].message
+        assert hi1.errors[0].details is not None
+
+        assert hi2.errors == []
+        assert get_dcat_extra(child2, DCAT_EXTRAS_PARENT_KEY) == str(parent.id)
+
+    def test_resolve_parents_dryrun(self):
+        """In preview mode the parent link is resolved but not persisted."""
+        parent = DatasetFactory(record_id="parent-record")
+        child = DatasetFactory()
+
+        backend = _backend_with_items(
+            HarvestItem(remote_id="parent", status="done", dataset=parent),
+            HarvestItem(
+                remote_id="child",
+                status="done",
+                dataset=child,
+                kwargs={"parent_record_id": parent.record_id},
+            ),
+            dryrun=True,
+        )
+        backend.resolve_parents()
+
+        for hi in backend.job.items:
+            assert hi.status == "done"
+            assert len(hi.errors) == 0
+
+        assert get_dcat_extra(child, DCAT_EXTRAS_PARENT_KEY) == str(parent.id)
+        assert get_dcat_extra(_get_dataset(id=child.id), DCAT_EXTRAS_PARENT_KEY) is None
+
+    def test_parent_id_dcat(self, rmock):
+        """A child DCAT dataset records its parent `dataset.id` in `extras["dcat"]["parent"]`."""
+        turtle = """\
+            @prefix dcat: <http://www.w3.org/ns/dcat#> .
+            @prefix dct: <http://purl.org/dc/terms/> .
+            @prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+            <http://example.com/datasets/parent> a dcat:Dataset ;
+                dct:title "Parent" ;
+                dct:description "Parent description" ;
+                dct:identifier "parent-id" .
+            <http://example.com/datasets/child> a dcat:Dataset ;
+                dct:title "Child" ;
+                dct:description "Child description" ;
+                dct:identifier "child-id" ;
+                <http://www.w3.org/ns/dcat#inSeries> <urn:iso19139:parent:parent-record-id> .
+
+            <http://example.com/records/parent-record-id> a dcat:CatalogRecord ;
+                foaf:primaryTopic <http://example.com/datasets/parent> ;
+                dct:identifier "parent-record-id" .
+            <http://example.com/records/child-record-id> a dcat:CatalogRecord ;
+                foaf:primaryTopic <http://example.com/datasets/child> ;
+                dct:identifier "child-record-id" .
+            """
+        url = TEST_URL_PATTERN.format(path="catalog-parent.ttl", domain=TEST_DOMAIN)
+        rmock.get(url, text=turtle)
+        source = HarvestSourceFactory(backend="dcat", url=url)
+
+        actions.run(source)
+        source.reload()
+        job = source.get_last_job()
+        assert len(job.items) == 2
+
+        parent = _get_dataset(harvest__remote_id="parent-id")
+        child = _get_dataset(harvest__remote_id="child-id")
+        assert get_dcat_extra(parent, DCAT_EXTRAS_PARENT_KEY) is None
+        assert get_dcat_extra(child, DCAT_EXTRAS_PARENT_KEY) == str(parent.id)
+
+    def test_parent_id_self_reference(self, rmock):
+        """A dataset whose `dcat:inSeries` points at its own record id is not linked to itself."""
+        turtle = """\
+            @prefix dcat: <http://www.w3.org/ns/dcat#> .
+            @prefix dct: <http://purl.org/dc/terms/> .
+            @prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+            <http://example.com/datasets/self> a dcat:Dataset ;
+                dct:title "Self" ;
+                dct:description "Self description" ;
+                dct:identifier "self-id" ;
+                <http://www.w3.org/ns/dcat#inSeries> <urn:iso19139:parent:self-record-id> .
+
+            <http://example.com/records/self-record-id> a dcat:CatalogRecord ;
+                foaf:primaryTopic <http://example.com/datasets/self> ;
+                dct:identifier "self-record-id" .
+            """
+        url = TEST_URL_PATTERN.format(path="catalog-self.ttl", domain=TEST_DOMAIN)
+        rmock.get(url, text=turtle)
+        source = HarvestSourceFactory(backend="dcat", url=url)
+
+        actions.run(source)
+        source.reload()
+        job = source.get_last_job()
+        assert len(job.items) == 1
+
+        # A record cannot be its own parent
+        assert (
+            get_dcat_extra(_get_dataset(harvest__remote_id="self-id"), DCAT_EXTRAS_PARENT_KEY)
+            is None
+        )
+
+    def test_custom_iso19139_parent_record_id_from_rdf_bare_uriref(self):
+        """A `dcat:inSeries` with `urn:iso19139:parent:<id>` URIRef returns the prefix-stripped
+        record id."""
+        g = Graph()
+        node = BNode()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCAT.inSeries, URIRef("urn:iso19139:parent:abc-1234")))
+
+        assert custom_iso19139_parent_record_id_from_rdf(g, node) == "abc-1234"
+
+    def test_custom_iso19139_parent_record_id_from_rdf_literal(self):
+        """A `dcat:inSeries` `urn:iso19139:parent:<id>` Literal returns the prefix-stripped record
+        id."""
+        g = Graph()
+        node = BNode()
+        g.add((node, DCAT.inSeries, Literal("urn:iso19139:parent:abc-1234")))
+
+        assert custom_iso19139_parent_record_id_from_rdf(g, node) == "abc-1234"
+
+    def test_custom_iso19139_parent_record_id_from_rdf_bnode(self):
+        """A `dcat:inSeries` BNode object is ignored, and does not prevent a later match."""
+        g = Graph()
+        node = BNode()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCAT.inSeries, BNode()))
+
+        assert custom_iso19139_parent_record_id_from_rdf(g, node) is None
+
+        g.add((node, DCAT.inSeries, URIRef("urn:iso19139:parent:abc-1234")))
+
+        assert custom_iso19139_parent_record_id_from_rdf(g, node) == "abc-1234"
+
+    def test_custom_iso19139_parent_record_id_from_rdf_with_whitespace(self):
+        """A `dcat:inSeries` value is stripped before the prefix check, whatever its node type."""
+        g = Graph()
+        node = BNode()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCAT.inSeries, Literal("\n  urn:iso19139:parent:abc-1234  ")))
+        g.add((node, DCAT.inSeries, URIRef("urn:iso19139:parent:def-5678 ")))
+
+        assert custom_iso19139_parent_record_id_from_rdf(g, node) == "abc-1234"
+
+    def test_custom_iso19139_parent_record_id_from_rdf_without_prefix(self):
+        """A `dcat:inSeries` without `urn:iso19139:parent:` prefix does not resolve."""
+        g = Graph()
+        node = BNode()
+        g.add((node, DCAT.inSeries, URIRef("http://example.org/series")))
+
+        assert custom_iso19139_parent_record_id_from_rdf(g, node) is None
+
+    def test_custom_iso19139_parent_record_id_from_rdf_none(self):
+        """A resource without `dcat:inSeries` has no parent record id."""
+        g = Graph()
+        node = BNode()
+        g.add((node, RDF.type, DCAT.Dataset))
+
+        assert custom_iso19139_parent_record_id_from_rdf(g, node) is None
+
+    def test_custom_iso19139_parent_record_id_from_rdf_multiple(self):
+        """Multiple `dcat:inSeries` return the first prefix-stripped `urn:iso19139:parent:<id>`
+        record id."""
+        g = Graph()
+        node = BNode()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCAT.inSeries, URIRef("urn:iso19139:no-match")))
+        g.add((node, DCAT.inSeries, URIRef("urn:iso19139:parent:abc-1234")))
+        g.add((node, DCAT.inSeries, URIRef("urn:iso19139:parent:too-late")))
+
+        assert custom_iso19139_parent_record_id_from_rdf(g, node) == "abc-1234"
+
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
 class CswDcatBackendTest(PytestOnlyDBTestCase):
@@ -1710,6 +2192,97 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
 
         dataset = Dataset.objects[0]
         assert dataset.harvest.remote_url == "http://catalog.example.com/id-1"
+
+    def test_parent_id_csw_iso19139(self, rmock):
+        """A child ISO-19139 dataset records its parent `dataset.id` in `extras["dcat"]["parent"]`."""
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+        <csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+          <csw:SearchStatus timestamp="2023-03-03T16:09:50.697645Z" />
+          <csw:SearchResults numberOfRecordsMatched="1" numberOfRecordsReturned="1" elementSet="full" nextRecord="0">
+            <gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gmi="http://www.isotc211.org/2005/gmi" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <gmd:fileIdentifier>
+                <gco:CharacterString>child-record-id</gco:CharacterString>
+              </gmd:fileIdentifier>
+              <gmd:parentIdentifier>
+                <gco:CharacterString>
+                  parent-record-id
+                </gco:CharacterString>
+              </gmd:parentIdentifier>
+              <gmd:hierarchyLevel>
+                <gmd:MD_ScopeCode codeListValue="dataset" codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#MD_ScopeCode">dataset</gmd:MD_ScopeCode>
+              </gmd:hierarchyLevel>
+              <gmd:identificationInfo>
+                <gmd:MD_DataIdentification>
+                  <gmd:citation>
+                    <gmd:CI_Citation>
+                      <gmd:title>
+                         <gco:CharacterString>Child</gco:CharacterString>
+                       </gmd:title>
+                       <gmd:identifier>
+                        <gmd:MD_Identifier>
+                          <gmd:code>
+                            <gco:CharacterString>child-id</gco:CharacterString>
+                          </gmd:code>
+                        </gmd:MD_Identifier>
+                      </gmd:identifier>
+                    </gmd:CI_Citation>
+                  </gmd:citation>
+                </gmd:MD_DataIdentification>
+              </gmd:identificationInfo>
+            </gmd:MD_Metadata>
+            <gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gmi="http://www.isotc211.org/2005/gmi" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <gmd:fileIdentifier>
+                <gco:CharacterString>parent-record-id</gco:CharacterString>
+              </gmd:fileIdentifier>
+              <gmd:hierarchyLevel>
+                <gmd:MD_ScopeCode codeListValue="dataset" codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#MD_ScopeCode">dataset</gmd:MD_ScopeCode>
+              </gmd:hierarchyLevel>
+              <gmd:identificationInfo>
+                <gmd:MD_DataIdentification>
+                  <gmd:citation>
+                    <gmd:CI_Citation>
+                      <gmd:title>
+                         <gco:CharacterString>Parent</gco:CharacterString>
+                       </gmd:title>
+                       <gmd:identifier>
+                        <gmd:MD_Identifier>
+                          <gmd:code>
+                            <gco:CharacterString>parent-id</gco:CharacterString>
+                          </gmd:code>
+                        </gmd:MD_Identifier>
+                      </gmd:identifier>
+                    </gmd:CI_Citation>
+                  </gmd:citation>
+                </gmd:MD_DataIdentification>
+              </gmd:identificationInfo>
+            </gmd:MD_Metadata>
+          </csw:SearchResults>
+        </csw:GetRecordsResponse>
+        """
+        mock_xslt(rmock)
+        rmock.head(rmock.ANY, headers={"Content-Type": "application/xml"})
+        rmock.post(rmock.ANY, text=xml)
+
+        source = HarvestSourceFactory(
+            backend="csw-iso-19139",
+            config={
+                "extra_configs": [
+                    {"key": "remote_url_prefix", "value": "http://catalog.example.com"}
+                ]
+            },
+        )
+
+        actions.run(source)
+        source.reload()
+        job = source.get_last_job()
+        assert len(job.items) == 2
+
+        parent = _get_dataset(harvest__remote_id="parent-id")
+        child = _get_dataset(harvest__remote_id="child-id")
+        assert get_dcat_extra(parent, DCAT_EXTRAS_PARENT_KEY) is None
+        assert get_dcat_extra(child, DCAT_EXTRAS_PARENT_KEY) == str(parent.id)
 
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw-dcat"])

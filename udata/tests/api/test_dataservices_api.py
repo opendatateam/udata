@@ -673,7 +673,7 @@ class DataserviceAPITest(APITestCase):
         user = self.login()
         original_member = Member(user=user, role="editor")
         original_org = OrganizationFactory(members=[original_member])
-        dataservice = DataserviceFactory(owner=user, organization=original_org)
+        dataservice = DataserviceFactory(organization=original_org)
 
         data = dataservice.to_dict()
         data["access_type"] = AccessType.RESTRICTED
@@ -696,7 +696,7 @@ class DataserviceAPITest(APITestCase):
         user = self.login()
         original_member = Member(user=user, role="editor")
         original_org = OrganizationFactory(members=[original_member])
-        dataservice = DataserviceFactory(owner=user, organization=original_org)
+        dataservice = DataserviceFactory(organization=original_org)
 
         new_member = Member(user=self.user, role="admin")
         new_org = OrganizationFactory(members=[new_member])
@@ -826,9 +826,8 @@ class DataservicesFeedAPItest(APITestCase):
 
     @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_org(self):
-        owner = UserFactory()
         org = OrganizationFactory()
-        DataserviceFactory(owner=owner, organization=org)
+        DataserviceFactory(organization=org)
 
         response = self.get(url_for("api.recent_dataservices_atom_feed"))
 

@@ -45,6 +45,9 @@ dataset_harvest_fields = api.model(
         "domain": fields.String(description="The harvested domain", allow_null=True),
         "source_id": fields.String(description="The harvester id", allow_null=True),
         "source_url": fields.String(description="The harvester source url", allow_null=True),
+        "record_id": fields.String(
+            description="The dataset record id on the source portal", allow_null=True
+        ),
         "remote_id": fields.String(
             description="The dataset remote id on the source portal", allow_null=True
         ),

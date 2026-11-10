@@ -661,11 +661,12 @@ class CurrentUserField(ModelFieldMixin, Field):
         return super().process(formdata, data, **kwargs)
 
     def pre_validate(self, form):
+        # An unset previous owner is a value too: an organization object has none, and setting
+        # one would let `PublishAsField` move the object out of its organization.
         if (
             form.instance
-            and self.name in form.instance
-            and getattr(form.instance, self.name).id != self.data.id
             and not admin_permission
+            and getattr(form.instance, self.name) != self.data
         ):
             raise validators.ValidationError(
                 _("Cannot change owner after creation. Please use transfer feature.")
@@ -692,12 +693,14 @@ class PublishAsField(ModelFieldMixin, Field):
         return len(current_user.organizations) <= 0
 
     def pre_validate(self, form):
-        # Some forms (like DiscussionCommentForm) are not model forms
+        # Some forms (like DiscussionCommentForm) are not model forms.
+        # Unlike the owner, an unset organization stays settable: moving one's own object to an
+        # organization one can publish for is allowed, the permission check below guarding it.
         if (
             isinstance(form, ModelForm)
             and form.instance
             and self.name in form.instance
-            and getattr(form.instance, self.name).id != self.data.id
+            and getattr(form.instance, self.name) != self.data
             and not admin_permission
         ):
             raise validators.ValidationError(

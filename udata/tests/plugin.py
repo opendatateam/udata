@@ -4,11 +4,11 @@ from uuid import uuid4
 
 import pytest
 
-from udata.tests.fakes import DataCiteFake
+from udata.tests.fakes import DataCiteFake, ProConnectFake
 
-# The storages the resources migration is about. The others keep their own
-# tests on the local backend.
-S3_TESTED_STORAGES = ("resources", "chunks")
+# The storages the resources migration is about, and the images, where what S3 serves an SVG
+# with matters. The others keep their own tests on the local backend.
+S3_TESTED_STORAGES = ("resources", "chunks", "images")
 
 
 def pytest_configure(config):
@@ -38,6 +38,28 @@ def datacite(app, rmock):
     fake = DataCiteFake()
     platform_uri = app.config["DOI_PLATFORM_URI"]
     rmock.put(re.compile(f"^{re.escape(platform_uri)}/dois/"), json=fake.handle_put)
+    return fake
+
+
+@pytest.fixture
+def proconnect(app, rmock, monkeypatch):
+    """An in-memory ProConnect, registered as udata's OpenID provider."""
+    from authlib.integrations.flask_client import OAuth
+
+    from udata.auth import proconnect as proconnect_auth
+
+    fake = ProConnectFake(client_id="udata-test")
+    fake.mount(rmock)
+    app.config.update(
+        PROCONNECT_CLIENT_ID=fake.client_id,
+        PROCONNECT_CLIENT_SECRET="secret",
+        PROCONNECT_OPENID_CONF_URL=fake.METADATA_URL,
+        PROCONNECT_SCOPE="openid email given_name usual_name",
+    )
+    # A registry of its own: the module-level one keeps the client built for a previous
+    # app, or from a local udata.cfg pointing at the real ProConnect.
+    monkeypatch.setattr(proconnect_auth, "oauth", OAuth())
+    proconnect_auth.init_app(app)
     return fake
 
 

@@ -16,7 +16,7 @@ from flask import (
     url_for,
 )
 from flask_restx import Api, Resource
-from flask_restx.inputs import positive
+from flask_restx.inputs import int_range, positive
 from flask_restx.reqparse import RequestParser
 from flask_storage import UnauthorizedFileType
 
@@ -36,17 +36,21 @@ DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = "X-API-KEY"
 
 
-def add_pagination_arguments(parser: RequestParser, *, page_size: int = 20) -> RequestParser:
+def add_pagination_arguments(
+    parser: RequestParser, *, page_size: int = 20, max_page_size: int | None = None
+) -> RequestParser:
     """Add the standard ``page``/``page_size`` query arguments to ``parser``.
 
     Both are validated as strictly positive integers, so an out-of-range value
     (``0`` or negative) yields a clean 400 instead of failing deeper down — e.g.
     a negative length reaching a Mongo ``$slice`` aggregation, which is a 500.
+    ``max_page_size`` bounds ``page_size`` the same way, for endpoints whose
+    response cost grows too much with the page size.
     """
     parser.add_argument("page", type=positive, default=1, location="args", help="The page to fetch")
     parser.add_argument(
         "page_size",
-        type=positive,
+        type=positive if max_page_size is None else int_range(1, max_page_size),
         default=page_size,
         location="args",
         help="The page size to fetch",
@@ -398,7 +402,7 @@ def marshal_page_with(func):
 
 
 def init_app(app):
-    # Load all core APIs: importing a module registers its endpoints
+    # Load all core APIs:importing a module registers its endpoints
     for module in (
         "udata.core.access_type.api",
         "udata.core.activity.api",
@@ -424,6 +428,7 @@ def init_app(app):
         "udata.core.topic.apiv2",
         "udata.core.post.api",
         "udata.core.post.apiv2",
+        "udata.core.storages.api",
         "udata.core.contact_point.api",
         "udata.features.transfer.api",
         "udata.features.notifications.api",

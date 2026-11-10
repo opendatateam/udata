@@ -326,6 +326,19 @@ class TopicsListAPITest(APITestCase):
         assert topic.owner is None
         assert topic.organization == org
 
+    def test_topic_api_create_with_both_an_owner_and_an_organization_is_refused(self):
+        data = TopicWithElementsFactory.as_payload()
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        data["owner"] = str(user.id)
+        data["organization"] = str(org.id)
+
+        response = self.post(url_for("apiv2.topics_list"), data)
+
+        self.assert400(response)
+        self.assertIn("organization", response.json["errors"])
+        self.assertEqual(Topic.objects.count(), 0)
+
     def test_topic_api_create_spatial_zone(self):
         paca, _, _ = create_geozones_fixtures()
         granularity = spatial_granularities[0][0]

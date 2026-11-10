@@ -137,7 +137,7 @@ def init_app(app):
 
     ContextTask.current_app = app
 
-    # Load core tasks: importing a module registers its tasks
+    # Load core tasks:importing a module registers its tasks
     for module in (
         "udata.core.metrics.tasks",
         "udata.core.tags.tasks",
@@ -146,6 +146,7 @@ def init_app(app):
         "udata.core.dataset.doi",
         "udata.core.dataset.tasks",
         "udata.core.dataset.transport",
+        "udata.core.dataset.ecologie",
         "udata.core.dataset.recommendations",
         "udata.core.spatial.tasks",
         "udata.core.topic.tasks",

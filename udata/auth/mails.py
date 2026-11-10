@@ -13,11 +13,19 @@ specifying our `template` folder for templates and the system is not intelligent
 our folder before fallbacking to the templates inside the `flask_security` package.
 """
 
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 from flask import current_app
 
+from udata.i18n import lazy_gettext as _
 from udata.mail import MailCTA, MailMessage
+from udata.uris import cdata_url
+
+if TYPE_CHECKING:
+    from udata.core.user.models import User
 
 log = logging.getLogger(__name__)
 
@@ -63,8 +71,6 @@ def render_mail_template(template_name_or_list: str | list[str], **kwargs):
 
 
 def welcome(confirmation_link: str, **kwargs) -> MailMessage:
-    from udata.i18n import lazy_gettext as _
-
     return MailMessage(
         subject=_("Confirm your email address"),
         paragraphs=[
@@ -76,8 +82,6 @@ def welcome(confirmation_link: str, **kwargs) -> MailMessage:
 
 
 def welcome_existing(recovery_link: str, **kwargs) -> MailMessage:
-    from udata.i18n import lazy_gettext as _
-
     return MailMessage(
         subject=_("Your email address is already associated with an account"),
         paragraphs=[
@@ -92,8 +96,6 @@ def welcome_existing(recovery_link: str, **kwargs) -> MailMessage:
 
 
 def confirmation_instructions(confirmation_link: str, **kwargs) -> MailMessage:
-    from udata.i18n import lazy_gettext as _
-
     return MailMessage(
         subject=_("Confirm your email address"),
         paragraphs=[
@@ -103,9 +105,26 @@ def confirmation_instructions(confirmation_link: str, **kwargs) -> MailMessage:
     )
 
 
-def reset_instructions(reset_token: str, **kwargs) -> MailMessage:
-    from udata.i18n import lazy_gettext as _
-    from udata.uris import cdata_url
+def proconnect_only_reset_instructions() -> MailMessage:
+    return MailMessage(
+        subject=_("Your account signs in with ProConnect"),
+        paragraphs=[
+            _(
+                "Someone requested a password reset for your %(site)s account.",
+                site=current_app.config["SITE_TITLE"],
+            ),
+            _("Your account has no password: it signs in with ProConnect only."),
+            _("If this wasn't you, please ignore this email."),
+            MailCTA(_("Sign in with ProConnect"), cdata_url("/login")),
+        ],
+    )
+
+
+def reset_instructions(reset_token: str, user: User, **kwargs) -> MailMessage:
+    if user.signs_in_with_proconnect_only:
+        # The page answers as for any account, so as not to tell whether it has a password:
+        # the mail does, to its owner. `ExtendedResetPasswordForm` refuses the token anyway.
+        return proconnect_only_reset_instructions()
 
     return MailMessage(
         subject=_("Reset your password"),
@@ -121,8 +140,6 @@ def reset_instructions(reset_token: str, **kwargs) -> MailMessage:
 
 
 def reset_notice(**kwargs) -> MailMessage:
-    from udata.i18n import lazy_gettext as _
-
     return MailMessage(
         subject=_("Your password has been reset"),
         paragraphs=[
@@ -132,9 +149,6 @@ def reset_notice(**kwargs) -> MailMessage:
 
 
 def change_notice(**kwargs) -> MailMessage:
-    from udata.i18n import lazy_gettext as _
-    from udata.uris import cdata_url
-
     return MailMessage(
         subject=_("Your password has been changed"),
         paragraphs=[
@@ -149,11 +163,24 @@ def change_notice(**kwargs) -> MailMessage:
 
 
 def two_factor_rescue(user, **kwargs) -> MailMessage:
-    from udata.i18n import lazy_gettext as _
-
     return MailMessage(
         subject=_("User can't access mail account"),
         paragraphs=[
             _("%(email)s can not access mail account", email=user.email),
+        ],
+    )
+
+
+def signs_in_with_proconnect_only() -> MailMessage:
+    return MailMessage(
+        subject=_("Your account now signs in with ProConnect only"),
+        paragraphs=[
+            _(
+                "Your %(site)s account now signs in with ProConnect and its two-factor "
+                "authentication only: its password and its %(site)s two-factor authentication, "
+                "if it had any, have been removed.",
+                site=current_app.config["SITE_TITLE"],
+            ),
+            _("If this wasn't you, contact us right away."),
         ],
     )

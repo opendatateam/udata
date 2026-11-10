@@ -234,6 +234,27 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data["resource"]["id"] == str(com_resource.id)
         assert data["resource"]["title"] == com_resource.title
 
+    def test_get_specific_private_dataset(self):
+        """The read check runs on the partially loaded dataset: 404 anonymous, 200 owner"""
+        resource = ResourceFactory()
+        user = UserFactory()
+        DatasetFactory(resources=[resource], private=True, owner=user)
+
+        response = self.get(url_for("apiv2.resource", rid=resource.id))
+        self.assert404(response)
+
+        self.login(user)
+        response = self.get(url_for("apiv2.resource", rid=resource.id))
+        self.assert200(response)
+
+    def test_get_specific_deleted_dataset(self):
+        """The read check runs on the partially loaded dataset: a deleted dataset answers 410"""
+        resource = ResourceFactory()
+        DatasetFactory(resources=[resource], deleted=datetime.now(UTC))
+
+        response = self.get(url_for("apiv2.resource", rid=resource.id))
+        self.assert410(response)
+
     def test_get(self):
         """Should fetch 1 page of resources from the API"""
         resources = [ResourceFactory() for _ in range(7)]

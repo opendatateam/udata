@@ -61,6 +61,7 @@ class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
             harvest={
                 "backend": "dummy_backend",
                 "domain": "example.com",
+                "record_id": "record-id",
                 "remote_id": "remote-id",
                 "remote_url": "https://www.example.com/",
                 "uri": "https://www.example.com/remote-id",
@@ -106,6 +107,7 @@ class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
         harvest_dataset_values = csv[str(harvest_dataset.id)]
         assert harvest_dataset_values["harvest.backend"] == "dummy_backend"
         assert harvest_dataset_values["harvest.domain"] == "example.com"
+        assert harvest_dataset_values["harvest.record_id"] == "record-id"
         assert harvest_dataset_values["harvest.remote_id"] == "remote-id"
         assert harvest_dataset_values["harvest.remote_url"] == "https://www.example.com/"
         assert harvest_dataset_values["harvest.uri"] == "https://www.example.com/remote-id"
