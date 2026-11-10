@@ -499,7 +499,7 @@ class UserRotatePasswordAPI(API):
 
 
 # These imports are not at the top of the file to avoid circular imports
-from udata.models import ContactPoint
+from udata.models import ContactPoint  # noqa
 
 contact_point_parser = ContactPoint.__index_parser__
 

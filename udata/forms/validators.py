@@ -1,6 +1,6 @@
 from urlextract import URLExtract
 from wtforms import validators
-from wtforms.validators import *
+from wtforms.validators import *  # noqa
 from wtforms.validators import StopValidation, ValidationError  # noqa
 
 

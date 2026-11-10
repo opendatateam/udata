@@ -6,9 +6,9 @@ from udata.flask_mongoengine.model_form import ModelForm as MEModelForm
 
 wtforms_json.init()
 
-from flask_wtf import FlaskForm
+from flask_wtf import FlaskForm  # noqa
 
-from udata import i18n
+from udata import i18n  # noqa
 
 log = logging.getLogger(__name__)
 
