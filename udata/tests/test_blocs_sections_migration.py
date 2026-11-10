@@ -1,27 +1,17 @@
+from uuid import uuid4
+
 from bson import ObjectId
 from flask import url_for
 from mongoengine.connection import get_db
 
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.dataset.models import Dataset
-from udata.core.edito_blocs.models import (
-    AccordionItemBloc,
-    AccordionListBloc,
-    DatasetBloc,
-    DatasetsListBloc,
-    ExploreBloc,
-    HeroBloc,
-    LinkInBloc,
-    LinksListBloc,
-    MarkdownBloc,
-    SectionBloc,
-    TitleBloc,
-)
+from udata.core.edito_blocs.models import DatasetBloc, MarkdownBloc, SectionBloc, TitleBloc
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.post.factories import PostFactory
+from udata.core.post.models import Post
 from udata.core.site.factories import SiteFactory
-from udata.core.site.models import Site
 from udata.core.user.factories import AdminFactory
 from udata.db import migrations
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
@@ -312,28 +302,39 @@ def test_upgrading_twice_gives_the_same_result():
     assert upgrade(blocs) == blocs
 
 
+def legacy(cls: str, **fields) -> dict:
+    """A bloc as the legacy format stored it, which no model reads anymore."""
+    return {"_id": str(uuid4()), "_cls": cls, **fields}
+
+
+def store_blocs(document, attr: str, blocs: list):
+    type(document)._get_collection().update_one({"_id": document.id}, {"$set": {attr: blocs}})
+
+
 class BlocsSectionsMigrationTest(PytestOnlyDBTestCase):
     def test_legacy_blocs_are_moved_to_sections(self):
         datasets = DatasetFactory.create_batch(2)
 
         def legacy_blocs():
             return [
-                HeroBloc(title="Hero", color="green"),
-                MarkdownBloc(title="Intro", content="Hello"),
-                DatasetsListBloc(title="Featured", datasets=datasets),
+                legacy("HeroBloc", title="Hero", color="green"),
+                legacy("MarkdownBloc", title="Intro", content="Hello"),
+                legacy("DatasetsListBloc", title="Featured", datasets=[d.id for d in datasets]),
             ]
 
-        post = PostFactory(body_type="blocs", blocs=legacy_blocs())
-        organization = OrganizationFactory(presentation_blocs=legacy_blocs())
-        SiteFactory(id="test-site", reuses_blocs=legacy_blocs())
-        post.reload()
-        last_modified = post.last_modified
+        post = PostFactory(body_type="blocs")
+        store_blocs(post, "blocs", legacy_blocs())
+        organization = OrganizationFactory()
+        store_blocs(organization, "presentation_blocs", legacy_blocs())
+        site = SiteFactory(id="test-site")
+        store_blocs(site, "reuses_blocs", legacy_blocs())
+        last_modified = Post._get_collection().find_one({"_id": post.id})["last_modified"]
 
         migrate()
 
         post.reload()
         organization.reload()
-        site = Site.objects.get(id="test-site")
+        site.reload()
         # Only the sections of an organization keep a neutral background.
         for blocs, color in (
             (post.blocs, "green"),
@@ -350,7 +351,7 @@ class BlocsSectionsMigrationTest(PytestOnlyDBTestCase):
             assert isinstance(title, TitleBloc)
             assert title.title == "Intro"
             assert isinstance(markdown, MarkdownBloc)
-            assert (markdown.title, markdown.content) == (None, "Hello")
+            assert markdown.content == "Hello"
 
             assert isinstance(featured, SectionBloc)
             title, *objects = featured.blocs
@@ -362,11 +363,13 @@ class BlocsSectionsMigrationTest(PytestOnlyDBTestCase):
         assert post.last_modified == last_modified
 
     def test_running_twice_gives_the_same_result(self):
-        post = PostFactory(
-            body_type="blocs",
-            blocs=[
-                MarkdownBloc(title="Intro", content="Hello"),
-                SectionBloc(blocs=[TitleBloc(title="Already upgraded")]),
+        post = PostFactory(body_type="blocs")
+        store_blocs(
+            post,
+            "blocs",
+            [
+                legacy("MarkdownBloc", title="Intro", content="Hello"),
+                legacy("SectionBloc", blocs=[legacy("TitleBloc", title="Already upgraded")]),
             ],
         )
 
@@ -385,34 +388,37 @@ def every_legacy_bloc() -> list:
     """A legacy bloc of each kind the migration converts, with all their fields set."""
     dataset = DatasetFactory(resources=[ResourceFactory()])
     return [
-        HeroBloc(
+        legacy(
+            "HeroBloc",
             title="Hero",
             description="Description",
             color="green",
             main_link_title="Go",
             main_link_url="https://e.com",
         ),
-        MarkdownBloc(title="Intro", subtitle="Sub", content="Hello"),
-        LinksListBloc(
+        legacy("MarkdownBloc", title="Intro", subtitle="Sub", content="Hello"),
+        legacy(
+            "LinksListBloc",
             title="Links",
             subtitle="Sub",
             paragraph="Text",
             main_link_title="All",
             main_link_url="https://e.com/all",
-            links=[LinkInBloc(title="Link", url="https://e.com/link")],
+            links=[{"title": "Link", "url": "https://e.com/link"}],
         ),
-        ExploreBloc(title="Explore", resource_id=dataset.resources[0].id),
-        AccordionListBloc(
+        legacy("ExploreBloc", title="Explore", resource_id=str(dataset.resources[0].id)),
+        legacy(
+            "AccordionListBloc",
             title="FAQ",
             description="Questions",
             items=[
-                AccordionItemBloc(
-                    title="Item",
-                    content=[
-                        DatasetsListBloc(title="In item", datasets=[dataset]),
-                        MarkdownBloc(title="Answer", content="A"),
+                {
+                    "title": "Item",
+                    "content": [
+                        legacy("DatasetsListBloc", title="In item", datasets=[dataset.id]),
+                        legacy("MarkdownBloc", title="Answer", content="A"),
                     ],
-                )
+                }
             ],
         ),
     ]
@@ -422,7 +428,8 @@ class BlocsSectionsMigrationAPITest(PytestOnlyAPITestCase):
     def test_migrated_post_blocs_can_be_saved_back(self):
         """The editor sends back the blocs it read: whatever the migration writes must pass
         the checks of the API."""
-        post = PostFactory(body_type="blocs", blocs=every_legacy_bloc())
+        post = PostFactory(body_type="blocs")
+        store_blocs(post, "blocs", every_legacy_bloc())
 
         migrate()
         self.login(AdminFactory())
@@ -433,11 +440,11 @@ class BlocsSectionsMigrationAPITest(PytestOnlyAPITestCase):
     def test_migrated_organization_blocs_can_be_saved_back(self):
         """Same on an organization, whose hero becomes a section of a neutral background."""
         user = self.login()
-        org = OrganizationFactory(
-            members=[Member(user=user, role="admin")], presentation_blocs=every_legacy_bloc()
-        )
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        store_blocs(org, "presentation_blocs", every_legacy_bloc())
 
         migrate()
+        org.reload()
         data = org.to_dict()
         data["presentation_blocs"] = self.get(
             url_for("api.organization", org=org), headers={"X-Fields": "{presentation_blocs}"}
@@ -449,16 +456,20 @@ class BlocsSectionsMigrationAPITest(PytestOnlyAPITestCase):
         """A dataset hard-deleted while listed becomes a bloc like the others: the API leaves
         it out, with the containers it leaves empty."""
         kept, deleted = DatasetFactory.create_batch(2)
-        post = PostFactory(
-            body_type="blocs",
-            blocs=[
-                DatasetsListBloc(title="Featured", datasets=[deleted, kept]),
-                AccordionListBloc(
+        post = PostFactory(body_type="blocs")
+        store_blocs(
+            post,
+            "blocs",
+            [
+                legacy("DatasetsListBloc", title="Featured", datasets=[deleted.id, kept.id]),
+                legacy(
+                    "AccordionListBloc",
                     items=[
-                        AccordionItemBloc(
-                            title="Item", content=[DatasetsListBloc(datasets=[deleted])]
-                        )
-                    ]
+                        {
+                            "title": "Item",
+                            "content": [legacy("DatasetsListBloc", datasets=[deleted.id])],
+                        }
+                    ],
                 ),
             ],
         )

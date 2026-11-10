@@ -164,6 +164,9 @@ class Defaults(object):
     SECURITY_TWO_FACTOR_RESCUE_MAIL = (
         "no-reply@data.gouv.fr"  # Should be a contact email for account rescue
     )
+    # Make ProConnect ask the agent for a second factor. Agents whose identity provider
+    # offers none are then denied access at ProConnect, without coming back.
+    PROCONNECT_REQUIRE_SECOND_FACTOR = False
 
     # Inactive users settings
     YEARS_OF_INACTIVITY_BEFORE_DELETION = None
@@ -389,6 +392,7 @@ class Defaults(object):
         # Base
         "csv",
         "txt",
+        "md",
         "json",
         "pdf",
         "xml",
@@ -477,12 +481,13 @@ class Defaults(object):
         "image/webp",
         "text/html",
         "text/calendar",
+        "text/markdown",
         "text/plain",
         "text/xml",
         "text/turtle",
     ]
 
-    # How much time upload chunks are kept before cleanup
+    # How much time upload chunks, and content images nothing shows, are kept before cleanup
     UPLOAD_MAX_RETENTION = 24 * HOUR
 
     # Avatar providers parameters
@@ -581,6 +586,11 @@ class Defaults(object):
     # Transport extras
     ##################
     TRANSPORT_DATASETS_URL = None
+
+    # Ecologie extras
+    #################
+    # Datasets in this topic get the ecologie:universe extra
+    ECOLOGIE_TOPIC_ID = None
 
     # Schemas parameters
     ####################

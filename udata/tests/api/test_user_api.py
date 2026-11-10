@@ -186,16 +186,17 @@ class UserAPITest(APITestCase):
         self.assertEqual(len(response.json["data"]), 2)
 
     def test_user_api_full_text_search_email(self):
-        """It should find users based on last name"""
-        self.login(AdminFactory())
+        """It should find users based on email"""
+        # Names are searched too: a random one (Faker has "Jane") would match the query.
+        self.login(AdminFactory(first_name="Admin", last_name="Admin"))
 
-        UserFactory(email="john@example.org")
-        UserFactory(email="jane@example.org")
+        UserFactory(first_name="John", last_name="Doe", email="john@example.org")
+        jane = UserFactory(first_name="Ann", last_name="Doe", email="jane@example.org")
 
         response = self.get(url_for("api.users", q="jane"))
         self.assert200(response)
 
-        self.assertEqual(len(response.json["data"]), 1)
+        assert [user["id"] for user in response.json["data"]] == [str(jane.id)]
 
     def test_user_api_full_text_search_unicode(self):
         """It should find user with special characters"""
