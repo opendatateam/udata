@@ -894,6 +894,16 @@ class VisibleIfFieldTest(PytestOnlyDBTestCase):
             data = marshal(obj, FakeWithVisibleIf.__read_fields__)
         assert (data["secret"], data["alias"], data["computed"]) == (None, None, None)
 
+    def test_it_is_refused_with_full_object(self) -> None:
+        """The full object would be read past the predicate."""
+        with pytest.raises(ValueError, match="visible_if"):
+
+            @generate_fields()
+            class FakeWithHiddenFullObject(Document):
+                license = field(
+                    ReferenceField(License), full_object=True, visible_if=lambda o: False
+                )
+
     def test_a_hidden_getter_is_not_called(self, app) -> None:
         FakeWithVisibleIf.computed_calls = 0
         with app.test_request_context("/"):

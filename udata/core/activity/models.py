@@ -82,7 +82,7 @@ def filter_by_user(base_query, value):
     user = User.objects(id=value).first()
     if user is None:
         return base_query.none()
-    return base_query.filter(actor__in=[user, *ApiToken.objects(user=user)])
+    return base_query.filter(actor__in=[user, *ApiToken.objects(user=user).only("id")])
 
 
 def filter_by_organization(base_query, value):

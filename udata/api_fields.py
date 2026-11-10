@@ -644,6 +644,9 @@ def generate_fields(**kwargs) -> Callable:
                     api_key_to_attribute[api_key] = key
 
             if read is not None and info.get("visible_if"):
+                # The full object reads its container, which this rewrite does not reach.
+                if info.get("full_object") is not None:
+                    raise ValueError(f"`{key}`: `visible_if` is not supported with `full_object`")
                 read.attribute = visible_only_if(read.attribute or key, info["visible_if"])
 
             if read:
@@ -698,9 +701,8 @@ def generate_fields(**kwargs) -> Callable:
             # entry in `api_key_to_attribute`: the rename only applies on the read side.
             api_method_key = additional_field_info.get("rename") or method_name
 
-            attribute = make_lambda(method)
-            if additional_field_info.get("visible_if"):
-                attribute = visible_only_if(attribute, additional_field_info["visible_if"])
+            visible_if = additional_field_info.get("visible_if")
+            attribute = visible_only_if(method, visible_if) if visible_if else make_lambda(method)
             read_fields[api_method_key] = field_constructor(
                 attribute=attribute, **{"readonly": True, **additional_field_info}
             )
@@ -995,10 +997,10 @@ def field(
             `ReferenceField` or a `ListField(ReferenceField)`, whose nested reference
             model is the full object, or the RestX field rendering the full object of a
             scalar field (e.g. an `{id, label}` object for a value with a label). Not
-            supported with `rename`, lazy or generic references.
+            supported with `rename`, `visible_if`, lazy or generic references.
         visible_if: Predicate on the serialized object, e.g. "the reader is a sysadmin or
             the owner": the field reads `None` when it does not hold. A getter is not even
-            called then.
+            called then. Not supported with `full_object`.
         **kwargs: Any additional parameters not explicitly defined
 
     Returns:

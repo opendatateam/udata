@@ -83,12 +83,6 @@ def _admin_or_self(_user) -> bool:
     return current_user_is_admin_or_self()
 
 
-def _visible_login_date(user):
-    if current_user_is_admin_or_self() or _is_org_private_context():
-        return user.current_login_at
-    return None
-
-
 # TODO: use simple text for role
 class Role(Document, RoleMixin):
     ADMIN = "admin"
@@ -216,7 +210,8 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         DateTimeField(),
         auditable=False,
         readonly=True,
-        attribute=_visible_login_date,
+        attribute="current_login_at",
+        visible_if=lambda _user: current_user_is_admin_or_self() or _is_org_private_context(),
     )
     current_login_at = DateTimeField()
     last_login_ip = StringField()
