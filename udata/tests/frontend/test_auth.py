@@ -11,6 +11,7 @@ from udata.core.organization.factories import (
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Member, MembershipRequest
 from udata.tests.api import APITestCase
+from udata.tests.helpers import capture_mails
 
 
 class AuthTest(APITestCase):
@@ -19,6 +20,19 @@ class AuthTest(APITestCase):
         data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
         token = security.confirm_serializer.dumps(data)
         return url_for("security.confirm_change_email", token=token)
+
+    def test_change_mail_notifies_the_previous_address(self):
+        # Whoever got hold of the account would otherwise move it away unnoticed: the new
+        # address confirms the change, so only the previous one can tell its holder.
+        user = self.login(UserFactory(email="old@example.com", first_name="Jane"))
+
+        with capture_mails() as mails:
+            self.get(self.change_email_link(user, "new@example.com"))
+
+        assert [mail.recipients for mail in mails] == [["old@example.com"]]
+        assert "new@example.com" in mails[0].body
+        assert "Jane" in mails[0].body
+        assert user.reload().email == "new@example.com"
 
     def test_change_mail_links_pending_email_invitations(self):
         """An unlinked invitation is invisible to the user, who could only ask to join."""
@@ -119,13 +133,16 @@ class AuthTest(APITestCase):
         confirmation_link = self.change_email_link(user, new_email)
 
         # A negative validity makes any freshly signed token already expired
-        with mock.patch.dict(
-            current_app.config, {"SECURITY_CONFIRM_EMAIL_WITHIN": timedelta(seconds=-1)}
-        ):
-            resp = self.get(confirmation_link)
+        with capture_mails() as mails:
+            with mock.patch.dict(
+                current_app.config, {"SECURITY_CONFIRM_EMAIL_WITHIN": timedelta(seconds=-1)}
+            ):
+                resp = self.get(confirmation_link)
 
         assert resp.status_code == 302
         assert "change_email_expired" in resp.location
+        # Only the new confirmation: the previous address isn't told of a change not made.
+        assert [mail.recipients for mail in mails] == [[new_email]]
 
         user.reload()
         assert user.email == original_email
@@ -139,9 +156,11 @@ class AuthTest(APITestCase):
         existing_user = UserFactory(email="taken@example.com")
         new_email = existing_user.email
 
-        resp = self.get(self.change_email_link(user, new_email))
+        with capture_mails() as mails:
+            resp = self.get(self.change_email_link(user, new_email))
         assert resp.status_code == 302
         assert "change_email_already_taken" in resp.location
+        assert mails == []
 
         # Email should not have changed
         user.reload()
