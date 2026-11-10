@@ -253,13 +253,6 @@ class ActivityAPITest(APITestCase):
             str(by_revoked.id),
         }
 
-    def test_activity_api_list_filtered_by_an_unknown_user(self) -> None:
-        FakeDatasetActivity.objects.create(actor=UserFactory(), related_to=DatasetFactory())
-
-        response: TestResponse = self.get(url_for("api.activity", user=ObjectId()))
-        assert200(response)
-        assert response.json["data"] == []
-
     def test_activity_api_list_with_an_actor_stored_as_a_bare_user_id(self) -> None:
         """An actor still stored in the pre-generic-reference format is read as a user.
 

@@ -7,7 +7,7 @@ from flask import current_app
 
 from udata.api import api
 from udata.api_fields import field, generate_fields
-from udata.auth import current_user
+from udata.core.user.permissions import UserEditPermission
 from udata.models import db
 
 TOKEN_BYTE_LENGTH = 48
@@ -27,12 +27,6 @@ def parse_future_datetime(value):
     if dt < datetime.now(timezone.utc):
         api.abort(400, "expires_at must be in the future")
     return dt
-
-
-def _owner_or_admin(token) -> bool:
-    if current_user.is_anonymous:
-        return False
-    return current_user.sysadmin or token.user.id == current_user.id
 
 
 def _hash_token(plaintext):
@@ -61,7 +55,7 @@ class ApiToken(db.Document):
         db.StringField(max_length=255),
         # The reference is public, as an activity actor, while the label is the owner's
         # own wording, e.g. which machine or script the token is for.
-        visible_if=_owner_or_admin,
+        visible_if=lambda token: UserEditPermission(token.user).can(),
         show_as_ref=True,
         description="User-given label for this token, only visible to its owner and sysadmins",
     )
