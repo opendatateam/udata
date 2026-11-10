@@ -149,7 +149,7 @@ class MailGenerationTest(APITestCase):
             send_mail(
                 UserFactory(email="jane@example.org", first_name=name),
                 MailMessage(
-                    _("Unknown"),
+                    _("Some text %(name)s", name=name),
                     paragraphs=[
                         _("Some text %(name)s", name=name),
                         MailCTA(_("Some text %(name)s", name=name), "https://example.org"),
@@ -161,8 +161,8 @@ class MailGenerationTest(APITestCase):
                 ),
             )
 
-        # The greeting, then the paragraph, the call to action and the two labels.
-        assert mails[0].html.count("&lt;a href=&#34;https://evil.example&#34;&gt;") == 5
+        # The title, the greeting, then the paragraph, the call to action and the two labels.
+        assert mails[0].html.count("&lt;a href=&#34;https://evil.example&#34;&gt;") == 6
         assert '<a href="https://evil.example">' not in mails[0].html
 
     @pytest.mark.options(DEFAULT_LANGUAGE="en")

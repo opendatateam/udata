@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ message.subject }}</title>
+    <title>{{ message.subject|string }}</title>
 </head>
 <body style="font-family: Marianne, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; background-color: #ffffff; max-width: 600px; margin: 0 auto; padding: 20px;">
     {% if config.MAIL_LOGO_URL %}
