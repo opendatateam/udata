@@ -6,7 +6,8 @@ from bson import DBRef, ObjectId
 from bson.son import SON
 from flask import g
 from mongoengine import Q
-from mongoengine.base import TopLevelDocumentMetaclass
+from mongoengine.base import TopLevelDocumentMetaclass, get_document
+from mongoengine.errors import DoesNotExist
 from mongoengine.fields import (
     DateTimeField,
     GenericReferenceField,
@@ -41,7 +42,8 @@ ACTOR_TYPES = ("User", "HarvestSource", "ApiToken")
 
 
 class ActorField(GenericReferenceField):
-    """Also read the actors stored before `actor` became a generic reference.
+    """Also read the actors stored before `actor` became a generic reference, and the
+    harvest sources purged since.
 
     It was a `ReferenceField("User")`, stored as a bare user id. The migration rewrites
     them, but the ones it has not reached yet and the ones written by workers still on
@@ -52,6 +54,18 @@ class ActorField(GenericReferenceField):
         if isinstance(value, ObjectId):
             return SON((("_cls", "User"), ("_ref", DBRef(User._get_collection_name(), value))))
         return value
+
+    def __get__(self, instance, owner):
+        try:
+            return super().__get__(instance, owner)
+        except DoesNotExist:
+            stored = instance._data[self.name]
+            # Purging a source deletes it for good, while the datasets it harvested stay
+            # archived with their history: the source is kept as its identifier alone.
+            if stored["_cls"] != "HarvestSource":
+                raise
+            instance._data[self.name] = get_document("HarvestSource")(id=stored["_ref"].id)
+            return instance._data[self.name]
 
 
 class EmitNewActivityMetaClass(TopLevelDocumentMetaclass):

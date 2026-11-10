@@ -9,6 +9,7 @@ from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import RDF
 
 from udata.core.access_type.constants import AccessType, InspireLimitationCategory
+from udata.core.dataservices.activities import UserCreatedDataservice
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.constants import DCAT_EXTRAS_KEY, UpdateFrequency
@@ -234,6 +235,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
             dataservices[0].harvest.remote_url
             == "https://data.paris2024.org/api/explore/v2.1/console"
         )
+        assert [activity.actor for activity in UserCreatedDataservice.objects] == [source]
 
     def test_harvest_dataservices_serving_datasets_referenced_by_uri(self, rmock):
         """A `dcat:servesDataset` node can reference a dataset by URI only, without any

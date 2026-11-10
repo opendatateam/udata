@@ -9,7 +9,7 @@ from udata.core.activity.models import Activity
 from udata.core.api_token.models import ApiToken
 from udata.core.dataset.activities import UserUpdatedDataset
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.dataset.models import Dataset
+from udata.core.dataset.models import Dataset, HarvestDatasetMetadata
 from udata.core.organization.activities import UserCreatedOrganization
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
@@ -18,6 +18,7 @@ from udata.core.topic.factories import TopicFactory
 from udata.core.topic.models import Topic
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
+from udata.harvest import actions
 from udata.harvest.tests.factories import HarvestSourceFactory
 from udata.i18n import lazy_gettext as _
 from udata.tests.api import APITestCase
@@ -484,6 +485,20 @@ class ActivityAPITest(APITestCase):
         response: TestResponse = self.get(url_for("api.activity"))
         assert200(response)
         assert len(response.json["data"]) == 0
+
+    def test_the_activities_of_a_purged_harvest_source_stay_listed(self) -> None:
+        """The datasets a purged source harvested stay archived, with their history."""
+        source = HarvestSourceFactory(deleted=datetime.now(UTC))
+        dataset = DatasetFactory(harvest=HarvestDatasetMetadata(source_id=str(source.id)))
+        activity = FakeDatasetActivity.objects.create(actor=source, related_to=dataset)
+
+        actions.purge_sources()
+
+        response: TestResponse = self.get(url_for("api.activity", related_to=dataset.id))
+        assert200(response)
+        assert [(item["id"], item["actor"]) for item in response.json["data"]] == [
+            (str(activity.id), {"id": str(source.id), "class": "HarvestSource", "name": None})
+        ]
 
     def test_activity_api_list_with_dangling_actor(self) -> None:
         """It should not crash when an activity actor has been hard-deleted."""
