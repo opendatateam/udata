@@ -96,8 +96,12 @@ def confirm_change_email(token):
         logout_user()
         login_user(user)
 
+    previous_email = user.email
     user.email = new_email
     _datastore.put(user)
+    # The new address confirmed the change: only the previous one can tell its holder, should
+    # someone else have moved the account away.
+    mails.email_changed(new_email).send(previous_email)
 
     return redirect(homepage_url(flash="change_email_confirmed"))
 

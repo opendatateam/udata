@@ -11,6 +11,7 @@ from udata.core.organization.factories import (
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Member, MembershipRequest
 from udata.tests.api import APITestCase
+from udata.tests.helpers import capture_mails
 
 
 class AuthTest(APITestCase):
@@ -19,6 +20,17 @@ class AuthTest(APITestCase):
         data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
         token = security.confirm_serializer.dumps(data)
         return url_for("security.confirm_change_email", token=token)
+
+    def test_change_mail_notifies_the_previous_address(self):
+        # Whoever got hold of the account would otherwise move it away unnoticed: the new
+        # address confirms the change, so only the previous one can tell its holder.
+        user = self.login(UserFactory(email="old@example.com"))
+
+        with capture_mails() as mails:
+            self.get(self.change_email_link(user, "new@example.com"))
+
+        assert [mail.recipients for mail in mails] == [["old@example.com"]]
+        assert "new@example.com" in mails[0].body
 
     def test_change_mail_links_pending_email_invitations(self):
         """An unlinked invitation is invisible to the user, who could only ask to join."""
