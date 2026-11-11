@@ -725,7 +725,6 @@ def generate_fields(**kwargs) -> Callable:
         cls.__write_fields__ = api.model(f"{cls.__name__} (write)", write_fields, **kwargs)
         cls.__ref_fields__ = api.inherit(f"{cls.__name__}Reference", base_reference, ref_fields)
 
-        page_mask = None
         if page_mask_exclude:
             page_mask = "data{{{0}}},*".format(
                 ",".join(k for k in read_fields if k not in page_mask_exclude)
