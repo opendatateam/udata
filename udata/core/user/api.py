@@ -2,7 +2,6 @@ from datetime import UTC, datetime
 
 from flask import request
 from flask_security import current_user, logout_user
-from slugify import slugify
 
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
@@ -23,6 +22,7 @@ from udata.core.storages.api import (
     parse_uploaded_image,
     uploaded_image_fields,
 )
+from udata.core.suggest import mongo_suggest
 from udata.core.user.models import Role, datastore
 from udata.models import CommunityResource, Dataset, MembershipRequest, Organization, Reuse, User
 from udata.mongo.errors import FieldValidationError
@@ -567,12 +567,16 @@ class SuggestUsersAPI(API):
     @api.expect(suggest_parser)
     @api.marshal_list_with(user_suggestion_fields)
     def get(self):
-        """Suggest users"""
+        """Users autocomplete: accent-insensitive (via slug), ranked by match quality."""
         args = suggest_parser.parse_args()
-        users = User.objects(
-            deleted=None, slug__icontains=slugify(args["q"], separator="-", to_lower=True)
+        return mongo_suggest(
+            User.objects(deleted=None),
+            args["q"],
+            match_fields=["slug"],
+            slug_field="slug",
+            order_by=DEFAULT_SORTING,
+            size=args["size"],
         )
-        return list(users.order_by(DEFAULT_SORTING).limit(args["size"]))
 
 
 @ns.route("/roles/", endpoint="user_roles")
