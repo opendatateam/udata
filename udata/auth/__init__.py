@@ -1,5 +1,6 @@
 import logging
 import typing as t
+from functools import wraps
 
 from flask import current_app, render_template
 from flask_mail import Message
@@ -14,6 +15,7 @@ from flask_security import current_user as current_user
 from flask_security import login_required as login_required
 from flask_security import login_user as login_user
 from flask_security import mail_util
+from flask_security.utils import check_and_update_authn_fresh
 
 from udata.mail import mail_sent
 
@@ -53,6 +55,24 @@ def authenticate_request(user) -> bool:
     current_app.extensions["security"].login_manager._update_request_context_with_user(user)
     identity_changed.send(current_app._get_current_object(), identity=Identity(user.fs_uniquifier))
     return True
+
+
+def fresh_session_required(func):
+    """Answer with flask-security's reauthentication request unless the user authenticated
+    recently: the user must already be authenticated (`login_required` / `api.secure` first),
+    this only checks how long ago.
+
+    A request authenticated by an API key is never fresh: a key can't stand for a login."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        within = current_app.config["SECURITY_FRESHNESS"]
+        grace = current_app.config["SECURITY_FRESHNESS_GRACE_PERIOD"]
+        if not check_and_update_authn_fresh(within, grace):
+            return current_app.extensions["security"]._reauthn_handler(within, grace)
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 class NoopMailUtil(mail_util.MailUtil):

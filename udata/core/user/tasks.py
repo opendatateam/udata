@@ -6,8 +6,9 @@ from bson import ObjectId
 from flask import current_app
 
 from udata.api.oauth2 import OAuth2Token
+from udata.auth import mails as auth_mails
 from udata.core.api_token.models import ApiToken
-from udata.tasks import job
+from udata.tasks import job, task
 
 from . import mails
 from .models import User
@@ -21,6 +22,14 @@ def users_acting_through_tokens_since(date: datetime) -> set[ObjectId]:
     api_keys = ApiToken.objects(last_used_at__gt=date).no_dereference().distinct("user")
     oauth_tokens = OAuth2Token.objects(last_used_at__gt=date).no_dereference().distinct("user")
     return {*api_keys, *oauth_tokens}
+
+
+@task(route="high.mail")
+def notify_email_changed(user_id: str, previous_email: str, new_email: str):
+    # Addressed to the user, for their name and language, but at the address they left.
+    recipient = User.objects.get(pk=user_id)
+    recipient.email = previous_email
+    auth_mails.email_changed(new_email).send(recipient)
 
 
 @job("notify-inactive-users")
