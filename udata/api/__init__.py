@@ -136,6 +136,9 @@ class UDataApi(Api):
 
                 if not authenticate_request(api_token.user):
                     self.abort(401, "Inactive user")
+                # Authenticating the owner is what grants the token their rights; the
+                # token itself is kept so that what it does is attributed to it.
+                g.api_token = api_token
                 api_token.update_usage(request.headers.get("User-Agent"))
             else:
                 check_credentials()

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
 import pytest
-from flask import current_app, json, url_for
+from flask import current_app, g, json, url_for
 from flask_security.utils import login_user, logout_user, set_request_attr
 
 from udata.core.api_token.models import ApiToken
@@ -56,6 +56,9 @@ class APITestCaseMixin:
         yield self._user
         self._user = None
         self._api_key = None
+        # pytest-flask keeps one app context, hence one `g`, for the whole test: what the
+        # token did must not be attributed to it once out of this block.
+        g.pop("api_token", None)
 
     def login(self, user=None):
         """Login a user via session authentication."""
