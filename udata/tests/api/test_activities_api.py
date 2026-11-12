@@ -5,6 +5,8 @@ from flask import url_for
 from mongoengine.fields import ReferenceField
 from werkzeug.test import TestResponse
 
+from udata.api.factories import OAuth2TokenFactory
+from udata.api.oauth2 import OAuth2Client
 from udata.core.activity.models import Activity
 from udata.core.api_token.models import ApiToken
 from udata.core.dataset.activities import UserUpdatedDataset
@@ -278,6 +280,72 @@ class ActivityAPITest(APITestCase):
         response: TestResponse = self.get(url_for("api.activity", actor_kind="Dataset"))
         assert400(response)
 
+    def test_an_edit_through_an_oauth2_token_is_attributed_to_the_token(self) -> None:
+        owner = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        token = OAuth2TokenFactory(user=owner)
+
+        response = self.put(
+            url_for("api.dataset", dataset=dataset),
+            {"title": "New title"},
+            headers={"Authorization": f"Bearer {token.access_token}"},
+        )
+
+        assert200(response)
+        assert [activity.actor for activity in UserUpdatedDataset.objects(related_to=dataset)] == [
+            token
+        ]
+
+    def test_an_oauth2_token_actor_shows_its_owner_and_its_application_only(self) -> None:
+        """Neither the access and refresh tokens nor the client secret are exposed."""
+        owner = UserFactory()
+        token = OAuth2TokenFactory(user=owner)
+        FakeDatasetActivity.objects.create(actor=token, related_to=DatasetFactory())
+
+        response: TestResponse = self.get(url_for("api.activity"))
+        assert200(response)
+        assert response.json["data"][0]["actor"] == {
+            "id": str(token.id),
+            "class": "OAuth2Token",
+            "client": {
+                "id": str(token.client.id),
+                "class": "OAuth2Client",
+                "name": token.client.name,
+            },
+            "owner": {
+                "id": str(owner.id),
+                "class": "User",
+                "slug": owner.slug,
+                "first_name": owner.first_name,
+                "last_name": owner.last_name,
+                "avatar": None,
+                "avatar_thumbnail": None,
+                "deleted": None,
+                "page": owner.self_web_url(),
+                "uri": owner.self_api_url(),
+            },
+        }
+
+    def test_activity_api_list_filtered_by_user_includes_their_oauth2_tokens(self) -> None:
+        """Revoked or not: a refresh and a revocation only flag the token."""
+        owner = UserFactory()
+        by_token = FakeDatasetActivity.objects.create(
+            actor=OAuth2TokenFactory(user=owner), related_to=DatasetFactory()
+        )
+        by_revoked = FakeDatasetActivity.objects.create(
+            actor=OAuth2TokenFactory(user=owner, revoked=True), related_to=DatasetFactory()
+        )
+        FakeDatasetActivity.objects.create(
+            actor=OAuth2TokenFactory(user=UserFactory()), related_to=DatasetFactory()
+        )
+
+        response: TestResponse = self.get(url_for("api.activity", user=owner.id))
+        assert200(response)
+        assert {activity["id"] for activity in response.json["data"]} == {
+            str(by_token.id),
+            str(by_revoked.id),
+        }
+
     def test_activity_api_list_with_an_actor_stored_as_a_bare_user_id(self) -> None:
         """An actor still stored in the pre-generic-reference format is read as a user.
 
@@ -499,6 +567,17 @@ class ActivityAPITest(APITestCase):
         assert [(item["id"], item["actor"]) for item in response.json["data"]] == [
             (str(activity.id), {"id": str(source.id), "class": "HarvestSource", "name": None})
         ]
+
+    def test_activity_api_list_with_an_oauth2_token_whose_client_is_gone(self) -> None:
+        """It should not crash when the application of a token actor has been hard-deleted."""
+        token = OAuth2TokenFactory()
+        FakeDatasetActivity.objects.create(actor=token, related_to=DatasetFactory())
+
+        OAuth2Client._get_collection().delete_one({"_id": token.client.id})
+
+        response: TestResponse = self.get(url_for("api.activity"))
+        assert200(response)
+        assert len(response.json["data"]) == 0
 
     def test_activity_api_list_with_dangling_actor(self) -> None:
         """It should not crash when an activity actor has been hard-deleted."""
