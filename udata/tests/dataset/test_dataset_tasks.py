@@ -2,6 +2,7 @@ import pytest
 
 # Those imports seem mandatory for the csv adapters to be registered.
 # This might be because of the decorator mechanism.
+import udata.core.dataset.activities  # noqa: F401  (connects the activity handlers)
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset import tasks
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter  # noqa
@@ -100,6 +101,13 @@ class DatasetTasksTest(PytestOnlyDBTestCase):
         post.reload()
         assert len(post.datasets) == 1
         assert post.datasets[0].id == dataset_keep.id
+
+    def test_purge_datasets_with_resources(self):
+        dataset = DatasetFactory(nb_resources=1, deleted="2016-01-01")
+
+        tasks.purge_datasets()
+
+        assert Dataset.objects(id=dataset.id).count() == 0
 
     def test_purge_datasets_community(self):
         dataset = Dataset.objects.create(title="delete me", deleted="2016-01-01")

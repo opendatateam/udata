@@ -349,10 +349,6 @@ class Defaults(object):
 
     HARVEST_ISO19139_XSLT_URL = "https://raw.githubusercontent.com/datagouv/iso-19139-to-dcat-ap/refs/heads/3.x-datagouv/iso-19139-to-dcat-ap.xsl"
 
-    # If set, harvest emit activities associated with this user as actor
-    # It should be a dedicated service account
-    HARVEST_ACTIVITY_USER_ID = None
-
     # S3 connection details
     ###########################################################################
     S3_URL = None
@@ -760,7 +756,6 @@ class Testing(object):
     }  # Disables deliverability for email domain name
     SECURITY_TWO_FACTOR = True  # should be set before security init_app for views to be loaded
     PUBLISH_ON_RESOURCE_EVENTS = False
-    HARVEST_ACTIVITY_USER_ID = None
     CDATA_BASE_URL = None
     SCHEMA_CATALOG_URL = None
     API_TOKEN_SECRET = "test-secret"

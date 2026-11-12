@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-11-10 10:03+0100\n"
+"POT-Creation-Date: 2026-11-10 14:29+0100\n"
 "PO-Revision-Date: 2025-11-19 12:59+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: sr\n"
@@ -154,13 +154,13 @@ msgstr ""
 msgid "Password must be changed for security reasons"
 msgstr "Лозинка мора бити промењена из сигуросних разлога"
 
-#: udata/auth/forms.py:145
+#: udata/auth/forms.py:145 udata/tests/api/test_proconnect_api.py:52
 msgid ""
 "Your account is protected by the two-factor authentication of ProConnect:"
 " sign in with ProConnect to set up another one."
 msgstr ""
 
-#: udata/auth/forms.py:156 udata/tests/api/test_security_api.py:142
+#: udata/auth/forms.py:156 udata/tests/api/test_security_api.py:143
 msgid "This account has no password."
 msgstr ""
 
@@ -182,7 +182,7 @@ msgid "Change email"
 msgstr "Промени е-маил"
 
 #: udata/auth/mails.py:75 udata/auth/mails.py:79 udata/auth/mails.py:100
-#: udata/auth/mails.py:103 udata/tests/api/test_security_api.py:112
+#: udata/auth/mails.py:103 udata/tests/api/test_security_api.py:113
 msgid "Confirm your email address"
 msgstr ""
 
@@ -222,7 +222,7 @@ msgstr ""
 msgid "Someone requested a password reset for your %(site)s account."
 msgstr ""
 
-#: udata/auth/mails.py:116
+#: udata/auth/mails.py:116 udata/tests/api/test_proconnect_api.py:665
 msgid "Your account has no password: it signs in with ProConnect only."
 msgstr ""
 
@@ -248,28 +248,37 @@ msgid "If you did not change your password, please reset it."
 msgstr ""
 
 #: udata/auth/mails.py:167
+msgid "The email address of your account has changed"
+msgstr ""
+
+#: udata/auth/mails.py:170
+#, python-format
+msgid "The email address of your %(site)s account is now %(email)s."
+msgstr ""
+
+#: udata/auth/mails.py:174 udata/auth/mails.py:198
+msgid "If this wasn't you, contact us right away."
+msgstr ""
+
+#: udata/auth/mails.py:181
 msgid "User can't access mail account"
 msgstr ""
 
-#: udata/auth/mails.py:169
+#: udata/auth/mails.py:183
 #, python-format
 msgid "%(email)s can not access mail account"
 msgstr ""
 
-#: udata/auth/mails.py:176
+#: udata/auth/mails.py:190
 msgid "Your account now signs in with ProConnect only"
 msgstr ""
 
-#: udata/auth/mails.py:179
+#: udata/auth/mails.py:193
 #, python-format
 msgid ""
 "Your %(site)s account now signs in with ProConnect and its two-factor "
 "authentication only: its password and its %(site)s two-factor "
 "authentication, if it had any, have been removed."
-msgstr ""
-
-#: udata/auth/mails.py:184
-msgid "If this wasn't you, contact us right away."
 msgstr ""
 
 #: udata/auth/password_validation.py:26
