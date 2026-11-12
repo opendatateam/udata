@@ -49,6 +49,9 @@ def authenticate_request(user) -> bool:
     credential in without it, after its revocation and fresh for the sensitive operations.
     Nor is it a login: `current_login_at` stays the date of the last one, the token records
     its own use.
+
+    Flask-Security has no public API for this: these two calls are the ones its own basic auth
+    makes (`flask_security.decorators._check_http_auth`).
     """
     if not user.active:
         return False
