@@ -189,42 +189,20 @@ class _ToolRefusal(Exception):
     """Internal: a refusal message to hand back to the model, never escapes a tool."""
 
 
-def _has_more_groups(tabular: TabularClient, resource_id: str, query: str, rows: list) -> bool:
-    if len(rows) < PAGE_SIZE:
-        return False
-    return tabular.has_more_groups(resource_id, query)
-
-
-def _distinct_groups(profile: dict, column: str) -> int | None:
-    """Groups of the whole table grouped by `column`, from the profile statistics.
-
-    One group per distinct value, plus one for the missing values.
-    """
-    details = profile.get("profile") if isinstance(profile, dict) else None
-    stats = details.get("profile") if isinstance(details, dict) else None
-    column_stats = stats.get(column) if isinstance(stats, dict) else None
-    if not isinstance(column_stats, dict):
-        return None
-    distinct = column_stats.get("nb_distinct")
-    if not isinstance(distinct, int):
-        return None
-    missing = column_stats.get("nb_missing_values")
-    return distinct + (1 if isinstance(missing, int) and missing > 0 else 0)
-
-
 def _chart_has_more_groups(
-    tabular: TabularClient, resource_id: str, config: CreateChartInput, profile: dict
-) -> bool:
-    """Whether the viewer truncates a series to its first PAGE_SIZE rows.
+    tabular: TabularClient, resource_id: str, config: CreateChartInput
+) -> bool | None:
+    """Whether the viewer truncates a series to its first PAGE_SIZE rows, None if unknown.
 
-    A series without aggregate returns rows, not groups: it is checked first, as
-    the most likely to overflow, from its exact row count. An aggregated series
-    has no total: without filter the profile counts its groups, otherwise page
-    51 is probed. The checks stop at the first overflow or service failure.
+    Each series is read like the viewer reads it, so a query api-tabular refuses
+    raises `TabularRequestRefused`. Raw series share the chart filters, hence
+    their row count: they are read once, first, as the most likely to overflow.
+    An unavailable service leaves the count unknown: the chart is valid against
+    the profile, and the viewer reports the outage itself.
     """
     x = config.x_axis.column_x
-    unfiltered = not build_data_query(filters=config.filters)
-    checked = set()
+    read = set()
+    more_groups = False
     try:
         for series in sorted(config.series, key=lambda series: series.aggregate_y is not None):
             aggregated = series.aggregate_y is not None
@@ -236,20 +214,18 @@ def _chart_has_more_groups(
                 filters=config.filters,
                 sort=(x, "asc"),
             )
-            if query in checked:
+            key = query if aggregated else None
+            if key in read:
                 continue
-            checked.add(query)
-            if aggregated and unfiltered and (groups := _distinct_groups(profile, x)) is not None:
-                overflow = groups > PAGE_SIZE
-            elif not aggregated and (total := tabular.row_count(resource_id, query)) is not None:
-                overflow = total > PAGE_SIZE
-            else:
-                overflow = tabular.has_more_groups(resource_id, query)
-            if overflow:
-                return True
+            read.add(key)
+            first_page = tabular.get_data(resource_id, with_page(query))
+            more_groups = more_groups or tabular.has_more_rows(resource_id, query, first_page)
+    except TabularRequestRefused:
+        raise
     except TabularError:
         log.warning("Could not check the group count of a chart", exc_info=True)
-    return False
+        return None
+    return more_groups
 
 
 def serialize_dataset_metadata(dataset: Dataset) -> str:
@@ -365,8 +341,7 @@ def register_tools(agent: Agent) -> None:
         try:
             result = ctx.deps.tabular.get_data(resource_id, with_page(query))
             rendered = _render_result(result)
-            rows = result.get("data") if isinstance(result, dict) else None
-            if groupby and _has_more_groups(ctx.deps.tabular, resource_id, query, rows or []):
+            if groupby and ctx.deps.tabular.has_more_rows(resource_id, query, result):
                 rendered += (
                     f"\nPlus de {PAGE_SIZE} groupes : seuls les {PAGE_SIZE} premiers "
                     "sont pris en compte."
@@ -381,20 +356,26 @@ def register_tools(agent: Agent) -> None:
 
         À n'appeler qu'après une vérification avec `query_data`. Types : line ou
         histogram, 1 à 4 séries. Retourne le graphique validé ou la liste des erreurs
-        à corriger.
+        à corriger. `more_groups` vaut true quand une série dépasse 50 points (groupes,
+        ou lignes sans agrégat) : le graphique n'en affiche que les 50 premiers, dis-le
+        à l'utilisateur et propose un filtre ou un agrégat. null : vérification impossible.
         """
         if refusal := _consume_tool_budget(ctx):
             return {"status": "error", "errors": [refusal]}
         try:
-            resource_id, known, profile = _active_columns(ctx)
+            resource_id, known, _ = _active_columns(ctx)
         except _ToolRefusal as refusal:
             return {"status": "error", "errors": [str(refusal)]}
         if errors := validate_create(config, known):
             return {"status": "error", "errors": errors}
+        try:
+            more_groups = _chart_has_more_groups(ctx.deps.tabular, resource_id, config)
+        except TabularRequestRefused as refusal:
+            return {"status": "error", "errors": [_tabular_error_message(refusal)]}
         return {
             "status": "ok",
             "chart": to_chart_output(config, resource_id),
-            "more_groups": _chart_has_more_groups(ctx.deps.tabular, resource_id, config, profile),
+            "more_groups": more_groups,
         }
 
     @agent.tool

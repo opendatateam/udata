@@ -8,12 +8,15 @@ aggregations, sorting, pagination).
 are sanitized: internal URLs and upstream details are logged server-side.
 """
 
+import ast
 import logging
 import re
 import uuid
 
 import requests
 from flask import current_app
+
+from udata.core.assistant.data_query import PAGE_SIZE, with_page
 
 log = logging.getLogger(__name__)
 
@@ -48,10 +51,18 @@ class TabularRequestRefused(TabularError):
 MAX_DETAIL_LENGTH = 300
 
 FORBIDDEN_AGGREGATION = "agrégation non autorisée sur cette ressource"
+# api-tabular's two "Unauthorized parameters" details (build_sql_query_string, raise_if_not_index).
+FORBIDDEN_AGGREGATION_DETAIL = re.compile(r"^Aggregation parameters .* are not allowed")
+NOT_INDEXED_DETAIL = re.compile(
+    r"^(?P<column>.*) is not among the allowed columns: (?P<allowed>\{.*\})$", re.S
+)
 # The resource's table is gone: the resource is not available, not the query wrong.
 MISSING_TABLE_CODES = {"42P01", "PGRST205"}
-# PostgreSQL qualifies a column with the resource's internal table name.
-INTERNAL_TABLE_NAME = re.compile(r'"?\b[0-9a-f]{32}\b"?\.')
+# The resource's internal table name, possibly schema-qualified, as PostgreSQL quotes it.
+_TABLE_NAME = r"\b(?:csvapi\.)?[0-9a-f]{32}\b"
+# A column qualified by the table: `t.col`, `"t.col"` or `"t"."col"` keep only the column.
+TABLE_QUALIFIER = re.compile(rf'"{_TABLE_NAME}"\.|{_TABLE_NAME}\.(?=\S)')
+TABLE_NAME = re.compile(_TABLE_NAME)
 
 
 def _refusal_detail(response: requests.Response) -> str | None:
@@ -68,7 +79,7 @@ def _refusal_detail(response: requests.Response) -> str | None:
         return None
     status = response.status_code
     if status == 403:
-        return FORBIDDEN_AGGREGATION if title == "Unauthorized parameters" else None
+        return _unauthorized_detail(detail) if title == "Unauthorized parameters" else None
     if isinstance(detail, dict) and status in (400, 404):
         if detail.get("code") in MISSING_TABLE_CODES:
             return None
@@ -77,7 +88,25 @@ def _refusal_detail(response: requests.Response) -> str | None:
         return None
     if not isinstance(detail, str) or not detail:
         return None
-    return INTERNAL_TABLE_NAME.sub("", detail)
+    return TABLE_NAME.sub("ressource", TABLE_QUALIFIER.sub("", detail))
+
+
+def _unauthorized_detail(detail) -> str | None:
+    """A forbidden aggregation, or a column outside the indexes of a large resource."""
+    if not isinstance(detail, str):
+        return None
+    if FORBIDDEN_AGGREGATION_DETAIL.match(detail):
+        return FORBIDDEN_AGGREGATION
+    if not (match := NOT_INDEXED_DETAIL.match(detail)):
+        return None
+    try:
+        allowed = ", ".join(sorted(ast.literal_eval(match["allowed"])))
+    except (ValueError, SyntaxError, TypeError):
+        allowed = match["allowed"]
+    return (
+        f"colonne {match['column']} non indexée : seules les colonnes {allowed} "
+        "peuvent être regroupées ou agrégées"
+    )
 
 
 def _validate_resource_id(resource_id: str) -> str:
@@ -94,6 +123,10 @@ def _validate_resource_id(resource_id: str) -> str:
     return str(parsed)
 
 
+def _data_route(resource_id: str, query: str) -> str:
+    return f"{DATA_ROUTE.format(rid=_validate_resource_id(resource_id))}?{query}"
+
+
 class TabularClient:
     def __init__(self, base_url: str | None = None, timeout: int | None = None):
         self.base_url = base_url if base_url is not None else current_app.config["TABULAR_API_URL"]
@@ -108,35 +141,31 @@ class TabularClient:
         The URL is built by concatenation, never through ``params=``, so that
         pre-encoded (possibly double-encoded) parts are not re-encoded.
         """
-        route = DATA_ROUTE.format(rid=_validate_resource_id(resource_id))
-        return self._request("GET", f"{route}?{query}")
+        return self._request("GET", _data_route(resource_id, query))
 
-    def has_more_groups(self, resource_id: str, query_without_page: str) -> bool:
-        """Whether an aggregated query has a 51st group, i.e. more than 50 groups.
+    def has_more_rows(self, resource_id: str, query: str, first_page: dict) -> bool:
+        """Whether ``query`` matches more rows than ``first_page``, its page 1 of PAGE_SIZE.
 
-        Aggregated responses have no total: page 51 is probed. PostgREST answers
-        416 when the offset exceeds the filtered rows, so fewer than 51 groups.
+        A raw query has an exact ``meta.total``. An aggregated one has none: a missing
+        ``links.next`` ends it, otherwise page 51 is probed: api-tabular 0.4 links every full
+        page to a next one. PostgREST answers 416 beyond the last row.
         """
-        payload = self._request(
+        rows = first_page.get("data") if isinstance(first_page, dict) else None
+        if not isinstance(rows, list) or len(rows) < PAGE_SIZE:
+            return False
+        meta = first_page.get("meta")
+        total = meta.get("total") if isinstance(meta, dict) else None
+        if isinstance(total, int):
+            return total > PAGE_SIZE
+        links = first_page.get("links")
+        if not isinstance(links, dict) or not links.get("next"):
+            return False
+        probe = self._request(
             "GET",
-            self._data_route(resource_id, query_without_page, "page=51&page_size=1"),
+            _data_route(resource_id, with_page(query, page=PAGE_SIZE + 1, page_size=1)),
             out_of_range={},
         )
-        return bool(payload.get("data")) if isinstance(payload, dict) else False
-
-    def row_count(self, resource_id: str, query_without_page: str) -> int | None:
-        """Exact row count of a query without aggregate (api-tabular's ``meta.total``)."""
-        payload = self._request(
-            "GET", self._data_route(resource_id, query_without_page, "page=1&page_size=1")
-        )
-        meta = payload.get("meta") if isinstance(payload, dict) else None
-        total = meta.get("total") if isinstance(meta, dict) else None
-        return total if isinstance(total, int) else None
-
-    @staticmethod
-    def _data_route(resource_id: str, query: str, page: str) -> str:
-        route = DATA_ROUTE.format(rid=_validate_resource_id(resource_id))
-        return f"{route}?{query}&{page}" if query else f"{route}?{page}"
+        return bool(probe.get("data")) if isinstance(probe, dict) else False
 
     def _request(self, method: str, route: str, out_of_range: dict | None = None) -> dict:
         """JSON of an api-tabular call; ``out_of_range``, if given, is returned on a 416."""

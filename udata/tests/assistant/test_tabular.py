@@ -1,6 +1,7 @@
 import pytest
 import requests
 
+from udata.core.assistant.data_query import PAGE_SIZE
 from udata.core.assistant.tabular import (
     MAX_DETAIL_LENGTH,
     TABULAR_TIMEOUT,
@@ -147,6 +148,36 @@ class TabularClientTest(PytestOnlyTestCase):
             self.make_client().get_data(RESOURCE_ID, "nope__exact=1")
         assert excinfo.value.detail == "column nope does not exist"
 
+    @pytest.mark.parametrize(
+        "message,hidden",
+        [
+            (
+                'column "70f4c60b4f9828beb7922b1fe0dae8da.votants" must appear in the GROUP BY',
+                'column "votants" must appear in the GROUP BY',
+            ),
+            ('column "70f4c60b4f9828beb7922b1fe0dae8da"."a b" x', 'column "a b" x'),
+            (
+                'relation "csvapi.70f4c60b4f9828beb7922b1fe0dae8da" is locked',
+                'relation "ressource" is locked',
+            ),
+            ("table '70f4c60b4f9828beb7922b1fe0dae8da' x", "table 'ressource' x"),
+            ("on 70f4c60b4f9828beb7922b1fe0dae8da for x", "on ressource for x"),
+            ("70f4c60b4f9828beb7922b1fe0dae8da", "ressource"),
+            ("value 170f4c60b4f9828beb7922b1fe0dae8da", "value 170f4c60b4f9828beb7922b1fe0dae8da"),
+        ],
+    )
+    def test_a_database_error_hides_every_form_of_the_table_name(
+        self, requests_mock, message, hidden
+    ):
+        requests_mock.get(
+            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby",
+            status_code=400,
+            json=self.database_error("42803", message),
+        )
+        with pytest.raises(TabularRequestRefused) as excinfo:
+            self.make_client().get_data(RESOURCE_ID, "a__groupby")
+        assert excinfo.value.detail == hidden
+
     def test_a_long_database_error_is_bounded_after_hiding_the_table_name(self, requests_mock):
         message = "column 70f4c60b4f9828beb7922b1fe0dae8da." + "x" * 400 + " does not exist"
         requests_mock.get(
@@ -203,6 +234,38 @@ class TabularClientTest(PytestOnlyTestCase):
         with pytest.raises(TabularRequestRefused) as excinfo:
             self.make_client().get_data(RESOURCE_ID, "a__groupby&b__sum")
         assert excinfo.value.detail == "agrégation non autorisée sur cette ressource"
+
+    def test_a_column_without_index_is_a_refusal_listing_the_indexed_columns(self, requests_mock):
+        # api-tabular's raise_if_not_index, on a resource with table_indexes
+        requests_mock.get(
+            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?score__groupby",
+            status_code=403,
+            json={
+                "errors": [
+                    {
+                        "code": None,
+                        "title": "Unauthorized parameters",
+                        "detail": "score is not among the allowed columns: {'birth', 'id'}",
+                    }
+                ]
+            },
+        )
+        with pytest.raises(TabularRequestRefused) as excinfo:
+            self.make_client().get_data(RESOURCE_ID, "score__groupby")
+        assert excinfo.value.detail == (
+            "colonne score non indexée : seules les colonnes birth, id "
+            "peuvent être regroupées ou agrégées"
+        )
+
+    def test_an_unknown_unauthorized_detail_is_a_generic_error(self, requests_mock):
+        requests_mock.get(
+            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby",
+            status_code=403,
+            json={"errors": [{"title": "Unauthorized parameters", "detail": "something else"}]},
+        )
+        with pytest.raises(TabularError) as excinfo:
+            self.make_client().get_data(RESOURCE_ID, "a__groupby")
+        assert not isinstance(excinfo.value, TabularRequestRefused)
 
     def test_another_403_is_a_generic_error(self, requests_mock):
         requests_mock.get(
@@ -308,36 +371,72 @@ class TabularClientTest(PytestOnlyTestCase):
             "?a__groupby&b__sum&page=1&page_size=50&c__exact=x%252Ey"
         )
 
-    def test_has_more_groups_is_true_when_the_51st_group_exists(self, requests_mock):
+    def full_page(self, **page):
+        """A first page of PAGE_SIZE rows, with these extra response fields."""
+        return {"data": [{"a": i} for i in range(PAGE_SIZE)], **page}
+
+    NEXT = {"next": "https://tabular.example.com/next"}
+
+    def test_has_more_rows_is_false_on_a_partial_page_without_any_request(self, requests_mock):
+        first_page = {"data": [{"a": 1}] * (PAGE_SIZE - 1), "links": self.NEXT}
+        assert self.make_client().has_more_rows(RESOURCE_ID, "a__groupby", first_page) is False
+        assert not requests_mock.request_history
+
+    @pytest.mark.parametrize("total,expected", [(926, True), (51, True), (50, False)])
+    def test_has_more_rows_reads_the_exact_total_of_a_raw_query(
+        self, requests_mock, total, expected
+    ):
+        first_page = self.full_page(links=self.NEXT, meta={"total": total})
+        assert self.make_client().has_more_rows(RESOURCE_ID, "columns=a", first_page) is expected
+        assert not requests_mock.request_history
+
+    @pytest.mark.parametrize("links", [{"next": None}, {}, None])
+    def test_has_more_rows_trusts_a_full_page_without_next_link(self, requests_mock, links):
+        # api-tabular's exact next link: no next page means no 51st group
+        first_page = self.full_page(links=links)
+        assert self.make_client().has_more_rows(RESOURCE_ID, "a__groupby", first_page) is False
+        assert not requests_mock.request_history
+
+    def test_has_more_rows_probes_the_51st_group_behind_a_next_link(self, requests_mock):
         requests_mock.get(
             f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/", json={"data": [{"a": "x"}]}
         )
-        assert self.make_client().has_more_groups(RESOURCE_ID, "a__groupby&b__sum") is True
-        assert requests_mock.request_history[0].url.endswith(
-            "?a__groupby&b__sum&page=51&page_size=1"
-        )
+        first_page = self.full_page(links=self.NEXT)
+        assert self.make_client().has_more_rows(RESOURCE_ID, "a__groupby", first_page) is True
+        assert requests_mock.request_history[0].url.endswith("?a__groupby&page=51&page_size=1")
 
-    def test_has_more_groups_is_false_on_an_empty_51st_page(self, requests_mock):
+    def test_has_more_rows_is_false_on_an_empty_51st_page(self, requests_mock):
         requests_mock.get(f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/", json={"data": []})
-        assert self.make_client().has_more_groups(RESOURCE_ID, "a__groupby") is False
+        first_page = self.full_page(links=self.NEXT)
+        assert self.make_client().has_more_rows(RESOURCE_ID, "a__groupby", first_page) is False
 
-    def test_has_more_groups_with_an_empty_query(self, requests_mock):
+    def test_has_more_rows_probes_with_an_empty_query(self, requests_mock):
         requests_mock.get(f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/", json={"data": []})
-        self.make_client().has_more_groups(RESOURCE_ID, "")
+        self.make_client().has_more_rows(RESOURCE_ID, "", self.full_page(links=self.NEXT))
         assert requests_mock.request_history[0].url.endswith("/data/?page=51&page_size=1")
 
-    def test_has_more_groups_is_false_when_the_51st_page_is_out_of_range(
-        self, requests_mock, caplog
-    ):
+    def test_has_more_rows_is_false_when_the_51st_page_is_out_of_range(self, requests_mock, caplog):
         # PostgREST refuses an offset beyond the filtered rows instead of an empty page
         requests_mock.get(
             f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/",
             status_code=416,
             json=self.database_error("PGRST103", "Requested range not satisfiable"),
         )
+        first_page = self.full_page(links=self.NEXT)
         with caplog.at_level("WARNING", logger="udata.core.assistant.tabular"):
-            assert self.make_client().has_more_groups(RESOURCE_ID, "a__groupby") is False
+            assert self.make_client().has_more_rows(RESOURCE_ID, "a__groupby", first_page) is False
         assert not caplog.records
+
+    def test_has_more_rows_raises_a_refused_probe(self, requests_mock):
+        requests_mock.get(
+            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/",
+            status_code=400,
+            json=self.database_error("22P02", 'invalid input syntax for type bigint: "abc"'),
+        )
+        with pytest.raises(TabularRequestRefused):
+            self.make_client().has_more_rows(
+                RESOURCE_ID, "a__groupby", self.full_page(links=self.NEXT)
+            )
 
     def test_get_data_out_of_range_is_still_an_error(self, requests_mock):
         requests_mock.get(
@@ -347,21 +446,3 @@ class TabularClientTest(PytestOnlyTestCase):
         )
         with pytest.raises(TabularError):
             self.make_client().get_data(RESOURCE_ID, "page=51&page_size=1")
-
-    def test_row_count_reads_the_exact_total_of_a_one_row_page(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/",
-            json={"data": [{"a": 1}], "meta": {"page": 1, "page_size": 1, "total": 926}},
-        )
-        assert self.make_client().row_count(RESOURCE_ID, "columns=a,b&a__sort=asc") == 926
-        assert requests_mock.request_history[0].url.endswith(
-            "?columns=a,b&a__sort=asc&page=1&page_size=1"
-        )
-
-    def test_row_count_without_a_total_is_none(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/",
-            json={"data": [], "meta": {"page": 1, "page_size": 1}},
-        )
-        assert self.make_client().row_count(RESOURCE_ID, "") is None
-        assert requests_mock.request_history[0].url.endswith("/data/?page=1&page_size=1")
