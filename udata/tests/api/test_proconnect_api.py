@@ -7,7 +7,8 @@ from flask_security.recoverable import generate_reset_password_token
 from udata.core.api_token.models import ApiToken
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
-from udata.tests.api import PytestOnlyAPITestCase
+from udata.i18n import gettext as _
+from udata.tests.api import PytestOnlyAPITestCase, SessionCookieMixin
 from udata.tests.helpers import capture_mails
 
 CDATA = "http://cdata.test"
@@ -17,18 +18,7 @@ CDATA = "http://cdata.test"
 # the test client speaks plain http to local.test, whatever a local udata.cfg says.
 @pytest.mark.options(SESSION_COOKIE_SECURE=False, SESSION_COOKIE_DOMAIN=None, CDATA_BASE_URL=CDATA)
 @pytest.mark.usefixtures("proconnect")
-class ProConnectAuthTest(PytestOnlyAPITestCase):
-    def get(self, url, *args, **kwargs):
-        # pytest-flask keeps one app context, hence one `g`, for the whole test, and
-        # flask-login caches the user there: the session cookie, which carries the
-        # freshness, would never be read again. A context per request reads it.
-        with current_app.app_context():
-            return super().get(url, *args, **kwargs)
-
-    def post(self, url, *args, **kwargs):
-        with current_app.app_context():
-            return super().post(url, *args, **kwargs)
-
+class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
     def sign_in(
         self,
         proconnect,
@@ -58,8 +48,10 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
     def assert_two_factor_setup_refused(self, response):
         self.assert400(response)
         assert response.json["response"]["field_errors"]["setup"] == [
-            "Your account is protected by the two-factor authentication of ProConnect: "
-            "sign in with ProConnect to set up another one."
+            _(
+                "Your account is protected by the two-factor authentication of ProConnect: "
+                "sign in with ProConnect to set up another one."
+            )
         ]
 
     def enter_totp(self, secret):
@@ -670,7 +662,7 @@ class ProConnectAuthTest(PytestOnlyAPITestCase):
 
         self.assert200(response)
         assert [mail.recipients for mail in mails] == [["jane@example.org"]]
-        assert "it signs in with ProConnect only" in mails[0].body
+        assert _("Your account has no password: it signs in with ProConnect only.") in mails[0].body
         assert f"{CDATA}/login" in mails[0].body
         assert "/reset/" not in mails[0].body
 
