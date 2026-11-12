@@ -2,11 +2,12 @@
 Make every member who edited a dataset, a reuse or a dataservice of their organization,
 or took part in the discussions of one of its subjects, follow it, as doing so now does.
 
-The activities are the only record of who edited what, and they do not tell an edit made
-by hand from one made by a script through an API key: both are attributed to the user.
-Unlike at edit time, the accounts that publish through a script are therefore made to
-follow what they published. Harvesting, attributed to `HARVEST_ACTIVITY_USER_ID`, is
-left out, as it follows nothing at harvest time.
+The activities are the only record of who edited what, and when this migration was
+written they did not tell an edit made by hand from one made by a script through an API
+key: both were attributed to the user. Unlike at edit time, the accounts that published
+through a script are therefore made to follow what they published. Harvesting, then
+attributed to `HARVEST_ACTIVITY_USER_ID`, is left out, as it follows nothing at harvest
+time.
 
 Membership is read as it is now, not as it was then: someone who left the organization
 long ago does not start hearing about it again. Who is left out otherwise is the same
@@ -74,8 +75,10 @@ def migrate(db):
 
     log.info("Collecting who edited what from the activities...")
     edits = {"_cls": {"$in": list(model_by_cls)}, "actor._cls": "User"}
-    # Harvesting is attributed to this account, and harvesting follows nothing.
-    if harvester := current_app.config["HARVEST_ACTIVITY_USER_ID"]:
+    # Harvesting was attributed to this account, and harvesting follows nothing. The
+    # setting is gone since harvesting is attributed to its source: only an instance
+    # that still declares it has activities to leave out.
+    if harvester := current_app.config.get("HARVEST_ACTIVITY_USER_ID"):
         edits["actor._ref"] = {"$ne": DBRef("user", ObjectId(harvester))}
     for row in Activity._get_collection().aggregate(
         [

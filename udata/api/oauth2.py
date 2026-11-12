@@ -29,7 +29,7 @@ from authlib.oauth2.rfc6750 import BearerTokenValidator
 from authlib.oauth2.rfc7009 import RevocationEndpoint
 from authlib.oauth2.rfc7636 import CodeChallenge
 from bson import ObjectId
-from flask import abort, current_app, jsonify, render_template, request
+from flask import abort, current_app, g, jsonify, render_template, request
 from flask_security.utils import verify_password
 from flask_storage.mongo import ImageField
 from mongoengine import NULLIFY, Q
@@ -43,8 +43,9 @@ from mongoengine.fields import (
 )
 from werkzeug.exceptions import Unauthorized
 
+from udata.api_fields import field, generate_fields
 from udata.app import csrf
-from udata.auth import current_user, login_required, login_user
+from udata.auth import authenticate_request, current_user, login_required
 from udata.core.organization.models import Organization
 from udata.core.storages import default_image_basename, images
 from udata.i18n import I18nBlueprint
@@ -67,10 +68,15 @@ TOKEN_TYPES = {
 SCOPES = {"default": _("Default scope"), "admin": _("System administrator rights")}
 
 
+@generate_fields()
 class OAuth2Client(ClientMixin, Datetimed, Document):
     secret = StringField(default=None)
 
-    name = StringField(required=True)
+    name = field(
+        StringField(required=True),
+        show_as_ref=True,
+        description="The application name, shown where it acted for a user",
+    )
     description = StringField()
 
     owner = ReferenceField("User")
@@ -139,9 +145,23 @@ class OAuth2Client(ClientMixin, Datetimed, Document):
         return bool(self.secret)
 
 
+@generate_fields()
 class OAuth2Token(Document):
-    client = ReferenceField("OAuth2Client", required=True)
-    user = ReferenceField("User")
+    # Its reference is public, as an activity actor: only these two fields are exposed,
+    # never the access or refresh token.
+    client = field(
+        ReferenceField("OAuth2Client", required=True),
+        readonly=True,
+        show_as_ref=True,
+        description="The application the token was issued to",
+    )
+    user = field(
+        ReferenceField("User"),
+        readonly=True,
+        show_as_ref=True,
+        rename="owner",
+        description="On whose behalf the token acts",
+    )
 
     # currently only bearer is supported
     token_type = StringField(choices=list(TOKEN_TYPES), default="Bearer")
@@ -149,11 +169,14 @@ class OAuth2Token(Document):
     access_token = StringField(unique=True)
     refresh_token = StringField(unique=True, sparse=True)
     created_at = DateTimeField(default=lambda: datetime.now(UTC), required=True)
+    # A token lives for weeks: only this field tells how recently it acted for its user.
+    last_used_at = DateTimeField()
     expires_in = IntField(required=True)
     scope = StringField(default="")
     revoked = BooleanField(default=False)
 
-    meta = {"collection": "oauth2_token"}
+    # `user`: the activities of a user include those of their tokens.
+    meta = {"collection": "oauth2_token", "indexes": ["user"]}
 
     def __str__(self):
         return "<OAuth2Token({0.client.name})>".format(self)
@@ -180,10 +203,6 @@ class OAuth2Token(Document):
 
     def is_revoked(self):
         return self.revoked
-
-    def is_refresh_token_valid(self):
-        refresh_window = current_app.config["OAUTH2_REFRESH_TOKEN_EXPIRES_IN"]
-        return not self.revoked and self.get_expires_at() + refresh_window > time.time()
 
 
 class OAuth2Code(Document):
@@ -259,9 +278,10 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
     INCLUDE_NEW_REFRESH_TOKEN = True
 
     def authenticate_refresh_token(self, refresh_token):
-        item = OAuth2Token.objects(refresh_token=refresh_token).first()
-        if item and item.is_refresh_token_valid():
-            return item
+        token = OAuth2Token.objects(refresh_token=refresh_token).first()
+        refresh_window = current_app.config["OAUTH2_REFRESH_TOKEN_EXPIRES_IN"]
+        if token and not token.revoked and token.get_expires_at() + refresh_window > time.time():
+            return token
 
     def authenticate_user(self, credential):
         return credential.user
@@ -389,7 +409,9 @@ def save_token(token, request):
 def check_credentials():
     try:
         with require_oauth.acquire() as token:
-            login_user(token.user)
+            if authenticate_request(token.user):
+                g.api_credential = token
+                token.update(set__last_used_at=datetime.now(UTC))
         return True
     except (Unauthorized, AuthlibFlaskException):
         return False
