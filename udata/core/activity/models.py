@@ -7,6 +7,7 @@ from bson.son import SON
 from flask import g
 from mongoengine import Q
 from mongoengine.base import TopLevelDocumentMetaclass
+from mongoengine.errors import DoesNotExist
 from mongoengine.fields import (
     DateTimeField,
     GenericReferenceField,
@@ -42,7 +43,8 @@ ACTOR_TYPES = ("User", "HarvestSource", "ApiToken", "OAuth2Token")
 
 
 class ActorField(GenericReferenceField):
-    """Also read the actors stored before `actor` became a generic reference.
+    """Also read the actors stored before `actor` became a generic reference, and the
+    harvest sources purged since.
 
     It was a `ReferenceField("User")`, stored as a bare user id. The migration rewrites
     them, but the ones it has not reached yet and the ones written by workers still on
@@ -53,6 +55,16 @@ class ActorField(GenericReferenceField):
         if isinstance(value, ObjectId):
             return SON((("_cls", "User"), ("_ref", DBRef(User._get_collection_name(), value))))
         return value
+
+    def _lazy_load_ref(self, ref_cls, dbref):
+        try:
+            return super()._lazy_load_ref(ref_cls, dbref)
+        except DoesNotExist:
+            # Purging a source deletes it for good, while the datasets it harvested stay
+            # archived with their history: the source is kept as its identifier alone.
+            if ref_cls._class_name != "HarvestSource":
+                raise
+            return ref_cls(id=dbref.id)
 
 
 class EmitNewActivityMetaClass(TopLevelDocumentMetaclass):
@@ -111,6 +123,11 @@ def filter_by_keys(base_query, values):
     return base_query.filter(_cls__in=[_registered_activities[key]._class_name for key in values])
 
 
+def filter_by_actor_kinds(base_query, values):
+    """Keep what some kinds of actor did, e.g. everything harvesting did."""
+    return base_query.filter(__raw__={"actor._cls": {"$in": values}})
+
+
 @generate_fields(
     default_sort="-created_at",
     standalone_filters=[
@@ -134,6 +151,16 @@ def filter_by_keys(base_query, values):
             "is_list": True,
             "query": filter_by_keys,
             "help": "Filter activities on those keys (ex : dataset:updated). Repeatable.",
+        },
+        {
+            "key": "actor_kind",
+            "type": str,
+            "is_list": True,
+            "choices": ACTOR_TYPES,
+            "query": filter_by_actor_kinds,
+            "help": (
+                "Filter activities on the kind of their actor (ex : HarvestSource). Repeatable."
+            ),
         },
     ],
 )
@@ -189,6 +216,8 @@ class Activity(Document, metaclass=EmitNewActivityMetaClass):
             ("actor", "-created_at"),
             ("organization", "-created_at"),
             ("related_to", "-created_at"),
+            # `actor_kind` reads `actor._cls`, indexed by the 2026-11-10 migration:
+            # mongoengine refuses to index a subfield of a generic reference.
         ],
         "allow_inheritance": True,
     }
@@ -232,15 +261,17 @@ class Activity(Document, metaclass=EmitNewActivityMetaClass):
 
     @classmethod
     def emit(cls, related_to, organization=None, changed_fields=None, extras=None):
-        if hasattr(g, "harvest_activity_user"):
-            # We're in the context of a harvest action with a harvest activity user to use as actor
-            actor = g.harvest_activity_user
+        if hasattr(g, "harvest_source"):
+            actor = g.harvest_source
         elif hasattr(g, "api_credential"):
             # An API key or an OAuth2 token acts on behalf of its owner, who stays
             # reachable as its `user`.
             actor = g.api_credential
-        else:
+        elif current_user and current_user.is_authenticated:
             actor = current_user._get_current_object()
+        else:
+            # Nobody to attribute it to, e.g. a command or a task changing an object.
+            return
         new_activity.send(
             cls,
             related_to=related_to,

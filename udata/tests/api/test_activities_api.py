@@ -11,7 +11,7 @@ from udata.core.activity.models import Activity
 from udata.core.api_token.models import ApiToken
 from udata.core.dataset.activities import UserUpdatedDataset
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.dataset.models import Dataset
+from udata.core.dataset.models import Dataset, HarvestDatasetMetadata
 from udata.core.organization.activities import UserCreatedOrganization
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
@@ -20,6 +20,7 @@ from udata.core.topic.factories import TopicFactory
 from udata.core.topic.models import Topic
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
+from udata.harvest import actions
 from udata.harvest.tests.factories import HarvestSourceFactory
 from udata.i18n import lazy_gettext as _
 from udata.tests.api import APITestCase
@@ -254,6 +255,30 @@ class ActivityAPITest(APITestCase):
             str(by_token.id),
             str(by_revoked.id),
         }
+
+    def test_activity_api_list_filtered_by_actor_kind(self) -> None:
+        """Lists what harvesting did, e.g. to see what a deployment changed in it."""
+        by_harvest = FakeDatasetActivity.objects.create(
+            actor=HarvestSourceFactory(), related_to=DatasetFactory()
+        )
+        token, _plaintext = ApiToken.generate(UserFactory())
+        by_token = FakeDatasetActivity.objects.create(actor=token, related_to=DatasetFactory())
+        FakeDatasetActivity.objects.create(actor=UserFactory(), related_to=DatasetFactory())
+
+        response: TestResponse = self.get(url_for("api.activity", actor_kind="HarvestSource"))
+        assert200(response)
+        assert [activity["id"] for activity in response.json["data"]] == [str(by_harvest.id)]
+
+        response = self.get(url_for("api.activity", actor_kind=["HarvestSource", "ApiToken"]))
+        assert200(response)
+        assert {activity["id"] for activity in response.json["data"]} == {
+            str(by_harvest.id),
+            str(by_token.id),
+        }
+
+    def test_activity_api_list_filtered_by_an_unknown_actor_kind(self) -> None:
+        response: TestResponse = self.get(url_for("api.activity", actor_kind="Dataset"))
+        assert400(response)
 
     def test_an_edit_through_an_oauth2_token_is_attributed_to_the_token(self) -> None:
         owner = UserFactory()
@@ -528,6 +553,20 @@ class ActivityAPITest(APITestCase):
         response: TestResponse = self.get(url_for("api.activity"))
         assert200(response)
         assert len(response.json["data"]) == 0
+
+    def test_the_activities_of_a_purged_harvest_source_stay_listed(self) -> None:
+        """The datasets a purged source harvested stay archived, with their history."""
+        source = HarvestSourceFactory(deleted=datetime.now(UTC))
+        dataset = DatasetFactory(harvest=HarvestDatasetMetadata(source_id=str(source.id)))
+        activity = FakeDatasetActivity.objects.create(actor=source, related_to=dataset)
+
+        actions.purge_sources()
+
+        response: TestResponse = self.get(url_for("api.activity", related_to=dataset.id))
+        assert200(response)
+        assert [(item["id"], item["actor"]) for item in response.json["data"]] == [
+            (str(activity.id), {"id": str(source.id), "class": "HarvestSource", "name": None})
+        ]
 
     def test_activity_api_list_with_an_oauth2_token_whose_client_is_gone(self) -> None:
         """It should not crash when the application of a token actor has been hard-deleted."""

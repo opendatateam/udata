@@ -136,6 +136,14 @@ class ActivityTest(APITestCase):
         self.assertEqual(Activity.objects(related_to=self.fake).count(), 1)
         self.assertEqual(Activity.objects(actor=self.user).count(), 1)
 
+    def test_emit_without_anyone_to_attribute_it_to_records_nothing(self):
+        """E.g. a command or a task changing an object outside of a request."""
+        self.logout()
+
+        FakeActivity.emit(self.fake)
+
+        assert Activity.objects(related_to=self.fake).count() == 0
+
 
 class AuditableTest(APITestCase):
     def test_auditable_signals_emission(self):
