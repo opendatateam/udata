@@ -70,21 +70,24 @@ def _encode(value: str) -> str:
     return quote(value, safe="-_.!~*'()")
 
 
-def _encode_value(value: str) -> str:
-    # api-tabular decodes the query string, then PostgREST decodes the value
-    # again: a single-encoded `#` would cut the upstream URL short.
-    return quote(_encode(value), safe="")
+def _encode_twice(text: str) -> str:
+    """A column name or simple filter value, decoded twice upstream.
+
+    api-tabular decodes the query string, then PostgREST decodes it again: a
+    single-encoded `#` would cut the upstream URL short, a `,` split `columns`.
+    """
+    return quote(_encode(text), safe="")
 
 
-def _encode_condition_value(value: str) -> str:
-    """A value of an or()/and() condition, quoted for PostgREST.
+def _encode_in_condition(text: str) -> str:
+    """A column name or value of an or()/and() condition.
 
     Only what survives the first decoding intact may stay single-encoded:
-    `,` `(` `)` split the or()/and() conditions, `.` separates PostgREST's
-    operator from the value, `#` and `%` break the upstream URL. `"` and `\\`
-    are backslash-escaped inside the quotes.
+    `,` `(` `)` split the or()/and() conditions, `.` separates the column, the
+    PostgREST operator and the value, `#` and `%` break the upstream URL. `"`
+    and `\\` are backslash-escaped for the quotes around a value.
     """
-    encoded = _encode(value).replace("%25", "%2525")
+    encoded = _encode(text).replace("%25", "%2525")
     encoded = encoded.replace("%5C", "%5C%5C").replace("%22", "%5C%2522")
     for single, double in (
         ("%2C", "%252C"),
@@ -94,31 +97,34 @@ def _encode_condition_value(value: str) -> str:
         ("%23", "%2523"),
     ):
         encoded = encoded.replace(single, double)
-    return f"%22{encoded}%22"
+    return encoded
 
 
-def _null_condition(f: Filter) -> str | None:
+def _null_condition(f: Filter, column: str) -> str | None:
     if f.condition == "is_null":
-        return f"{_encode(f.column)}__isnull"
+        return f"{column}__isnull"
     if f.condition == "is_not_null":
-        return f"{_encode(f.column)}__isnotnull"
+        return f"{column}__isnotnull"
     return None
 
 
 def _param(f: Filter) -> str | None:
-    if (null := _null_condition(f)) is not None:
+    column = _encode_twice(f.column)
+    if (null := _null_condition(f, column)) is not None:
         return null
     if not f.value:
         return None
-    return f"{_encode(f.column)}__{_encode(f.condition)}={_encode_value(f.value)}"
+    return f"{column}__{_encode(f.condition)}={_encode_twice(f.value)}"
 
 
 def _condition(f: Filter) -> str | None:
-    if (null := _null_condition(f)) is not None:
+    # A quoted column would be parsed with a `[a-z]+` operator, cutting strictly_*.
+    column = _encode_in_condition(f.column)
+    if (null := _null_condition(f, column)) is not None:
         return null
     if not f.value:
         return None
-    return f"{_encode(f.column)}__{_encode(f.condition)}.{_encode_condition_value(f.value)}"
+    return f"{column}__{_encode(f.condition)}.%22{_encode_in_condition(f.value)}%22"
 
 
 def _group(group: "AndFilters | OrFilters") -> str | None:
@@ -161,13 +167,13 @@ def build_data_query(
     """Query string for `/data/`, without `page` / `page_size` (see `with_page`)."""
     params: list[str] = []
     if columns:
-        params.append("columns=" + ",".join(_encode(c) for c in columns))
+        params.append("columns=" + ",".join(_encode_twice(c) for c in columns))
     if groupby:
-        params.append(f"{_encode(groupby)}__groupby")
+        params.append(f"{_encode_twice(groupby)}__groupby")
     if aggregate:
-        params.append(f"{_encode(aggregate[0])}__{_encode(aggregate[1])}")
+        params.append(f"{_encode_twice(aggregate[0])}__{_encode(aggregate[1])}")
     if sort:
-        params.append(f"{_encode(sort[0])}__sort={_encode(sort[1])}")
+        params.append(f"{_encode_twice(sort[0])}__sort={_encode(sort[1])}")
     if filters:
         params.extend(_build_filter_query(filters))
     return "&".join(params)

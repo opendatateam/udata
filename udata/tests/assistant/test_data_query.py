@@ -19,7 +19,7 @@ def test_grouped_aggregate_sorted_on_x():
 
 
 def test_columns():
-    assert build_data_query(columns=["a b", "c"]) == "columns=a%20b,c"
+    assert build_data_query(columns=["a b", "c"]) == "columns=a%2520b,c"
 
 
 def test_aggregate_without_groupby_is_a_global_total():
@@ -82,8 +82,7 @@ def test_empty_values_are_dropped():
 
 def test_special_characters_are_encoded():
     f = Filter(column="Nom de l'élu", condition="exact", value="a&b")
-    # encodeURIComponent leaves the apostrophe of the column untouched
-    assert build_data_query(filters=f) == "Nom%20de%20l'%C3%A9lu__exact=a%2526b"
+    assert build_data_query(filters=f) == "Nom%2520de%2520l%27%25C3%25A9lu__exact=a%2526b"
 
 
 @pytest.mark.parametrize(
@@ -209,3 +208,53 @@ def test_filter_errors_treats_a_blank_value_as_missing():
     assert filter_errors(Filter(column="a", condition="exact", value="  \t")) == [
         "Le filtre exact sur a demande une valeur."
     ]
+
+
+# Verified against api-tabular main on PostgreSQL: decoded twice, like the values.
+COLUMN_KEYS = {
+    "Nb. habitants": "Nb.%2520habitants",
+    "Taux (en points, 2020)": "Taux%2520%28en%2520points%252C%25202020%29",
+    "Région": "R%25C3%25A9gion",
+    "a&b": "a%2526b",
+    "50%": "50%2525",
+    "#1": "%25231",
+}
+
+
+@pytest.mark.parametrize("column,key", COLUMN_KEYS.items())
+def test_column_names_of_top_level_parameters_are_double_encoded(column, key):
+    assert (
+        build_data_query(
+            columns=[column, "x"],
+            groupby=column,
+            aggregate=(column, "max"),
+            sort=(column, "asc"),
+            filters=Filter(column=column, condition="exact", value="1"),
+        )
+        == f"columns={key},x&{key}__groupby&{key}__max&{key}__sort=asc&{key}__exact=1"
+    )
+
+
+# Unquoted: api-tabular reads a quoted column's operator as `[a-z]+`, which cuts strictly_*.
+CONDITION_COLUMNS = {
+    "Nb. habitants": "Nb%252E%20habitants",
+    "Taux (en points, 2020)": "Taux%20%2528en%20points%252C%202020%2529",
+    "Région": "R%C3%A9gion",
+    "a&b": "a%26b",
+    "50%": "50%2525",
+    "#1": "%25231",
+    "strictly": "strictly",
+}
+
+
+@pytest.mark.parametrize("column,encoded", CONDITION_COLUMNS.items())
+def test_column_names_of_group_conditions_are_encoded_like_their_values(column, encoded):
+    group = OrFilters(
+        filters=[
+            Filter(column=column, condition="strictly_greater", value="0"),
+            Filter(column=column, condition="is_null"),
+        ]
+    )
+    assert build_data_query(filters=group) == (
+        f"or=({encoded}__strictly_greater.%220%22,{encoded}__isnull)"
+    )
