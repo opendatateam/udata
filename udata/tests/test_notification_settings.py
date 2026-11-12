@@ -11,7 +11,7 @@ from mongoengine.connection import get_db
 import udata
 import udata.features.notifications.follow
 import udata.models  # noqa: F401 -- registers every document before the imports below
-from udata.api.oauth2 import OAuth2Client
+from udata.api.factories import OAuth2TokenFactory
 from udata.core.dataservices.activities import UserUpdatedDataservice
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.activities import UserUpdatedDataset
@@ -51,7 +51,7 @@ from udata.features.notifications.settings import (
 from udata.features.notifications.tasks import notification_digest, send_notification_digests
 from udata.features.transfer.factories import TransferFactory
 from udata.mail import MailMessage
-from udata.tests.api import APITestCase, PytestOnlyDBTestCase, create_oauth_token
+from udata.tests.api import APITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import capture_mails
 
 DISCUSSIONS = "discussion"
@@ -2208,12 +2208,7 @@ class FollowWhatOneWorksOnTest(APITestCase):
     def test_a_script_publishing_with_an_oauth_token_follows_nothing(self):
         editor = UserFactory()
         dataset = DatasetFactory(organization=OrganizationFactory(editors=[editor]))
-        client = OAuth2Client.objects.create(
-            name="script",
-            owner=UserFactory(),
-            redirect_uris=["https://script.example.org/callback"],
-        )
-        create_oauth_token(client, editor)
+        OAuth2TokenFactory(user=editor, access="access-token")
         data = dataset.to_dict()
         data["description"] = "new description"
 

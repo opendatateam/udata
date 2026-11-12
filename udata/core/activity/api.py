@@ -28,7 +28,10 @@ class SiteActivityAPI(API):
         safe_items = []
         for item in qs.queryset.items:
             try:
-                item.actor
+                # A token is serialized along with the user it acts for, and an OAuth2
+                # token with its application.
+                getattr(item.actor, "user", None)
+                getattr(item.actor, "client", None)
                 item.organization
                 item.related_to
             except DoesNotExist as e:

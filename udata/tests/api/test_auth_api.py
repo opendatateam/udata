@@ -1,3 +1,4 @@
+from datetime import datetime
 from urllib.parse import parse_qs
 
 import pytest
@@ -6,20 +7,18 @@ from authlib.common.urls import url_decode, urlparse
 from authlib.oauth2.rfc7636 import (
     create_s256_code_challenge,
 )
-from flask import url_for
+from flask import current_app, url_for
 
 from udata.api import API, api
+from udata.api.factories import CLIENT_SECRET, OAuth2TokenFactory
 from udata.api.oauth2 import OAuth2Client, OAuth2Token
 from udata.auth import PermissionDenied
-from udata.core.api_token.models import hash_token
+from udata.core.api_token.hashing import hash_token
+from udata.core.api_token.models import ApiToken
 from udata.core.user.factories import UserFactory
+from udata.core.user.models import User
 from udata.forms import Form, fields, validators
-from udata.tests.api import (
-    CLIENT_SECRET,
-    PytestOnlyAPITestCase,
-    basic_header,
-    create_oauth_token,
-)
+from udata.tests.api import PytestOnlyAPITestCase, basic_header
 from udata.tests.helpers import (
     assert200,
     assert400,
@@ -95,7 +94,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
     def test_oauth_auth(self, oauth):
         """Should handle OAuth header authentication"""
-        create_oauth_token(oauth, UserFactory())
+        OAuth2TokenFactory(client=oauth, access="access-token", refresh="refresh-token")
 
         response = self.post(url_for("api.fake"), headers={"Authorization": "Bearer access-token"})
 
@@ -105,7 +104,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
     def test_oauth_auth_refuses_the_stored_tokens(self, oauth):
         # What a dump of the database gives.
-        token = create_oauth_token(oauth, UserFactory())
+        token = OAuth2TokenFactory(client=oauth, access="access-token", refresh="refresh-token")
 
         response = self.post(
             url_for("api.fake"), headers={"Authorization": f"Bearer {token.access_token}"}
@@ -123,7 +122,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
     def test_bad_oauth_auth(self, oauth):
         """Should handle wrong OAuth header authentication"""
-        create_oauth_token(oauth, UserFactory())
+        OAuth2TokenFactory(client=oauth, access="access-token", refresh="refresh-token")
 
         response = self.post(
             url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", "not-my-token"])}
@@ -812,12 +811,17 @@ class APIAuthTest(PytestOnlyAPITestCase):
     @pytest.mark.oauth(confidential=True)
     def test_refresh_token(self, oauth):
         user = UserFactory()
-        token_to_be_refreshed = create_oauth_token(oauth, user)
-        token_same_user_not_refreshed = create_oauth_token(
-            oauth, user, "same-user-access-token", "same-user-refresh-token"
+        token_to_be_refreshed = OAuth2TokenFactory(
+            client=oauth, user=user, access="access-token", refresh="refresh-token"
         )
-        other_token = create_oauth_token(
-            oauth, UserFactory(), "other-access-token", "other-refresh-token"
+        token_same_user_not_refreshed = OAuth2TokenFactory(
+            client=oauth,
+            user=user,
+            access="same-user-access-token",
+            refresh="same-user-refresh-token",
+        )
+        other_token = OAuth2TokenFactory(
+            client=oauth, access="other-access-token", refresh="other-refresh-token"
         )
         tokens_count = OAuth2Token.objects.count()
 
@@ -856,7 +860,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
     @pytest.mark.parametrize("plaintext", ["access-token", "refresh-token"])
     def test_revoke_token(self, client, oauth, plaintext):
-        token = create_oauth_token(oauth, UserFactory(), "access-token", "refresh-token")
+        token = OAuth2TokenFactory(client=oauth, access="access-token", refresh="refresh-token")
         response = self.post(
             url_for("oauth.revoke_token"),
             {
@@ -876,7 +880,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         [("access_token", "access-token"), ("refresh_token", "refresh-token")],
     )
     def test_revoke_token_with_hint(self, client, oauth, token_type, plaintext):
-        token = create_oauth_token(oauth, UserFactory(), "access-token", "refresh-token")
+        token = OAuth2TokenFactory(client=oauth, access="access-token", refresh="refresh-token")
         response = self.post(
             url_for("oauth.revoke_token"),
             {"token": plaintext, "token_type_hint": token_type},
@@ -889,7 +893,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         assert tok.revoked is True
 
     def test_revoke_token_with_bad_hint(self, oauth):
-        token = create_oauth_token(oauth, UserFactory())
+        token = OAuth2TokenFactory(client=oauth, access="access-token", refresh="refresh-token")
 
         response = self.post(
             url_for("oauth.revoke_token"),
@@ -926,3 +930,44 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
         assert403(response)
         assert "message" in response.json
+
+
+# A cookie must reach the next request for its absence to prove anything: the test client
+# speaks plain http to local.test, whatever a local udata.cfg says.
+@pytest.mark.options(SESSION_COOKIE_SECURE=False, SESSION_COOKIE_DOMAIN=None)
+class HeaderAuthTest(PytestOnlyAPITestCase):
+    """A credential sent in a header authenticates its request only. A session it opened
+    would outlive its revocation, and be fresh enough for the sensitive operations. Nor is
+    it a login: the credential records its own use."""
+
+    LAST_LOGIN = datetime(2024, 1, 1)
+
+    def post(self, headers=None):
+        # pytest-flask keeps one app context, hence one `g`, for the whole test, and
+        # flask-login caches the user there: a context per request reads the cookie.
+        with current_app.app_context():
+            return self.client.post(url_for("api.fake"), headers=headers)
+
+    def assert_authenticated_this_request_only(self, response, user):
+        assert200(response)
+        assert not response.headers.getlist("Set-Cookie")
+        assert401(self.post())
+        assert User.objects.get(id=user.id).current_login_at == self.LAST_LOGIN
+
+    def test_api_key(self):
+        user = UserFactory(current_login_at=self.LAST_LOGIN)
+        token, plaintext = ApiToken.generate(user)
+
+        self.assert_authenticated_this_request_only(self.post({"X-API-KEY": plaintext}), user)
+        token.reload()
+        assert token.last_used_at is not None
+
+    def test_oauth_token(self, oauth):
+        user = UserFactory(current_login_at=self.LAST_LOGIN)
+        token = OAuth2TokenFactory(client=oauth, user=user, access="access-token")
+
+        self.assert_authenticated_this_request_only(
+            self.post({"Authorization": "Bearer access-token"}), user
+        )
+        token.reload()
+        assert token.last_used_at is not None

@@ -9,7 +9,7 @@ from werkzeug.security import gen_salt
 from udata.api import api
 from udata.api.oauth2 import OAuth2Client
 from udata.commands import cli, exit_with_error, success
-from udata.core.api_token.models import hash_token
+from udata.core.api_token.hashing import hash_token
 from udata.models import User
 
 log = logging.getLogger(__name__)

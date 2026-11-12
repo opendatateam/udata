@@ -10,7 +10,7 @@ import re
 
 from pymongo import UpdateOne
 
-from udata.core.api_token.models import hash_token
+from udata.core.api_token.hashing import hash_token
 
 log = logging.getLogger(__name__)
 

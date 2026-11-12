@@ -1,4 +1,3 @@
-from flask_security import current_user
 from mongoengine.errors import DoesNotExist
 from mongoengine.fields import ReferenceField
 
@@ -55,20 +54,17 @@ class UserDeletedTopicElement(TopicRelatedActivity, Activity):
 
 @Topic.on_create.connect
 def on_user_created_topic(topic, **kwargs):
-    if current_user and current_user.is_authenticated:
-        UserCreatedTopic.emit(topic, topic.organization)
+    UserCreatedTopic.emit(topic, topic.organization)
 
 
 @Topic.on_update.connect
 def on_user_updated_topic(topic, **kwargs):
-    changed_fields = kwargs.get("changed_fields", [])
-    if current_user and current_user.is_authenticated:
-        UserUpdatedTopic.emit(topic, topic.organization, changed_fields)
+    UserUpdatedTopic.emit(topic, topic.organization, kwargs.get("changed_fields", []))
 
 
 @TopicElement.on_create.connect
 def on_user_created_topic_element(topic_element, **kwargs):
-    if current_user and current_user.is_authenticated and topic_element.topic:
+    if topic_element.topic:
         extras = {"element_id": str(topic_element.id)}
         UserCreatedTopicElement.emit(
             topic_element.topic, topic_element.topic.organization, extras=extras
@@ -78,7 +74,7 @@ def on_user_created_topic_element(topic_element, **kwargs):
 @TopicElement.on_update.connect
 def on_user_updated_topic_element(topic_element, **kwargs):
     changed_fields = kwargs.get("changed_fields", [])
-    if current_user and current_user.is_authenticated and topic_element.topic:
+    if topic_element.topic:
         extras = {"element_id": str(topic_element.id)}
         UserUpdatedTopicElement.emit(
             topic_element.topic, topic_element.topic.organization, changed_fields, extras=extras
@@ -92,6 +88,6 @@ def on_user_deleted_topic_element(topic_element, **kwargs):
     except DoesNotExist:
         # Topic was already deleted, skip activity creation
         return
-    if current_user and current_user.is_authenticated and topic:
+    if topic:
         extras = {"element_id": str(topic_element.id)}
         UserDeletedTopicElement.emit(topic, topic.organization, extras=extras)

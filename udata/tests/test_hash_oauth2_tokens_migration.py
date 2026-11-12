@@ -1,16 +1,11 @@
 from flask import url_for
 from mongoengine.connection import get_db
 
-from udata.api.oauth2 import OAuth2Client, OAuth2Token
-from udata.core.api_token.models import hash_token
-from udata.core.user.factories import UserFactory
+from udata.api.factories import CLIENT_SECRET, OAuth2ClientFactory, OAuth2TokenFactory
+from udata.api.oauth2 import OAuth2Token
+from udata.core.api_token.hashing import hash_token
 from udata.db import migrations
-from udata.tests.api import (
-    CLIENT_SECRET,
-    PytestOnlyAPITestCase,
-    basic_header,
-    create_oauth_token,
-)
+from udata.tests.api import PytestOnlyAPITestCase, basic_header
 from udata.tests.helpers import assert200
 
 MIGRATION = "2026-11-11-hash-oauth2-tokens.py"
@@ -20,23 +15,11 @@ def migrate():
     migrations.get(MIGRATION).migrate(get_db())
 
 
-def client_app(secret=None):
-    return OAuth2Client.objects.create(
-        name="test-client",
-        owner=UserFactory(),
-        redirect_uris=["https://test.org/callback"],
-        secret=secret,
-    )
-
-
 class HashOAuth2TokensMigrationTest(PytestOnlyAPITestCase):
+    """The factories store hashes: a value in clear is set on the stored field itself."""
+
     def test_tokens_in_clear_are_hashed_and_keep_authenticating(self):
-        token = OAuth2Token.objects.create(
-            client=client_app(),
-            user=UserFactory(),
-            access_token="access-token",
-            refresh_token="refresh-token",
-        )
+        token = OAuth2TokenFactory(access_token="access-token", refresh_token="refresh-token")
 
         migrate()
 
@@ -47,9 +30,7 @@ class HashOAuth2TokensMigrationTest(PytestOnlyAPITestCase):
         assert response.json["id"] == str(token.user.id)
 
     def test_a_token_without_refresh_token_keeps_none(self):
-        token = OAuth2Token.objects.create(
-            client=client_app(), user=UserFactory(), access_token="access-token"
-        )
+        token = OAuth2TokenFactory(access_token="access-token", refresh_token=None)
 
         migrate()
 
@@ -59,13 +40,8 @@ class HashOAuth2TokensMigrationTest(PytestOnlyAPITestCase):
 
     def test_hashed_tokens_are_left_alone(self):
         """A failed run is run again, and new workers write hashes before it runs."""
-        create_oauth_token(client_app(), UserFactory())
-        OAuth2Token.objects.create(
-            client=client_app(),
-            user=UserFactory(),
-            access_token="other-access-token",
-            refresh_token="other-refresh-token",
-        )
+        OAuth2TokenFactory(access="access-token")
+        OAuth2TokenFactory(access_token="other-access-token", refresh_token="other-refresh-token")
 
         migrate()
         migrate()
@@ -77,8 +53,8 @@ class HashOAuth2TokensMigrationTest(PytestOnlyAPITestCase):
             assert200(response)
 
     def test_client_secrets_in_clear_are_hashed_and_keep_authenticating(self):
-        client = client_app(secret=CLIENT_SECRET)
-        public_client = client_app()
+        client = OAuth2ClientFactory(secret=CLIENT_SECRET)
+        public_client = OAuth2ClientFactory(secret=None)
 
         migrate()
         migrate()
@@ -95,9 +71,7 @@ class HashOAuth2TokensMigrationTest(PytestOnlyAPITestCase):
     def test_every_token_is_hashed_across_batches(self):
         """The rewrite is batched: it must not stop at the first batch."""
         for index in range(3):
-            OAuth2Token.objects.create(
-                client=client_app(), user=UserFactory(), access_token=f"access-token-{index}"
-            )
+            OAuth2TokenFactory(access_token=f"access-token-{index}", refresh_token=None)
 
         # A fresh module per `get()`, so shrinking the batch stays local to this test.
         migration = migrations.get(MIGRATION)

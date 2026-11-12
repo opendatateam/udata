@@ -8,6 +8,7 @@ from flask_restx.reqparse import Argument, RequestParser
 from flask_storage.mongo import ImageField
 from mongoengine import PULL, EmbeddedDocument
 from mongoengine.fields import (
+    BooleanField,
     DateTimeField,
     DictField,
     EmbeddedDocumentField,
@@ -322,6 +323,24 @@ class FakeWithRename(Document):
     @field(description="Link to the API endpoint for this fake", rename="api_url")
     def uri(self) -> str:
         return "fake-with-rename/foobar/endpoint/"
+
+
+@generate_fields()
+class FakeWithVisibleIf(Document):
+    """A predicate on the document itself stands for "may the reader see it?"."""
+
+    shown = BooleanField(default=False)
+    secret = field(StringField(), visible_if=lambda o: o.shown)
+    renamed_secret = field(StringField(), rename="alias", visible_if=lambda o: o.shown)
+
+    meta = {"collection": "fake_with_visible_if_api_fields"}
+
+    computed_calls = 0
+
+    @field(visible_if=lambda o: o.shown)
+    def computed(self) -> str:
+        type(self).computed_calls += 1
+        return "computed"
 
 
 @generate_fields()
@@ -855,6 +874,41 @@ class RenameFieldTest(PytestOnlyDBTestCase):
         """`patch()` reads the mapping after finding the key in `__write_fields__`, so
         an entry for anything else could never be reached."""
         assert FakeWithRename.__api_key_to_attribute__ == {"name": "label"}
+
+
+class VisibleIfFieldTest(PytestOnlyDBTestCase):
+    def test_fields_are_read_when_visible(self, app) -> None:
+        obj = FakeWithVisibleIf(shown=True, secret="a secret", renamed_secret="another")
+        with app.test_request_context("/"):
+            data = marshal(obj, FakeWithVisibleIf.__read_fields__)
+        assert (data["secret"], data["alias"], data["computed"]) == (
+            "a secret",
+            "another",
+            "computed",
+        )
+
+    def test_fields_read_none_when_hidden(self, app) -> None:
+        """The keys stay, so the shape of the payload does not depend on the reader."""
+        obj = FakeWithVisibleIf(shown=False, secret="a secret", renamed_secret="another")
+        with app.test_request_context("/"):
+            data = marshal(obj, FakeWithVisibleIf.__read_fields__)
+        assert (data["secret"], data["alias"], data["computed"]) == (None, None, None)
+
+    def test_it_is_refused_with_full_object(self) -> None:
+        """The full object would be read past the predicate."""
+        with pytest.raises(ValueError, match="visible_if"):
+
+            @generate_fields()
+            class FakeWithHiddenFullObject(Document):
+                license = field(
+                    ReferenceField(License), full_object=True, visible_if=lambda o: False
+                )
+
+    def test_a_hidden_getter_is_not_called(self, app) -> None:
+        FakeWithVisibleIf.computed_calls = 0
+        with app.test_request_context("/"):
+            marshal(FakeWithVisibleIf(shown=False), FakeWithVisibleIf.__read_fields__)
+        assert FakeWithVisibleIf.computed_calls == 0
 
 
 class ListAttributeFieldTest(PytestOnlyDBTestCase):
