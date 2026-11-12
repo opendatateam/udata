@@ -146,16 +146,16 @@ class TabularClientTest(PytestOnlyTestCase):
         )
         with pytest.raises(TabularRequestRefused) as excinfo:
             self.make_client().get_data(RESOURCE_ID, "nope__exact=1")
-        assert excinfo.value.detail == "column nope does not exist"
+        assert excinfo.value.detail == "column ressource.nope does not exist"
 
     @pytest.mark.parametrize(
         "message,hidden",
         [
             (
                 'column "70f4c60b4f9828beb7922b1fe0dae8da.votants" must appear in the GROUP BY',
-                'column "votants" must appear in the GROUP BY',
+                'column "ressource.votants" must appear in the GROUP BY',
             ),
-            ('column "70f4c60b4f9828beb7922b1fe0dae8da"."a b" x', 'column "a b" x'),
+            ('column "70f4c60b4f9828beb7922b1fe0dae8da"."a b" x', 'column "ressource"."a b" x'),
             (
                 'relation "csvapi.70f4c60b4f9828beb7922b1fe0dae8da" is locked',
                 'relation "ressource" is locked',
@@ -187,7 +187,7 @@ class TabularClientTest(PytestOnlyTestCase):
         )
         with pytest.raises(TabularRequestRefused) as excinfo:
             self.make_client().get_data(RESOURCE_ID, "a__groupby")
-        assert excinfo.value.detail == ("column " + "x" * 400)[:MAX_DETAIL_LENGTH]
+        assert excinfo.value.detail == ("column ressource." + "x" * 400)[:MAX_DETAIL_LENGTH]
 
     def test_a_database_error_404_is_a_refusal(self, requests_mock):
         # PostgREST answers 404 to an aggregate PostgreSQL has no function for

@@ -58,11 +58,8 @@ NOT_INDEXED_DETAIL = re.compile(
 )
 # The resource's table is gone: the resource is not available, not the query wrong.
 MISSING_TABLE_CODES = {"42P01", "PGRST205"}
-# The resource's internal table name, possibly schema-qualified, as PostgreSQL quotes it.
-_TABLE_NAME = r"\b(?:csvapi\.)?[0-9a-f]{32}\b"
-# A column qualified by the table: `t.col`, `"t.col"` or `"t"."col"` keep only the column.
-TABLE_QUALIFIER = re.compile(rf'"{_TABLE_NAME}"\.|{_TABLE_NAME}\.(?=\S)')
-TABLE_NAME = re.compile(_TABLE_NAME)
+# The resource's internal table name, possibly schema-qualified, read as "ressource".
+TABLE_NAME = re.compile(r"\b(?:csvapi\.)?[0-9a-f]{32}\b")
 
 
 def _refusal_detail(response: requests.Response) -> str | None:
@@ -88,7 +85,7 @@ def _refusal_detail(response: requests.Response) -> str | None:
         return None
     if not isinstance(detail, str) or not detail:
         return None
-    return TABLE_NAME.sub("ressource", TABLE_QUALIFIER.sub("", detail))
+    return TABLE_NAME.sub("ressource", detail)
 
 
 def _unauthorized_detail(detail) -> str | None:
