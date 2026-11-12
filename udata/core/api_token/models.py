@@ -28,7 +28,7 @@ def parse_future_datetime(value):
     return dt
 
 
-def _hash_token(plaintext):
+def hash_token(plaintext):
     key = current_app.config["API_TOKEN_SECRET"].encode()
     return hmac.new(key, plaintext.encode(), hashlib.sha256).hexdigest()
 
@@ -96,7 +96,7 @@ class ApiToken(db.Document):
         prefix = current_app.config.get("API_TOKEN_PREFIX", "udata_")
         raw = secrets.token_urlsafe(TOKEN_BYTE_LENGTH)
         plaintext = f"{prefix}{raw}"
-        token_hash = _hash_token(plaintext)
+        token_hash = hash_token(plaintext)
         display_prefix = plaintext[: len(prefix) + PREFIX_DISPLAY_LENGTH]
         token = cls(
             token_hash=token_hash,
@@ -116,7 +116,7 @@ class ApiToken(db.Document):
         Returns (ApiToken, None) on success, or (None, error_reason) on failure.
         error_reason is one of: "invalid", "revoked", "expired".
         """
-        token_hash = _hash_token(plaintext_token)
+        token_hash = hash_token(plaintext_token)
         token = cls.objects(token_hash=token_hash).first()
         if token is None:
             return None, "invalid"

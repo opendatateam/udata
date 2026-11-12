@@ -9,6 +9,7 @@ from werkzeug.security import gen_salt
 from udata.api import api
 from udata.api.oauth2 import OAuth2Client
 from udata.commands import cli, exit_with_error, success
+from udata.core.api_token.models import hash_token
 from udata.models import User
 
 log = logging.getLogger(__name__)
@@ -94,7 +95,7 @@ def create_oauth_client(client_name, user_email, uri, grant_types, scope, respon
         scope=scope,
         response_types=response_types,
         redirect_uris=uri,
-        secret=client_secret,
+        secret=hash_token(client_secret) if client_secret else None,
     )
 
     click.echo(f"New OAuth client: {client.name}")
@@ -102,7 +103,7 @@ def create_oauth_client(client_name, user_email, uri, grant_types, scope, respon
     if public:
         click.echo("Client is public and has no secret.")
     else:
-        click.echo(f"Client's secret {client.secret}")
+        click.echo(f"Client's secret {client_secret}")
     click.echo(f"Client's grant_types {client.grant_types}")
     click.echo(f"Client's response_types {client.response_types}")
     click.echo(f"Client's URI {client.redirect_uris}")

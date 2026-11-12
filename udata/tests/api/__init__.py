@@ -1,3 +1,4 @@
+from base64 import b64encode
 from contextlib import contextmanager
 from urllib.parse import urlparse
 
@@ -5,10 +6,28 @@ import pytest
 from flask import json
 from flask_security.utils import login_user, logout_user, set_request_attr
 
-from udata.core.api_token.models import ApiToken
+from udata.api.oauth2 import OAuth2Token
+from udata.core.api_token.models import ApiToken, hash_token
 from udata.core.user.factories import UserFactory
 from udata.mongo import db
 from udata.tests import PytestOnlyTestCase, TestCase, helpers
+
+CLIENT_SECRET = "suchs3cr3t"
+
+
+def basic_header(client, secret=CLIENT_SECRET):
+    credentials = b64encode(f"{client.client_id}:{secret}".encode()).decode()
+    return {"Authorization": f"Basic {credentials}"}
+
+
+def create_oauth_token(client, user, access_token="access-token", refresh_token="refresh-token"):
+    """Store an OAuth2 token the way `save_token` does, hashed."""
+    return OAuth2Token.objects.create(
+        client=client,
+        user=user,
+        access_token=hash_token(access_token),
+        refresh_token=hash_token(refresh_token),
+    )
 
 
 @pytest.mark.usefixtures("instance_path")
