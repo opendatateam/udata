@@ -2215,7 +2215,11 @@ class FollowWhatOneWorksOnTest(APITestCase):
             secret="s3cr3t",
         )
         token = OAuth2Token.objects.create(
-            client=client, user=editor, access_token="access", refresh_token="refresh"
+            client=client,
+            user=editor,
+            access_token="access",
+            refresh_token="refresh",
+            expires_in=3600,
         )
         data = dataset.to_dict()
         data["description"] = "new description"
