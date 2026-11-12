@@ -58,7 +58,7 @@ class APITestCaseMixin:
         self._api_key = None
         # pytest-flask keeps one app context, hence one `g`, for the whole test: what the
         # token did must not be attributed to it once out of this block.
-        g.pop("api_token", None)
+        g.pop("api_credential", None)
 
     def login(self, user=None):
         """Login a user via session authentication."""
