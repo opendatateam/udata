@@ -11,6 +11,8 @@ from mongoengine import EmbeddedDocument
 from mongoengine.fields import (
     BooleanField,
     DateTimeField,
+    EmbeddedDocumentField,
+    EnumField,
     GenericEmbeddedDocumentField,
     IntField,
     ListField,
@@ -30,6 +32,7 @@ from udata.core.linkable import Linkable
 from udata.core.metrics.models import WithMetrics
 from udata.core.spam.models import SpamMixin
 from udata.core.storages import avatars, default_image_basename
+from udata.features.notifications.constants import MailCadence
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
@@ -75,33 +78,19 @@ def _visible_email(user):
     return f"***@{domain}"
 
 
-def _email_for_admin_or_self(user):
-    """Return the email only to a sysadmin or to the user themselves, `None` otherwise.
+def _admin_or_self(name: str):
+    """An `attribute` giving the field `name` only to a sysadmin or to the user
+    themselves, `None` otherwise."""
 
-    Stricter than `_visible_email`, which always yields at least a domain: the user API
-    (`/me`, `/users/`, `/users/<id>`) never hands a third party anything at all, whereas
-    `_visible_email` serves the org contexts where members are allowed to reach out.
-    """
-    if current_user_is_admin_or_self():
-        return user.email
-    return None
+    def visible(user):
+        return getattr(user, name) if current_user_is_admin_or_self() else None
+
+    return visible
 
 
 def _visible_login_date(user):
     if current_user_is_admin_or_self() or _is_org_private_context():
         return user.current_login_at
-    return None
-
-
-def _visible_password_rotation_demanded(user):
-    if current_user_is_admin_or_self():
-        return user.password_rotation_demanded
-    return None
-
-
-def _visible_password_rotation_performed(user):
-    if current_user_is_admin_or_self():
-        return user.password_rotation_performed
     return None
 
 
@@ -121,6 +110,27 @@ class UserSettings(EmbeddedDocument):
 
 
 @generate_fields()
+class ProConnectIdentity(EmbeddedDocument):
+    """The ProConnect identity this account signs in with."""
+
+    sub = field(
+        StringField(required=True),
+        description="The ProConnect identifier (`sub`) of the identity",
+    )
+    second_factor = field(
+        BooleanField(default=False),
+        description="Whether the last login with this identity presented a second factor "
+        "held by the agent (key, passkey, authenticator app)",
+    )
+    # A second factor at ProConnect only stands for the udata one once we know whose it
+    # is: seen with the udata 2FA, or as the first second factor of an account without one.
+    verified_at = field(
+        DateTimeField(),
+        description="When this identity was trusted as the account holder's, null until then",
+    )
+
+
+@generate_fields()
 class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     slug = field(
         SlugField(max_length=255, required=True, populate_from="fullname"),
@@ -130,7 +140,10 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     )
     email = field(
         StringField(max_length=255, required=True, unique=True),
-        attribute=_email_for_admin_or_self,
+        # Stricter than `_visible_email`, which always yields at least a domain: the user
+        # API (`/me`, `/users/`, `/users/<id>`) never hands a third party anything at all,
+        # whereas `_visible_email` serves the org contexts where members may reach out.
+        attribute=_admin_or_self("email"),
         # The address is an identity: `Organization.create_invitation` resolves one into
         # an existing account, and registration proves it (`SECURITY_CONFIRMABLE`). Only
         # the `/change-email` flow carries that proof over, by mailing a token to the new
@@ -190,13 +203,13 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         DateTimeField(),
         auditable=False,
         readonly=True,
-        attribute=_visible_password_rotation_demanded,
+        attribute=_admin_or_self("password_rotation_demanded"),
     )
     password_rotation_performed = field(
         DateTimeField(),
         auditable=False,
         readonly=True,
-        attribute=_visible_password_rotation_performed,
+        attribute=_admin_or_self("password_rotation_performed"),
     )
 
     # The 5 fields below are required for Flask-security when SECURITY_TRACKABLE is True.
@@ -219,6 +232,16 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     tf_primary_method = StringField()
     tf_totp_secret = StringField()
 
+    # Written by the ProConnect login (`udata.auth.proconnect`), cleared by `udata user
+    # unset-proconnect`.
+    proconnect = field(
+        EmbeddedDocumentField(ProConnectIdentity),
+        allow_null=True,
+        auditable=False,
+        readonly=True,
+        attribute=_admin_or_self("proconnect"),
+    )
+
     deleted = field(
         DateTimeField(),
         auditable=False,
@@ -232,6 +255,19 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     # Used to track notification for automatic inactive users deletion
     # when YEARS_OF_INACTIVITY_BEFORE_DELETION is set
     inactive_deletion_notified_at = DateTimeField()
+
+    # How often this user agrees to be mailed about what concerns them. What concerns
+    # them is decided by their `NotificationSetting` rules; this is only the rhythm.
+    mail_cadence = field(
+        EnumField(MailCadence, default=MailCadence.IMMEDIATE, required=True),
+        attribute=_admin_or_self("mail_cadence"),
+    )
+    # "Turn everything off": nothing reaches the user but what asks for an action. A
+    # field rather than a rule, so that no rule, however precise, can bring anything back.
+    notifications_paused = field(
+        BooleanField(default=False),
+        attribute=_admin_or_self("notifications_paused"),
+    )
 
     before_save = Signal()
     after_save = Signal()
@@ -250,6 +286,8 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
             },
             "-created_at",
             "slug",
+            # Every ProConnect login looks the trusted identity up.
+            {"fields": ["proconnect.sub"], "sparse": True},
         ],
         "ordering": ["-created_at"],
         "auto_create_index_on_save": True,
@@ -285,6 +323,51 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     def sysadmin(self):
         return self.has_role("admin")
 
+    @property
+    def two_factor_required_by_policy(self) -> bool:
+        """Whether the configuration requires a second factor from this account, set up or not."""
+        return current_app.config["SECURITY_TWO_FACTOR_REQUIRED"] or (
+            current_app.config["SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN"] and self.sysadmin
+        )
+
+    @property
+    def trusted_proconnect_sub(self) -> str | None:
+        """The ProConnect identity trusted as the account holder's, if any."""
+        identity = self.proconnect
+        return identity.sub if identity is not None and identity.verified_at else None
+
+    @property
+    def second_factor_at_proconnect_only(self) -> bool:
+        """Whether the account's only second factor is the one of its trusted ProConnect identity,
+        which a login must then present as a udata one would be."""
+        return self.trusted_proconnect_sub is not None and not self.tf_primary_method
+
+    @property
+    def signs_in_with_proconnect_only(self) -> bool:
+        """Whether the account has no way in but its trusted ProConnect identity: no password to
+        give it back, which a reset only takes reading the mailbox to do."""
+        return not self.password and self.second_factor_at_proconnect_only
+
+    @field(
+        description="Whether this session may drop the password and the udata 2FA of the account",
+        allow_null=True,
+    )
+    def can_switch_to_proconnect_only(self) -> bool:
+        # Circular import: the ProConnect login imports this model.
+        from udata.auth.proconnect import can_switch_to_proconnect_only
+
+        if not current_user_is_admin_or_self():
+            return None
+        return not self.signs_in_with_proconnect_only and can_switch_to_proconnect_only(self)
+
+    @field(description="Whether the account can sign in with a password", allow_null=True)
+    def has_password(self) -> bool:
+        return bool(self.password) if current_user_is_admin_or_self() else None
+
+    @field(description="Whether the account has set up the udata 2FA", allow_null=True)
+    def has_two_factor(self) -> bool:
+        return bool(self.tf_primary_method) if current_user_is_admin_or_self() else None
+
     def check_tf_required(
         self, tf_setup_methods: list[tuple[str, str]], tf_fresh: bool
     ) -> tuple[bool, list[tuple[str, str]]]:
@@ -300,11 +383,7 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         Overrides default implementation in Flask-Security to add configurable 2FA requirement for sysadmins.
         This is called AFTER the user has successfully authenticated.
         """
-        if (
-            current_app.config["SECURITY_TWO_FACTOR_REQUIRED"]
-            or len(tf_setup_methods) > 0
-            or (current_app.config["SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN"] and self.sysadmin)
-        ):
+        if self.two_factor_required_by_policy or len(tf_setup_methods) > 0:
             if current_app.config["SECURITY_TWO_FACTOR_ALWAYS_VALIDATE"] or not tf_fresh:
                 return True, tf_setup_methods
         return False, tf_setup_methods
@@ -318,9 +397,7 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         definitive answer in the authentication path.
         Overrides default implementation in Flask-Security to add configurable 2FA requirement for sysadmins.
         """
-        return super().check_tf_required_setup() or (
-            current_app.config["SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN"] and self.sysadmin
-        )
+        return self.two_factor_required_by_policy
 
     def self_web_url(self, **kwargs):
         return cdata_url(f"/users/{self._link_id(**kwargs)}", **kwargs)
@@ -457,11 +534,24 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         ApiToken.objects(user=self, revoked_at=None).update(
             set__revoked_at=datetime.now(timezone.utc)
         )
+        from udata.geopf.auth import revoke_token
+        from udata.geopf.models import GeopfToken
+
+        geopf_token = GeopfToken.objects(user=self).first()
+        if geopf_token:
+            revoke_token(geopf_token)
+            geopf_token.delete()
         for organization in self.organizations:
             organization.members = [
                 member for member in organization.members if member.user != self
             ]
             organization.save()
+        # A deleted account must not leave pending requests or invitations behind in organizations.
+        from udata.core.organization.models import Organization
+
+        Organization.objects(requests__user=self).update(
+            __raw__={"$pull": {"requests": {"user": self.id, "status": "pending"}}}
+        )
         if delete_comments:
             from udata.core.discussions.models import Discussion
 
@@ -539,7 +629,7 @@ datastore = MongoEngineUserDatastore(db, User, Role)
 #
 # `email` is declared here rather than reused from `__read_fields__` because the two
 # obey different rules: `_visible_email` grants org members a partial address, while the
-# user API hands third parties nothing (see `_email_for_admin_or_self`).
+# user API hands third parties nothing (see `User.email`).
 user_with_email_ref_fields = api.inherit(
     "UserReferenceWithEmail",
     User.__ref_fields__,

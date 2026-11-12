@@ -6,8 +6,10 @@ from flask import url_for
 from udata.core import storages
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
-from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.notifications import MembershipRequestNotificationDetails
+from udata.core.organization.factories import (
+    MembershipRequestNotificationFactory,
+    OrganizationFactory,
+)
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.constants import NotificationType
 from udata.features.notifications.models import Notification
@@ -184,16 +186,17 @@ class UserAPITest(APITestCase):
         self.assertEqual(len(response.json["data"]), 2)
 
     def test_user_api_full_text_search_email(self):
-        """It should find users based on last name"""
-        self.login(AdminFactory())
+        """It should find users based on email"""
+        # Names are searched too: a random one (Faker has "Jane") would match the query.
+        self.login(AdminFactory(first_name="Admin", last_name="Admin"))
 
-        UserFactory(email="john@example.org")
-        UserFactory(email="jane@example.org")
+        UserFactory(first_name="John", last_name="Doe", email="john@example.org")
+        jane = UserFactory(first_name="Ann", last_name="Doe", email="jane@example.org")
 
         response = self.get(url_for("api.users", q="jane"))
         self.assert200(response)
 
-        self.assertEqual(len(response.json["data"]), 1)
+        assert [user["id"] for user in response.json["data"]] == [str(jane.id)]
 
     def test_user_api_full_text_search_unicode(self):
         """It should find user with special characters"""
@@ -594,6 +597,56 @@ class UserAPITest(APITestCase):
         assert len(discussion.discussion) == 2
         assert discussion.discussion[1].content != "DELETED"
 
+    def test_delete_user_removes_pending_membership_requests(self):
+        user = AdminFactory()
+        self.login(user)
+        applicant = UserFactory()
+        pending_request = MembershipRequest(user=applicant, comment="please")
+        refused_request = MembershipRequest(
+            user=applicant, comment="old", status="refused", refusal_comment="no"
+        )
+        other_request = MembershipRequest(user=UserFactory(), comment="mine")
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="admin")],
+            requests=[pending_request, refused_request, other_request],
+        )
+        # An account can only have one pending entry per organization, so the
+        # invitation lives in another one.
+        inviting_organization = OrganizationFactory(
+            requests=[MembershipRequest(kind="invitation", user=applicant)]
+        )
+
+        response = self.delete(url_for("api.user", user=applicant))
+        self.assert204(response)
+
+        organization.reload()
+        assert [r.id for r in organization.requests] == [refused_request.id, other_request.id]
+        inviting_organization.reload()
+        assert inviting_organization.requests == []
+
+    def test_delete_user_removes_pending_membership_requests_in_deleted_organization(self):
+        """Ensure account deletion removes pending requests/invitations even when the org is deleted."""
+        user = AdminFactory()
+        self.login(user)
+        applicant = UserFactory()
+        pending_request = MembershipRequest(user=applicant, comment="please")
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="admin")],
+            requests=[pending_request],
+        )
+        inviting_organization = OrganizationFactory(
+            requests=[MembershipRequest(kind="invitation", user=applicant)],
+            deleted=datetime.now(UTC),
+        )
+
+        response = self.delete(url_for("api.user", user=applicant))
+        self.assert204(response)
+
+        organization.reload()
+        assert organization.requests == []
+        inviting_organization.reload()
+        assert inviting_organization.requests == []
+
     def test_delete_user_without_notify(self):
         user = AdminFactory()
         self.login(user)
@@ -879,14 +932,12 @@ class OrgInvitationsAPITest(APITestCase):
         organization = OrganizationFactory(
             members=[Member(user=admin, role="admin")], requests=[invitation]
         )
-        notification = Notification(
+        notification = MembershipRequestNotificationFactory(
             user=user,
-            type=NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
-            details=MembershipRequestNotificationDetails(
-                request_organization=organization, request_user=user
-            ),
+            request_organization=organization,
+            request_user=user,
+            invitation=True,
         )
-        notification.save()
 
         self.post(url_for("api.accept_org_invitation", id=invitation.id))
 
@@ -903,14 +954,12 @@ class OrgInvitationsAPITest(APITestCase):
         organization = OrganizationFactory(
             members=[Member(user=admin, role="admin")], requests=[invitation]
         )
-        notification = Notification(
+        notification = MembershipRequestNotificationFactory(
             user=user,
-            type=NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
-            details=MembershipRequestNotificationDetails(
-                request_organization=organization, request_user=user
-            ),
+            request_organization=organization,
+            request_user=user,
+            invitation=True,
         )
-        notification.save()
 
         self.post(url_for("api.refuse_org_invitation", id=invitation.id))
 

@@ -11,3 +11,6 @@ def init_app(app):
 
     # Load feature notifications
     import udata.features.transfer.notifications  # noqa
+
+    # Following what one works on
+    import udata.features.notifications.follow  # noqa

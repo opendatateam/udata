@@ -1,8 +1,9 @@
 from flask import url_for
 from flask_storage.mongo import ImageField
-from mongoengine import PULL, Q
+from mongoengine import DENY, PULL, Q
 from mongoengine.errors import ValidationError
 from mongoengine.fields import (
+    BooleanField,
     DateTimeField,
     EmbeddedDocumentListField,
     ListField,
@@ -15,9 +16,10 @@ from udata.api_fields import field, generate_fields
 from udata.auth import Permission
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.dataset.permissions import OwnablePermission
-from udata.core.edito_blocs.base import Bloc
+from udata.core.edito_blocs.base import Bloc, check_blocs_layout
 from udata.core.linkable import Linkable
 from udata.core.owned import Owned, OwnedQuerySet
+from udata.core.reuse.models import Reuse
 from udata.core.storages import default_image_basename, images
 from udata.core.topic.models import Topic, TopicElement
 from udata.i18n import lazy_gettext as _
@@ -28,11 +30,26 @@ from udata.mongo.slug_fields import SlugField
 from udata.mongo.url_field import URLField
 from udata.uris import cdata_url
 
-from .api_fields import post_permissions_fields
+from .api_fields import post_ancestor_fields, post_permissions_fields
 from .constants import BODY_TYPES, EXTERNAL_PAGE, IMAGE_SIZES, POST_KINDS
 from .permissions import PostReadPermission
 
 __all__ = ("Post",)
+
+
+def check_chosen_slug(slug, obj, is_update, **_kwargs):
+    """Runs on the slug already normalized by `SlugField.from_input`."""
+    # Left empty at creation, the slug is derived from the name
+    if slug is None and not is_update:
+        return
+    # Cleared on update, or with nothing left once normalized, it would be saved empty:
+    # `SlugField` is exempted from the `required` check.
+    if not slug:
+        raise FieldValidationError(_("The slug must contain letters or digits"), field="slug")
+    # Rejected rather than suffixed like a derived slug: the post would be published under
+    # a URL nobody asked for.
+    if Post.objects(slug=slug, id__ne=obj.id).count():
+        raise FieldValidationError(_("This slug is already used by another post"), field="slug")
 
 
 class PostQuerySet(OwnedQuerySet):
@@ -79,8 +96,9 @@ class Post(Datetimed, Linkable, Owned, Document[PostQuerySet]):
         show_as_ref=True,
     )
     slug = field(
-        SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
-        readonly=True,
+        # No `update`: a renamed post keeps its URL, which only changes when the slug is set
+        SlugField(max_length=255, required=True, populate_from="name", follow=True),
+        checks=[check_chosen_slug],
     )
     headline = field(
         StringField(),
@@ -93,6 +111,7 @@ class Post(Datetimed, Linkable, Owned, Document[PostQuerySet]):
     blocs = field(
         EmbeddedDocumentListField(Bloc),
         generic=True,
+        checks=[check_blocs_layout],
     )
     image_url = field(
         StringField(),
@@ -127,7 +146,7 @@ class Post(Datetimed, Linkable, Owned, Document[PostQuerySet]):
         description="The post datasets",
     )
     reuses = field(
-        ListField(ReferenceField("Reuse", reverse_delete_rule=PULL)),
+        ListField(ReferenceField(Reuse, reverse_delete_rule=PULL)),
         description="The post reuses",
     )
 
@@ -148,11 +167,26 @@ class Post(Datetimed, Linkable, Owned, Document[PostQuerySet]):
         description="Post kind (news, page or external_page). Only news and pages are shown on the main site.",
     )
 
+    sidemenu = field(
+        BooleanField(default=False),
+        description="Display a side menu linking to the headings of the post",
+    )
+
+    parent = field(
+        # DENY: otherwise sub-pages would keep a dangling reference and every read of them
+        # would fail. The API checks it first, this covers the deletions made elsewhere.
+        ReferenceField("self", reverse_delete_rule=DENY),
+        nested_fields=post_ancestor_fields,
+        allow_null=True,
+        description="The parent page, only for pages",
+    )
+
     meta = {
         "ordering": ["-created_at"],
         "indexes": [
             "-created_at",
             "-published",
+            "parent",
             {
                 "fields": ["$name", "$headline", "$content"],
                 "default_language": "french",
@@ -189,6 +223,29 @@ class Post(Datetimed, Linkable, Owned, Document[PostQuerySet]):
         """Remove the topic elements pointing to a deleted post"""
         TopicElement.objects(element=document).delete()
 
+    @property
+    @field(
+        nested_fields=post_ancestor_fields,
+        as_list=True,
+        description="The ancestor pages, from the root page to the parent",
+    )
+    def ancestors(self) -> list["Post"]:
+        ancestors = []
+        seen = set()
+        ancestor = self.parent
+        # Stops on an id already met: `clean()` rejects cycles, but two concurrent updates
+        # (A under B, B under A) each pass it against the other's previous parent. Without
+        # this, every read of these posts would loop forever.
+        while ancestor and ancestor.id not in seen:
+            seen.add(ancestor.id)
+            ancestors.insert(0, ancestor)
+            ancestor = ancestor.parent
+        return ancestors
+
+    @property
+    def path(self) -> str:
+        return "/".join(post.slug for post in [*self.ancestors, self])
+
     def clean(self):
         super().clean()
         self._check_kind()
@@ -201,6 +258,30 @@ class Post(Datetimed, Linkable, Owned, Document[PostQuerySet]):
             self.body_type = "blocs"
         if self.body_type != "blocs" and not self.content:
             raise ValidationError("content is required when body_type is 'markdown' or 'html'")
+
+        if self.parent:
+            if self.kind != "page" or self.parent.kind != "page":
+                raise ValidationError(
+                    "Only a page can have a parent, and its parent must be a page",
+                    field_name="parent",
+                )
+            if any(ancestor.id == self.id for ancestor in self.ancestors):
+                raise ValidationError("A page cannot be its own ancestor", field_name="parent")
+            # A published page exposes its ancestors (name, slug in its path): a draft
+            # parent would leak through it.
+            if self.published and not self.parent.published:
+                raise ValidationError(
+                    "A published page cannot be under an unpublished page", field_name="parent"
+                )
+
+        if self.id:
+            children = Post.objects(parent=self.id)
+            if self.kind != "page" and children.count():
+                raise ValidationError("A page with sub-pages must stay a page", field_name="kind")
+            if not self.published and children.visible().count():
+                raise ValidationError(
+                    "A page with published sub-pages cannot be unpublished", field_name="published"
+                )
 
     def _check_kind(self):
         if self._created or "kind" not in self._get_changed_fields():
@@ -219,6 +300,8 @@ class Post(Datetimed, Linkable, Owned, Document[PostQuerySet]):
         if self.is_external_page:
             # Rendered by external sites: `url_for` falls back to the API url
             return None
+        if self.kind == "page":
+            return cdata_url(f"/pages/{self.path}", **kwargs)
         return cdata_url(f"/posts/{self._link_id(**kwargs)}", **kwargs)
 
     def self_api_url(self, **kwargs):

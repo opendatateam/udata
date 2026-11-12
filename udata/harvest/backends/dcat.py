@@ -5,7 +5,7 @@ from datetime import date
 from typing import ClassVar, Generator
 
 from flask import current_app
-from rdflib import Graph, Node
+from rdflib import Graph, Literal, Node, URIRef
 from rdflib.namespace import RDF
 from saxonche import PySaxonProcessor, PyXdmNode
 from typing_extensions import override
@@ -13,8 +13,15 @@ from werkzeug.utils import cached_property
 
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.rdf import dataservice_from_rdf
+from udata.core.dataset.constants import DCAT_EXTRAS_KEY
 from udata.core.dataset.models import Dataset
-from udata.core.dataset.rdf import dataset_from_rdf
+from udata.core.dataset.rdf import (
+    dataset_from_rdf,
+    get_dcat_extra,
+    set_dcat_extra,
+    unset_dcat_extra,
+)
+from udata.harvest.exceptions import HarvestValidationError
 from udata.harvest.models import HarvestError, HarvestItem
 from udata.i18n import lazy_gettext as _
 from udata.rdf import (
@@ -61,12 +68,33 @@ URIS_TO_REPLACE = {
     "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld": "https://gist.githubusercontent.com/maudetes/f019586185d6f59dcfb07f97148a1973/raw/585c3c7bf602b5a4e635b137257d0619792e2c1f/gistfile1.txt"  # noqa
 }
 
+# Custom record id format `urn:iso19139:parent:<parent record id>` (SEMIC XSLT datagouv patch)
+ISO19139_PARENT_PREFIX = "urn:iso19139:parent:"
+# Custom `extras["dcat"]` key storing parent `dataset.id`
+DCAT_EXTRAS_PARENT_KEY = "parent"
+
 
 def extract_graph(source, target, node, specs):
     for p, o in source.predicate_objects(node):
         target.add((node, p, o))
         if p in specs:
             extract_graph(source, target, o, specs[p])
+
+
+def custom_iso19139_parent_record_id_from_rdf(graph: Graph, node: Node) -> str | None:
+    """Return the first parent record identifier, if any.
+
+    Currently only supports the custom `urn:iso19139:parent:...` pattern implemented ahead of
+    specification in the datagouv ISO-to-DCAT XSLT.
+    """
+    for obj in graph.objects(node, DCAT.inSeries):
+        if isinstance(obj, URIRef) or isinstance(obj, Literal):
+            # URIRef: <dcat:inSeries rdf:resource="...">
+            # Literal: <dcat:inSeries>...</dcat:inSeries> (lenient)
+            value = str(obj).strip()
+            if value and value.startswith(ISO19139_PARENT_PREFIX):
+                return value.removeprefix(ISO19139_PARENT_PREFIX)
+    return None
 
 
 class DcatBackend(BaseBackend):
@@ -94,6 +122,13 @@ class DcatBackend(BaseBackend):
                 self.process_one_dataservices_page(page_graph, page_number)
         finally:
             try:
+                self.resolve_parents()
+            except Exception as e:
+                log.exception(f"Failed while resolving parents: {safe_unicode(e)}")
+                self.job.errors.append(
+                    HarvestError(message=safe_unicode(e), details=traceback.format_exc())
+                )
+            try:
                 self.store_graphs()
             except Exception as e:
                 log.exception(f"Failed to store harvest graphs: {safe_unicode(e)}")
@@ -111,12 +146,10 @@ class DcatBackend(BaseBackend):
             response.raise_for_status()
             mime_type = response.headers.get("Content-Type", "").split(";", 1)[0]
             if not mime_type:
-                msg = "Unable to detect format from extension or mime type"
-                raise ValueError(msg)
+                raise HarvestValidationError("Unable to detect format from extension or mime type")
             fmt = guess_format(mime_type)
             if not fmt:
-                msg = 'Unsupported mime type "{0}"'.format(mime_type)
-                raise ValueError(msg)
+                raise HarvestValidationError(f'Unsupported mime type "{mime_type}"')
         return fmt
 
     def walk_paginated_graph(self, url: str) -> Generator[tuple[Graph, int], None, None]:
@@ -213,6 +246,11 @@ class DcatBackend(BaseBackend):
             graph, dataset, node=node, remote_url_prefix=remote_url_prefix, dryrun=self.dryrun
         )
 
+        if (
+            parent_record_id := custom_iso19139_parent_record_id_from_rdf(graph, node)
+        ) and parent_record_id != dataset.harvest.record_id:
+            harvest_item.kwargs["parent_record_id"] = parent_record_id
+
         return dataset
 
     def process_dataservice(
@@ -237,9 +275,70 @@ class DcatBackend(BaseBackend):
 
         return dataservice
 
+    def resolve_parents(self) -> None:
+        """Resolve children to their parent dataset once all items have been processed.
+
+        Only parents from the same harvest source are resolved.
+        When resolved, the parent's `dataset.id` is stored in `extras["dcat"]["parent"]`.
+        Resolution failures record errors but keep `harvest_item.status` as "done" by design.
+        """
+        log.debug("Resolving parents...")
+        for harvest_item in self.job.items:
+            if harvest_item.status != "done":
+                continue
+
+            dataset = harvest_item.dataset
+            if dataset is None:
+                continue
+
+            parent_record_id = harvest_item.kwargs.get("parent_record_id")
+            existing_parent_id = get_dcat_extra(dataset, DCAT_EXTRAS_PARENT_KEY)
+            if not parent_record_id and not existing_parent_id:
+                continue
+
+            try:
+                new_parent_id = None
+                if parent_record_id:
+                    parent = (
+                        Dataset.objects(
+                            harvest__record_id=parent_record_id,
+                            harvest__source_id=str(self.source.id),
+                        )
+                        .visible()
+                        .first()
+                    )
+                    if parent:
+                        new_parent_id = str(parent.id)
+                    else:
+                        msg = f'Failed resolving parent "{parent_record_id}" for item "{harvest_item.remote_id}"'
+                        log.warning(msg)
+                        harvest_item.errors.append(HarvestError(message=msg))
+
+                if new_parent_id == existing_parent_id:
+                    continue
+
+                if new_parent_id:
+                    set_dcat_extra(dataset, DCAT_EXTRAS_PARENT_KEY, new_parent_id)
+                else:
+                    unset_dcat_extra(dataset, DCAT_EXTRAS_PARENT_KEY)
+                if not self.dryrun:
+                    # Targeted update to avoid triggering another full `save()`:
+                    # sync the `extras["dcat"]` sub-dict, or drop it when empty.
+                    if dcat := dataset.extras.get(DCAT_EXTRAS_KEY):
+                        Dataset.objects(id=dataset.id).update_one(set__extras__dcat=dcat)
+                    else:
+                        Dataset.objects(id=dataset.id).update_one(unset__extras__dcat=1)
+            except Exception as e:
+                msg = f'Failed updating parent "{parent_record_id}" for item "{harvest_item.remote_id}": {safe_unicode(e)}'
+                log.exception(msg)
+                harvest_item.errors.append(
+                    HarvestError(message=msg, details=traceback.format_exc())
+                )
+
     def store_graphs(self):
         # The official MongoDB document size in 16MB. The default value here is 15MB to account
         # for other fields in the document (and for difference between * 1024 vs * 1000).
+        log.debug("Storing graphs...")
         max_harvest_graph_size_in_mongo = current_app.config.get(
             "HARVEST_MAX_CATALOG_SIZE_IN_MONGO"
         )

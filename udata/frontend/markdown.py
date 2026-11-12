@@ -40,6 +40,9 @@ def nofollow_callback(attrs, new=False):
     if (None, "href") not in attrs:
         return attrs
     parsed_url = urlparse(attrs[(None, "href")])
+    # mailto: links have no host to rewrite
+    if parsed_url.scheme == "mailto":
+        return attrs
     if parsed_url.netloc in ("", current_app.config["SERVER_NAME"]):
         path = parsed_url.path
         attrs[(None, "href")] = "{scheme}://{netloc}{path}{query}".format(

@@ -178,6 +178,7 @@ MODULES_WITH_COMMANDS = [
     "core.organization",
     "core.spatial",
     "core.user",
+    "geopf",
     "harvest",
     "search",
 ]

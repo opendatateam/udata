@@ -10,7 +10,6 @@ from mongoengine.fields import GenericReferenceField, ReferenceField
 from mongoengine.fields import IntField as MongoIntField
 from mongoengine.fields import StringField as MongoStringField
 from mongoengine.fields import UUIDField as MongoUUIDField
-from speaklater import is_lazy_string
 from wtforms import Field as WTField
 from wtforms import Form as WTForm
 from wtforms import SubmitField, fields, validators  # noqa
@@ -296,51 +295,11 @@ def nullable_text(value):
 
 class SelectField(FieldHelper, fields.SelectField):
     def __init__(self, label=None, validators=None, coerce=nullable_text, **kwargs):
-        # self._choices = kwargs.pop('choices')
         super(SelectField, self).__init__(label, validators, coerce, **kwargs)
-
-    @staticmethod
-    def localize_label(label):
-        if not label:
-            return ""
-        if is_lazy_string(label):
-            return label
-        return _(label)
-
-    def iter_choices(self):
-        localized_choices = [
-            (value, self.localize_label(label), selected, render_kw)
-            for value, label, selected, render_kw in super(SelectField, self).iter_choices()
-        ]
-        for value, label, selected, render_kw in sorted(localized_choices, key=lambda c: c[1]):
-            yield (value, label, selected, render_kw)
-
-    @property
-    def choices(self):
-        if callable(self._choices):
-            return self._choices()
-        else:
-            return self._choices
-
-    @choices.setter
-    def choices(self, value):
-        self._choices = value
 
 
 class ModelSelectField(FieldHelper, BaseModelSelectField):
     pass
-
-
-class SelectMultipleField(FieldHelper, fields.SelectMultipleField):
-    widget = widgets.SelectPicker(multiple=True)
-
-    def iter_choices(self):
-        localized_choices = [
-            (value, self._(label) if label else "", selected, render_kw)
-            for value, label, selected, render_kw in super(SelectMultipleField, self).iter_choices()
-        ]
-        for value, label, selected, render_kw in sorted(localized_choices, key=lambda c: c[1]):
-            yield (value, label, selected, render_kw)
 
 
 class TagField(Field):
@@ -704,11 +663,12 @@ class CurrentUserField(ModelFieldMixin, Field):
         return super(CurrentUserField, self).process(formdata, data, **kwargs)
 
     def pre_validate(self, form):
+        # An unset previous owner is a value too: an organization object has none, and setting
+        # one would let `PublishAsField` move the object out of its organization.
         if (
             form.instance
-            and self.name in form.instance
-            and getattr(form.instance, self.name).id != self.data.id
             and not admin_permission
+            and getattr(form.instance, self.name) != self.data
         ):
             raise validators.ValidationError(
                 _("Cannot change owner after creation. Please use transfer feature.")
@@ -735,12 +695,14 @@ class PublishAsField(ModelFieldMixin, Field):
         return len(current_user.organizations) <= 0
 
     def pre_validate(self, form):
-        # Some forms (like DiscussionCommentForm) are not model forms
+        # Some forms (like DiscussionCommentForm) are not model forms.
+        # Unlike the owner, an unset organization stays settable: moving one's own object to an
+        # organization one can publish for is allowed, the permission check below guarding it.
         if (
             isinstance(form, ModelForm)
             and form.instance
             and self.name in form.instance
-            and getattr(form.instance, self.name).id != self.data.id
+            and getattr(form.instance, self.name) != self.data
             and not admin_permission
         ):
             raise validators.ValidationError(

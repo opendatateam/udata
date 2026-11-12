@@ -215,6 +215,7 @@ def register_extensions(app):
         tasks,
     )
     from udata.auth import proconnect
+    from udata.geopf import auth as geopf_auth
 
     cors.init_app(app)
     tasks.init_app(app)
@@ -228,6 +229,7 @@ def register_extensions(app):
     search.init_app(app)
     sentry.init_app(app)
     proconnect.init_app(app)
+    geopf_auth.init_app(app)
 
     app.after_request(return_404_html_if_requested)
     app.register_error_handler(NotFound, page_not_found)

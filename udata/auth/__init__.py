@@ -1,7 +1,10 @@
 import logging
 import typing as t
+from functools import wraps
 
-from flask import render_template
+from flask import current_app, render_template
+from flask_mail import Message
+from flask_principal import Identity, identity_changed
 from flask_principal import Permission as BasePermission
 from flask_principal import PermissionDenied as PermissionDenied
 from flask_principal import RoleNeed as RoleNeed
@@ -12,6 +15,9 @@ from flask_security import current_user as current_user
 from flask_security import login_required as login_required
 from flask_security import login_user as login_user
 from flask_security import mail_util
+from flask_security.utils import check_and_update_authn_fresh
+
+from udata.mail import mail_sent
 
 from . import mails
 
@@ -35,6 +41,43 @@ class Permission(BasePermission):
 admin_permission = Permission()
 
 
+def authenticate_request(user) -> bool:
+    """Authenticate `user` for this request only.
+
+    An API key or an OAuth2 token stands for its holder on the request it comes with. Unlike
+    `login_user`, nothing goes in the session: its cookie would let whoever sent the
+    credential in without it, after its revocation and fresh for the sensitive operations.
+    Nor is it a login: `current_login_at` stays the date of the last one, the token records
+    its own use.
+
+    Flask-Security has no public API for this: these two calls are the ones its own basic auth
+    makes (`flask_security.decorators._check_http_auth`).
+    """
+    if not user.active:
+        return False
+    current_app.extensions["security"].login_manager._update_request_context_with_user(user)
+    identity_changed.send(current_app._get_current_object(), identity=Identity(user.fs_uniquifier))
+    return True
+
+
+def fresh_session_required(func):
+    """Answer with flask-security's reauthentication request unless the user authenticated
+    recently: the user must already be authenticated (`login_required` / `api.secure` first),
+    this only checks how long ago.
+
+    A request authenticated by an API key is never fresh: a key can't stand for a login."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        within = current_app.config["SECURITY_FRESHNESS"]
+        grace = current_app.config["SECURITY_FRESHNESS_GRACE_PERIOD"]
+        if not check_and_update_authn_fresh(within, grace):
+            return current_app.extensions["security"]._reauthn_handler(within, grace)
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 class NoopMailUtil(mail_util.MailUtil):
     def send_mail(
         self,
@@ -49,8 +92,8 @@ class NoopMailUtil(mail_util.MailUtil):
         log.debug(f"Sending mail {subject} to {recipient}")
         log.debug(body)
         log.debug(html)
-
-        return None
+        # As `udata.mail.send_mail` does when sending is disabled :DisableMail
+        mail_sent.send(Message(subject=subject, body=body, html=html, recipients=[recipient]))
 
 
 def init_app(app):
@@ -62,10 +105,13 @@ def init_app(app):
             raise ConfigError(f"{key} must be set to a unique, random value.")
 
     from .forms import (
+        ExtendedChangePasswordForm,
         ExtendedForgotPasswordForm,
         ExtendedLoginForm,
         ExtendedRegisterForm,
         ExtendedResetPasswordForm,
+        ExtendedTwoFactorSetupForm,
+        ExtendedVerifyForm,
     )
     from .password_validation import UdataPasswordUtil
     from .views import create_security_blueprint
@@ -96,6 +142,9 @@ def init_app(app):
         register_form=ExtendedRegisterForm,
         reset_password_form=ExtendedResetPasswordForm,
         forgot_password_form=ExtendedForgotPasswordForm,
+        verify_form=ExtendedVerifyForm,
+        two_factor_setup_form=ExtendedTwoFactorSetupForm,
+        change_password_form=ExtendedChangePasswordForm,
         password_util_cls=UdataPasswordUtil,
         mail_util_cls=mail_util_cls,
     )

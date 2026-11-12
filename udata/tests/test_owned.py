@@ -1,4 +1,4 @@
-from mongoengine import post_save
+from mongoengine import ValidationError, post_save
 from mongoengine.fields import BooleanField, ReferenceField, StringField
 
 import udata.core.owned as owned
@@ -10,101 +10,6 @@ from udata.core.user.models import User
 from udata.models import Member
 from udata.mongo.document import UDataDocument as Document
 from udata.tests.api import APITestCase, DBTestCase
-
-
-class GetResponsibleUsersTest(DBTestCase):
-    """Tests for the get_responsible_users helper function."""
-
-    def test_returns_owner_only(self):
-        """Should return only the owner when object has no organization."""
-        owner = UserFactory()
-        owned_obj = Owned.objects.create(owner=owner)
-
-        recipients = owned.get_responsible_users(owned_obj)
-
-        assert len(recipients) == 1
-        assert recipients[0] == owner
-
-    def test_returns_org_admins_only(self):
-        """Should return org admins when object has no owner."""
-        admin1 = UserFactory()
-        admin2 = UserFactory()
-        org = OrganizationFactory(
-            members=[
-                Member(user=admin1, role="admin"),
-                Member(user=admin2, role="admin"),
-            ]
-        )
-        owned_obj = Owned.objects.create(organization=org)
-
-        recipients = owned.get_responsible_users(owned_obj)
-
-        assert len(recipients) == 2
-        assert admin1 in recipients
-        assert admin2 in recipients
-
-    def test_returns_owner_and_org_admins(self):
-        """Should return both owner and org admins."""
-        owner = UserFactory()
-        admin1 = UserFactory()
-        admin2 = UserFactory()
-        org = OrganizationFactory(
-            members=[
-                Member(user=admin1, role="admin"),
-                Member(user=admin2, role="admin"),
-            ]
-        )
-        owned_obj = Owned.objects.create(owner=owner, organization=org)
-
-        recipients = owned.get_responsible_users(owned_obj)
-
-        assert len(recipients) == 3
-        assert owner in recipients
-        assert admin1 in recipients
-        assert admin2 in recipients
-
-    def test_filters_by_role(self):
-        """Should only return members with the specified role."""
-        owner = UserFactory()
-        admin = UserFactory()
-        editor = UserFactory()
-        org = OrganizationFactory(
-            members=[
-                Member(user=admin, role="admin"),
-                Member(user=editor, role="editor"),
-            ]
-        )
-        owned_obj = Owned.objects.create(owner=owner, organization=org)
-
-        # Default role is "admin"
-        recipients = owned.get_responsible_users(owned_obj)
-        assert len(recipients) == 2
-        assert owner in recipients
-        assert admin in recipients
-        assert editor not in recipients
-
-        # With editor role
-        recipients = owned.get_responsible_users(owned_obj, role="editor")
-        assert len(recipients) == 2
-        assert owner in recipients
-        assert editor in recipients
-        assert admin not in recipients
-
-    def test_returns_empty_list_when_no_owner_and_no_org(self):
-        """Should return empty list when object has no owner and no organization."""
-        owned_obj = Owned.objects.create()
-
-        recipients = owned.get_responsible_users(owned_obj)
-
-        assert len(recipients) == 0
-
-    def test_handles_none_values(self):
-        """Should handle None values gracefully."""
-        owned_obj = Owned.objects.create(owner=None, organization=None)
-
-        recipients = owned.get_responsible_users(owned_obj)
-
-        assert len(recipients) == 0
 
 
 class CustomQuerySet(owned.OwnedQuerySet):
@@ -145,6 +50,12 @@ class TestOwned(DBTestCase):
 
         self.assertIsInstance(Owned.organization, ReferenceField)
         self.assertEqual(Owned.organization.document_type_obj, Organization)
+
+    def test_cannot_be_created_with_both_an_owner_and_an_organization(self):
+        with self.assertRaises(ValidationError):
+            Owned.objects.create(owner=UserFactory(), organization=OrganizationFactory())
+
+        self.assertEqual(Owned.objects.count(), 0)
 
     def test_owner_changed_from_user_to_user(self):
         first_owner = UserFactory()
@@ -218,6 +129,41 @@ class TestOwned(DBTestCase):
 
         self.assertTrue(getattr(handler, "called", False))
 
+    def test_owner_changed_with_both_fields_set_at_once(self):
+        # As forms do: they set `owner` and `organization` together, one of them to None.
+        user = UserFactory()
+        org = OrganizationFactory()
+        owned = Owned.objects.create(owner=user)
+
+        def handler(document, previous):
+            self.assertEqual(document.organization, org)
+            self.assertEqual(previous, user)
+            handler.called = True
+
+        with Owned.on_owner_change.connected_to(handler):
+            owned.owner = None
+            owned.organization = org
+            owned.save()
+
+        self.assertTrue(getattr(handler, "called", False))
+
+    def test_owner_changed_from_org_to_user_with_both_fields_set_at_once(self):
+        user = UserFactory()
+        org = OrganizationFactory()
+        owned = Owned.objects.create(organization=org)
+
+        def handler(document, previous):
+            self.assertEqual(document.owner, user)
+            self.assertEqual(previous, org)
+            handler.called = True
+
+        with Owned.on_owner_change.connected_to(handler):
+            owned.organization = None
+            owned.owner = user
+            owned.save()
+
+        self.assertTrue(getattr(handler, "called", False))
+
     def test_owner_changed_from_org_to_user_with_owned_postsave_signal(self):
         # Test with an additionnal post save signal that will retriger save signals
         user = UserFactory()
@@ -231,6 +177,79 @@ class TestOwned(DBTestCase):
 
         assert owned.owner == user
         assert owned.organization is None
+
+    def test_owner_change_signal_keeps_previous_owner_through_a_nested_save(self):
+        # The nested save, as `Reuse.count_datasets()` does from `post_save`, finds the new
+        # owner already in base: it must not report it as the previous one.
+        user = UserFactory()
+        org = OrganizationFactory()
+        owned = OwnedPostSave.objects.create(organization=org)
+        received = []
+
+        def handler(document, previous):
+            received.append(previous)
+
+        with (
+            Owned.on_owner_change.connected_to(handler),
+            post_save.connected_to(OwnedPostSave.post_save, sender=OwnedPostSave),
+        ):
+            owned.owner = user
+            owned.save()
+
+        assert received == [org]
+
+    def test_previous_owner_survives_a_nested_save_between_two_orgs(self):
+        first_org = OrganizationFactory()
+        second_org = OrganizationFactory()
+        owned = OwnedPostSave.objects.create(organization=first_org)
+        received = []
+
+        def handler(document, previous):
+            received.append(previous)
+
+        with (
+            Owned.on_owner_change.connected_to(handler),
+            post_save.connected_to(OwnedPostSave.post_save, sender=OwnedPostSave),
+        ):
+            owned.organization = second_org
+            owned.save()
+
+        assert received == [first_org]
+
+    def test_previous_owner_survives_a_nested_save_between_two_users(self):
+        first_user = UserFactory()
+        second_user = UserFactory()
+        owned = OwnedPostSave.objects.create(owner=first_user)
+        received = []
+
+        def handler(document, previous):
+            received.append(previous)
+
+        with (
+            Owned.on_owner_change.connected_to(handler),
+            post_save.connected_to(OwnedPostSave.post_save, sender=OwnedPostSave),
+        ):
+            owned.owner = second_user
+            owned.save()
+
+        assert received == [first_user]
+
+    def test_owner_change_signal_is_not_sent_again_by_a_later_save(self):
+        user = UserFactory()
+        org = OrganizationFactory()
+        owned = Owned.objects.create(owner=user)
+        received = []
+
+        def handler(document, previous):
+            received.append(previous)
+
+        with Owned.on_owner_change.connected_to(handler):
+            owned.organization = org
+            owned.save()
+            owned.name = "New name"
+            owned.save()
+
+        assert received == [user]
 
 
 class OwnedQuerysetTest(DBTestCase):

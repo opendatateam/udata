@@ -15,10 +15,15 @@ from udata.core.discussions.factories import DiscussionFactory
 from udata.core.edito_blocs.models import (
     AccordionItemBloc,
     AccordionListBloc,
-    DatasetsListBloc,
+    DatasetBloc,
     MarkdownBloc,
+    SectionBloc,
+    TitleBloc,
 )
-from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.factories import (
+    MembershipRequestNotificationFactory,
+    OrganizationFactory,
+)
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.features.notifications.constants import NotificationType
@@ -534,17 +539,231 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         assert Organization.objects[0].deleted is None
 
 
+class OrganizationBannerAPITest(PytestOnlyAPITestCase):
+    def upload_banner(self, org):
+        return self.post(
+            url_for("api.organization_banner", org=org),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+
+    def test_organization_banner_upload(self):
+        """An admin should upload a banner image"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        response = self.put(url_for("api.organization", org=org), {"banner_image_position": 0})
+        assert200(response)
+
+        response = self.upload_banner(org)
+        assert200(response)
+        assert response.json["success"]
+
+        org.reload()
+        assert org.banner_image
+        assert org.banner_image.filename in storages.images
+        assert org.banner_image.original in storages.images
+        # The vertical crop belonged to the previous image
+        assert org.banner_image_position == 50
+
+    def test_organization_banner_reupload_removes_previous_files(self):
+        """Re-uploading a banner should delete the files it replaces"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        self.upload_banner(org)
+        org.reload()
+        previous = {org.banner_image.filename, org.banner_image.original}
+
+        self.upload_banner(org)
+        org.reload()
+        current = {org.banner_image.filename, org.banner_image.original}
+
+        assert not previous & current, "the re-upload should store new files"
+        assert not any(filename in storages.images for filename in previous), (
+            "the replaced files should be removed from storage"
+        )
+        assert all(filename in storages.images for filename in current)
+
+    def test_organization_banner_upload_forbidden_for_non_member(self):
+        """It should forbid a non-member from uploading a banner"""
+        self.login()
+        org = OrganizationFactory()
+        response = self.upload_banner(org)
+        assert403(response)
+
+    def test_organization_banner_upload_forbidden_for_editor(self):
+        """An editor should not upload a banner: only admins can"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="editor")])
+        response = self.upload_banner(org)
+        assert403(response)
+
+    def test_organization_banner_upload_rejects_non_image(self):
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        response = self.post(
+            url_for("api.organization_banner", org=org),
+            {"file": (BytesIO(b"not an image"), "payload.txt")},
+            json=False,
+        )
+        assert400(response)
+
+    def test_organization_banner_upload_rejects_oversize(self):
+        """A banner above BANNER_MAX_SIZE should be refused before it is stored"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        oversized = BytesIO(b"\x00" * (org_constants.BANNER_MAX_SIZE + 1))
+        response = self.post(
+            url_for("api.organization_banner", org=org),
+            {"file": (oversized, "big.png")},
+            json=False,
+        )
+        assert_status(response, 413)
+
+    def test_organization_banner_delete(self):
+        """Deleting the banner image clears the field and removes the stored files"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        self.upload_banner(org)
+        org.reload()
+        assert org.banner_image
+        filenames = {org.banner_image.filename, org.banner_image.original}
+        assert all(filename in storages.images for filename in filenames)
+        response = self.put(url_for("api.organization", org=org), {"banner_image_position": 0})
+        assert200(response)
+
+        response = self.delete(url_for("api.organization_banner", org=org))
+        assert_status(response, 204)
+
+        org.reload()
+        assert not org.banner_image
+        # The vertical crop belonged to the deleted image
+        assert org.banner_image_position == 50
+        assert not any(filename in storages.images for filename in filenames), (
+            "the files should be removed from storage"
+        )
+
+    def test_organization_banner_delete_without_banner(self):
+        """Deleting when no banner is set is a no-op, not an error"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        response = self.delete(url_for("api.organization_banner", org=org))
+        assert_status(response, 204)
+        org.reload()
+        assert not org.banner_image
+
+    def test_organization_banner_delete_forbidden_for_non_member(self):
+        self.login()
+        org = OrganizationFactory()
+        response = self.delete(url_for("api.organization_banner", org=org))
+        assert403(response)
+
+    def test_organization_banner_delete_forbidden_for_editor(self):
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="editor")])
+        response = self.delete(url_for("api.organization_banner", org=org))
+        assert403(response)
+
+    def test_organization_api_update_banner_color_and_position(self):
+        """banner_color and banner_image_position are writable via PUT"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        response = self.put(
+            url_for("api.organization", org=org),
+            {"banner_color": "#000091", "banner_image_position": 0},
+        )
+        assert200(response)
+        org.reload()
+        assert org.banner_color == "#000091"
+        assert org.banner_image_position == 0
+
+    def test_organization_api_update_banner_position_out_of_range(self):
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        response = self.put(url_for("api.organization", org=org), {"banner_image_position": 101})
+        assert400(response)
+
+    def test_organization_api_update_banner_color_null_clears(self):
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")], banner_color="#000091")
+        response = self.put(url_for("api.organization", org=org), {"banner_color": None})
+        assert200(response)
+        org.reload()
+        assert org.banner_color is None
+
+    def test_organization_api_update_banner_color_invalid_format(self):
+        """Any API client can write this field: the format is validated"""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        response = self.put(url_for("api.organization", org=org), {"banner_color": "white"})
+        assert400(response)
+        org.reload()
+        assert org.banner_color is None
+
+    def test_organization_api_get_exposes_banner_fields(self):
+        org = OrganizationFactory(banner_color="#000091", banner_image_position=25)
+        response = self.get(url_for("api.organization", org=org))
+        assert200(response)
+        assert response.json["banner_color"] == "#000091"
+        assert response.json["banner_image_position"] == 25
+        assert response.json["banner_image"] is None
+
+    def test_organization_api_list_exposes_banner_fields(self):
+        org = OrganizationFactory(banner_color="#000091")
+        response = self.get(url_for("api.organizations"))
+        assert200(response)
+        listed = next(o for o in response.json["data"] if o["id"] == str(org.id))
+        assert listed["banner_color"] == "#000091"
+        assert listed["banner_image_position"] == 50
+
+    def test_organization_api_update_preserves_banner_image(self):
+        """Updating an org via PUT must not touch its banner image when the
+        client echoes the banner image URL back in the payload (same
+        regression as the logo, test_organization_api_update_preserves_logo)."""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        self.upload_banner(org)
+        org.reload()
+        filename = org.banner_image.filename
+        original = org.banner_image.original
+
+        response = self.get(url_for("api.organization", org=org))
+        data = response.json
+        assert data["banner_image"], "The banner image URL should be in the GET payload"
+
+        data["banner_color"] = "#000091"
+        response = self.put(url_for("api.organization", org=org), data)
+        assert200(response)
+
+        org.reload()
+        assert org.banner_image.filename == filename
+        assert org.banner_image.original == original
+
+
+def welcome_section():
+    return SectionBloc(blocs=[TitleBloc(title="Welcome"), MarkdownBloc(content="Hello")])
+
+
+WELCOME_SECTION_PAYLOAD = {
+    "class": "SectionBloc",
+    "blocs": [
+        {"class": "TitleBloc", "title": "Welcome"},
+        {"class": "MarkdownBloc", "content": "Hi"},
+    ],
+}
+
+
 class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
     def test_blocs_hidden_by_default(self):
         """Blocs are an opt-in field — they should not appear in the default response."""
-        org = OrganizationFactory(presentation_blocs=[MarkdownBloc(content="Hello")])
+        org = OrganizationFactory(presentation_blocs=[welcome_section()])
         response = self.get(url_for("api.organization", org=org))
         assert200(response)
         assert "presentation_blocs" not in response.json
 
     def test_blocs_returned_with_x_fields(self):
         org = OrganizationFactory(
-            presentation_blocs=[MarkdownBloc(content="Hello", title="Welcome")],
+            presentation_blocs=[welcome_section()],
             presentation_blocs_published_at=datetime(2020, 1, 1, tzinfo=UTC),
         )
         response = self.get(
@@ -553,9 +772,9 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         )
         assert200(response)
         assert len(response.json["presentation_blocs"]) == 1
-        assert response.json["presentation_blocs"][0]["class"] == "MarkdownBloc"
-        assert response.json["presentation_blocs"][0]["title"] == "Welcome"
-        assert response.json["presentation_blocs"][0]["content"] == "Hello"
+        title, markdown = response.json["presentation_blocs"][0]["blocs"]
+        assert (title["class"], title["title"]) == ("TitleBloc", "Welcome")
+        assert (markdown["class"], markdown["content"]) == ("MarkdownBloc", "Hello")
 
     def test_blocs_references_are_batched(self):
         """The cards embedded in an organization's blocs must not be dereferenced one
@@ -563,14 +782,10 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
 
         def query_count(nb_cards):
             owners = [UserFactory() for _ in range(4)]
+            datasets = [DatasetFactory(owner=owners[i % len(owners)]) for i in range(nb_cards)]
             org = OrganizationFactory(
                 presentation_blocs=[
-                    DatasetsListBloc(
-                        title="Featured",
-                        datasets=[
-                            DatasetFactory(owner=owners[i % len(owners)]) for i in range(nb_cards)
-                        ],
-                    )
+                    SectionBloc(blocs=[DatasetBloc(dataset=d, width="1/2") for d in datasets])
                 ],
                 presentation_blocs_published_at=datetime(2020, 1, 1, tzinfo=UTC),
             )
@@ -581,7 +796,8 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
                 response = self.get(url, headers=headers)
                 count = int(counter)
             assert200(response)
-            assert len(response.json["presentation_blocs"][0]["datasets"]) == nb_cards
+            blocs = response.json["presentation_blocs"][0]["blocs"]
+            assert [bloc["dataset"]["id"] for bloc in blocs] == [str(d.id) for d in datasets]
             return count
 
         many, few = query_count(20), query_count(2)
@@ -592,9 +808,7 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
 
     def test_draft_blocs_hidden_from_public(self):
         """Without a publication date, blocs are a draft and never shown to the public."""
-        org = OrganizationFactory(
-            presentation_blocs=[MarkdownBloc(content="Hello", title="Welcome")]
-        )
+        org = OrganizationFactory(presentation_blocs=[welcome_section()])
         response = self.get(
             url_for("api.organization", org=org),
             headers={"X-Fields": "{*}"},
@@ -607,7 +821,7 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         user = self.login()
         org = OrganizationFactory(
             members=[Member(user=user, role="admin")],
-            presentation_blocs=[MarkdownBloc(content="Hello", title="Welcome")],
+            presentation_blocs=[welcome_section()],
         )
         response = self.get(
             url_for("api.organization", org=org),
@@ -615,7 +829,7 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         )
         assert200(response)
         assert len(response.json["presentation_blocs"]) == 1
-        assert response.json["presentation_blocs"][0]["title"] == "Welcome"
+        assert response.json["presentation_blocs"][0]["blocs"][0]["title"] == "Welcome"
 
     def test_draft_blocs_hidden_from_editor(self):
         """Only organization administrators see draft blocs: an editor (who cannot edit
@@ -623,7 +837,7 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         user = self.login()
         org = OrganizationFactory(
             members=[Member(user=user, role="editor")],
-            presentation_blocs=[MarkdownBloc(content="Hello", title="Welcome")],
+            presentation_blocs=[welcome_section()],
         )
         response = self.get(
             url_for("api.organization", org=org),
@@ -637,7 +851,7 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
         data = org.to_dict()
         data["presentation_blocs"] = [
-            {"class": "MarkdownBloc", "title": "Edito", "content": "**Hi**"}
+            {"class": "SectionBloc", "blocs": [{"class": "MarkdownBloc", "content": "**Hi**"}]}
         ]
         data["presentation_blocs_published_at"] = "2020-01-01T00:00:00+00:00"
         response = self.put(url_for("api.organization", org=org), data)
@@ -651,28 +865,33 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
         data = org.to_dict()
         data["presentation_blocs"] = [
-            {"class": "MarkdownBloc", "title": "Edito", "content": "**Hi**"},
             {
-                "class": "LinksListBloc",
-                "title": "Useful links",
-                "links": [{"title": "Doc", "url": "https://example.com"}],
-            },
+                "class": "SectionBloc",
+                "blocs": [
+                    {"class": "TitleBloc", "title": "Edito"},
+                    {"class": "MarkdownBloc", "content": "**Hi**"},
+                    {
+                        "class": "LinksListBloc",
+                        "links": [{"title": "Doc", "url": "https://example.com"}],
+                    },
+                ],
+            }
         ]
         response = self.put(url_for("api.organization", org=org), data)
         assert200(response)
 
         org.reload()
-        assert len(org.presentation_blocs) == 2
-        assert org.presentation_blocs[0].__class__.__name__ == "MarkdownBloc"
-        assert org.presentation_blocs[0].title == "Edito"
-        assert org.presentation_blocs[1].__class__.__name__ == "LinksListBloc"
-        assert org.presentation_blocs[1].links[0].title == "Doc"
+        title, markdown, links = org.presentation_blocs[0].blocs
+        assert (title.__class__.__name__, title.title) == ("TitleBloc", "Edito")
+        assert (markdown.__class__.__name__, markdown.content) == ("MarkdownBloc", "**Hi**")
+        assert links.__class__.__name__ == "LinksListBloc"
+        assert links.links[0].title == "Doc"
 
     def test_editor_cannot_update_blocs(self):
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="editor")])
         data = org.to_dict()
-        data["presentation_blocs"] = [{"class": "MarkdownBloc", "content": "Hi"}]
+        data["presentation_blocs"] = [WELCOME_SECTION_PAYLOAD]
         response = self.put(url_for("api.organization", org=org), data)
         assert403(response)
         org.reload()
@@ -682,7 +901,7 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         self.login()
         org = OrganizationFactory()
         data = org.to_dict()
-        data["presentation_blocs"] = [{"class": "MarkdownBloc", "content": "Hi"}]
+        data["presentation_blocs"] = [WELCOME_SECTION_PAYLOAD]
         response = self.put(url_for("api.organization", org=org), data)
         assert403(response)
         org.reload()
@@ -690,19 +909,22 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
 
     def test_accordion_blocs_serialized_recursively(self):
         """A generic bloc nested inside an accordion item must serialize with its concrete
-        class and fields. This exercises the generic resolution at two levels
-        (`Organization.blocs` -> `AccordionItemBloc.content`), which is the path most
-        affected by resolving the allowed subclasses at marshalling time."""
+        class and fields. This exercises the generic resolution at three levels
+        (`Organization.blocs` -> `SectionBloc.blocs` -> `AccordionItemBloc.content`), the
+        path most affected by resolving the allowed subclasses at marshalling time."""
         org = OrganizationFactory(
             presentation_blocs=[
-                AccordionListBloc(
-                    title="FAQ",
-                    items=[
-                        AccordionItemBloc(
-                            title="Question",
-                            content=[MarkdownBloc(title="Answer", content="**Hello**")],
+                SectionBloc(
+                    blocs=[
+                        AccordionListBloc(
+                            items=[
+                                AccordionItemBloc(
+                                    title="Question",
+                                    content=[MarkdownBloc(content="**Hello**")],
+                                )
+                            ],
                         )
-                    ],
+                    ]
                 )
             ],
             presentation_blocs_published_at=datetime(2020, 1, 1, tzinfo=UTC),
@@ -712,28 +934,37 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
             headers={"X-Fields": "{*}"},
         )
         assert200(response)
-        accordion = response.json["presentation_blocs"][0]
+        accordion = response.json["presentation_blocs"][0]["blocs"][0]
         assert accordion["class"] == "AccordionListBloc"
-        assert accordion["title"] == "FAQ"
         item = accordion["items"][0]
         assert item["title"] == "Question"
         nested = item["content"][0]
         assert nested["class"] == "MarkdownBloc"
-        assert nested["title"] == "Answer"
         assert nested["content"] == "**Hello**"
 
-    def test_accordion_rejects_disallowed_nested_blocs(self):
-        """`check_no_recursive_blocs` forbids nesting an accordion (or hero) inside an
-        accordion item, both on the model and through the API write path."""
+    def test_rejects_blocs_out_of_layout(self):
+        """`check_blocs_layout` runs on the organization blocs too."""
         user = self.login()
         org = OrganizationFactory(members=[Member(user=user, role="admin")])
         data = org.to_dict()
         data["presentation_blocs"] = [
             {
-                "class": "AccordionListBloc",
-                "title": "FAQ",
-                "items": [
-                    {"title": "Question", "content": [{"class": "HeroBloc", "title": "nope"}]}
+                "class": "SectionBloc",
+                "blocs": [
+                    {
+                        "class": "AccordionListBloc",
+                        "items": [
+                            {
+                                "title": "Question",
+                                "content": [
+                                    {
+                                        "class": "SectionBloc",
+                                        "blocs": [{"class": "TitleBloc", "title": "nope"}],
+                                    }
+                                ],
+                            }
+                        ],
+                    }
                 ],
             }
         ]
@@ -741,6 +972,22 @@ class OrganizationBlocsAPITest(PytestOnlyAPITestCase):
         assert400(response)
         org.reload()
         assert org.presentation_blocs == []
+
+    def test_rejects_colored_sections(self):
+        """The organization page sits under the organization's own banner: its sections keep
+        neutral backgrounds, unlike the sections of a post or of the site."""
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        data = org.to_dict()
+        section = {"class": "SectionBloc", "blocs": [{"class": "TitleBloc", "title": "T"}]}
+
+        data["presentation_blocs"] = [{**section, "color": "green"}]
+        assert400(self.put(url_for("api.organization", org=org), data))
+
+        data["presentation_blocs"] = [section]
+        assert200(self.put(url_for("api.organization", org=org), data))
+        org.reload()
+        assert org.presentation_blocs[0].color is None
 
     @pytest.mark.parametrize(
         "bloc",
@@ -1237,11 +1484,11 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         organization = OrganizationFactory(members=[member], requests=[membership_request])
 
         api_url = url_for("api.refuse_membership", org=organization, id=membership_request.id)
-        response = self.post(api_url, {})
-        assert400(response)
+        response = self.post(api_url, {"comment": ""})
+        assert200(response)
 
         organization.reload()
-        assert organization.requests[0].status == "pending"
+        assert organization.requests[0].status == "refused"
         assert organization.requests[0].refusal_comment is None
 
     def test_refuse_membership_and_invite_member_with_non_object_body(self):
@@ -1587,8 +1834,6 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
     def test_cancel_invitation_marks_notification_as_handled(self):
         """Test that canceling an invitation marks the related notification as handled."""
-        from udata.core.organization.notifications import MembershipRequestNotificationDetails
-
         user = self.login()
         invited_user = UserFactory()
         invitation = MembershipRequest(
@@ -1597,14 +1842,12 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         organization = OrganizationFactory(
             members=[Member(user=user, role="admin")], requests=[invitation]
         )
-        notification = Notification(
+        notification = MembershipRequestNotificationFactory(
             user=invited_user,
-            type=NotificationType.ORGANIZATION_MEMBERSHIP_INVITED,
-            details=MembershipRequestNotificationDetails(
-                request_organization=organization, request_user=invited_user
-            ),
+            request_organization=organization,
+            request_user=invited_user,
+            invitation=True,
         )
-        notification.save()
 
         api_url = url_for("api.cancel_membership", org=organization, id=invitation.id)
         self.post(api_url)

@@ -1,45 +1,34 @@
 import logging
-from enum import StrEnum, auto
 
 from mongoengine import EmbeddedDocument
-from mongoengine.fields import EnumField, ReferenceField, UUIDField
+from mongoengine.fields import ReferenceField, StringField, UUIDField
 
 from udata.api_fields import field, generate_fields
 from udata.core.discussions import mails
-from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.models import Discussion, Message
 from udata.core.discussions.signals import on_discussion_deleted, on_discussion_message_deleted
 from udata.core.user.models import User
-from udata.features.notifications.actions import notifier
 from udata.features.notifications.constants import NotificationType
-from udata.features.notifications.events import NotificationEvent
+from udata.features.notifications.events import (
+    NotificationEvent,
+    discussion_recipients,
+    subject_scopes,
+)
+from udata.features.notifications.mails import way_out
+from udata.i18n import lazy_gettext as _
+from udata.i18n import ngettext
+from udata.mail import Link
 
 log = logging.getLogger(__name__)
 
 
-class DiscussionStatus(StrEnum):
-    NEW_DISCUSSION = auto()
-    NEW_COMMENT = auto()
-    CLOSED = auto()
-
-
-# Superseded by `Notification.type`, kept until the front reads the type instead.
-STATUSES_BY_TYPE = {
-    NotificationType.DISCUSSION_NEW: DiscussionStatus.NEW_DISCUSSION,
-    NotificationType.DISCUSSION_COMMENT: DiscussionStatus.NEW_COMMENT,
-    NotificationType.DISCUSSION_CLOSED: DiscussionStatus.CLOSED,
-}
-
-
 @generate_fields()
 class DiscussionNotificationDetails(EmbeddedDocument):
-    # Superseded by `Notification.type`, kept until the front reads the type instead.
-    status = field(
-        EnumField(DiscussionStatus),
-        readonly=True,
-        auditable=False,
-        filterable={},
-    )
+    # Superseded by `Notification.type` and read by nothing, but still written by the
+    # previous release while it is being replaced: an undeclared field would make such a
+    # notification fail to load. Dropped, with its values, by the next release.
+    status = StringField()
+
     # keep track of the message to show in the notification
     message_id = field(
         UUIDField(),
@@ -70,17 +59,47 @@ class DiscussionEvent(NotificationEvent):
         raise NotImplementedError
 
     def recipients(self):
-        return self.discussion.owner_recipients(sender=self.sender)
+        return discussion_recipients(self.discussion)
+
+    def excluded(self):
+        return [self.sender] if self.sender else []
+
+    @property
+    def subject(self):
+        return self.discussion.subject
+
+    def scopes(self):
+        """Muting one thread, one dataset or a whole organization are three grains of
+        the same setting."""
+        return subject_scopes(self.discussion)
 
     def via_app(self, recipient):
-        return DiscussionNotificationDetails(
-            discussion=self.discussion,
-            status=STATUSES_BY_TYPE[self.type],
-        )
+        return DiscussionNotificationDetails(discussion=self.discussion)
+
+    def ways_out(self):
+        return [
+            way_out(_("Stop following this discussion"), scope=self.discussion, event="discussion"),
+            *super().ways_out(),
+        ]
+
+    @classmethod
+    def digest_subject(cls, details):
+        # The thread is grouped under what it is about: a count of new discussions only
+        # makes sense there, and that is where the reader goes to read them.
+        # The threads of one subject share where it is displayed: the first one's link
+        # stands for all of them.
+        discussion = details.discussion
+        subject = discussion.subject
+        return subject.id, Link(str(subject), discussion.subject_notification_url)
 
 
 class NewDiscussion(DiscussionEvent):
     type = NotificationType.DISCUSSION_NEW
+    label = _("New discussions")
+
+    digest_count = staticmethod(
+        lambda count: ngettext("%(num)d new discussion", "%(num)d new discussions", count)
+    )
 
     @property
     def sender(self):
@@ -96,6 +115,11 @@ class NewDiscussion(DiscussionEvent):
 
 class NewDiscussionComment(DiscussionEvent):
     type = NotificationType.DISCUSSION_COMMENT
+    label = _("Replies to discussions")
+
+    digest_count = staticmethod(
+        lambda count: ngettext("%(num)d new comment", "%(num)d new comments", count)
+    )
 
     def __init__(self, discussion: Discussion, message: Message):
         super().__init__(discussion)
@@ -122,6 +146,11 @@ class NewDiscussionComment(DiscussionEvent):
 
 class DiscussionClosed(DiscussionEvent):
     type = NotificationType.DISCUSSION_CLOSED
+    label = _("Closed discussions")
+
+    digest_count = staticmethod(
+        lambda count: ngettext("%(num)d closed discussion", "%(num)d closed discussions", count)
+    )
 
     def __init__(self, discussion: Discussion, message: Message | None):
         super().__init__(discussion)
@@ -139,35 +168,6 @@ class DiscussionClosed(DiscussionEvent):
         return mails.discussion_closed(
             self.discussion, self.message, self.discussion.notification_url
         )
-
-
-@notifier("discussion")
-def discussions_notifications(user):
-    """Notify user about open discussions"""
-    notifications = []
-
-    # Only fetch required fields for notification serialization
-    # Greatly improve performances and memory usage
-    qs = discussions_for(user).only("id", "created", "title", "subject")
-
-    # Do not dereference subject (so it's a DBRef)
-    # Also improve performances and memory usage
-    for discussion in qs.no_dereference():
-        notifications.append(
-            (
-                discussion.created,
-                {
-                    "id": discussion.id,
-                    "title": discussion.title,
-                    "subject": {
-                        "id": discussion.subject["_ref"].id,
-                        "type": discussion.subject["_cls"].lower(),
-                    },
-                },
-            )
-        )
-
-    return notifications
 
 
 @on_discussion_deleted.connect

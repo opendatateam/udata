@@ -1,10 +1,21 @@
 from datetime import datetime
 
-from udata.api import API, api
+from flask import request
+
+from udata.api import API, api, fields
+from udata.api_fields import patch
 from udata.auth import current_user
+from udata.features.notifications.constants import is_event_name
 from udata.features.notifications.permissions import EditNotificationPermission
 
 from .models import Notification
+from .resolution import resolved_for, set_follow
+from .settings import (
+    NOTIFICATION_SCOPES,
+    NotificationSetting,
+    set_rule,
+    subject_summary_fields,
+)
 
 notifs = api.namespace("notifications", "Notifications API")
 
@@ -20,6 +31,171 @@ class NotificationsAPI(API):
         user = current_user._get_current_object()
         notifications = Notification.objects(user=user)
         return Notification.apply_pagination(Notification.apply_sort_filters(notifications))
+
+
+@notifs.route("/settings/", endpoint="notification_settings")
+class NotificationSettingsAPI(API):
+    @api.secure
+    @api.doc("list_notification_settings")
+    @api.expect(NotificationSetting.__index_parser__)
+    @api.marshal_with(NotificationSetting.__page_fields__)
+    def get(self):
+        """List the rules the current user set about their notifications, latest first.
+
+        Only rules are listed: whatever no rule covers follows the default rules. What
+        they add up to is given by `/notifications/resolved/`.
+
+        Paginated: editing or answering follows a subject, so the rules of a busy account
+        keep growing, and each one reads its subject back."""
+        settings = NotificationSetting.objects(user=current_user.id).order_by("-id")
+        return NotificationSetting.apply_pagination(
+            NotificationSetting.apply_sort_filters(settings)
+        )
+
+    @api.secure
+    @api.doc("set_notification_setting")
+    @api.expect(NotificationSetting.__write_fields__)
+    @api.response(204, "Rule set or removed: the list says what applies now")
+    @api.response(400, "Validation error")
+    def put(self):
+        """Set a rule about some notifications, or remove it with `enabled: null`.
+
+        A rule is identified by its subject and event, either of them possibly null:
+        setting it again replaces the previous answer. Removing a follow udata made by
+        itself (for editing a subject or answering about it) turns it into a "no":
+        removed, the next edit or answer would make it again."""
+        payload = api.json_payload()
+        # Left out, it would read as `null` and withdraw the rule.
+        if "enabled" not in payload:
+            api.abort(400, errors={"enabled": "Expected true, false or null"})
+        # Checked before anything reaches MongoDB: withdrawing reads the rule by its key,
+        # without the validation a save would run.
+        event = payload.get("event")
+        if event is not None and (not isinstance(event, str) or not is_event_name(event)):
+            api.abort(400, errors={"event": "Unknown event"})
+        rule = patch(NotificationSetting(user=current_user._get_current_object()), request)
+        set_rule(rule.user, rule.scope, rule.event, rule.enabled)
+        return "", 204
+
+
+resolved_fields = api.model(
+    "NotificationResolved",
+    {
+        "scope": fields.Nested(
+            api.model_reference, allow_null=True, description="The subject asked about"
+        ),
+        "event": fields.String(allow_null=True, description="The event asked about"),
+        "heard": fields.Boolean(description="Whether the user hears about it, pause aside"),
+        "reasons": fields.List(fields.String, description="Why the user is concerned"),
+        "muted": fields.Boolean(description="Whether the user said no to this subject and event"),
+        "followed_events": fields.List(
+            fields.String, description="The narrower events the user still follows on it"
+        ),
+        "heard_types": fields.List(
+            fields.String, description="The types asked about the user hears on it"
+        ),
+        "partial": fields.Boolean(
+            description="Whether the user hears only some of the types that can be about it"
+        ),
+        "subject": fields.Nested(
+            subject_summary_fields,
+            allow_null=True,
+            description="The subject as the user may see it, null when out of reach",
+        ),
+    },
+)
+
+# A page asks for all of its subjects at once, each one costing a few queries.
+MAX_RESOLVED_SUBJECTS = 100
+
+resolved_parser = api.parser()
+resolved_parser.add_argument(
+    "scope",
+    type=str,
+    action="append",
+    required=True,
+    location="args",
+    help=f"A subject, as `Class:id`, repeated for up to {MAX_RESOLVED_SUBJECTS} subjects",
+)
+resolved_parser.add_argument(
+    "event",
+    type=str,
+    location="args",
+    help="A notification type or a prefix of some, every notification without one",
+)
+
+
+def parse_subject(value: str):
+    """A subject named `Class:id` in a query string, checked as one in a body."""
+    class_name, _, id = value.partition(":")
+    return api.resolve_reference({"class": class_name, "id": id}, "scope", NOTIFICATION_SCOPES)
+
+
+@notifs.route("/resolved/", endpoint="notification_resolved")
+class NotificationResolvedAPI(API):
+    @api.secure
+    @api.doc("resolve_notifications")
+    @api.expect(resolved_parser)
+    @api.marshal_list_with(resolved_fields)
+    @api.response(400, "Unknown subject or event, or too many subjects")
+    def get(self):
+        """Whether and why the current user hears about notifications on some
+        subjects, once their rules and the defaults are applied.
+
+        One answer per subject, so that a page asks once for all of its subjects. Without
+        an event, it is about every notification on them."""
+        args = resolved_parser.parse_args()
+        if args["event"] is not None and not is_event_name(args["event"]):
+            api.abort(400, "Unknown event")
+        scopes = list(dict.fromkeys(args["scope"]))
+        if len(scopes) > MAX_RESOLVED_SUBJECTS:
+            api.abort(400, f"At most {MAX_RESOLVED_SUBJECTS} subjects")
+        return resolved_for(
+            current_user._get_current_object(),
+            [parse_subject(scope) for scope in scopes],
+            args["event"],
+        )
+
+
+follow_fields = api.model(
+    "NotificationFollow",
+    {
+        "scope": fields.Nested(api.model_reference, required=True, description="The subject"),
+        "event": fields.String(
+            allow_null=True,
+            description="A notification type or a prefix of some, every notification without one",
+        ),
+        "followed": fields.Boolean(required=True, description="Follow, or stop following"),
+    },
+)
+
+
+@notifs.route("/follow/", endpoint="notification_follow")
+class NotificationFollowAPI(API):
+    @api.secure
+    @api.doc("follow_notifications")
+    @api.expect(follow_fields)
+    @api.marshal_with(resolved_fields)
+    @api.response(400, "Unknown subject or event")
+    def put(self):
+        """Follow some notifications on a subject, or stop, and get what the current user
+        hears about once done.
+
+        Which rules to write or withdraw depends on how they rank, which is the server's
+        to know: stopping withdraws one's own follow, and only says no when a role or a
+        broader follow still brings the notifications in."""
+        payload = api.json_payload()
+        event = payload.get("event")
+        if not isinstance(payload.get("followed"), bool):
+            api.abort(400, errors={"followed": "Expected true or false"})
+        if event is not None and (not isinstance(event, str) or not is_event_name(event)):
+            api.abort(400, errors={"event": "Unknown event"})
+        return set_follow(
+            current_user._get_current_object(),
+            api.resolve_reference(payload.get("scope"), "scope", NOTIFICATION_SCOPES),
+            event,
+            payload["followed"],
+        )
 
 
 @notifs.route("/<notification:notification>/read/", endpoint="read_notifications")

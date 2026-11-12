@@ -5,7 +5,7 @@ from bson import ObjectId
 from flask import url_for
 from mongoengine.errors import ValidationError
 
-from udata.core.edito_blocs.models import DatasetsListBloc
+from udata.core.edito_blocs.models import SectionBloc, TitleBloc
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.post.constants import EXTERNAL_PAGE
 from udata.core.post.factories import PostFactory
@@ -129,7 +129,7 @@ class ExternalPageAPITest(PytestOnlyAPITestCase):
         assert response.json["data"] == []
 
     def test_list_excludes_blocs_but_get_returns_them(self):
-        post = external_page(blocs=[DatasetsListBloc(title="Test", datasets=[])])
+        post = external_page(blocs=[SectionBloc(blocs=[TitleBloc(title="Test")])])
 
         response = self.get(url_for("api.posts", kind=EXTERNAL_PAGE))
         assert200(response)
@@ -137,7 +137,7 @@ class ExternalPageAPITest(PytestOnlyAPITestCase):
 
         response = self.get(url_for("api.post", post=post))
         assert200(response)
-        assert response.json["blocs"][0]["class"] == "DatasetsListBloc"
+        assert response.json["blocs"][0]["class"] == "SectionBloc"
 
     def test_get_draft_is_404_for_strangers(self):
         owner = UserFactory()
@@ -318,10 +318,10 @@ class ExternalPageTopicElementTest(PytestOnlyAPITestCase):
 
 class ExternalPageModelTest(PytestOnlyAPITestCase):
     def test_blocs_round_trip(self):
-        post = external_page(blocs=[DatasetsListBloc(title="Test", datasets=[])])
+        post = external_page(blocs=[SectionBloc(blocs=[TitleBloc(title="Test")])])
         post.reload()
         assert len(post.blocs) == 1
-        assert post.blocs[0].title == "Test"
+        assert post.blocs[0].blocs[0].title == "Test"
 
     def test_clean_defaults_to_blocs(self):
         post = PostFactory(kind=EXTERNAL_PAGE, content=None)

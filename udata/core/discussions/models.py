@@ -1,7 +1,7 @@
 import fnmatch
 import logging
 from datetime import UTC, datetime
-from urllib.parse import urlparse
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from bson import ObjectId
 from flask import current_app, g, url_for
@@ -397,6 +397,9 @@ class Discussion(SpamMixin, Linkable, Document):
 
         return OwnablePermission(self.subject).can()
 
+    def __str__(self):
+        return self.title or ""
+
     @field(description="The discussion web URL")
     def self_web_url(self, **kwargs):
         return self.subject.self_web_url(append="/discussions", discussion_id=self.id, **kwargs)
@@ -418,13 +421,28 @@ class Discussion(SpamMixin, Linkable, Document):
         migrations), or a config change tightening the allow-list could all
         leave an unsafe URL in storage.
         """
+        external_url = self._notification_external_url()
+        if external_url:
+            parts = urlparse(external_url)
+            query = urlencode(
+                [*parse_qsl(parts.query, keep_blank_values=True), ("discussion_id", str(self.id))]
+            )
+            return urlunparse(parts._replace(query=query))
+        return self.url_for()
+
+    @property
+    def subject_notification_url(self):
+        """URL to point to in a notification about the discussions of the subject as a
+        whole, such as a digest line: the same platform as `notification_url`, without
+        pointing at this thread."""
+        return self._notification_external_url() or self.subject.self_web_url(append="/discussions")
+
+    def _notification_external_url(self) -> str | None:
         # Raw DB writes (imports, migrations) bypassing mongoengine validation
         # can leave `notification` set to `None`, hence the `or {}` coercion.
         notification = (self.extras or {}).get("notification") or {}
         meta_url = notification.get("external_url")
-        if is_valid_notification_external_url(meta_url):
-            return f"{meta_url}#discussion-{self.id}"
-        return self.url_for()
+        return meta_url if is_valid_notification_external_url(meta_url) else None
 
     def spam_report_message(self, breadcrumb):
         message = f"Spam potentiel sur la discussion « [{self.title}]({self.url_for()}) »"
@@ -432,19 +450,6 @@ class Discussion(SpamMixin, Linkable, Document):
             message += f" de [{self.user.fullname}]({self.user.url_for()})"
 
         return message
-
-    def owner_recipients(self, sender=None):
-        """Return the list of users that should be notified about this discussion."""
-        recipients = {m.posted_by.id: m.posted_by for m in self.discussion}
-        if getattr(self.subject, "organization", None):
-            for member in self.subject.organization.members:
-                recipients[member.user.id] = member.user
-        elif getattr(self.subject, "owner", None):
-            recipients[self.subject.owner.id] = self.subject.owner
-
-        if sender:
-            recipients.pop(sender.id, None)
-        return list(recipients.values())
 
     @spam_protected()
     def signal_new(self):

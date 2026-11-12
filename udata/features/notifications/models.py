@@ -1,26 +1,40 @@
 from datetime import UTC, datetime
 
 from flask_restx.inputs import boolean
-from mongoengine import NULLIFY, Q, ValidationError
+from mongoengine import NULLIFY, Q, ValidationError, signals
 from mongoengine.fields import (
+    BooleanField,
     DateTimeField,
     EnumField,
     GenericEmbeddedDocumentField,
+    ListField,
     ReferenceField,
 )
 
 from udata.api_fields import field, generate_fields
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.notifications import DataserviceCreatedNotificationDetails
+from udata.core.dataset.models import Dataset
+from udata.core.discussions.models import Discussion
 from udata.core.discussions.notifications import DiscussionNotificationDetails
+from udata.core.organization.models import Organization
 from udata.core.organization.notifications import (
     MembershipAcceptedNotificationDetails,
     MembershipRefusedNotificationDetails,
     MembershipRequestNotificationDetails,
     NewBadgeNotificationDetails,
 )
+from udata.core.post.models import Post
+from udata.core.reuse.models import Reuse
 from udata.core.reuse.notifications import ReuseCreatedNotificationDetails
+from udata.core.topic.models import Topic
 from udata.core.user.models import User
-from udata.features.notifications.constants import TYPES_REQUIRING_ACTION, NotificationType
+from udata.features.notifications.constants import (
+    TYPES_REQUIRING_ACTION,
+    NotificationReason,
+    NotificationType,
+)
+from udata.features.notifications.settings import NotificationSetting
 from udata.features.transfer.notifications import TransferRequestNotificationDetails
 from udata.harvest.notifications import ValidateHarvesterNotificationDetails
 from udata.mongo.datetime_fields import Datetimed
@@ -64,6 +78,11 @@ class NotificationQuerySet(UDataQuerySet):
         """This function must be updated to handle new details cases"""
         return self.filter(details__request_user=user)
 
+    def mark_mailed(self):
+        """Out of the queue of the digests, mailed or not to be: `last_modified` is set
+        by hand, as in `mark_handled`."""
+        return self.update(set__mail_pending=False, set__last_modified=datetime.now(UTC))
+
     def mark_handled(self, at=None):
         """The subject got acted upon, so whatever was pending about it is resolved.
 
@@ -87,6 +106,7 @@ class Notification(Datetimed, Document[NotificationQuerySet]):
     meta = {
         "ordering": ["-created_at"],
         "queryset_class": NotificationQuerySet,
+        "indexes": [("user", "mail_pending")],
     }
 
     id = field(AutoUUIDField(primary_key=True))
@@ -113,6 +133,21 @@ class Notification(Datetimed, Document[NotificationQuerySet]):
         GenericEmbeddedDocumentField(choices=tuple(dict.fromkeys(DETAILS_BY_TYPE.values()))),
         generic=True,
     )
+    # Why this user was concerned, recorded at dispatch time because it cannot be
+    # recomputed later: roles change, discussions get answered, and the notification
+    # still has to explain itself in the site's notification list, next to the ways out
+    # it offers.
+    reasons = field(
+        ListField(EnumField(NotificationReason)),
+        readonly=True,
+        auditable=False,
+    )
+    # Waiting for the next digest of its user, and dropped once the digest is out.
+    #
+    # It doubles as the digest cursor — "still pending" *is* "not mailed yet", which
+    # makes the job replayable without a date to keep anywhere. Internal to that queue,
+    # hence not exposed.
+    mail_pending = BooleanField(default=False)
 
     @field(
         description="Whether the notification is resolved by acting on its subject "
@@ -133,3 +168,17 @@ class Notification(Datetimed, Document[NotificationQuerySet]):
                 f"A {self.type} notification carries {expected.__name__} details, "
                 f"got {type(self.details).__name__}"
             )
+
+
+def delete_settings_of(sender, document, **kwargs):
+    """A decision outlives nothing it was about: left behind, it could no longer be
+    listed (its scope fails to load) nor therefore withdrawn."""
+    NotificationSetting.objects(scope=document).delete()
+
+
+# One sender per scope rather than every document: mongoengine turns the bulk delete of
+# any model with a `post_delete` receiver into one delete per document. The same classes
+# as `NOTIFICATION_SCOPES`, which names them.
+SCOPE_MODELS = (Organization, Discussion, Dataset, Reuse, Post, Dataservice, Topic)
+for model in SCOPE_MODELS:
+    signals.post_delete.connect(delete_settings_of, sender=model)

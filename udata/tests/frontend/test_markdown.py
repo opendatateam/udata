@@ -94,6 +94,7 @@ class MarkdownTest(PytestOnlyAPITestCase):
         [
             ("/", "http://local.test/"),
             ("bar", "http://local.test/bar"),
+            ("http:spam.com", "http://local.test/spam.com"),
             ("/?tag=test&sort=-followers", "http://local.test/?tag=test&sort=-followers"),
         ],
     )
@@ -124,6 +125,14 @@ class MarkdownTest(PytestOnlyAPITestCase):
         el = dom.getElementsByTagName("a")[0]
         assert el.getAttribute("href") == "ftp://random.net"
         assert el.firstChild.data == "foo"
+
+    def test_markdown_linkify_mailto(self, md2dom):
+        """Markdown filter should preserve mailto links"""
+        text = "[mail@domain.com](mailto:mail@domain.com)"
+        dom = md2dom(text)
+        el = dom.getElementsByTagName("a")[0]
+        assert el.getAttribute("href") == "mailto:mail@domain.com"
+        assert el.firstChild.data == "mail@domain.com"
 
     def test_markdown_linkify_relative_with_tooltip(self, app):
         """Markdown filter should transform + add tooltip"""

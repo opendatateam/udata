@@ -20,7 +20,6 @@ from udata.features.notifications.models import Notification
 from udata.features.transfer.actions import accept_transfer, refuse_transfer, request_transfer
 from udata.features.transfer.factories import TransferFactory
 from udata.features.transfer.models import TRANSFERABLE_SUBJECTS, Transfer
-from udata.features.transfer.notifications import transfer_request_notifications
 from udata.models import Member
 from udata.tests.api import DBTestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
@@ -50,7 +49,7 @@ class TransferStartTest(PytestOnlyDBTestCase):
         user = UserFactory()
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
-        dataset = DatasetFactory(owner=user, organization=org)
+        dataset = DatasetFactory(organization=org)
         recipient = UserFactory()
         comment = faker.sentence()
 
@@ -112,7 +111,7 @@ class TransferStartTest(PytestOnlyDBTestCase):
         user = UserFactory()
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
-        dataset = DatasetFactory(owner=user, organization=org)
+        dataset = DatasetFactory(organization=org)
         comment = faker.sentence()
 
         login_user(user)
@@ -322,52 +321,6 @@ class TransferContactPointsTest(PytestOnlyDBTestCase):
         assert subject.owner == owner
 
 
-class TransferNotificationsTest(PytestOnlyDBTestCase):
-    def test_pending_transfer_request_for_user(self):
-        user = UserFactory()
-        datasets = DatasetFactory.create_batch(2, owner=user)
-        recipient = UserFactory()
-        comment = faker.sentence()
-        transfers = {}
-
-        login_user(user)
-        for dataset in datasets:
-            transfer = request_transfer(dataset, recipient, comment)
-            transfers[transfer.id] = transfer
-
-        assert len(transfer_request_notifications(user)) == 0
-
-        notifications = transfer_request_notifications(recipient)
-        assert len(notifications) == len(datasets)
-        for dt, details in notifications:
-            transfer = transfers[details["id"]]
-            assert details["subject"]["class"] == "dataset"
-            assert details["subject"]["id"] == transfer.subject.id
-
-    def test_pending_transfer_request_for_org(self):
-        user = UserFactory()
-        datasets = DatasetFactory.create_batch(2, owner=user)
-        recipient = UserFactory()
-        member = Member(user=recipient, role="editor")
-        org = OrganizationFactory(members=[member])
-        comment = faker.sentence()
-        transfers = {}
-
-        login_user(user)
-        for dataset in datasets:
-            transfer = request_transfer(dataset, org, comment)
-            transfers[transfer.id] = transfer
-
-        assert len(transfer_request_notifications(user)) == 0
-
-        notifications = transfer_request_notifications(recipient)
-        assert len(notifications) == len(datasets)
-        for dt, details in notifications:
-            transfer = transfers[details["id"]]
-            assert details["subject"]["class"] == "dataset"
-            assert details["subject"]["id"] == transfer.subject.id
-
-
 class TransferRequestNotificationTest(DBTestCase):
     def test_notification_created_for_user_recipient(self):
         """Notification is created for user recipient when transfer is requested"""
@@ -443,16 +396,19 @@ class TransferRequestNotificationTest(DBTestCase):
             assert notification.details.transfer_subject == dataset
             assert_equal_dates(notification.created_at, transfer.created)
 
-    def test_no_duplicate_notifications(self):
-        """Duplicate notifications are not created for same transfer"""
+    def test_a_second_pending_transfer_is_refused(self):
+        """As the front offers a single pending transfer per object, so does the API"""
         owner = UserFactory()
         recipient = UserFactory()
         dataset = DatasetFactory(owner=owner)
 
         login_user(owner)
         request_transfer(dataset, recipient, faker.sentence())
-        request_transfer(dataset, recipient, faker.sentence())
+        for other_recipient in (recipient, UserFactory()):
+            with pytest.raises(ValueError):
+                request_transfer(dataset, other_recipient, faker.sentence())
 
+        assert Transfer.objects(subject=dataset).count() == 1
         assert Notification.objects.count() == 1
 
     def test_multiple_transfers_create_separate_notifications(self):
@@ -472,24 +428,6 @@ class TransferRequestNotificationTest(DBTestCase):
         subjects = [notif.details.transfer_subject for notif in notifications]
         self.assertIn(dataset1, subjects)
         self.assertIn(dataset2, subjects)
-
-    def test_notification_not_created_if_previous_exists(self):
-        """Notification is created when transferring from org to user"""
-        admin = UserFactory()
-        org = OrganizationFactory(members=[Member(user=admin, role="admin")])
-        dataset = DatasetFactory(organization=org)
-        recipient = UserFactory()
-
-        login_user(admin)
-        request_transfer(dataset, recipient, faker.sentence())
-
-        notifications = Notification.objects.all()
-        assert len(notifications) == 1
-
-        request_transfer(dataset, recipient, faker.sentence())
-
-        notifications = Notification.objects.all()
-        assert len(notifications) == 1
 
     def test_notification_created_if_previous_handled(self):
         """Notification is created when transferring from org to user"""

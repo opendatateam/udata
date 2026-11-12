@@ -60,6 +60,14 @@ def purge_organizations(self):
             storage.delete(organization.logo.original)
             for key, value in organization.logo.thumbnails.items():
                 storage.delete(value)
+        if organization.banner_image and organization.banner_image.filename is not None:
+            # `original` may equal `filename` (unresized upload): dedupe
+            for filename in {
+                organization.banner_image.filename,
+                organization.banner_image.original,
+            }:
+                if filename in storages.images:
+                    storages.images.delete(filename)
         # Remove
         organization.delete()
         # Reindex the datasets that were linked to the organization

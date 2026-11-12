@@ -39,6 +39,13 @@ class OrganizationTasksTest(APITestCase):
         )
         self.assert200(response)
 
+        response = self.post(
+            url_for("api.organization_banner", org=org),
+            {"file": (create_test_image(), "test.png")},
+            json=False,
+        )
+        self.assert200(response)
+
         transfer_to_org = Transfer.objects.create(
             owner=user,
             recipient=org,
@@ -84,6 +91,8 @@ class OrganizationTasksTest(APITestCase):
 
         # Check organization's logo is deleted
         self.assertEqual(list(storages.avatars.list_files()), [])
+
+        self.assertEqual(list(storages.images.list_files()), [])
 
         # Check organization's contact points are deleted
         self.assertEqual(ContactPoint.objects().count(), 0)

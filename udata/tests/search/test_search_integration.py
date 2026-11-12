@@ -66,6 +66,102 @@ class SearchIntegrationTest(APITestCase):
         titles = [d["title"] for d in response.json["data"]]
         assert "Données spectaculaires sur les transports" in titles
 
+    def test_dataset_punctuation_search(self):
+        """Dots and underscores vs spaces in titles should match in both directions."""
+        DatasetFactory(title="Catalogue data.gouv.fr")
+        DatasetFactory(title="Portail data gouv")
+        DatasetFactory(title="Export data_gouv")
+
+        self.refresh_index()
+
+        response = self.get("/api/2/datasets/search/?q=data gouv")
+        self.assert200(response)
+        titles = [d["title"] for d in response.json["data"]]
+        assert "Catalogue data.gouv.fr" in titles
+        assert "Portail data gouv" in titles
+        assert "Export data_gouv" in titles
+
+        response = self.get("/api/2/datasets/search/?q=data.gouv")
+        self.assert200(response)
+        titles = [d["title"] for d in response.json["data"]]
+        assert "Catalogue data.gouv.fr" in titles
+        assert "Portail data gouv" in titles
+        assert "Export data_gouv" in titles
+
+    def test_dataset_punctuation_search_across_description(self):
+        """A dotted title and a description word match in the same query."""
+        DatasetFactory(title="Catalogue data.gouv.fr", description="statistiques nationales")
+        DatasetFactory(title="Autre catalogue", description="statistiques nationales")
+
+        self.refresh_index()
+
+        response = self.get("/api/2/datasets/search/?q=data gouv statistiques")
+        self.assert200(response)
+        titles = [d["title"] for d in response.json["data"]]
+        assert "Catalogue data.gouv.fr" in titles
+        assert "Autre catalogue" not in titles
+
+    def test_dataset_punctuation_search_in_description(self):
+        """Dots in the description match a spaced query, same as in a title.
+
+        Description uses the same analyzer as title, so the match does not
+        have to come from the title.
+        """
+        DatasetFactory(title="Sans rapport", description="Publié sur data.gouv.fr")
+        DatasetFactory(title="Autre sujet", description="Rien à voir ici")
+
+        self.refresh_index()
+
+        response = self.get("/api/2/datasets/search/?q=data gouv")
+        self.assert200(response)
+        titles = [d["title"] for d in response.json["data"]]
+        assert "Sans rapport" in titles
+        assert "Autre sujet" not in titles
+
+        response = self.get("/api/2/datasets/search/?q=data.gouv")
+        self.assert200(response)
+        titles = [d["title"] for d in response.json["data"]]
+        assert "Sans rapport" in titles
+        assert "Autre sujet" not in titles
+
+    def test_dataset_decimal_not_split(self):
+        """q=2.5 matches a decimal, not a title that only has 2 and 5 apart."""
+        DatasetFactory(title="Indice 2.5", description="air")
+        DatasetFactory(title="Pollution PM2.5", description="air")
+        DatasetFactory(title="Ligne 2 et 5", description="air")
+        self.refresh_index()
+
+        response = self.get("/api/2/datasets/search/?q=2.5")
+        self.assert200(response)
+        assert [d["title"] for d in response.json["data"]] == ["Indice 2.5"]
+
+    def test_dataset_dotted_acronym_matches_plain(self):
+        """C.C.A.S. and M.E.N. match their plain forms, and the query does not collapse to "a"."""
+        DatasetFactory(title="Budget du C.C.A.S.")
+        DatasetFactory(title="Aides du CCAS")
+        DatasetFactory(title="Circulaire du M.E.N.")
+        DatasetFactory(title="Site du MEN")
+        DatasetFactory(title="Un a dans le titre")
+        self.refresh_index()
+
+        for term in ("C.C.A.S.", "C.C.A.S", "CCAS"):
+            response = self.get("/api/2/datasets/search/", query_string={"q": term})
+            self.assert200(response)
+            titles = [d["title"] for d in response.json["data"]]
+            assert "Budget du C.C.A.S." in titles
+            assert "Aides du CCAS" in titles
+            assert "Circulaire du M.E.N." not in titles
+            assert "Un a dans le titre" not in titles
+
+        for term in ("M.E.N", "M.E.N.", "MEN"):
+            response = self.get("/api/2/datasets/search/", query_string={"q": term})
+            self.assert200(response)
+            titles = [d["title"] for d in response.json["data"]]
+            assert "Circulaire du M.E.N." in titles
+            assert "Site du MEN" in titles
+            assert "Budget du C.C.A.S." not in titles
+            assert "Un a dans le titre" not in titles
+
     def test_dataset_filter_by_format_family(self):
         """Test filtering datasets by format_family."""
         csv_resource = ResourceFactory(format="csv")

@@ -10,7 +10,7 @@ We’ll use the following repositories:
 # Check the system requirements
 
 !!! info
-    Be aware that udata requires Python **>=3.11,<3.14** to work.
+    Be aware that udata requires Python **>=3.11,<3.15** to work.
 
 udata requires several libraries to be installed to work. You can see them on the udata documentation link below.
 

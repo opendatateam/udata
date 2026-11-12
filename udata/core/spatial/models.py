@@ -5,6 +5,7 @@ from mongoengine.fields import IntField, ListField, MultiPolygonField, Reference
 from werkzeug.local import LocalProxy
 from werkzeug.utils import cached_property
 
+from udata.api import fields
 from udata.api_fields import field, generate_fields
 from udata.app import cache
 from udata.core.metrics.models import WithMetrics
@@ -13,6 +14,7 @@ from udata.mongo.document import UDataDocument as Document
 from udata.mongo.queryset import UDataQuerySet
 
 from . import geoids
+from .api_fields import granularity_fields
 from .constants import ADMIN_LEVEL_MAX, ADMIN_LEVEL_MIN, BASE_GRANULARITIES
 
 __all__ = ("GeoLevel", "GeoZone", "SpatialCoverage", "spatial_granularities")
@@ -41,15 +43,20 @@ class GeoZoneQuerySet(UDataQuerySet):
         return result.id if id_only and result else result
 
 
+@generate_fields()
 class GeoZone(WithMetrics, Document[GeoZoneQuerySet]):
     SEPARATOR = ":"
 
     id = StringField(primary_key=True)
-    slug = StringField(required=True)
-    name = StringField(required=True)
-    code = StringField(required=True)
-    level = StringField(required=True)
-    uri = StringField()
+    slug = field(StringField(required=True), show_as_ref=True, description="The zone slug")
+    name = field(StringField(required=True), show_as_ref=True, description="The zone name")
+    code = field(
+        StringField(required=True),
+        show_as_ref=True,
+        description="The zone unique code in the level",
+    )
+    level = field(StringField(required=True), show_as_ref=True, description="The zone level")
+    uri = field(StringField(), show_as_ref=True, description="The zone uri")
     ancestors = ListField(StringField())
 
     meta = {
@@ -141,9 +148,25 @@ admin_levels = LocalProxy(get_spatial_admin_levels)
 class SpatialCoverage(EmbeddedDocument):
     """Represent a spatial coverage as a list of territories and/or a geometry."""
 
-    geom = field(MultiPolygonField())
-    zones = field(ListField(ReferenceField(GeoZone)))
-    granularity = field(StringField(default="other"))
+    geom = field(
+        MultiPolygonField(),
+        allow_null=True,
+        description="A multipolygon for the whole coverage",
+    )
+    zones = field(
+        ListField(ReferenceField(GeoZone)),
+        full_object=True,
+        description="The covered zones identifiers (full GeoZone objects if `X-Get-Datasets-Full-Objects` is set, IDs of the zones otherwise)",
+    )
+    granularity = field(
+        StringField(default="other"),
+        default="other",
+        full_object=fields.Nested(
+            granularity_fields,
+            attribute=lambda s: {"id": s.granularity or "other", "name": s.granularity_label},
+        ),
+        description="The spatial/territorial granularity (full Granularity object if `X-Get-Datasets-Full-Objects` is set, ID of the granularity otherwise)",
+    )
 
     @property
     def granularity_label(self):

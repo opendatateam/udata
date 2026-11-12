@@ -32,17 +32,22 @@ class OrganizationPrivatePermission(Permission):
         )
 
 
+def organization_needs(user) -> set:
+    """What `user` may do as a member of organizations: a role in each, and the objects
+    assigned to them as a partial editor."""
+    from udata.core.organization.assignment import Assignment
+
+    needs = set()
+    for org in Organization.objects(members__user=user.id).only("members"):
+        membership = get_by(org.members, user=user)
+        needs.add(OrganizationNeed(membership.role, org.id))
+    for raw in Assignment.objects(user=user.id).only("subject").no_dereference().as_pymongo():
+        subject = raw["subject"]
+        needs.add(AssignmentNeed(subject["_cls"], subject["_ref"].id))
+    return needs
+
+
 @identity_loaded.connect
 def inject_organization_needs(sender, identity, **kwargs):
     if current_user.is_authenticated:
-        for org in Organization.objects(members__user=current_user.id):
-            membership = get_by(org.members, user=current_user._get_current_object())
-            identity.provides.add(OrganizationNeed(membership.role, org.id))
-
-        from udata.core.organization.assignment import Assignment
-
-        for raw in (
-            Assignment.objects(user=current_user.id).only("subject").no_dereference().as_pymongo()
-        ):
-            subject = raw["subject"]
-            identity.provides.add(AssignmentNeed(subject["_cls"], subject["_ref"].id))
+        identity.provides.update(organization_needs(current_user._get_current_object()))

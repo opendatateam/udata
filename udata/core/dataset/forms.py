@@ -50,8 +50,7 @@ HOSTED_RESOURCE_PROTECTED_FIELDS = (
 
 class ChecksumForm(ModelForm):
     model_class = Checksum
-    choices = list(zip(CHECKSUM_TYPES, CHECKSUM_TYPES))
-    type = fields.SelectField(choices=choices, default="sha1")
+    type = fields.SelectField(choices=list(CHECKSUM_TYPES), default="sha1")
     value = fields.StringField(_("Checksum value"), [validators.DataRequired()])
 
 
@@ -92,14 +91,14 @@ class BaseResourceForm(ModelForm):
     filetype = fields.RadioField(
         _("File type"),
         [validators.DataRequired()],
-        choices=list(RESOURCE_FILETYPES.items()),
+        choices=list(RESOURCE_FILETYPES),
         default="file",
         description=_("Whether the resource is an uploaded file, a remote file or an API"),
     )
     type = fields.RadioField(
         _("Type"),
         [validators.DataRequired()],
-        choices=list(RESOURCE_TYPES.items()),
+        choices=list(RESOURCE_TYPES),
         default="other",
         description=_("Resource type (documentation, API...)"),
     )
@@ -161,8 +160,8 @@ def unmarshal_frequency(form, field):
 class AccessAudienceForm(ModelForm):
     model_class = AccessAudience
 
-    role = fields.SelectField(choices=[(e.value, e.value) for e in AccessAudienceType])
-    condition = fields.SelectField(choices=[(e.value, e.value) for e in AccessAudienceCondition])
+    role = fields.SelectField(choices=[e.value for e in AccessAudienceType])
+    condition = fields.SelectField(choices=[e.value for e in AccessAudienceCondition])
 
 
 class DatasetForm(ModelForm):
@@ -184,7 +183,7 @@ class DatasetForm(ModelForm):
     )
     license = fields.ModelSelectField(_("License"), model=License, allow_blank=True)
     access_type = fields.SelectField(
-        choices=[(e.value, e.value) for e in AccessType],
+        choices=[e.value for e in AccessType],
         default=AccessType.OPEN,
         validators=[validators.optional()],
     )
@@ -192,7 +191,7 @@ class DatasetForm(ModelForm):
     authorization_request_url = fields.StringField(_("Authorization request URL"))
     access_type_reason_category = fields.SelectField(
         _("Access type reason category"),
-        choices=[(e.value, e.label) for e in InspireLimitationCategory],
+        choices=[e.value for e in InspireLimitationCategory],
         validators=[validators.optional()],
     )
     access_type_reason = fields.StringField(_("Access type reason"))

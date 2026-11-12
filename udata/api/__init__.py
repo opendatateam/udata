@@ -3,6 +3,7 @@ from functools import wraps
 
 import mongoengine
 from babel import Locale, UnknownLocaleError
+from bson import ObjectId
 from flask import (
     Blueprint,
     current_app,
@@ -14,13 +15,14 @@ from flask import (
     url_for,
 )
 from flask_restx import Api, Resource
-from flask_restx.inputs import positive
+from flask_restx.inputs import int_range, positive
 from flask_restx.reqparse import RequestParser
 from flask_storage import UnauthorizedFileType
 
 from udata.app import csrf
-from udata.auth import Permission, PermissionDenied, RoleNeed, current_user, login_user
+from udata.auth import Permission, PermissionDenied, RoleNeed, authenticate_request, current_user
 from udata.i18n import get_locale
+from udata.mongo import db
 
 from . import fields
 
@@ -33,17 +35,21 @@ DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = "X-API-KEY"
 
 
-def add_pagination_arguments(parser: RequestParser, *, page_size: int = 20) -> RequestParser:
+def add_pagination_arguments(
+    parser: RequestParser, *, page_size: int = 20, max_page_size: int | None = None
+) -> RequestParser:
     """Add the standard ``page``/``page_size`` query arguments to ``parser``.
 
     Both are validated as strictly positive integers, so an out-of-range value
     (``0`` or negative) yields a clean 400 instead of failing deeper down — e.g.
     a negative length reaching a Mongo ``$slice`` aggregation, which is a 500.
+    ``max_page_size`` bounds ``page_size`` the same way, for endpoints whose
+    response cost grows too much with the page size.
     """
     parser.add_argument("page", type=positive, default=1, location="args", help="The page to fetch")
     parser.add_argument(
         "page_size",
-        type=positive,
+        type=positive if max_page_size is None else int_range(1, max_page_size),
         default=page_size,
         location="args",
         help="The page size to fetch",
@@ -128,7 +134,7 @@ class UDataApi(Api):
                         self.abort(401, "Expired API token")
                     self.abort(401, "Invalid API token")
 
-                if not login_user(api_token.user, False):
+                if not authenticate_request(api_token.user):
                     self.abort(401, "Inactive user")
                 api_token.update_usage(request.headers.get("User-Agent"))
             else:
@@ -150,6 +156,38 @@ class UDataApi(Api):
         if not isinstance(data, dict):
             self.abort(400, errors={"request": "expecting a JSON object"})
         return data
+
+    def resolve_reference(self, reference, field_name: str, allowed_classes):
+        """Resolve a `{"class": …, "id": …}` reference into a document, errors reported on
+        `field_name`.
+
+        Both parts come straight from the request, and both are checked before anything
+        reaches MongoDB. `class` is matched against `allowed_classes` rather than resolved
+        against the whole document registry, because a generic reference only validates its
+        choices on save — long after the lookup below has run. And `id` has to be an object
+        id: a dict reaches MongoDB as a set of operators (`{"$regex": …}`) selecting an
+        arbitrary document, which MongoEngine rejects on an `ObjectId` primary key but not on
+        a `StringField` one.
+        """
+        if not isinstance(reference, dict):
+            self.abort(400, errors={field_name: "Expected an object with `class` and `id` keys"})
+
+        class_name = reference.get("class")
+        if class_name not in allowed_classes:
+            expected = ", ".join(allowed_classes)
+            self.abort(400, errors={field_name: "`class` must be one of: {0}".format(expected)})
+
+        object_id = reference.get("id")
+        if not ObjectId.is_valid(object_id):
+            self.abort(400, errors={field_name: "`id` must be an identifier"})
+
+        model = db.resolve_model(class_name)
+        try:
+            return model.objects.get(id=object_id)
+        except model.DoesNotExist:
+            self.abort(
+                400, errors={field_name: 'Unknown {0} id "{1}"'.format(field_name, object_id)}
+            )
 
     def validate(self, form_cls, obj=None):
         """Validate a form from the request and handle errors"""
@@ -345,6 +383,18 @@ base_reference = api.model(
     description="Base model for reference field, aka. inline model reference",
 )
 
+GEOM_TYPES = ("Point", "LineString", "Polygon", "MultiPoint", "MultiLineString", "MultiPolygon")
+
+geojson = api.model(
+    "GeoJSON",
+    {
+        "type": fields.String(description="The GeoJSON Type", required=True, enum=GEOM_TYPES),
+        "coordinates": fields.List(
+            fields.Raw(), description="The geometry as coordinates lists", required=True
+        ),
+    },
+)
+
 
 def marshal_page(page, page_fields):
     return api.marshal(page, fields.pager(page_fields))
@@ -380,10 +430,12 @@ def init_app(app):
     import udata.core.topic.apiv2  # noqa
     import udata.core.post.api  # noqa
     import udata.core.post.apiv2  # noqa
+    import udata.core.storages.api  # noqa
     import udata.core.contact_point.api  # noqa
     import udata.features.transfer.api  # noqa
     import udata.features.notifications.api  # noqa
     import udata.core.avatars.api  # noqa
+    import udata.geopf.api  # noqa
     import udata.harvest.api  # noqa
 
     # api.init_app(app)

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ message.subject }}</title>
+    <title>{{ message.subject|string }}</title>
 </head>
 <body style="font-family: Marianne, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; background-color: #ffffff; max-width: 600px; margin: 0 auto; padding: 20px;">
     {% if config.MAIL_LOGO_URL %}
@@ -14,26 +14,40 @@
 
     <p style="margin-bottom: 20px;">{{ _('Hi %(user)s', user=recipient.first_name) }},</p>
 
+    {# `string` drops the `__html__` of LazyString, which would skip autoescaping what it
+       interpolates. Only `ParagraphWithLinks` is HTML: it escapes its values itself. #}
     {% for item in message.paragraphs %}
         {% if item.__class__.__name__ == 'MailCTA' %}
             <p style="margin: 25px 0;">
-                <a href="{{ item.link }}" style="color: #000091; text-decoration: underline; font-weight: 700;">{{ item.label }}</a>
+                <a href="{{ item.link }}" style="color: #000091; text-decoration: underline; font-weight: 700;">{{ item.label|string }}</a>
             </p>
         {% elif item.__class__.__name__ == 'LabelledContent' %}
             {% if item.inline %}
-                <p style="margin-bottom: 15px;"><strong>{{ item.label }}</strong> {{ item.truncated_content }}</p>
+                <p style="margin-bottom: 15px;"><strong>{{ item.label|string }}</strong> {{ item.truncated_content }}</p>
             {% else %}
-                <p style="margin-bottom: 5px; font-weight: bold;">{{ item.label }}</p>
+                <p style="margin-bottom: 5px; font-weight: bold;">{{ item.label|string }}</p>
                 <p style="margin-bottom: 15px; margin-top: 0; font-style: italic;">{{ item.truncated_content }}</p>
             {% endif %}
         {% elif item.__class__.__name__ == 'ParagraphWithLinks' %}
             <p style="margin-bottom: 15px;">{{ item.html|safe }}</p>
         {% else %}
-            <p style="margin-bottom: 15px;">{{ item }}</p>
+            <p style="margin-bottom: 15px;">{{ item|string }}</p>
         {% endif %}
     {% endfor %}
 
     <p style="margin-top: 30px; margin-bottom: 5px;">{{ _('Have a great day') }},</p>
     <p style="margin: 0;">{{ _('The %(site)s team', site=config.SITE_TITLE) }}</p>
+
+    {% if message.footer %}
+    <div style="margin-top: 30px; font-size: 12px; color: #666;">
+        {% for item in message.footer %}
+            {% if item.__class__.__name__ == 'MailCTA' %}
+                <p style="margin: 0 0 5px;"><a href="{{ item.link }}" style="color: #666; text-decoration: underline;">{{ item.label|string }}</a></p>
+            {% else %}
+                <p style="margin: 0 0 5px;">{{ item|string }}</p>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
 </body>
 </html>

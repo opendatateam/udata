@@ -87,7 +87,7 @@ class SpatialCoverageForm(ModelForm):
     granularity = SelectField(
         _("Spatial granularity"),
         description=_("The size of the data increment"),
-        choices=lambda: spatial_granularities,
+        choices=lambda: [id for id, _label in spatial_granularities],
         default="other",
     )
     geom = GeomField()

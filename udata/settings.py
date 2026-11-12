@@ -47,9 +47,7 @@ class Defaults(object):
     CELERY_RESULT_SERIALIZER = "pickle"
     CELERY_ACCEPT_CONTENT = ["pickle", "json"]
     CELERY_WORKER_HIJACK_ROOT_LOGGER = False
-    CELERY_BEAT_SCHEDULER = "udata.tasks.Scheduler"
-    CELERY_MONGODB_SCHEDULER_COLLECTION = "schedules"
-    CELERY_MONGODB_SCHEDULER_CONNECTION_ALIAS = "udata_scheduler"
+    CELERY_BEAT_SCHEDULER = "udata.core.jobs.scheduler.Scheduler"
 
     # Default celery routing
     CELERY_TASK_DEFAULT_QUEUE = "default"
@@ -166,6 +164,9 @@ class Defaults(object):
     SECURITY_TWO_FACTOR_RESCUE_MAIL = (
         "no-reply@data.gouv.fr"  # Should be a contact email for account rescue
     )
+    # Make ProConnect ask the agent for a second factor. Agents whose identity provider
+    # offers none are then denied access at ProConnect, without coming back.
+    PROCONNECT_REQUIRE_SECOND_FACTOR = False
 
     # Inactive users settings
     YEARS_OF_INACTIVITY_BEFORE_DELETION = None
@@ -298,7 +299,7 @@ class Defaults(object):
         "plaintext",
     ]
 
-    MD_ALLOWED_PROTOCOLS = ["http", "https", "ftp", "ftps"]
+    MD_ALLOWED_PROTOCOLS = ["http", "https", "ftp", "ftps", "mailto"]
 
     # Tags constraints
     TAG_MIN_LENGTH = 3
@@ -391,6 +392,7 @@ class Defaults(object):
         # Base
         "csv",
         "txt",
+        "md",
         "json",
         "pdf",
         "xml",
@@ -479,12 +481,13 @@ class Defaults(object):
         "image/webp",
         "text/html",
         "text/calendar",
+        "text/markdown",
         "text/plain",
         "text/xml",
         "text/turtle",
     ]
 
-    # How much time upload chunks are kept before cleanup
+    # How much time upload chunks, and content images nothing shows, are kept before cleanup
     UPLOAD_MAX_RETENTION = 24 * HOUR
 
     # Avatar providers parameters
@@ -584,6 +587,11 @@ class Defaults(object):
     ##################
     TRANSPORT_DATASETS_URL = None
 
+    # Ecologie extras
+    #################
+    # Datasets in this topic get the ecologie:universe extra
+    ECOLOGIE_TOPIC_ID = None
+
     # Schemas parameters
     ####################
     SCHEMA_CATALOG_URL = None
@@ -671,6 +679,32 @@ class Defaults(object):
     # Metrics settings
     ###########################################################################
     METRICS_API = None
+
+    # Géoplateforme (geopf) integration
+    ###########################################################################
+    GEOPF_API_BASE = "https://data.geopf.fr/api"
+    # Base URL of the cartes.gouv.fr dashboard, used to build fiche URLs.
+    GEOPF_DASHBOARD_BASE = "https://cartes.gouv.fr"
+    # Resource formats eligible for push. Only gpkg is actually processed today
+    # (see udata/geopf/srs.py), so adding a format here without SRS-detection
+    # support for it would just fail at upload time.
+    GEOPF_PUSHABLE_FORMATS = frozenset({"gpkg"})
+    # Maximum size (bytes) of a resource file materialized to disk for a push,
+    # whether downloaded from a remote URL or copied from local storage.
+    GEOPF_MAX_FILE_SIZE = 1_000_000_000  # 1 GB
+    # Per-request timeout (seconds) for calls to the geopf API.
+    GEOPF_REQUEST_TIMEOUT = 120
+    # Max duration (seconds) of an upload-checks or processing poll loop.
+    GEOPF_POLL_TIMEOUT = 1800
+    # OAuth2/OIDC client registration against geopf's Keycloak (sso.geopf.fr, realm geoplateforme).
+    GEOPF_OAUTH_CLIENT_ID = None
+    GEOPF_OAUTH_CLIENT_SECRET = None
+    GEOPF_OAUTH_OPENID_CONF_URL = (
+        "https://sso.geopf.fr/realms/geoplateforme/.well-known/openid-configuration"
+    )
+    GEOPF_OAUTH_SCOPE = "openid"
+    # Fernet key used to encrypt GeopfToken.access_token/refresh_token at rest.
+    GEOPF_TOKEN_ENCRYPTION_KEY = None
 
     # Format families for search filtering
     ###########################################################################

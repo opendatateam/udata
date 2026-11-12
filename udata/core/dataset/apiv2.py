@@ -7,34 +7,35 @@ from flask_login import current_user
 from flask_restx import marshal
 
 from udata import search
-from udata.api import API, add_pagination_arguments, apiv2, fields
+from udata.api import API, add_pagination_arguments, apiv2, fields, geojson
 from udata.auth import admin_permission
 from udata.core.access_type.models import AccessAudience
 from udata.core.badges.models import Badge
 from udata.core.contact_point.models import ContactPoint
 from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.models import Member, Organization
-from udata.core.spatial.api_fields import geojson
+from udata.core.spatial.api_fields import granularity_fields
+from udata.core.spatial.models import GeoZone, SpatialCoverage
 from udata.core.user.models import User
 from udata.mongo.queryset import paginate_embedded_list
-from udata.utils import get_by
 
 from .api import DEFAULT_SORTING, DatasetApiParser, ResourceMixin
 from .api_fields import (
     catalog_schema_fields,
     checksum_fields,
+    dataset_geopf_fields,
     dataset_harvest_fields,
     dataset_internal_fields,
     dataset_permissions_fields,
     resource_fields,
+    resource_geopf_fields,
     resource_harvest_fields,
     resource_internal_fields,
     schema_fields,
-    spatial_coverage_fields,
     temporal_coverage_fields,
 )
 from .constants import DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UpdateFrequency
-from .models import CommunityResource, Dataset, Resource, get_dataset_by_resource_id
+from .models import CommunityResource, Dataset, Resource, get_dataset_and_resource_by_id
 from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
@@ -77,6 +78,7 @@ DEFAULT_MASK_APIV2 = ",".join(
         "doi",
         "quality",
         "harvest",
+        "geopf",
         "internal",
         "contact_points",
         "featured",
@@ -186,6 +188,13 @@ dataset_fields = apiv2.model(
             description="Dataset harvest metadata attributes",
             skip_none=True,
         ),
+        "geopf": fields.Nested(
+            dataset_geopf_fields,
+            readonly=True,
+            allow_null=True,
+            description="Géoplateforme sync status metadata",
+            skip_none=True,
+        ),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
         "metrics": fields.Raw(
             attribute=lambda o: o.get_metrics(), description="The dataset metrics"
@@ -200,7 +209,7 @@ dataset_fields = apiv2.model(
             temporal_coverage_fields, allow_null=True, description="The temporal coverage"
         ),
         "spatial": fields.Nested(
-            spatial_coverage_fields, allow_null=True, description="The spatial coverage"
+            SpatialCoverage.__read_fields__, allow_null=True, description="The spatial coverage"
         ),
         "license": fields.Raw(
             attribute=lambda d: (
@@ -280,12 +289,17 @@ apiv2.inherit("OrganizationReference", Organization.__ref_fields__)
 apiv2.inherit("UserReference", User.__ref_fields__)
 apiv2.inherit("MemberUserWithEmail", Member.__read_fields__)
 apiv2.inherit("Resource", resource_fields)
-apiv2.inherit("SpatialCoverage", spatial_coverage_fields)
+apiv2.inherit("SpatialCoverage (read)", SpatialCoverage.__read_fields__)
+apiv2.inherit("SpatialCoverage (write)", SpatialCoverage.__write_fields__)
+apiv2.inherit("GeoZoneReference", GeoZone.__ref_fields__)
+apiv2.inherit("GeoGranularity", granularity_fields)
 apiv2.inherit("TemporalCoverage", temporal_coverage_fields)
 apiv2.inherit("GeoJSON", geojson)
 apiv2.inherit("Checksum", checksum_fields)
 apiv2.inherit("HarvestDatasetMetadata", dataset_harvest_fields)
 apiv2.inherit("HarvestResourceMetadata", resource_harvest_fields)
+apiv2.inherit("GeopfDatasetMetadata", dataset_geopf_fields)
+apiv2.inherit("GeopfResourceMetadata", resource_geopf_fields)
 apiv2.inherit("DatasetInternals", dataset_internal_fields)
 apiv2.inherit("ResourceInternals", resource_internal_fields)
 apiv2.inherit("ContactPoint (read)", ContactPoint.__read_fields__)
@@ -326,7 +340,7 @@ class DatasetListAPI(API):
         """List or search all datasets"""
         args = dataset_parser.parse()
         datasets = Dataset.objects.exclude("resources").visible_by_user(
-            current_user, mongoengine.Q(private__ne=True, archived=None, deleted=None)
+            current_user, mongoengine.Q(private=False, archived=None, deleted=None)
         )
         datasets = dataset_parser.parse_filters(datasets, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
@@ -533,27 +547,24 @@ class DatasetSchemasAPI(API):
 @ns.route("/resources/<uuid:rid>/", endpoint="resource")
 class ResourceAPI(API):
     @apiv2.doc("get_resource")
+    @apiv2.marshal_with(specific_resource_fields)
     def get(self, rid):
-        dataset = get_dataset_by_resource_id(rid)
+        dataset, resource = get_dataset_and_resource_by_id(rid)
         if dataset:
             if not dataset.permissions["read"].can():
                 if not dataset.private and dataset.deleted:
                     apiv2.abort(410, "Dataset has been deleted")
                 apiv2.abort(404)
-            resource = get_by(dataset.resources, id=rid)
         else:
-            resource = CommunityResource.objects(id=rid).first()
+            # `no_dereference` keeps `resource.dataset` a DBRef: the parent Dataset is
+            # never fetched whole since only its id ends up in the response.
+            resource = CommunityResource.objects(id=rid).no_dereference().first()
             if resource:
                 dataset = resource.dataset
         if not resource:
             apiv2.abort(404, "Resource does not exist")
 
-        # Manually marshalling to make sure resource.dataset is in the scope.
-        # See discussions in https://github.com/opendatateam/udata/pull/2732/files
-        return marshal(
-            {"resource": resource, "dataset_id": dataset.id if dataset else None},
-            specific_resource_fields,
-        )
+        return {"resource": resource, "dataset_id": dataset.id if dataset else None}
 
 
 @ns.route(

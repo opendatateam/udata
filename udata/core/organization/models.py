@@ -13,6 +13,7 @@ from mongoengine.fields import (
     EmbeddedDocumentListField,
     GenericEmbeddedDocumentField,
     GenericReferenceField,
+    IntField,
     ListField,
     MapField,
     ReferenceField,
@@ -27,12 +28,12 @@ from udata.api_fields import field, generate_fields, required_if
 from udata.core.auditable import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.checks import check_is_email
-from udata.core.edito_blocs.base import Bloc
+from udata.core.edito_blocs.base import Bloc, check_blocs_layout, check_no_colored_sections
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.spam.models import SpamMixin
-from udata.core.storages import avatars, default_image_basename
+from udata.core.storages import avatars, default_image_basename, images
 from udata.core.user.models import User, user_with_email_ref_fields
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -284,6 +285,27 @@ class Organization(
             "size": BIGGEST_LOGO_SIZE,
         },
     )
+    banner_color = field(
+        StringField(regex=r"^#[0-9a-fA-F]{6}$"),
+        description="Hex color code (e.g. #000091) for the organization page banner",
+    )
+    banner_image = field(
+        ImageField(
+            fs=images,
+            basename=default_image_basename,
+            # No thumbnails: they are square center-crops, wrong for a banner.
+        ),
+        # Read-only: managed through the dedicated upload endpoint
+        readonly=True,
+        description="The organization page banner image URL",
+    )
+    banner_image_position = field(
+        IntField(min_value=0, max_value=100, default=50),
+        description=(
+            "Vertical position of the banner image, as a percentage matching "
+            "CSS background-position-y (0 = top, 50 = centered, 100 = bottom)"
+        ),
+    )
     business_number_id = field(
         StringField(max_length=ORG_BID_SIZE_LIMIT), checks=[check_siret], filterable={}
     )
@@ -303,6 +325,7 @@ class Organization(
     presentation_blocs = field(
         EmbeddedDocumentListField(Bloc),
         generic=True,
+        checks=[check_blocs_layout, check_no_colored_sections],
         # Read through `public_presentation_blocs` so the API hides unpublished blocs from
         # the public. Writes still target the real `presentation_blocs` attribute (patch()
         # addresses fields by key).

@@ -1,4 +1,5 @@
 from base64 import b64encode
+from datetime import datetime
 from urllib.parse import parse_qs
 
 import pytest
@@ -7,12 +8,14 @@ from authlib.common.urls import url_decode, urlparse
 from authlib.oauth2.rfc7636 import (
     create_s256_code_challenge,
 )
-from flask import url_for
+from flask import current_app, url_for
 
 from udata.api import API, api
 from udata.api.oauth2 import OAuth2Client, OAuth2Token
 from udata.auth import PermissionDenied
+from udata.core.api_token.models import ApiToken
 from udata.core.user.factories import UserFactory
+from udata.core.user.models import User
 from udata.forms import Form, fields, validators
 from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import (
@@ -28,7 +31,7 @@ ns = api.namespace("fake", "A Fake namespace")
 
 class FakeForm(Form):
     required = fields.StringField(validators=[validators.DataRequired()])
-    choices = fields.SelectField(choices=(("first", ""), ("second", "")))
+    choices = fields.SelectField(choices=["first", "second"])
     email = fields.StringField(validators=[validators.Email()])
 
 
@@ -889,3 +892,44 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
         assert403(response)
         assert "message" in response.json
+
+
+# A cookie must reach the next request for its absence to prove anything: the test client
+# speaks plain http to local.test, whatever a local udata.cfg says.
+@pytest.mark.options(SESSION_COOKIE_SECURE=False, SESSION_COOKIE_DOMAIN=None)
+class HeaderAuthTest(PytestOnlyAPITestCase):
+    """A credential sent in a header authenticates its request only. A session it opened
+    would outlive its revocation, and be fresh enough for the sensitive operations. Nor is
+    it a login: the credential records its own use."""
+
+    LAST_LOGIN = datetime(2024, 1, 1)
+
+    def post(self, headers=None):
+        # pytest-flask keeps one app context, hence one `g`, for the whole test, and
+        # flask-login caches the user there: a context per request reads the cookie.
+        with current_app.app_context():
+            return self.client.post(url_for("api.fake"), headers=headers)
+
+    def assert_authenticated_this_request_only(self, response, user):
+        assert200(response)
+        assert not response.headers.getlist("Set-Cookie")
+        assert401(self.post())
+        assert User.objects.get(id=user.id).current_login_at == self.LAST_LOGIN
+
+    def test_api_key(self):
+        user = UserFactory(current_login_at=self.LAST_LOGIN)
+        token, plaintext = ApiToken.generate(user)
+
+        self.assert_authenticated_this_request_only(self.post({"X-API-KEY": plaintext}), user)
+        token.reload()
+        assert token.last_used_at is not None
+
+    def test_oauth_token(self, oauth):
+        user = UserFactory(current_login_at=self.LAST_LOGIN)
+        token = OAuth2Token.objects.create(client=oauth, user=user, access_token="access-token")
+
+        self.assert_authenticated_this_request_only(
+            self.post({"Authorization": f"Bearer {token.access_token}"}), user
+        )
+        token.reload()
+        assert token.last_used_at is not None

@@ -6,6 +6,7 @@ from uuid import uuid4
 
 import feedparser
 import pytest
+import requests
 import requests_mock
 from flask import url_for
 from mongoengine.fields import BooleanField
@@ -45,10 +46,17 @@ from udata.core.dataset.models import (
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import OrganizationBadge
-from udata.core.spatial.factories import SAMPLE_GEOM, GeoLevelFactory, SpatialCoverageFactory
+from udata.core.spatial.factories import SAMPLE_GEOM, SpatialCoverageFactory
 from udata.core.storages.api import META, chunk_filename
 from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.geopf.models import (
+    GeopfDatasetMetadata,
+    GeopfDatasetPushMetadata,
+    GeopfResourceMetadata,
+    GeopfResourceOfferingMetadata,
+    GeopfResourcePushMetadata,
+)
 from udata.i18n import gettext as _
 from udata.models import CommunityResource, Dataset, Follow, Member
 from udata.mongo.datetime_fields import DateRange
@@ -539,24 +547,15 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
 
     def test_dataset_api_get_with_full_objects(self):
-        """It should fetch a private dataset from the API if user is authorized"""
+        """It should render frequency and license as objects with the full objects header"""
         license = LicenseFactory(id="lov2", title="Licence Ouverte Version 2.0")
-        paca, bdr, arles = create_geozones_fixtures()
-        country = GeoLevelFactory(id="country", name="Pays", admin_level=10)
-        other = GeoLevelFactory(id="other", name="Autre")
 
-        dataset = DatasetFactory(
-            frequency=UpdateFrequency.MONTHLY,
-            license=license,
-            spatial=SpatialCoverageFactory(zones=[paca.id], granularity=country.id),
-        )
+        dataset = DatasetFactory(frequency=UpdateFrequency.MONTHLY, license=license)
 
         response = self.get(url_for("apiv2.dataset", dataset=dataset))
         self.assert200(response)
         assert response.json["frequency"] == UpdateFrequency.MONTHLY.id
         assert response.json["license"] == "lov2"
-        assert response.json["spatial"]["zones"][0] == paca.id
-        assert response.json["spatial"]["granularity"] == "country"
 
         response = self.get(
             url_for("apiv2.dataset", dataset=dataset),
@@ -569,16 +568,8 @@ class DatasetAPITest(APITestCase):
         assert response.json["frequency"]["label"] == UpdateFrequency.MONTHLY.label
         assert response.json["license"]["id"] == "lov2"
         assert response.json["license"]["title"] == license.title
-        assert response.json["spatial"]["zones"][0]["id"] == paca.id
-        assert response.json["spatial"]["zones"][0]["name"] == paca.name
-        assert response.json["spatial"]["granularity"]["id"] == "country"
-        assert response.json["spatial"]["granularity"]["name"] == country.name
 
-        dataset_without_anything = DatasetFactory(
-            frequency=None,
-            license=None,
-            spatial=SpatialCoverageFactory(zones=[], granularity=None),
-        )
+        dataset_without_anything = DatasetFactory(frequency=None, license=None)
 
         response = self.get(
             url_for("apiv2.dataset", dataset=dataset_without_anything),
@@ -591,9 +582,6 @@ class DatasetAPITest(APITestCase):
         assert response.json["frequency"]["label"] == UpdateFrequency.UNKNOWN.label
         assert response.json["license"]["id"] == DEFAULT_LICENSE["id"]
         assert response.json["license"]["title"] == DEFAULT_LICENSE["title"]
-        assert len(response.json["spatial"]["zones"]) == 0
-        assert response.json["spatial"]["granularity"]["id"] == "other"
-        assert response.json["spatial"]["granularity"]["name"] == other.name
 
     def test_dataset_api_create(self):
         """It should create a dataset from the API"""
@@ -895,7 +883,7 @@ class DatasetAPITest(APITestCase):
         user = self.login()
         original_member = Member(user=user, role="editor")
         original_org = OrganizationFactory(members=[original_member])
-        dataset = DatasetFactory(owner=user, organization=original_org)
+        dataset = DatasetFactory(organization=original_org)
 
         new_member = Member(user=self.user, role="admin")
         new_org = OrganizationFactory(members=[new_member])
@@ -914,6 +902,22 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().organization.id, new_org.id)
+
+    def test_dataset_api_update_org_editor_cannot_take_ownership(self):
+        """An organization editor cannot move an organization dataset to themselves"""
+        editor = self.login()
+        org = OrganizationFactory(members=[Member(user=editor, role="editor")])
+        dataset = DatasetFactory(organization=org)
+
+        data = dataset.to_dict()
+        del data["organization"]
+        data["owner"] = str(editor.id)
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+
+        self.assert400(response)
+        dataset.reload()
+        self.assertEqual(dataset.organization, org)
+        self.assertIsNone(dataset.owner)
 
     def test_dataset_api_update_with_resources(self):
         """It should update a dataset from the API with resources parameters"""
@@ -1868,9 +1872,8 @@ class DatasetsFeedAPItest(APITestCase):
 
     @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_org(self):
-        owner = UserFactory()
         org = OrganizationFactory()
-        DatasetFactory(owner=owner, organization=org, resources=[ResourceFactory()])
+        DatasetFactory(organization=org, resources=[ResourceFactory()])
 
         response = self.get(url_for("api.recent_datasets_atom_feed"))
 
@@ -3041,6 +3044,127 @@ class DatasetArchivedAPITest(APITestCase):
         self.assert200(response)
 
 
+@pytest.mark.options(
+    PUBLISH_ON_RESOURCE_EVENTS=True,
+    RESOURCES_ANALYSER_URI="http://hydra.test",
+    RESOURCES_ANALYSER_API_KEY="hydra-api-key",
+)
+class ResourceAnalysisAPITest(APITestCase):
+    def force_analysis(self):
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+        self.login(AdminFactory())
+        return self.post(url_for("api.resource_analysis", dataset=dataset, rid=resource.id))
+
+    @requests_mock.Mocker(kw="rmock")
+    def test_admin_forces_analysis(self, rmock):
+        rmock.post(
+            "http://hydra.test/api/checks", status_code=201, json={"timeout": False, "error": None}
+        )
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+        self.login(AdminFactory())
+
+        response = self.post(url_for("api.resource_analysis", dataset=dataset, rid=resource.id))
+
+        self.assertStatus(response, 202)
+        assert rmock.call_count == 1
+        assert rmock.last_request.json() == {
+            "resource_id": str(resource.id),
+            "force_analysis": True,
+        }
+        assert rmock.last_request.headers["Authorization"] == "Bearer hydra-api-key"
+
+    @requests_mock.Mocker(kw="rmock")
+    def test_resource_timed_out(self, rmock):
+        rmock.post(
+            "http://hydra.test/api/checks", status_code=201, json={"timeout": True, "error": None}
+        )
+
+        response = self.force_analysis()
+
+        self.assertStatus(response, 502)
+        assert "did not answer in time" in response.json["message"]
+
+    @requests_mock.Mocker(kw="rmock")
+    def test_resource_unreachable(self, rmock):
+        rmock.post(
+            "http://hydra.test/api/checks",
+            status_code=201,
+            json={"timeout": False, "error": "404, message='Not Found'"},
+        )
+
+        response = self.force_analysis()
+
+        self.assertStatus(response, 502)
+        assert "404, message='Not Found'" in response.json["message"]
+
+    @requests_mock.Mocker(kw="rmock")
+    def test_analyser_answers_an_error(self, rmock):
+        rmock.post("http://hydra.test/api/checks", status_code=404)
+
+        response = self.force_analysis()
+
+        self.assertStatus(response, 502)
+        assert "The resources analyser failed" in response.json["message"]
+
+    @requests_mock.Mocker(kw="rmock")
+    def test_analyser_unreachable(self, rmock):
+        rmock.post("http://hydra.test/api/checks", exc=requests.ConnectionError)
+
+        response = self.force_analysis()
+
+        self.assertStatus(response, 502)
+        assert "The resources analyser failed" in response.json["message"]
+
+    @requests_mock.Mocker(kw="rmock")
+    def test_dataset_owner_cannot_force_analysis(self, rmock):
+        user = self.login()
+        resource = ResourceFactory()
+        dataset = DatasetFactory(owner=user, resources=[resource])
+
+        response = self.post(url_for("api.resource_analysis", dataset=dataset, rid=resource.id))
+
+        self.assert403(response)
+        assert rmock.call_count == 0
+
+    @requests_mock.Mocker(kw="rmock")
+    def test_unknown_resource(self, rmock):
+        dataset = DatasetFactory(resources=[ResourceFactory()])
+        self.login(AdminFactory())
+
+        response = self.post(url_for("api.resource_analysis", dataset=dataset, rid=uuid4()))
+
+        self.assert404(response)
+        assert rmock.call_count == 0
+
+
+# pytest-flask applies class-level `options` after method-level ones, so the
+# analyser can't be switched off from a method of the class above.
+class ResourceAnalysisWithoutAnalyserAPITest(APITestCase):
+    def force_analysis(self):
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+        self.login(AdminFactory())
+        return self.post(url_for("api.resource_analysis", dataset=dataset, rid=resource.id))
+
+    @requests_mock.Mocker(kw="rmock")
+    @pytest.mark.options(PUBLISH_ON_RESOURCE_EVENTS=False)
+    def test_events_not_published(self, rmock):
+        response = self.force_analysis()
+
+        self.assertStatus(response, 503)
+        assert rmock.call_count == 0
+
+    @requests_mock.Mocker(kw="rmock")
+    @pytest.mark.options(PUBLISH_ON_RESOURCE_EVENTS=True, RESOURCES_ANALYSER_URI="")
+    def test_no_analyser_uri(self, rmock):
+        response = self.force_analysis()
+
+        self.assertStatus(response, 503)
+        assert rmock.call_count == 0
+
+
 class CommunityResourceAPITest(APITestCase):
     def test_community_resource_api_get(self):
         """It should fetch a community resource from the API"""
@@ -3488,6 +3612,7 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
             archived_reason="not-on-remote",
             uri="http://domain.gouv.fr/dataset/uri",
             dct_identifier="http://domain.gouv.fr/dataset/identifier",
+            doi="10.15148/762d02eb-82dc-46f4-b231-b67f3819a8ad",
         )
         dataset = DatasetFactory(harvest=harvest_metadata)
 
@@ -3508,6 +3633,7 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
             "archived_reason": "not-on-remote",
             "uri": "http://domain.gouv.fr/dataset/uri",
             "dct_identifier": "http://domain.gouv.fr/dataset/identifier",
+            "doi": "10.15148/762d02eb-82dc-46f4-b231-b67f3819a8ad",
         }
 
     def test_dataset_with_resource_harvest_metadata(self):
@@ -3566,3 +3692,45 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
         assert200(response)
         assert response.json["resources"][0]["created_at"] == issued_date.isoformat()
         assert response.json["resources"][0]["last_modified"] == modification_date.isoformat()
+
+
+class GeopfMetadataAPITest(PytestOnlyAPITestCase):
+    def test_dataset_with_geopf_push_metadata(self):
+        dataset = DatasetFactory(
+            geopf=GeopfDatasetMetadata(
+                push=GeopfDatasetPushMetadata(datastore_id="ds-1", datasheet_name="Ma fiche")
+            )
+        )
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["geopf"] == {
+            "datasheet_url": "https://cartes.gouv.fr/tableau-de-bord/entrepots/ds-1/donnees/Ma%20fiche"
+        }
+
+    def test_dataset_without_geopf_metadata_is_null(self):
+        dataset = DatasetFactory()
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["geopf"] is None
+
+    def test_resource_with_geopf_push_metadata(self):
+        resource = ResourceFactory(
+            geopf=GeopfResourceMetadata(push=GeopfResourcePushMetadata(status="done"))
+        )
+        dataset = DatasetFactory(resources=[resource])
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["resources"][0]["geopf"] == {"push_status": "done"}
+
+    def test_resource_with_geopf_offering_metadata(self):
+        resource = ResourceFactory(
+            geopf=GeopfResourceMetadata(offering=GeopfResourceOfferingMetadata(id="offering-1"))
+        )
+        dataset = DatasetFactory(resources=[resource])
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["resources"][0]["geopf"] == {"offering_id": "offering-1"}

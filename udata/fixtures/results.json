@@ -19969,90 +19969,155 @@
     "title": "data.gouv.fr",
     "datasets_blocs": [
       {
-        "class": "DatasetsListBloc",
-        "id": "fd2464f7-c529-4dd2-a55a-c709bb76d6b3",
-        "subtitle": "Découvrez quelques-uns des jeux de données les plus populaires sur la plateforme.",
-        "title": "Jeux de données populaires"
-      },
-      {
-        "class": "LinksListBloc",
-        "id": "c834872c-6bf8-4fc3-9697-4d3316842788",
-        "links": [
+        "id": "b4300cd7-d70a-4e42-8df9-7d1096b092b8",
+        "class": "SectionBloc",
+        "blocs": [
           {
-            "color": "#3558A2",
-            "title": "Élections",
-            "url": "https://www.data.gouv.fr/pages/donnees-des-elections/"
-          },
-          {
-            "color": "#5E5DAE",
-            "title": "Éducation",
-            "url": "https://www.data.gouv.fr/pages/donnees_education/"
-          },
-          {
-            "color": "#2B6972",
-            "title": "Énergie",
-            "url": "https://www.data.gouv.fr/pages/donnees-energie/"
+            "id": "87ff5cc6-9f3c-423f-8ad7-274f6588f03e",
+            "class": "TitleBloc",
+            "title": "Jeux de données populaires",
+            "subtitle": "Découvrez quelques-uns des jeux de données les plus populaires sur la plateforme."
           }
-        ],
-        "main_link_title": "Voir toutes les thématiques",
-        "main_link_url": "https://www.data.gouv.fr/pages/thematiques-a-la-une",
-        "paragraph": null,
-        "subtitle": "Retrouvez ici une sélection de jeux de données clés regroupés par sujet.",
-        "title": "Thématiques à la une"
+        ]
       },
       {
-        "class": "DatasetsListBloc",
-        "id": "4c64477b-45fa-4fde-b1d0-e09006dffd41",
-        "subtitle": "Découvrez notre sélection de jeux de données du moment.",
-        "title": "Sélection du moment "
+        "id": "33982ccb-c3e6-487d-b8e6-7cb78f9163fe",
+        "class": "SectionBloc",
+        "blocs": [
+          {
+            "id": "d91bc2df-8d94-4a09-b253-bfa8039aaff6",
+            "class": "TitleBloc",
+            "title": "Thématiques à la une",
+            "subtitle": "Retrouvez ici une sélection de jeux de données clés regroupés par sujet."
+          },
+          {
+            "class": "LinksListBloc",
+            "id": "c834872c-6bf8-4fc3-9697-4d3316842788",
+            "links": [
+              {
+                "color": "#3558A2",
+                "title": "Élections",
+                "url": "https://www.data.gouv.fr/pages/donnees-des-elections/"
+              },
+              {
+                "color": "#5E5DAE",
+                "title": "Éducation",
+                "url": "https://www.data.gouv.fr/pages/donnees_education/"
+              },
+              {
+                "color": "#2B6972",
+                "title": "Énergie",
+                "url": "https://www.data.gouv.fr/pages/donnees-energie/"
+              }
+            ],
+            "width": null
+          },
+          {
+            "class": "ButtonBloc",
+            "id": "81bdf13b-cadd-4ced-862c-ad1e4e441ef4",
+            "width": null,
+            "title": "Voir toutes les thématiques",
+            "url": "https://www.data.gouv.fr/pages/thematiques-a-la-une"
+          }
+        ]
+      },
+      {
+        "id": "613a882f-ad62-46f3-ade4-4ab12747da4d",
+        "class": "SectionBloc",
+        "blocs": [
+          {
+            "id": "cc373df1-0a33-4d69-a558-efb3eb4a3de6",
+            "class": "TitleBloc",
+            "title": "Sélection du moment ",
+            "subtitle": "Découvrez notre sélection de jeux de données du moment."
+          }
+        ]
       }
     ],
     "reuses_blocs": [
       {
-        "class": "ReusesListBloc",
-        "id": "c9c4cb40-d7b1-464c-aa82-6acce6235e9f",
-        "subtitle": null,
-        "title": "Réutilisations de données populaires"
+        "id": "122eb012-0888-4bb7-875a-a04b7ad5262d",
+        "class": "SectionBloc",
+        "blocs": [
+          {
+            "id": "c409ad14-b155-4997-b55a-85872eaca9e2",
+            "class": "TitleBloc",
+            "title": "Réutilisations de données populaires"
+          }
+        ]
       },
       {
-        "class": "ReusesListBloc",
-        "id": "142c123c-848c-4bf1-ac0e-12b85a0b91c4",
-        "subtitle": "Découvrez quelques-unes des réutilisations les plus populaires sur la plateforme.",
-        "title": "Sélection du moment"
+        "id": "d6504b22-d133-40ca-9085-61b31ba9d351",
+        "class": "SectionBloc",
+        "blocs": [
+          {
+            "id": "f3f4fc28-b895-4a7f-921a-3c04b89002f9",
+            "class": "TitleBloc",
+            "title": "Sélection du moment",
+            "subtitle": "Découvrez quelques-unes des réutilisations les plus populaires sur la plateforme."
+          }
+        ]
       }
     ],
     "dataservices_blocs": [
       {
-        "class": "DataservicesListBloc",
-        "id": "b2ef876b-335b-4109-98a3-fd7ef3fe3b7c",
-        "subtitle": "Découvrez notre sélection des APIs du moment.",
-        "title": "Sélection du moment"
+        "id": "77c77d5b-7373-4cf0-9538-f719df268d12",
+        "class": "SectionBloc",
+        "blocs": [
+          {
+            "id": "06b4cc6d-cf91-4f33-b4ec-76466e08ceca",
+            "class": "TitleBloc",
+            "title": "Sélection du moment",
+            "subtitle": "Découvrez notre sélection des APIs du moment."
+          }
+        ]
       },
       {
-        "class": "LinksListBloc",
-        "id": "fa21b583-8565-494d-a708-e16cb545504b",
-        "links": [
+        "id": "dcb358ab-ecea-4699-b5fb-996966fa9c0e",
+        "class": "SectionBloc",
+        "blocs": [
           {
-            "color": "",
-            "title": "Géographie",
-            "url": "https://guides.data.gouv.fr/reutiliser-des-donnees/utiliser-les-api-geographiques"
+            "id": "9a7ee03b-ba46-4be1-9504-9db586dc4161",
+            "class": "TitleBloc",
+            "title": "Les guides thématiques",
+            "subtitle": "Retrouvez ici une sélection de guides concernant les APIs regroupés par sujet."
           },
           {
-            "color": "",
-            "title": "Météorologie",
-            "url": "https://guides.data.gouv.fr/reutiliser-des-donnees/prise-en-main-des-donnees-meteorologiques"
+            "class": "MarkdownBloc",
+            "id": "488c4542-4295-4323-a411-178235c71bc6",
+            "width": "1/2",
+            "content": "Nos guides ont été crée afin de vous permettre d'explorer des cas pratiques d'utilisation des APIs  mises à votre disposition pour vous accompagner dans leur utilisation. "
           },
           {
-            "color": "",
-            "title": "Transports",
-            "url": "https://doc.transport.data.gouv.fr/reutilisations-des-donnees/reutilisation-des-donnees"
+            "class": "LinksListBloc",
+            "id": "fa21b583-8565-494d-a708-e16cb545504b",
+            "links": [
+              {
+                "color": "",
+                "title": "Géographie",
+                "url": "https://guides.data.gouv.fr/reutiliser-des-donnees/utiliser-les-api-geographiques"
+              },
+              {
+                "color": "",
+                "title": "Météorologie",
+                "url": "https://guides.data.gouv.fr/reutiliser-des-donnees/prise-en-main-des-donnees-meteorologiques"
+              },
+              {
+                "color": "",
+                "title": "Transports",
+                "url": "https://doc.transport.data.gouv.fr/reutilisations-des-donnees/reutilisation-des-donnees"
+              }
+            ],
+            "width": "1/2"
+          },
+          {
+            "class": "ButtonBloc",
+            "id": "9bcb3e51-afeb-4a7d-b8f1-65c5a9a4504c",
+            "width": "1/2",
+            "title": "Voir l’ensemble des guides thématiques",
+            "url": "https://guides.data.gouv.fr/reutiliser-des-donnees"
           }
-        ],
-        "main_link_title": "Voir l’ensemble des guides thématiques",
-        "main_link_url": "https://guides.data.gouv.fr/reutiliser-des-donnees",
-        "paragraph": "Nos guides ont été crée afin de vous permettre d'explorer des cas pratiques d'utilisation des APIs  mises à votre disposition pour vous accompagner dans leur utilisation. ",
-        "subtitle": "Retrouvez ici une sélection de guides concernant les APIs regroupés par sujet.",
-        "title": "Les guides thématiques"
+        ]
       }
     ]
   }

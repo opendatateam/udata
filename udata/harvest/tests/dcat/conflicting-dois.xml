@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+  xmlns:owl="http://www.w3.org/2002/07/owl#"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:dcat="http://www.w3.org/ns/dcat#"
+  xmlns:dcterms="http://purl.org/dc/terms/"
+>
+  <dcat:Catalog rdf:about="http://data.test.org/">
+    <dcat:dataset>
+      <dcat:Dataset rdf:about="http://data.test.org/datasets/1">
+        <dcterms:title>Dataset with two DOIs</dcterms:title>
+        <dcterms:description>Its source declares two different DOIs for it.</dcterms:description>
+        <dcterms:identifier>10.15148/762d02eb</dcterms:identifier>
+        <owl:sameAs rdf:resource="https://doi.org/10.15148/0e999ffc"/>
+      </dcat:Dataset>
+    </dcat:dataset>
+  </dcat:Catalog>
+</rdf:RDF>

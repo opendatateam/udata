@@ -4,7 +4,7 @@ from udata.core.badges.models import Badge
 from udata.core.contact_point.models import ContactPoint
 from udata.core.organization.constants import BIGGEST_LOGO_SIZE
 from udata.core.organization.models import Organization
-from udata.core.spatial.api_fields import spatial_coverage_fields
+from udata.core.spatial.models import SpatialCoverage
 from udata.core.user.models import User
 
 from .constants import (
@@ -45,6 +45,9 @@ dataset_harvest_fields = api.model(
         "domain": fields.String(description="The harvested domain", allow_null=True),
         "source_id": fields.String(description="The harvester id", allow_null=True),
         "source_url": fields.String(description="The harvester source url", allow_null=True),
+        "record_id": fields.String(
+            description="The dataset record id on the source portal", allow_null=True
+        ),
         "remote_id": fields.String(
             description="The dataset remote id on the source portal", allow_null=True
         ),
@@ -69,6 +72,12 @@ dataset_harvest_fields = api.model(
         "dct_identifier": fields.String(
             description="The dct:identifier property from the harvested dataset", allow_null=True
         ),
+        "doi": fields.String(
+            description="The DOI the source declares for the dataset (dct:identifier, "
+            "adms:identifier or owl:sameAs)",
+            allow_null=True,
+            readonly=True,
+        ),
     },
 )
 
@@ -86,6 +95,39 @@ resource_harvest_fields = api.model(
         ),
         "last_update": fields.ISODateTime(
             description="The resource last harvest date", allow_null=True, readonly=True
+        ),
+    },
+)
+
+dataset_geopf_fields = api.model(
+    "GeopfDatasetMetadata",
+    {
+        "datasheet_url": fields.String(
+            attribute="push.datasheet_url",
+            description="Public Géoplateforme fiche (dashboard) url, once pushed",
+            allow_null=True,
+            readonly=True,
+        ),
+    },
+)
+
+resource_geopf_fields = api.model(
+    "GeopfResourceMetadata",
+    {
+        "push_status": fields.String(
+            attribute="push.status",
+            description="Push status to Géoplateforme, if this resource has ever been pushed",
+            enum=["pending", "done", "error", "timeout"],
+            allow_null=True,
+            readonly=True,
+        ),
+        "offering_id": fields.String(
+            attribute="offering.id",
+            description=(
+                "Géoplateforme offering id, if this resource was created from a geopf offering pull"
+            ),
+            allow_null=True,
+            readonly=True,
         ),
     },
 )
@@ -167,6 +209,13 @@ resource_fields = api.model(
             allow_null=True,
             readonly=True,
             description="Harvest attributes metadata information",
+            skip_none=True,
+        ),
+        "geopf": fields.Nested(
+            resource_geopf_fields,
+            allow_null=True,
+            readonly=True,
+            description="Géoplateforme sync status metadata",
             skip_none=True,
         ),
         "extras": fields.Raw(description="Extra attributes as key-value pairs"),
@@ -287,6 +336,7 @@ DEFAULT_MASK = ",".join(
         "frequency_date",
         "extras",
         "harvest",
+        "geopf",
         "metrics",
         "organization",
         "owner",
@@ -389,6 +439,13 @@ dataset_fields = api.model(
             description="Dataset harvest metadata attributes",
             skip_none=True,
         ),
+        "geopf": fields.Nested(
+            dataset_geopf_fields,
+            readonly=True,
+            allow_null=True,
+            description="Géoplateforme sync status metadata",
+            skip_none=True,
+        ),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
         "metrics": fields.Raw(
             attribute=lambda o: o.get_metrics(), description="The dataset metrics"
@@ -403,7 +460,7 @@ dataset_fields = api.model(
             temporal_coverage_fields, allow_null=True, description="The temporal coverage"
         ),
         "spatial": fields.Nested(
-            spatial_coverage_fields, allow_null=True, description="The spatial coverage"
+            SpatialCoverage.__read_fields__, allow_null=True, description="The spatial coverage"
         ),
         "license": fields.String(
             attribute="license.id", default=DEFAULT_LICENSE["id"], description="The dataset license"

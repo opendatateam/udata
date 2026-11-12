@@ -28,6 +28,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
 from udata.core.owned import Owned
 from udata.core.storages import default_image_basename, images
+from udata.core.user.factories import UserFactory
 from udata.factories import ModelFactory
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics
 from udata.mongo.document import UDataDocument as Document
@@ -234,6 +235,18 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, Document):
     }
 
 
+@generate_fields(
+    nested_filters={
+        "owner_first_name": "owner.first_name",
+        "organization_badge": "organization.badges",
+    },
+)
+class FakeWithTwoNestedFilters(Owned, Document):
+    """Two nested filters on references to two different models."""
+
+    meta = {"collection": "fake_with_two_nested_filters_api_fields"}
+
+
 class FakeFactory(ModelFactory):
     class Meta:
         model = Fake
@@ -309,6 +322,29 @@ class FakeWithRename(Document):
     @field(description="Link to the API endpoint for this fake", rename="api_url")
     def uri(self) -> str:
         return "fake-with-rename/foobar/endpoint/"
+
+
+@generate_fields()
+class FakeWithUntypedList(Document):
+    """An untyped `ListField()` has no inner field to convert (e.g. a Celery task's
+    positional arguments, which may hold anything)."""
+
+    things = field(ListField())
+
+    meta = {"collection": "fake_with_untyped_list_api_fields"}
+
+
+@generate_fields()
+class FakeImageWithoutThumbnails(Document):
+    """An ImageField with neither model `thumbnails` nor `thumbnail_info`:
+    it must not yield a duplicate `<key>_thumbnail` API field."""
+
+    image = field(
+        ImageField(fs=images, basename=default_image_basename),
+        readonly=True,
+    )
+
+    meta = {"collection": "fake_image_without_thumbnails"}
 
 
 @generate_fields()
@@ -490,6 +526,26 @@ class ApplySortAndFiltersTest(PytestOnlyDBTestCase):
             results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
             assert fake1 in results
             assert fake2 not in results
+
+    def test_nested_filters_on_two_references(self, app) -> None:
+        """Each nested filter queries the model of its own reference, not the last one declared."""
+        alice = FakeWithTwoNestedFilters(owner=UserFactory(first_name="Alice")).save()
+        bob = FakeWithTwoNestedFilters(owner=UserFactory(first_name="Bob")).save()
+        org_public_service: Organization = OrganizationFactory()
+        org_public_service.add_badge(org_constants.PUBLIC_SERVICE)
+        public_service = FakeWithTwoNestedFilters(organization=org_public_service).save()
+        company = FakeWithTwoNestedFilters(organization=OrganizationFactory()).save()
+
+        with app.test_request_context("/foobar", query_string={"owner_first_name": "Alice"}):
+            results = FakeWithTwoNestedFilters.apply_sort_filters(FakeWithTwoNestedFilters.objects)
+            assert list(results) == [alice]
+            assert bob not in results
+        with app.test_request_context(
+            "/foobar", query_string={"organization_badge": org_constants.PUBLIC_SERVICE}
+        ):
+            results = FakeWithTwoNestedFilters.apply_sort_filters(FakeWithTwoNestedFilters.objects)
+            assert list(results) == [public_service]
+            assert company not in results
 
     def test_searchable(self, app) -> None:
         """If `@generate_fields(searchable=True)`, then the document can be full-text searched."""
@@ -755,6 +811,19 @@ class RenameFieldTest(PytestOnlyDBTestCase):
         assert "picture_thumbnail" in read_fields
         assert "image_thumbnail" not in read_fields
 
+    def test_image_field_without_thumbnails_has_no_thumbnail_api_field(self) -> None:
+        """No model thumbnails and no thumbnail_info: no `<key>_thumbnail` key,
+        which would only duplicate the main image URL."""
+        read_fields = FakeImageWithoutThumbnails.__read_fields__
+        assert "image" in read_fields
+        assert "image_thumbnail" not in read_fields
+
+    def test_image_field_with_thumbnail_info_keeps_thumbnail_api_field(self) -> None:
+        """thumbnail_info alone (no model thumbnails) still yields the key —
+        this is the Fake/FakeWithRename configuration."""
+        read_fields = Fake.__read_fields__
+        assert "image_thumbnail" in read_fields
+
     def test_write_fields_use_the_api_key(self) -> None:
         """A writable renamed field is accepted under its API key. A readonly one is not
         writable at all, whatever the key."""
@@ -804,3 +873,10 @@ class ListAttributeFieldTest(PytestOnlyDBTestCase):
         assert len(embeddeds) == 1
         assert embeddeds[0]["title"] == "shown"
         assert embeddeds[0]["description"] == "a description"
+
+    def test_untyped_list_keeps_heterogeneous_values(self, app) -> None:
+        """An untyped `ListField()` has no inner field: its values go through as-is."""
+        obj = FakeWithUntypedList(things=["a string", 42, {"a-key": "a-value"}])
+        with app.test_request_context("/"):
+            things = marshal(obj, FakeWithUntypedList.__read_fields__)["things"]
+        assert things == ["a string", 42, {"a-key": "a-value"}]

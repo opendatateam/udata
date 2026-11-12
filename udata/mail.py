@@ -1,6 +1,6 @@
 import copy
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from html import escape
 
 from blinker import signal
@@ -67,7 +67,7 @@ class ParagraphWithLinks:
         for key, value in new_paragraph._kwargs.items():
             if hasattr(value, "url_for"):
                 new_paragraph._kwargs[key] = (
-                    f'<a href="{value.url_for(_mailCampaign=True)}" style="color: #000000; text-decoration: underline;">{escape(str(value))}</a>'
+                    f'<a href="{escape(str(value.url_for(_mailCampaign=True)))}" style="color: #000000; text-decoration: underline;">{escape(str(value))}</a>'
                 )
 
         return str(new_paragraph)
@@ -77,6 +77,9 @@ class ParagraphWithLinks:
 class MailMessage:
     subject: LazyString
     paragraphs: list[LazyString | MailCTA | ParagraphWithLinks | LabelledContent | None]
+    # Shown small under the signature, for what the mail is not about: typically why one
+    # receives it, and the way out of the mails one did not ask for.
+    footer: list[LazyString | MailCTA] = field(default_factory=list)
 
     def __post_init__(self):
         self.paragraphs = [p for p in self.paragraphs if p is not None]

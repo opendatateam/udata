@@ -30,10 +30,6 @@ class TextArea(WidgetHelper, widgets.TextArea):
     pass
 
 
-class SelectPicker(WidgetHelper, widgets.Select):
-    classes = "selectpicker"
-
-
 class MarkdownEditor(WidgetHelper, widgets.TextArea):
     classes = "md"
     attributes = {"rows": 8}

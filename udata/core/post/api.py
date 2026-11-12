@@ -7,6 +7,7 @@ from mongoengine import Q
 
 from udata.api import API, api
 from udata.api_fields import patch, patch_and_save
+from udata.core.discussions.models import Discussion
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -133,6 +134,11 @@ class PostAPI(API):
     def delete(self, post):
         """Delete a given post"""
         post.permissions["delete"].test()
+        # Checked before anything is deleted: the DENY rule on `parent` only fires on
+        # `post.delete()`, after the discussions would already be gone.
+        if Post.objects(parent=post).count():
+            api.abort(400, _("This page has sub-pages: move or delete them first"))
+        Discussion.objects(subject=post).delete()
         post.delete()
         return "", 204
 
