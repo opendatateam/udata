@@ -162,6 +162,20 @@ def change_notice(**kwargs) -> MailMessage:
     )
 
 
+def email_changed(new_email: str) -> MailMessage:
+    return MailMessage(
+        subject=_("The email address of your account has changed"),
+        paragraphs=[
+            _(
+                "The email address of your %(site)s account is now %(email)s.",
+                site=current_app.config["SITE_TITLE"],
+                email=new_email,
+            ),
+            _("If this wasn't you, contact us right away."),
+        ],
+    )
+
+
 def two_factor_rescue(user, **kwargs) -> MailMessage:
     return MailMessage(
         subject=_("User can't access mail account"),

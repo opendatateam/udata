@@ -8,7 +8,7 @@ from udata.core.api_token.models import ApiToken
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
 from udata.i18n import gettext as _
-from udata.tests.api import PytestOnlyAPITestCase
+from udata.tests.api import PytestOnlyAPITestCase, SessionCookieMixin
 from udata.tests.helpers import capture_mails
 
 CDATA = "http://cdata.test"
@@ -18,18 +18,7 @@ CDATA = "http://cdata.test"
 # the test client speaks plain http to local.test, whatever a local udata.cfg says.
 @pytest.mark.options(SESSION_COOKIE_SECURE=False, SESSION_COOKIE_DOMAIN=None, CDATA_BASE_URL=CDATA)
 @pytest.mark.usefixtures("proconnect")
-class ProConnectAuthTest(PytestOnlyAPITestCase):
-    def get(self, url, *args, **kwargs):
-        # pytest-flask keeps one app context, hence one `g`, for the whole test, and
-        # flask-login caches the user there: the session cookie, which carries the
-        # freshness, would never be read again. A context per request reads it.
-        with current_app.app_context():
-            return super().get(url, *args, **kwargs)
-
-    def post(self, url, *args, **kwargs):
-        with current_app.app_context():
-            return super().post(url, *args, **kwargs)
-
+class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
     def sign_in(
         self,
         proconnect,
