@@ -514,7 +514,7 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
             }
         }
         mocker.patch.object(TabularClient, "get_profile", return_value=profile)
-        mocker.patch.object(TabularClient, "has_more_groups", return_value=False)
+        mocker.patch.object(TabularClient, "get_data", return_value={"data": []})
         config = {
             "title": "Doses",
             "description": "Doses par département",
@@ -999,6 +999,14 @@ class AssistantChatAuthenticationTest(PytestOnlyAPITestCase):
         assert response.status_code == 200
         assert "data: " in response.get_data(as_text=True)
 
+    @pytest.mark.parametrize("auth,status", [("api_key", 400), ("anonymous", 401)])
+    def test_sessionless_deeply_nested_json_is_rejected(self, mocker, auth, status):
+        agent = mocker.patch("udata.core.assistant.api.get_agent")
+        headers = self._api_key_headers() if auth == "api_key" else {}
+        response = self._raw_chat("[" * 300_000, headers)
+        assert response.status_code == status
+        agent.assert_not_called()
+
     def _oversized_body(self):
         return json.dumps({**PAYLOAD, "pad": "x" * MAX_REQUEST_BYTES}).encode()
 
@@ -1065,6 +1073,42 @@ class AssistantChatUserPartsTest(PytestOnlyAPITestCase):
         response = self._chat_with_user_parts([])
         assert response.status_code == 400
         assert response.json["message"] == "Un message utilisateur ne peut pas être vide."
+        agent.assert_not_called()
+
+    @pytest.mark.parametrize("texts", [[""], ["  ", "\n\t"]])
+    def test_user_message_with_blank_text_only_is_rejected(self, mocker, texts):
+        self.login()
+        agent = mocker.patch("udata.core.assistant.api.get_agent")
+        response = self._chat_with_user_parts([{"type": "text", "text": t} for t in texts])
+        assert response.status_code == 400
+        assert response.json["message"] == "Un message utilisateur ne peut pas être vide."
+        agent.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "messages",
+        [
+            [],
+            [{"id": "m0", "role": "system", "parts": [{"type": "text", "text": "x"}]}],
+            [{"id": "m0", "role": "assistant", "parts": [{"type": "text", "text": "x"}]}],
+        ],
+    )
+    def test_conversation_without_user_message_is_rejected(self, mocker, messages):
+        # Otherwise pydantic-ai raises "Processed history cannot be empty" into Sentry
+        self.login()
+        agent = mocker.patch("udata.core.assistant.api.get_agent")
+        response = self.post(url_for("api.assistant_chat"), data={**PAYLOAD, "messages": messages})
+        assert response.status_code == 400
+        assert response.json["message"] == "La conversation ne contient aucun message utilisateur."
+        agent.assert_not_called()
+
+    @pytest.mark.parametrize("body", ["[" * 300_000, '{"messages": ' + "[" * 300_000])
+    def test_deeply_nested_json_is_rejected(self, mocker, body):
+        self.login()
+        agent = mocker.patch("udata.core.assistant.api.get_agent")
+        response = self.client.post(
+            url_for("api.assistant_chat"), data=body, content_type="application/json"
+        )
+        assert response.status_code == 400
         agent.assert_not_called()
 
     def _chat_with_assistant_parts(self, parts):

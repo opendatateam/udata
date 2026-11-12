@@ -80,11 +80,13 @@ ASSISTANT_PART_TYPES = (TextUIPart, ReasoningUIPart, StepStartUIPart, ToolUIPart
 
 
 def _check_messages(messages) -> None:
-    """Reject unexpected parts, empty user messages and too much user text.
+    """Reject unexpected parts, empty user messages, too much user text and no user message.
 
     pydantic-ai fetches the URL of a user ``file`` part server-side and forwards its
     content to the provider, bypassing every size limit: users only send text.
     """
+    if not any(message.role == "user" for message in messages):
+        api.abort(400, _("The conversation has no user message."))
     for message in messages:
         if message.role == "assistant":
             if not all(isinstance(part, ASSISTANT_PART_TYPES) for part in message.parts):
@@ -92,10 +94,10 @@ def _check_messages(messages) -> None:
             continue
         if message.role != "user":
             continue
-        if not message.parts:
-            api.abort(400, _("A user message cannot be empty."))
         if not all(isinstance(part, TextUIPart) for part in message.parts):
             api.abort(400, _("Only text messages are accepted."))
+        if not any(part.text.strip() for part in message.parts):
+            api.abort(400, _("A user message cannot be empty."))
         length = sum(len(part.text) for part in message.parts)
         if length > MAX_USER_MESSAGE_CHARS:
             api.abort(
@@ -112,11 +114,13 @@ def _extract_context(body: bytes) -> tuple[str | None, dict | None]:
 
     The raw JSON is parsed because neither field is part of the Vercel AI
     protocol. A malformed body returns ``(None, None)`` so ``build_run_input``
-    can reject it with its own 400. An invalid UUID or an invalid visualization
-    (not an object, or larger than ``MAX_VISUALIZATION_BYTES``) aborts with a 400.
+    can reject it with its own 400 (the app's JSON provider also turns a nesting
+    too deep for the stack into a ``ValueError``). An invalid UUID or an invalid
+    visualization (not an object, or larger than ``MAX_VISUALIZATION_BYTES``)
+    aborts with a 400.
     """
     try:
-        payload = json.loads(body)
+        payload = current_app.json.loads(body)
     except ValueError:
         return None, None
     if not isinstance(payload, dict):

@@ -163,6 +163,14 @@ class UdataJsonProvider(DefaultJSONProvider):
 
         return super(UdataJsonProvider, UdataJsonProvider).default(obj)
 
+    def loads(self, s, **kwargs):
+        # Nesting deep enough to exhaust the stack is invalid JSON, not a server error:
+        # request.get_json() then answers 400, or None when silent (Flask-Security).
+        try:
+            return super().loads(s, **kwargs)
+        except RecursionError as error:
+            raise ValueError("JSON nested too deeply") from error
+
 
 # These loggers are very verbose
 # We need to put them in WARNING level
