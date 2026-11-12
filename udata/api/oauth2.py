@@ -30,7 +30,6 @@ from authlib.oauth2.rfc7009 import RevocationEndpoint
 from authlib.oauth2.rfc7636 import CodeChallenge
 from bson import ObjectId
 from flask import abort, current_app, jsonify, render_template, request
-from flask_security.utils import verify_password
 from flask_storage.mongo import ImageField
 from mongoengine import NULLIFY, Q
 from mongoengine.fields import (
@@ -252,15 +251,6 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
         return authorization_code.user
 
 
-class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
-    def authenticate_user(self, username, password):
-        from udata.core.user.models import User
-
-        user = User.objects(email=username).first()
-        if user and verify_password(password, user.password):
-            return user
-
-
 class RefreshTokenGrant(grants.RefreshTokenGrant):
     INCLUDE_NEW_REFRESH_TOKEN = True
 
@@ -410,9 +400,10 @@ def check_credentials():
 def init_app(app):
     oauth.init_app(app, query_client=query_client, save_token=save_token)
 
-    # support all grants
+    # No password grant: it hands out a token on the email and password alone, skipping
+    # the login form's checks (second factor, demanded password rotation, disabled or
+    # unconfirmed account).
     oauth.register_grant(AuthorizationCodeGrant, [CodeChallenge(required=True)])
-    oauth.register_grant(PasswordGrant)
     oauth.register_grant(RefreshTokenGrant)
     oauth.register_grant(grants.ClientCredentialsGrant)
 

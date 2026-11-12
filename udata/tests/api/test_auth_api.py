@@ -708,7 +708,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         assert response.content_type == "application/json"
         assert "access_token" in response.json
 
-    def test_password_grant_token(self, oauth):
+    def test_password_grant_is_not_supported(self, oauth):
         user = UserFactory(password="password")
 
         response = self.post(
@@ -722,9 +722,9 @@ class APIAuthTest(PytestOnlyAPITestCase):
             json=False,
         )
 
-        assert200(response)
-        assert response.content_type == "application/json"
-        assert "access_token" in response.json
+        assert400(response)
+        assert response.json["error"] == "unsupported_grant_type"
+        assert OAuth2Token.objects.count() == 0
 
     def test_invalid_implicit_grant_token(self, oauth):
         self.login()
