@@ -21,6 +21,15 @@ class AuthTest(APITestCase):
         token = security.confirm_serializer.dumps(data)
         return url_for("security.confirm_change_email", token=token)
 
+    def open_expired(self, link):
+        with capture_mails() as mails:
+            # A negative validity makes any freshly signed token already expired
+            with mock.patch.dict(
+                current_app.config, {"SECURITY_CONFIRM_EMAIL_WITHIN": timedelta(seconds=-1)}
+            ):
+                response = self.get(link)
+        return response, mails
+
     def test_change_mail_notifies_the_previous_address(self):
         # Whoever got hold of the account would otherwise move it away unnoticed: the new
         # address confirms the change, so only the previous one can tell its holder.
@@ -125,27 +134,45 @@ class AuthTest(APITestCase):
         assert user.email == new_email
 
     def test_change_mail_expired(self):
-        """An expired link sends a new confirmation mail and redirects with a flash"""
+        """An expired link sends nothing: its owner asks again from their profile."""
         user = self.login(AdminFactory())
         original_email = user.email
-        new_email = "test@test.com"
 
-        confirmation_link = self.change_email_link(user, new_email)
-
-        # A negative validity makes any freshly signed token already expired
-        with capture_mails() as mails:
-            with mock.patch.dict(
-                current_app.config, {"SECURITY_CONFIRM_EMAIL_WITHIN": timedelta(seconds=-1)}
-            ):
-                resp = self.get(confirmation_link)
+        resp, mails = self.open_expired(self.change_email_link(user, "test@test.com"))
 
         assert resp.status_code == 302
         assert "change_email_expired" in resp.location
-        # Only the new confirmation: the previous address isn't told of a change not made.
-        assert [mail.recipients for mail in mails] == [[new_email]]
+        assert mails == []
+        assert user.reload().email == original_email
 
-        user.reload()
-        assert user.email == original_email
+    def test_change_mail_expired_link_opened_by_someone_else(self):
+        owner = UserFactory(email="owner@example.com")
+        self.login(UserFactory(email="visitor@example.com"))
+
+        resp, mails = self.open_expired(self.change_email_link(owner, "new@example.com"))
+
+        assert "change_email_expired" in resp.location
+        assert mails == []
+        assert owner.reload().email == "owner@example.com"
+
+    def test_change_mail_expired_link_opened_anonymously(self):
+        owner = UserFactory(email="owner@example.com")
+
+        resp, mails = self.open_expired(self.change_email_link(owner, "new@example.com"))
+
+        assert "change_email_expired" in resp.location
+        assert mails == []
+
+    def test_change_mail_expired_link_of_a_user_not_found(self):
+        """A password change rotates `fs_uniquifier`: the link no longer finds its owner."""
+        owner = UserFactory(email="owner@example.com")
+        link = self.change_email_link(owner, "new@example.com")
+        current_app.extensions["security"].datastore.set_uniquifier(owner)
+
+        resp, mails = self.open_expired(link)
+
+        assert resp.status_code == 302
+        assert mails == []
 
     def test_change_mail_already_taken(self):
         """Should not allow changing email to one already taken by another user"""

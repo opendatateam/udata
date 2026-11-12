@@ -49,7 +49,7 @@ def slash_url_suffix(url, suffix):
 
 
 def send_change_email_confirmation_instructions(user, new_email):
-    data = [str(current_user.fs_uniquifier), hash_data(current_user.email), new_email]
+    data = [str(user.fs_uniquifier), hash_data(user.email), new_email]
     token = _security.confirm_serializer.dumps(data)
 
     mails.confirmation_instructions(
@@ -79,8 +79,9 @@ def confirm_change_email(token):
     expired, invalid, user, new_email = confirm_change_email_token_status(token)
 
     flash = None
+    # No new link for an expired one: it would go to the very address whose consent is in
+    # question, so the owner asks again from their profile, with a fresh session.
     if expired:
-        send_change_email_confirmation_instructions(user, new_email)
         flash = "change_email_expired"
     elif not user or invalid:
         flash = "change_email_invalid"
