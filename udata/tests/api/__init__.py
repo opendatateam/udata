@@ -1,12 +1,15 @@
+import time
 from contextlib import contextmanager
+from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
 import pytest
-from flask import g, json
+from flask import current_app, g, json, url_for
 from flask_security.utils import login_user, logout_user, set_request_attr
 
 from udata.core.api_token.models import ApiToken
 from udata.core.user.factories import UserFactory
+from udata.core.user.models import User
 from udata.mongo import db
 from udata.tests import PytestOnlyTestCase, TestCase, helpers
 
@@ -63,6 +66,8 @@ class APITestCaseMixin:
 
         login_user(self.user)
         set_request_attr("fs_authn_via", "session")
+        # Signed in just now: the session is fresh, as after a login.
+        set_request_attr("fs_paa", time.time())
 
         return self.user
 
@@ -242,3 +247,28 @@ class APITestCase(APITestCaseMixin, DBTestCase):
 
 class PytestOnlyAPITestCase(APITestCaseMixin, PytestOnlyDBTestCase):
     pass
+
+
+class SessionCookieMixin:
+    """Each request going through `perform` reads the session from the cookie, as in
+    production. `json=False` requests call the client directly and don't.
+
+    pytest-flask keeps one app context, hence one `g`, for the whole test, and flask-login
+    caches the user there: the session cookie, which carries the freshness, would never be
+    read again. A context per request reads it. `login()` doesn't set that cookie: sign in
+    through the login views instead.
+    """
+
+    def perform(self, verb, url, **kwargs):
+        with current_app.app_context():
+            return super().perform(verb, url, **kwargs)
+
+    def sign_in_with_password(self, signed_in_ago: timedelta = timedelta(0)) -> User:
+        user = UserFactory(
+            email="jane@example.org", password="password", confirmed_at=datetime.now()
+        )
+        self.post(url_for("security.login"), {"email": user.email, "password": "password"})
+        if signed_in_ago:
+            with self.client.session_transaction() as session:
+                session["fs_paa"] = time.time() - signed_in_ago.total_seconds()
+        return user

@@ -44,7 +44,7 @@ from mongoengine.fields import (
 from werkzeug.exceptions import Unauthorized
 
 from udata.app import csrf
-from udata.auth import current_user, login_required, login_user
+from udata.auth import authenticate_request, current_user, login_required
 from udata.core.organization.models import Organization
 from udata.core.storages import default_image_basename, images
 from udata.i18n import I18nBlueprint
@@ -152,6 +152,9 @@ class OAuth2Token(Document):
     access_token = StringField(unique=True)
     refresh_token = StringField(unique=True, sparse=True)
     created_at = DateTimeField(default=lambda: datetime.now(UTC), required=True)
+    # A refresh updates this document rather than creating another one: only this field
+    # tells how recently the token acted for its user.
+    last_used_at = DateTimeField()
     expires_in = IntField(required=True, default=TOKEN_EXPIRATION)
     scope = StringField(default="")
     revoked = BooleanField(default=False)
@@ -401,7 +404,8 @@ def save_token(token, request):
 def check_credentials():
     try:
         with require_oauth.acquire() as token:
-            login_user(token.user)
+            if authenticate_request(token.user):
+                token.update(set__last_used_at=datetime.now(UTC))
         return True
     except (Unauthorized, AuthlibFlaskException):
         return False
