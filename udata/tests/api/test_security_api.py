@@ -6,6 +6,9 @@ from flask_security.recoverable import generate_reset_password_token
 from flask_security.utils import get_message
 
 from udata.commands.fixtures import UserFactory
+from udata.core.organization.constants import CERTIFIED
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.models import OrganizationBadge
 from udata.core.user.factories import AdminFactory
 from udata.i18n import lazy_gettext as _
 from udata.tests.api import PytestOnlyAPITestCase, SessionCookieMixin
@@ -295,6 +298,45 @@ class TwoFactorSecurityAPITest(PytestOnlyAPITestCase):
         self.assertStatus(response, 200)
         assert response.json["response"]["tf_required"] is False
         assert "tf_state" not in response.json["response"]
+
+    @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED_FOR_CERTIFIED_ORGS=True)
+    def test_certified_org_member_requires_2fa(self):
+        user = UserFactory(password="password123", confirmed_at=datetime.now(UTC))
+        OrganizationFactory(editors=[user], badges=[OrganizationBadge(kind=CERTIFIED)])
+
+        response = self.post(
+            url_for("security.login"), {"email": user.email, "password": "password123"}
+        )
+        self.assertStatus(response, 200)
+        assert response.json["response"]["tf_required"] is True
+        assert response.json["response"]["tf_state"] == "setup_from_login"
+
+    @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED_FOR_CERTIFIED_ORGS=True)
+    def test_non_certified_org_member_no_2fa(self):
+        user = UserFactory(password="password123", confirmed_at=datetime.now(UTC))
+        OrganizationFactory(editors=[user])
+        OrganizationFactory(
+            editors=[user],
+            badges=[OrganizationBadge(kind=CERTIFIED)],
+            deleted=datetime.now(UTC),
+        )
+
+        response = self.post(
+            url_for("security.login"), {"email": user.email, "password": "password123"}
+        )
+        self.assertStatus(response, 200)
+        assert response.json["response"]["tf_required"] is False
+
+    @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED_FOR_CERTIFIED_ORGS=False)
+    def test_certified_org_member_no_2fa_when_disabled(self):
+        user = UserFactory(password="password123", confirmed_at=datetime.now(UTC))
+        OrganizationFactory(editors=[user], badges=[OrganizationBadge(kind=CERTIFIED)])
+
+        response = self.post(
+            url_for("security.login"), {"email": user.email, "password": "password123"}
+        )
+        self.assertStatus(response, 200)
+        assert response.json["response"]["tf_required"] is False
 
     @pytest.mark.options(
         SECURITY_TWO_FACTOR_REQUIRED=False, SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=False
