@@ -18,6 +18,8 @@ A slow hash (bcrypt/argon2) is unnecessary here: tokens have 48 bytes of entropy
 
 `SECRET_KEY` is used by Flask for session signing and by Flask-Security for password reset tokens. If a token hash secret needs to be rotated (e.g. suspected leak), rotating `SECRET_KEY` would invalidate all sessions and pending password resets. A dedicated secret allows independent rotation.
 
+The OAuth2 access tokens, refresh tokens and client secrets are hashed with the same secret: rotating it also voids them, and every OAuth2 client with a secret has to be created again.
+
 ### `API_TOKEN_PREFIX` and display prefix
 
 A configurable prefix (default: `udata_`) is prepended to every generated token. This serves two purposes: secret scanning tools (GitHub, GitLeaks, etc.) can detect leaked tokens via pattern matching, and different prefixes per environment (e.g. `udata_prod_`, `udata_demo_`) let users identify which environment a token belongs to.

@@ -46,6 +46,7 @@ from werkzeug.exceptions import Unauthorized
 from udata.api_fields import field, generate_fields
 from udata.app import csrf
 from udata.auth import authenticate_request, current_user, login_required
+from udata.core.api_token.hashing import hash_token
 from udata.core.organization.models import Organization
 from udata.core.storages import default_image_basename, images
 from udata.i18n import I18nBlueprint
@@ -73,6 +74,7 @@ SCOPES = {"default": _("Default scope"), "admin": _("System administrator rights
 
 @generate_fields()
 class OAuth2Client(ClientMixin, Datetimed, Document):
+    # Stored as a `hash_token` hash: the plaintext is only shown once, at creation.
     secret = StringField(default=None)
 
     name = field(
@@ -104,10 +106,6 @@ class OAuth2Client(ClientMixin, Datetimed, Document):
         return self.get_client_id()
 
     @property
-    def client_secret(self):
-        return self.secret
-
-    @property
     def default_redirect_uri(self):
         return self.redirect_uris[0]
 
@@ -127,7 +125,7 @@ class OAuth2Client(ClientMixin, Datetimed, Document):
             return redirect_uri in self.redirect_uris
 
     def check_client_secret(self, client_secret):
-        return self.secret == client_secret
+        return self.secret == hash_token(client_secret)
 
     def check_endpoint_auth_method(self, method, _endpoint):
         if not self.has_client_secret():
@@ -169,6 +167,7 @@ class OAuth2Token(Document):
     # currently only bearer is supported
     token_type = StringField(choices=list(TOKEN_TYPES), default="Bearer")
 
+    # Both stored as `hash_token` hashes: the plaintexts only ever go to the client.
     access_token = StringField(unique=True)
     refresh_token = StringField(unique=True, sparse=True)
     created_at = DateTimeField(default=lambda: datetime.now(UTC), required=True)
@@ -289,7 +288,7 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
     INCLUDE_NEW_REFRESH_TOKEN = True
 
     def authenticate_refresh_token(self, refresh_token):
-        item = OAuth2Token.objects(refresh_token=refresh_token).first()
+        item = OAuth2Token.objects(refresh_token=hash_token(refresh_token)).first()
         if item and item.is_refresh_token_valid():
             return item
 
@@ -306,12 +305,13 @@ class RevokeToken(RevocationEndpoint):
 
     def query_token(self, token_string, token_type_hint):
         qs = OAuth2Token.objects()
+        token_hash = hash_token(token_string)
         if token_type_hint == "access_token":
-            return qs.filter(access_token=token_string).first()
+            return qs.filter(access_token=token_hash).first()
         elif token_type_hint == "refresh_token":
-            return qs.filter(refresh_token=token_string).first()
+            return qs.filter(refresh_token=token_hash).first()
         else:
-            qs = qs(Q(access_token=token_string) | Q(refresh_token=token_string))
+            qs = qs(Q(access_token=token_hash) | Q(refresh_token=token_hash))
             return qs.first()
 
     def revoke_token(self, token, _request):
@@ -321,7 +321,7 @@ class RevokeToken(RevocationEndpoint):
 
 class BearerToken(BearerTokenValidator):
     def authenticate_token(self, token_string):
-        return OAuth2Token.objects(access_token=token_string).first()
+        return OAuth2Token.objects(access_token=hash_token(token_string)).first()
 
     def request_invalid(self, request):
         return False
@@ -413,13 +413,17 @@ def save_token(token, request):
     scope = token.pop("scope", "")
     client = request.client
     user = request.user or client.owner
+    # A copy: authlib sends `token` to the client after this, with the plaintexts.
+    stored = {**token, "access_token": hash_token(token["access_token"])}
+    if "refresh_token" in token:
+        stored["refresh_token"] = hash_token(token["refresh_token"])
     if request.grant_type == "refresh_token":
         old_token = OAuth2Token.objects(
             refresh_token=request.refresh_token.refresh_token, client=client, user=user, scope=scope
         ).first()
-        old_token.update(**token)
+        old_token.update(**stored)
     else:
-        OAuth2Token.objects.create(client=client, user=user, scope=scope, **token)
+        OAuth2Token.objects.create(client=client, user=user, scope=scope, **stored)
 
 
 def check_credentials():

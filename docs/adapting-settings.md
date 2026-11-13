@@ -38,9 +38,10 @@ A secret key used as salt for cryptographic parts.
 
 ### API_TOKEN_SECRET
 
-A secret key used for HMAC-SHA256 hashing of API tokens.
+A secret key used for HMAC-SHA256 hashing of API tokens, OAuth2 tokens and OAuth2 client secrets.
 **You must specify your own secure key, different from `SECRET_KEY`**.
-The app refuses to start without it.
+The app refuses to start without it. Changing it voids all of them: every API token, every
+OAuth2 token, and every OAuth2 client with a secret, which then has to be created again.
 
 ### SITE_ID
 
