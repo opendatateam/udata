@@ -428,6 +428,7 @@ def init_app(app):
     import udata.core.followers.api  # noqa
     import udata.core.jobs.api  # noqa
     import udata.core.reports.api  # noqa
+    import udata.core.assistant.api  # noqa
     import udata.core.site.api  # noqa
     import udata.core.tags.api  # noqa
     import udata.core.topic.apiv2  # noqa

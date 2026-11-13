@@ -520,6 +520,40 @@ List of API's endpoints to block when `READ_ONLY_MODE` is set to `True`. Endpoin
 
 List of datasets slugs to query to fill the fixture file.
 
+## AI assistant
+
+The chart assistant (`POST /api/1/assistant/chat/`) talks to an OpenAI-compatible provider, such as [Albert](https://albert.sites.beta.gouv.fr/), and reads resource data from [api-tabular](https://github.com/datagouv/api-tabular).
+
+### AI_BASE_URL
+
+**default**: `None`
+
+Base URL of the OpenAI-compatible provider API (ex: `https://albert.api.etalab.gouv.fr/v1`). The assistant is disabled, and its endpoint answers `503`, while it is `None`.
+
+### AI_API_KEY
+
+**default**: `None`
+
+API key sent to the provider. The endpoint answers `503` when `AI_BASE_URL` is set without it.
+
+### AI_MODEL
+
+**default**: `openai/gpt-oss-120b`
+
+Name of the provider model the assistant uses.
+
+### AI_REASONING_EFFORT
+
+**default**: `None`
+
+Reasoning effort sent to the provider (`openai_reasoning_effort`). `None` keeps the provider default; `"none"` disables reasoning on models that would otherwise stream it.
+
+### TABULAR_API_URL
+
+**default**: `None`
+
+Base URL of the api-tabular service (ex: `https://tabular-api.data.gouv.fr`), from which the assistant reads resource profiles and data. Without it, the assistant answers that the tabular service is unavailable.
+
 ## Example configuration file
 
 Here a sample configuration file:

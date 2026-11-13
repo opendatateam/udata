@@ -385,6 +385,14 @@ def is_uuid(uuid_string: str, version: int = 4) -> bool:
         return False
 
 
+def normalize_uuid(value: Any) -> str | None:
+    """Canonical form of a UUID of any accepted spelling, None if ``value`` is not one."""
+    try:
+        return str(UUID(value))
+    except (ValueError, AttributeError, TypeError):
+        return None
+
+
 # This is the default providers list
 # We remove the lorum one to replace it
 # with a unicode enabled one below

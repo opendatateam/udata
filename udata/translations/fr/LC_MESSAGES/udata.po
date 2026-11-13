@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-11-10 14:29+0100\n"
+"POT-Creation-Date: 2026-11-13 14:39+0100\n"
 "PO-Revision-Date: 2025-11-19 13:03+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
@@ -38,7 +38,7 @@ msgstr "Votre mot de passe a été modifié"
 msgid "Password reset instructions"
 msgstr "Instructions de réinitialisation du mot de passe"
 
-#: udata/settings.py:584
+#: udata/settings.py:580
 msgid "This dataset has been archived"
 msgstr "Ce jeu de données a été archivé"
 
@@ -94,15 +94,15 @@ msgstr ""
 "l'instant, nous avons été avertis de cette erreur et la corrigeons dans "
 "les plus brefs délais."
 
-#: udata/api/oauth2.py:67
+#: udata/api/oauth2.py:68
 msgid "Bearer Token"
 msgstr "Bearer Token"
 
-#: udata/api/oauth2.py:70
+#: udata/api/oauth2.py:71
 msgid "Default scope"
 msgstr "Scope par défaut"
 
-#: udata/api/oauth2.py:70
+#: udata/api/oauth2.py:71
 msgid "System administrator rights"
 msgstr "Droits de l'administrateur système"
 
@@ -164,7 +164,7 @@ msgstr ""
 "Votre compte est protégé par l'authentification à deux facteurs de "
 "ProConnect : connectez-vous avec ProConnect pour en configurer une autre."
 
-#: udata/auth/forms.py:156 udata/tests/api/test_security_api.py:143
+#: udata/auth/forms.py:156 udata/tests/api/test_security_api.py:142
 msgid "This account has no password."
 msgstr "Ce compte n'a pas de mot de passe."
 
@@ -186,7 +186,7 @@ msgid "Change email"
 msgstr "Modifier l'adresse email"
 
 #: udata/auth/mails.py:75 udata/auth/mails.py:79 udata/auth/mails.py:100
-#: udata/auth/mails.py:103 udata/tests/api/test_security_api.py:113
+#: udata/auth/mails.py:103 udata/tests/api/test_security_api.py:112
 msgid "Confirm your email address"
 msgstr "Confirmez votre adresse e-mail"
 
@@ -487,6 +487,59 @@ msgstr ""
 msgid "You can only set one condition for a given access audience role"
 msgstr "Vous ne pouvez définir qu'une seule condition pour une audience donnée"
 
+#: udata/core/assistant/api.py:73
+msgid "The conversation has no user message."
+msgstr "La conversation ne contient aucun message utilisateur."
+
+#: udata/core/assistant/api.py:77 udata/core/assistant/api.py:82
+msgid "Only text messages are accepted."
+msgstr "Seuls les messages texte sont acceptés."
+
+#: udata/core/assistant/api.py:84
+msgid "A user message cannot be empty."
+msgstr "Un message utilisateur ne peut pas être vide."
+
+#: udata/core/assistant/api.py:90
+#, python-format
+msgid "Your message is too long (%(max)s characters maximum)."
+msgstr "Votre message est trop long (%(max)s caractères maximum)."
+
+#: udata/core/assistant/api.py:128
+msgid "Invalid resource_id: a resource UUID is expected."
+msgstr "resource_id invalide : un UUID de ressource est attendu."
+
+#: udata/core/assistant/api.py:136
+msgid "Invalid visualization context."
+msgstr "Contexte de visualisation invalide."
+
+#: udata/core/assistant/api.py:208 udata/core/assistant/api.py:282
+msgid "An error occurred while generating the response."
+msgstr "Une erreur est survenue lors de la génération de la réponse."
+
+#: udata/core/assistant/api.py:213
+msgid "The response took too long and was interrupted."
+msgstr "La réponse a pris trop de temps et a été interrompue."
+
+#: udata/core/assistant/api.py:215
+msgid "The response was interrupted."
+msgstr "La réponse a été interrompue."
+
+#: udata/core/assistant/api.py:313
+msgid "Assistant is not configured (AI_BASE_URL is not set)."
+msgstr "L'assistant n'est pas configuré (AI_BASE_URL n'est pas définie)."
+
+#: udata/core/assistant/api.py:321
+msgid ""
+"Assistant is enabled but the AI provider API key (AI_API_KEY) is not "
+"configured."
+msgstr ""
+"L'assistant est activé mais la clé d'API du fournisseur d'IA (AI_API_KEY)"
+" n'est pas configurée."
+
+#: udata/core/assistant/api.py:340
+msgid "Invalid request body."
+msgstr "Corps de requête invalide."
+
 #: udata/core/contact_point/api.py:60
 msgid "An existing contact point already exists with these informations."
 msgstr "Un point de contact existe déjà avec ces informations."
@@ -559,15 +612,15 @@ msgstr "Un point de contact ne peut pas changer de propriétaire."
 msgid "Contact point {id} does not belong to the owner of this object"
 msgstr "Le point de contact {id} n'appartient pas au propriétaire de cet objet"
 
-#: udata/core/dataservices/activities.py:24
+#: udata/core/dataservices/activities.py:22
 msgid "created a dataservice"
 msgstr "a créé une API"
 
-#: udata/core/dataservices/activities.py:30
+#: udata/core/dataservices/activities.py:28
 msgid "updated a dataservice"
 msgstr "a mis à jour une API"
 
-#: udata/core/dataservices/activities.py:37
+#: udata/core/dataservices/activities.py:35
 msgid "deleted a dataservice"
 msgstr "a supprimé une API"
 
@@ -597,27 +650,27 @@ msgstr "Date de dernière modification"
 msgid "New APIs"
 msgstr "Nouvelles API"
 
-#: udata/core/dataset/activities.py:25
+#: udata/core/dataset/activities.py:23
 msgid "created a dataset"
 msgstr "a créé un jeu de données"
 
-#: udata/core/dataset/activities.py:31
+#: udata/core/dataset/activities.py:29
 msgid "updated a dataset"
 msgstr "a mis à jour un jeu de données"
 
-#: udata/core/dataset/activities.py:38
+#: udata/core/dataset/activities.py:36
 msgid "deleted a dataset"
 msgstr "a supprimé un jeu de données"
 
-#: udata/core/dataset/activities.py:44
+#: udata/core/dataset/activities.py:42
 msgid "added a resource to a dataset"
 msgstr "a ajouté une ressource à un jeu de données"
 
-#: udata/core/dataset/activities.py:50
+#: udata/core/dataset/activities.py:48
 msgid "updated a resource"
 msgstr "a mis à jour une ressource"
 
-#: udata/core/dataset/activities.py:56
+#: udata/core/dataset/activities.py:54
 msgid "removed a resource from a dataset"
 msgstr "a supprimé une ressource d'un jeu de données"
 
@@ -795,7 +848,7 @@ msgstr "Autre"
 #: udata/tests/test_mail.py:32 udata/tests/test_mail.py:45
 #: udata/tests/test_mail.py:61 udata/tests/test_mail.py:75
 #: udata/tests/test_mail.py:93 udata/tests/test_mail.py:108
-#: udata/tests/test_mail.py:130 udata/tests/test_mail.py:150
+#: udata/tests/test_mail.py:130 udata/tests/test_mail.py:176
 msgid "Unknown"
 msgstr "Inconnu"
 
@@ -1256,11 +1309,11 @@ msgstr "Membre de l'équipe %(site)s"
 msgid "Deletion of your %(content_type)s"
 msgstr "Suppression de votre %(content_type)s"
 
-#: udata/core/organization/activities.py:19
+#: udata/core/organization/activities.py:18
 msgid "created an organization"
 msgstr "a mis à jour une organisation"
 
-#: udata/core/organization/activities.py:26
+#: udata/core/organization/activities.py:25
 msgid "updated an organization"
 msgstr "a mis à jour une organisation"
 
@@ -1598,15 +1651,15 @@ msgstr "Sécurité"
 msgid "Spam"
 msgstr "Spam"
 
-#: udata/core/reuse/activities.py:19
+#: udata/core/reuse/activities.py:18
 msgid "created a reuse"
 msgstr "a créé une réutilisation"
 
-#: udata/core/reuse/activities.py:25
+#: udata/core/reuse/activities.py:24
 msgid "updated a reuse"
 msgstr "a mis à jour une réutilisation"
 
-#: udata/core/reuse/activities.py:32
+#: udata/core/reuse/activities.py:31
 msgid "deleted a reuse"
 msgstr "a supprimé une réutilisation"
 
@@ -1820,23 +1873,23 @@ msgstr "Collectivités d'outre-mer françaises"
 msgid "French arrondissement"
 msgstr "Arrondissement français"
 
-#: udata/core/topic/activities.py:27
+#: udata/core/topic/activities.py:26
 msgid "created a topic"
 msgstr "a créé une thématique"
 
-#: udata/core/topic/activities.py:33
+#: udata/core/topic/activities.py:32
 msgid "updated a topic"
 msgstr "a mis à jour une thématique"
 
-#: udata/core/topic/activities.py:40
+#: udata/core/topic/activities.py:39
 msgid "added an element to a topic"
 msgstr "a ajouté un élément à une thématique"
 
-#: udata/core/topic/activities.py:46
+#: udata/core/topic/activities.py:45
 msgid "updated an element in a topic"
 msgstr "a mis à jour un élément dans une thématique"
 
-#: udata/core/topic/activities.py:53
+#: udata/core/topic/activities.py:52
 msgid "removed an element from a topic"
 msgstr "a supprimé un élément d'une thématique"
 
@@ -1849,35 +1902,35 @@ msgstr "Un élément de thématique doit avoir un titre ou un élément."
 msgid "collection"
 msgstr "collection"
 
-#: udata/core/user/activities.py:36
+#: udata/core/user/activities.py:35
 msgid "followed a user"
 msgstr "a suivi un utilisateur"
 
-#: udata/core/user/activities.py:43
+#: udata/core/user/activities.py:42
 msgid "discussed a dataservice"
 msgstr "a commenté une API"
 
-#: udata/core/user/activities.py:48
+#: udata/core/user/activities.py:47
 msgid "discussed a dataset"
 msgstr "a commenté un jeu de données"
 
-#: udata/core/user/activities.py:53
+#: udata/core/user/activities.py:52
 msgid "discussed a reuse"
 msgstr "a commenté une réutilisation"
 
-#: udata/core/user/activities.py:58
+#: udata/core/user/activities.py:57
 msgid "followed a dataservice"
 msgstr "a suivi une API"
 
-#: udata/core/user/activities.py:63
+#: udata/core/user/activities.py:62
 msgid "followed a dataset"
 msgstr "a suivi un jeu de données"
 
-#: udata/core/user/activities.py:68
+#: udata/core/user/activities.py:67
 msgid "followed a reuse"
 msgstr "a suivi une réutilisation"
 
-#: udata/core/user/activities.py:73
+#: udata/core/user/activities.py:72
 msgid "followed an organization"
 msgstr "a suivi une organisation"
 
@@ -1899,7 +1952,7 @@ msgstr "Suppression de votre compte %(site)s inactif"
 msgid "Your account on %(site)s has been deleted due to inactivity"
 msgstr "Votre compte sur %(site)s a été supprimé pour cause d'inactivité"
 
-#: udata/core/user/mails.py:33 udata/tests/user/test_user_tasks.py:36
+#: udata/core/user/mails.py:33 udata/tests/user/test_user_tasks.py:38
 #, python-brace-format
 msgid "Inactivity of your {site} account"
 msgstr "Inactivité de votre compte {site}"
@@ -1940,7 +1993,7 @@ msgstr ""
 "vous aurez toujours la possibilité de recréer un compte sur la plateforme"
 " %(site)s."
 
-#: udata/core/user/models.py:296
+#: udata/core/user/models.py:286
 msgid "account"
 msgstr "compte"
 
@@ -1956,7 +2009,7 @@ msgstr "Editorialiste"
 msgid "Site moderator"
 msgstr "Moderateur"
 
-#: udata/core/visualizations/models.py:226
+#: udata/core/visualizations/models.py:228
 msgid "chart"
 msgstr "visualisation"
 
@@ -2298,11 +2351,11 @@ msgstr ""
 msgid "Hi %(user)s"
 msgstr "Bonjour %(user)s"
 
-#: udata/templates/mail/message.html:36
+#: udata/templates/mail/message.html:38
 msgid "Have a great day"
 msgstr "Très bonne journée"
 
-#: udata/templates/mail/message.html:37
+#: udata/templates/mail/message.html:39
 #, python-format
 msgid "The %(site)s team"
 msgstr "L'équipe de %(site)s"
@@ -2456,7 +2509,7 @@ msgstr "Se ré-authentifier"
 msgid "Some text"
 msgstr "Du texte"
 
-#: udata/tests/test_mail.py:76 udata/tests/test_mail.py:151
+#: udata/tests/test_mail.py:76 udata/tests/test_mail.py:177
 #, python-format
 msgid "Some text %(org)s"
 msgstr "Du texte %(org)s"
@@ -2466,7 +2519,14 @@ msgstr "Du texte %(org)s"
 msgid "Some text:"
 msgstr "Du texte :"
 
-#: udata/tests/api/test_activities_api.py:28
+#: udata/tests/test_mail.py:152 udata/tests/test_mail.py:154
+#: udata/tests/test_mail.py:155 udata/tests/test_mail.py:156
+#: udata/tests/test_mail.py:158
+#, python-format
+msgid "Some text %(name)s"
+msgstr ""
+
+#: udata/tests/api/test_activities_api.py:33
 msgid "did something to a dataset"
 msgstr "a fait quelque chose sur un jeu de données"
 
@@ -2494,7 +2554,7 @@ msgstr "Assez réutilisé"
 msgid "Heavily reused"
 msgstr "Souvent réutilisé"
 
-#: udata/tests/user/test_user_tasks.py:108
+#: udata/tests/user/test_user_tasks.py:110
 #, python-brace-format
 msgid "Deletion of your inactive {site} account"
 msgstr "Suppression de votre compte {site} inactif"
@@ -2639,4 +2699,7 @@ msgstr "Suppression de votre compte {site} inactif"
 
 #~ msgid "Enabled"
 #~ msgstr "Activé"
+
+#~ msgid "The conversation is too large."
+#~ msgstr "La conversation est trop volumineuse."
 
