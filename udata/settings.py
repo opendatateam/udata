@@ -225,8 +225,6 @@ class Defaults(object):
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
     OAUTH2_TOKEN_EXPIRES_IN = {
         "authorization_code": 30 * 24 * HOUR,
-        "implicit": 10 * 24 * HOUR,
-        "password": 30 * 24 * HOUR,
         "client_credentials": 30 * 24 * HOUR,
     }
     OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI = False
