@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-11-12 17:05+0100\n"
+"POT-Creation-Date: 2026-11-13 14:39+0100\n"
 "PO-Revision-Date: 2025-11-19 12:59+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: de\n"
@@ -441,58 +441,54 @@ msgstr ""
 msgid "You can only set one condition for a given access audience role"
 msgstr ""
 
-#: udata/core/assistant/api.py:67
-msgid "The conversation is too large."
-msgstr ""
-
-#: udata/core/assistant/api.py:89
+#: udata/core/assistant/api.py:73
 msgid "The conversation has no user message."
 msgstr ""
 
-#: udata/core/assistant/api.py:93 udata/core/assistant/api.py:98
+#: udata/core/assistant/api.py:77 udata/core/assistant/api.py:82
 msgid "Only text messages are accepted."
 msgstr ""
 
-#: udata/core/assistant/api.py:100
+#: udata/core/assistant/api.py:84
 msgid "A user message cannot be empty."
 msgstr ""
 
-#: udata/core/assistant/api.py:106
+#: udata/core/assistant/api.py:90
 #, python-format
 msgid "Your message is too long (%(max)s characters maximum)."
 msgstr ""
 
-#: udata/core/assistant/api.py:132 udata/core/assistant/api.py:136
+#: udata/core/assistant/api.py:128
 msgid "Invalid resource_id: a resource UUID is expected."
 msgstr ""
 
-#: udata/core/assistant/api.py:144
+#: udata/core/assistant/api.py:136
 msgid "Invalid visualization context."
 msgstr ""
 
-#: udata/core/assistant/api.py:216 udata/core/assistant/api.py:290
+#: udata/core/assistant/api.py:208 udata/core/assistant/api.py:282
 msgid "An error occurred while generating the response."
 msgstr ""
 
-#: udata/core/assistant/api.py:221
+#: udata/core/assistant/api.py:213
 msgid "The response took too long and was interrupted."
 msgstr ""
 
-#: udata/core/assistant/api.py:223
+#: udata/core/assistant/api.py:215
 msgid "The response was interrupted."
 msgstr ""
 
-#: udata/core/assistant/api.py:321
+#: udata/core/assistant/api.py:313
 msgid "Assistant is not configured (AI_BASE_URL is not set)."
 msgstr ""
 
-#: udata/core/assistant/api.py:329
+#: udata/core/assistant/api.py:321
 msgid ""
 "Assistant is enabled but the AI provider API key (AI_API_KEY) is not "
 "configured."
 msgstr ""
 
-#: udata/core/assistant/api.py:343
+#: udata/core/assistant/api.py:340
 msgid "Invalid request body."
 msgstr ""
 
@@ -2541,4 +2537,7 @@ msgstr ""
 
 #~ msgid "Enabled"
 #~ msgstr "Aktiviert"
+
+#~ msgid "The conversation is too large."
+#~ msgstr ""
 
