@@ -60,9 +60,6 @@ require_oauth = ResourceProtector()
 
 
 GRANT_EXPIRATION = 100  # 100 seconds
-TOKEN_EXPIRATION = 30 * 24 * 60 * 60  # 30 days in seconds
-REFRESH_EXPIRATION = 30  # days
-EPOCH = datetime.fromtimestamp(0)
 
 TOKEN_TYPES = {
     "Bearer": _("Bearer Token"),
@@ -172,10 +169,9 @@ class OAuth2Token(Document):
     access_token = StringField(unique=True)
     refresh_token = StringField(unique=True, sparse=True)
     created_at = DateTimeField(default=lambda: datetime.now(UTC), required=True)
-    # A refresh updates this document rather than creating another one: only this field
-    # tells how recently the token acted for its user.
+    # A token lives for weeks: only this field tells how recently it acted for its user.
     last_used_at = DateTimeField()
-    expires_in = IntField(required=True, default=TOKEN_EXPIRATION)
+    expires_in = IntField(required=True)
     scope = StringField(default="")
     revoked = BooleanField(default=False)
 
@@ -195,7 +191,8 @@ class OAuth2Token(Document):
         return self.expires_in
 
     def get_expires_at(self):
-        return (self.created_at - EPOCH).total_seconds() + self.expires_in
+        # MongoEngine loads `created_at` as a naive datetime, in UTC.
+        return self.created_at.replace(tzinfo=UTC).timestamp() + self.expires_in
 
     def get_client_id(self):
         return str(self.client.id)
@@ -206,14 +203,6 @@ class OAuth2Token(Document):
 
     def is_revoked(self):
         return self.revoked
-
-    def is_refresh_token_valid(self):
-        if self.revoked:
-            return False
-        expired_at = datetime.fromtimestamp(self.get_expires_at())
-        expired_at += timedelta(days=REFRESH_EXPIRATION)
-        # expired_at is naive (fromtimestamp), so compare with naive datetime
-        return expired_at > datetime.now(UTC).replace(tzinfo=None)
 
 
 class OAuth2Code(Document):
@@ -289,9 +278,10 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
     INCLUDE_NEW_REFRESH_TOKEN = True
 
     def authenticate_refresh_token(self, refresh_token):
-        item = OAuth2Token.objects(refresh_token=refresh_token).first()
-        if item and item.is_refresh_token_valid():
-            return item
+        token = OAuth2Token.objects(refresh_token=refresh_token).first()
+        refresh_window = current_app.config["OAUTH2_REFRESH_TOKEN_EXPIRES_IN"]
+        if token and not token.revoked and token.get_expires_at() + refresh_window > time.time():
+            return token
 
     def authenticate_user(self, credential):
         return credential.user
@@ -413,13 +403,7 @@ def save_token(token, request):
     scope = token.pop("scope", "")
     client = request.client
     user = request.user or client.owner
-    if request.grant_type == "refresh_token":
-        old_token = OAuth2Token.objects(
-            refresh_token=request.refresh_token.refresh_token, client=client, user=user, scope=scope
-        ).first()
-        old_token.update(**token)
-    else:
-        OAuth2Token.objects.create(client=client, user=user, scope=scope, **token)
+    OAuth2Token.objects.create(client=client, user=user, scope=scope, **token)
 
 
 def check_credentials():

@@ -290,14 +290,25 @@ The full option list is available in
 **default**:
 ```python
     {
-        'authorization_code': 10 * 24 * HOUR,
+        'authorization_code': 30 * 24 * HOUR,
+        'refresh_token': 30 * 24 * HOUR,
         'implicit': 10 * 24 * HOUR,
-        'password': 10 * 24 * HOUR,
-        'client_credentials': 10 * 24 * HOUR
+        'password': 30 * 24 * HOUR,
+        'client_credentials': 30 * 24 * HOUR
     }
 ```
 
-The OAuth2 token duration.
+The OAuth2 access token duration, per grant type. A grant type missing from this dict falls
+back to Authlib's own defaults: 10 days for `authorization_code`, `password` and
+`client_credentials`, one hour for anything else, `refresh_token` included.
+
+### OAUTH2_REFRESH_TOKEN_EXPIRES_IN
+
+**default**: `30 * 24 * HOUR`
+
+How long, in seconds, a refresh token stays usable once the access token it came with has
+expired. With the default values, an application can refresh a token up to 60 days after it was
+issued.
 
 ## Flask-Security options
 

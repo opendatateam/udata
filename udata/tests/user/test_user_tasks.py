@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from flask import current_app
 
-from udata.api.oauth2 import OAuth2Client, OAuth2Token
+from udata.api.factories import OAuth2TokenFactory
 from udata.core.api_token.models import ApiToken
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.user import tasks
@@ -126,26 +126,13 @@ class UserTasksTest(APITestCase):
         token, _ = ApiToken.generate(with_api_key)
         token.update(last_used_at=datetime.now(UTC))
         with_oauth_token = UserFactory(current_login_at=long_ago)
-        OAuth2Token.objects.create(
-            client=OAuth2Client.objects.create(
-                name="app", owner=UserFactory(), redirect_uris=["https://app.test/callback"]
-            ),
-            user=with_oauth_token,
-            access_token="access-token",
-            last_used_at=datetime.now(UTC),
-        )
+        OAuth2TokenFactory(user=with_oauth_token, last_used_at=datetime.now(UTC))
         inactive_user = UserFactory(current_login_at=long_ago)
         with_stale_api_key = UserFactory(current_login_at=long_ago)
         token, _ = ApiToken.generate(with_stale_api_key)
         token.update(last_used_at=long_ago)
         with_unused_oauth_token = UserFactory(current_login_at=long_ago)
-        OAuth2Token.objects.create(
-            client=OAuth2Client.objects.create(
-                name="other app", owner=UserFactory(), redirect_uris=["https://other.test/callback"]
-            ),
-            user=with_unused_oauth_token,
-            access_token="unused-access-token",
-        )
+        OAuth2TokenFactory(user=with_unused_oauth_token)
 
         with capture_mails() as mails:
             tasks.notify_inactive_users()

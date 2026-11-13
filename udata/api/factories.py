@@ -24,3 +24,4 @@ class OAuth2TokenFactory(ModelFactory):
     user = factory.SubFactory(UserFactory)
     access_token = factory.Faker("uuid4")
     refresh_token = factory.Faker("uuid4")
+    expires_in = 30 * 24 * 60 * 60
