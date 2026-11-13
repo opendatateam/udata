@@ -1,5 +1,21 @@
 # Changelog
 
+## 17.26.0 (2026-11-13)
+
+- chore(deps): update dependency faker to >=40.54, <40.55 ([#4085](https://github.com/opendatateam/udata/pull/4085))
+- chore(deps): update redis:alpine docker digest to 7958cfb ([#4098](https://github.com/opendatateam/udata/pull/4098))
+- chore(deps): update rustfs/rustfs docker tag to v1.0.5 ([#4097](https://github.com/opendatateam/udata/pull/4097))
+- chore: upgrade mongo patch ([#4103](https://github.com/opendatateam/udata/pull/4103))
+- chore: upgrade pillow to 13 ([#4040](https://github.com/opendatateam/udata/pull/4040))
+- feat: attribute harvesting to the harvest source and filter the activities on the kind of their actor ([#4092](https://github.com/opendatateam/udata/pull/4092))
+- feat: attribute the activities done through an API token to the token ([#4088](https://github.com/opendatateam/udata/pull/4088))
+- feat: attribute the activities done through an OAuth2 token to the token, on behalf of its user ([#4094](https://github.com/opendatateam/udata/pull/4094))
+- feat: require a fresh session to change the account email and notify the previous address ([#4089](https://github.com/opendatateam/udata/pull/4089))
+- fix: don't open a session for requests authenticated by an API key or an OAuth2 token ([#4091](https://github.com/opendatateam/udata/pull/4091))
+- fix: escape what translated strings interpolate in mail paragraphs and labels ([#4093](https://github.com/opendatateam/udata/pull/4093))
+- fix: send no new link when an expired email change link is opened ([#4095](https://github.com/opendatateam/udata/pull/4095))
+
+
 ## 17.25.0 (2026-11-10)
 
 - chore: update translations ([#4086](https://github.com/opendatateam/udata/pull/4086))
