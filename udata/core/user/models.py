@@ -11,6 +11,7 @@ from mongoengine import EmbeddedDocument
 from mongoengine.fields import (
     BooleanField,
     DateTimeField,
+    EmbeddedDocumentField,
     EnumField,
     GenericEmbeddedDocumentField,
     IntField,
@@ -77,20 +78,9 @@ def _visible_email(user):
     return f"***@{domain}"
 
 
-def _admin_or_self(name: str):
-    """An `attribute` giving the field `name` only to a sysadmin or to the user
-    themselves, `None` otherwise."""
-
-    def visible(user):
-        return getattr(user, name) if current_user_is_admin_or_self() else None
-
-    return visible
-
-
-def _visible_login_date(user):
-    if current_user_is_admin_or_self() or _is_org_private_context():
-        return user.current_login_at
-    return None
+def _admin_or_self(_user) -> bool:
+    """A `visible_if` for the fields only a sysadmin or the user themselves may read."""
+    return current_user_is_admin_or_self()
 
 
 # TODO: use simple text for role
@@ -109,6 +99,27 @@ class UserSettings(EmbeddedDocument):
 
 
 @generate_fields()
+class ProConnectIdentity(EmbeddedDocument):
+    """The ProConnect identity this account signs in with."""
+
+    sub = field(
+        StringField(required=True),
+        description="The ProConnect identifier (`sub`) of the identity",
+    )
+    second_factor = field(
+        BooleanField(default=False),
+        description="Whether the last login with this identity presented a second factor "
+        "held by the agent (key, passkey, authenticator app)",
+    )
+    # A second factor at ProConnect only stands for the udata one once we know whose it
+    # is: seen with the udata 2FA, or as the first second factor of an account without one.
+    verified_at = field(
+        DateTimeField(),
+        description="When this identity was trusted as the account holder's, null until then",
+    )
+
+
+@generate_fields()
 class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     slug = field(
         SlugField(max_length=255, required=True, populate_from="fullname"),
@@ -121,7 +132,7 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         # Stricter than `_visible_email`, which always yields at least a domain: the user
         # API (`/me`, `/users/`, `/users/<id>`) never hands a third party anything at all,
         # whereas `_visible_email` serves the org contexts where members may reach out.
-        attribute=_admin_or_self("email"),
+        visible_if=_admin_or_self,
         # The address is an identity: `Organization.create_invitation` resolves one into
         # an existing account, and registration proves it (`SECURITY_CONFIRMABLE`). Only
         # the `/change-email` flow carries that proof over, by mailing a token to the new
@@ -181,13 +192,13 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         DateTimeField(),
         auditable=False,
         readonly=True,
-        attribute=_admin_or_self("password_rotation_demanded"),
+        visible_if=_admin_or_self,
     )
     password_rotation_performed = field(
         DateTimeField(),
         auditable=False,
         readonly=True,
-        attribute=_admin_or_self("password_rotation_performed"),
+        visible_if=_admin_or_self,
     )
 
     # The 5 fields below are required for Flask-security when SECURITY_TRACKABLE is True.
@@ -199,7 +210,8 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         DateTimeField(),
         auditable=False,
         readonly=True,
-        attribute=_visible_login_date,
+        attribute="current_login_at",
+        visible_if=lambda _user: current_user_is_admin_or_self() or _is_org_private_context(),
     )
     current_login_at = DateTimeField()
     last_login_ip = StringField()
@@ -209,6 +221,16 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     # Two-Factor authentification fields
     tf_primary_method = StringField()
     tf_totp_secret = StringField()
+
+    # Written by the ProConnect login (`udata.auth.proconnect`), cleared by `udata user
+    # unset-proconnect`.
+    proconnect = field(
+        EmbeddedDocumentField(ProConnectIdentity),
+        allow_null=True,
+        auditable=False,
+        readonly=True,
+        visible_if=_admin_or_self,
+    )
 
     deleted = field(
         DateTimeField(),
@@ -228,13 +250,13 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     # them is decided by their `NotificationSetting` rules; this is only the rhythm.
     mail_cadence = field(
         EnumField(MailCadence, default=MailCadence.IMMEDIATE, required=True),
-        attribute=_admin_or_self("mail_cadence"),
+        visible_if=_admin_or_self,
     )
     # "Turn everything off": nothing reaches the user but what asks for an action. A
     # field rather than a rule, so that no rule, however precise, can bring anything back.
     notifications_paused = field(
         BooleanField(default=False),
-        attribute=_admin_or_self("notifications_paused"),
+        visible_if=_admin_or_self,
     )
 
     before_save = Signal()
@@ -254,6 +276,8 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
             },
             "-created_at",
             "slug",
+            # Every ProConnect login looks the trusted identity up.
+            {"fields": ["proconnect.sub"], "sparse": True},
         ],
         "ordering": ["-created_at"],
         "auto_create_index_on_save": True,
@@ -289,6 +313,58 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     def sysadmin(self):
         return self.has_role("admin")
 
+    @property
+    def two_factor_required_by_policy(self) -> bool:
+        """Whether the configuration requires a second factor from this account, set up or not."""
+        return current_app.config["SECURITY_TWO_FACTOR_REQUIRED"] or (
+            current_app.config["SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN"] and self.sysadmin
+        )
+
+    @property
+    def trusted_proconnect_sub(self) -> str | None:
+        """The ProConnect identity trusted as the account holder's, if any."""
+        identity = self.proconnect
+        return identity.sub if identity is not None and identity.verified_at else None
+
+    @property
+    def second_factor_at_proconnect_only(self) -> bool:
+        """Whether the account's only second factor is the one of its trusted ProConnect identity,
+        which a login must then present as a udata one would be."""
+        return self.trusted_proconnect_sub is not None and not self.tf_primary_method
+
+    @property
+    def signs_in_with_proconnect_only(self) -> bool:
+        """Whether the account has no way in but its trusted ProConnect identity: no password to
+        give it back, which a reset only takes reading the mailbox to do."""
+        return not self.password and self.second_factor_at_proconnect_only
+
+    @field(
+        description="Whether this session may drop the password and the udata 2FA of the account",
+        allow_null=True,
+        visible_if=_admin_or_self,
+    )
+    def can_switch_to_proconnect_only(self) -> bool:
+        # Circular import: the ProConnect login imports this model.
+        from udata.auth.proconnect import can_switch_to_proconnect_only
+
+        return not self.signs_in_with_proconnect_only and can_switch_to_proconnect_only(self)
+
+    @field(
+        description="Whether the account can sign in with a password",
+        allow_null=True,
+        visible_if=_admin_or_self,
+    )
+    def has_password(self) -> bool:
+        return bool(self.password)
+
+    @field(
+        description="Whether the account has set up the udata 2FA",
+        allow_null=True,
+        visible_if=_admin_or_self,
+    )
+    def has_two_factor(self) -> bool:
+        return bool(self.tf_primary_method)
+
     def check_tf_required(
         self, tf_setup_methods: list[tuple[str, str]], tf_fresh: bool
     ) -> tuple[bool, list[tuple[str, str]]]:
@@ -304,11 +380,7 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         Overrides default implementation in Flask-Security to add configurable 2FA requirement for sysadmins.
         This is called AFTER the user has successfully authenticated.
         """
-        if (
-            current_app.config["SECURITY_TWO_FACTOR_REQUIRED"]
-            or len(tf_setup_methods) > 0
-            or (current_app.config["SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN"] and self.sysadmin)
-        ):
+        if self.two_factor_required_by_policy or len(tf_setup_methods) > 0:
             if current_app.config["SECURITY_TWO_FACTOR_ALWAYS_VALIDATE"] or not tf_fresh:
                 return True, tf_setup_methods
         return False, tf_setup_methods
@@ -322,9 +394,7 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         definitive answer in the authentication path.
         Overrides default implementation in Flask-Security to add configurable 2FA requirement for sysadmins.
         """
-        return super().check_tf_required_setup() or (
-            current_app.config["SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN"] and self.sysadmin
-        )
+        return self.two_factor_required_by_policy
 
     def self_web_url(self, **kwargs):
         return cdata_url(f"/users/{self._link_id(**kwargs)}", **kwargs)

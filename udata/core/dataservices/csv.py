@@ -33,6 +33,7 @@ class DataserviceCsvAdapter(csv.Adapter):
         ("datasets", lambda d: ",".join([str(d.id) for d in d.datasets])),
         ("harvest.backend", lambda r: r.harvest and r.harvest.backend),
         ("harvest.domain", lambda r: r.harvest and r.harvest.domain),
+        ("harvest.record_id", lambda r: r.harvest and r.harvest.record_id),
         ("harvest.remote_id", lambda r: r.harvest and r.harvest.remote_id),
         ("harvest.remote_url", lambda r: r.harvest and r.harvest.remote_url),
         ("harvest.uri", lambda r: r.harvest and r.harvest.uri),

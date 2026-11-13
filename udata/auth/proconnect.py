@@ -1,17 +1,21 @@
 import json
 import time
-from dataclasses import dataclass
-from datetime import datetime
+from dataclasses import asdict, dataclass, replace
+from datetime import UTC, datetime
 
 from authlib.common.urls import add_params_to_uri
 from authlib.integrations.base_client import OAuthError
 from authlib.integrations.flask_client import OAuth
 from flask import abort, current_app, redirect, request, session, url_for
+from flask_login import user_logged_out
+from flask_security.signals import tf_code_confirmed
 from flask_security.tf_plugin import tf_clean_session
+from flask_security.utils import check_and_update_authn_fresh
 from werkzeug.security import gen_salt
 
 from udata.api import API, api
-from udata.auth import current_user, login_user
+from udata.auth import current_user, login_user, mails
+from udata.core.user.models import ProConnectIdentity, User, datastore
 from udata.uris import cdata_url, homepage_url
 
 ns = api.namespace("proconnect", "Proconnect related operations")
@@ -24,6 +28,16 @@ ID_TOKEN_KEY = "id_token"
 REAUTH_KEY = "proconnect_reauth"
 # The ProConnect levels reached with a second factor: eIDAS substantial and high imply one.
 SECOND_FACTOR_ACR_VALUES = ["eidas0-mfa", "eidas1-mfa", "eidas2", "eidas3"]
+# The `amr` methods of a second factor the agent holds. The `acr` can't tell: it echoes the
+# level asked for, which the agent's browser carries. A one-time code sent by email (`mail`)
+# is left out: it only proves access to the mailbox again, as a password reset does.
+HELD_SECOND_FACTOR_AMR = {"otp", "pop", "hwk", "swk"}
+# The ProConnect login waiting for the udata 2FA, which flask-security's views complete.
+PENDING_LOGIN_KEY = "proconnect_pending_login"
+# The ProConnect login this session was opened with.
+LOGIN_KEY = "proconnect_login"
+# Set when a login is sent back to ProConnect for the second factor the account relies on.
+SECOND_FACTOR_ASKED_KEY = "proconnect_second_factor_asked"
 
 
 def init_app(app):
@@ -62,28 +76,58 @@ def get_logout_url():
     )
 
 
-def authorize_redirect(state: str | None = None):
+def authorize_redirect(state: str | None = None, require_second_factor: bool = False):
     redirect_uri = url_for("api.proconnect_auth", _external=True)
-    if not current_app.config["PROCONNECT_REQUIRE_SECOND_FACTOR"]:
-        return oauth.proconnect.authorize_redirect(redirect_uri, acr_values="eidas1", state=state)
-    # Required rather than requested: ProConnect then has the agent present a second factor,
-    # or set one up, before coming back.
-    claims = {"id_token": {"acr": {"essential": True, "values": SECOND_FACTOR_ACR_VALUES}}}
-    return oauth.proconnect.authorize_redirect(redirect_uri, state=state, claims=json.dumps(claims))
+    # ProConnect only returns the `amr` when the `claims` ask for it.
+    claims = {"id_token": {"amr": None}}
+    params = {}
+    if require_second_factor or current_app.config["PROCONNECT_REQUIRE_SECOND_FACTOR"]:
+        # Required rather than requested: ProConnect then has the agent present a second
+        # factor, or set one up, before coming back.
+        claims["id_token"]["acr"] = {"essential": True, "values": SECOND_FACTOR_ACR_VALUES}
+    else:
+        params["acr_values"] = "eidas1"
+    return oauth.proconnect.authorize_redirect(
+        redirect_uri, state=state, claims=json.dumps(claims), **params
+    )
 
 
 @dataclass
 class ProConnectAuthentication:
     userinfo: dict
-    # ProConnect vouches that the agent presented a second factor.
+    # The ProConnect identity of the agent.
+    sub: str
+    # ProConnect vouches that the agent presented a second factor they hold.
     second_factor: bool
+
+
+@dataclass
+class ProConnectLogin:
+    """A ProConnect login of an account, as kept in the session."""
+
+    fs_uniquifier: str
+    sub: str
+    second_factor: bool
+
+    def is_of(self, user: User) -> bool:
+        return self.fs_uniquifier == user.fs_uniquifier
+
+    def presents_trusted_second_factor(self, user: User) -> bool:
+        """Whether this login of `user` presented the second factor of its trusted identity, the
+        proof that sensitive changes to the account's second factors require."""
+        return self.is_of(user) and self.second_factor and self.sub == user.trusted_proconnect_sub
+
+
+def session_login(key: str) -> ProConnectLogin | None:
+    data = session.get(key)
+    return ProConnectLogin(**data) if data else None
 
 
 def authenticate() -> ProConnectAuthentication:
     """Complete the authorization code flow and return what ProConnect says of the agent."""
     token = oauth.proconnect.authorize_access_token()
     # authlib leaves the claims of the id_token it verified under `userinfo`.
-    acr = token["userinfo"].get("acr")
+    id_token_claims = token["userinfo"]
     # Store the id_token in the session, it'll be used when logging out from ProConnect.
     session[ID_TOKEN_KEY] = token[ID_TOKEN_KEY]
     # /!\ DIRTY HACK.
@@ -101,7 +145,8 @@ def authenticate() -> ProConnectAuthentication:
     userinfo_token[ID_TOKEN_KEY] = resp.content
     return ProConnectAuthentication(
         userinfo=oauth.proconnect.parse_id_token(userinfo_token, nonce=None),
-        second_factor=acr in SECOND_FACTOR_ACR_VALUES,
+        sub=id_token_claims["sub"],
+        second_factor=bool(HELD_SECOND_FACTOR_AMR & set(id_token_claims.get("amr") or [])),
     )
 
 
@@ -121,6 +166,8 @@ class ProconnectLoginAPI(API):
             # Clean out any potential old session info - in case of previous
             # aborted 2FA attempt.
             tf_clean_session()
+        session.pop(PENDING_LOGIN_KEY, None)
+        session.pop(SECOND_FACTOR_ASKED_KEY, None)
 
         return authorize_redirect()
 
@@ -152,26 +199,59 @@ class ProconnectReauthAPI(API):
 @ns.route("/auth", endpoint="proconnect_auth")
 class ProconnectAuthAPI(API):
     def get(self):
-        from udata.models import datastore
-
         reauth_state = session.pop(REAUTH_KEY, None)
         if reauth_state and reauth_state == request.args.get("state"):
             return reauthenticate()
 
+        second_factor_asked = session.pop(SECOND_FACTOR_ASKED_KEY, False)
         authentication = authenticate()
         proconnect_user = authentication.userinfo
-        user = datastore.find_user(email=proconnect_user["email"])
+        email = proconnect_user["email"]
+        # The identity trusted as an account holder's finds that account even when its
+        # identity provider changed its address (a renamed domain).
+        user = User.objects(
+            proconnect__sub=authentication.sub, proconnect__verified_at__ne=None, deleted=None
+        ).first() or datastore.find_user(email=email)
         if not user:
             user = datastore.create_user(
-                email=proconnect_user["email"],
+                email=email,
                 first_name=proconnect_user.get("given_name"),
                 last_name=proconnect_user.get("usual_name"),
                 confirmed_at=datetime.now(),
             )
+        login = ProConnectLogin(
+            fs_uniquifier=user.fs_uniquifier,
+            sub=authentication.sub,
+            second_factor=authentication.second_factor,
+        )
+
+        trusted_sub = user.trusted_proconnect_sub
+        if user.second_factor_at_proconnect_only:
+            # Another identity, even with a second factor of its own, is someone else at the
+            # same address.
+            if trusted_sub != login.sub:
+                return redirect(homepage_url(flash="proconnect_identity_mismatch"))
+            # The account's second factor must be presented, as a udata one would be.
+            # ProConnect only asks for it when required, and the request we send goes through
+            # the agent's browser: send them back with it required.
+            if not login.second_factor:
+                # Once only: an identity provider may answer with no method we count as a
+                # second factor (a code by email), every time.
+                if second_factor_asked:
+                    return redirect(homepage_url(flash="proconnect_second_factor_required"))
+                session[SECOND_FACTOR_ASKED_KEY] = True
+                return authorize_redirect(require_second_factor=True)
+
         # A second factor presented to ProConnect stands for the udata one, as the identity
-        # provider's password stands for the udata one. It may come from a ProConnect session
-        # opened earlier, which is why the login stays not fresh below.
-        if current_app.config["SECURITY_TWO_FACTOR"] and not authentication.second_factor:
+        # provider's password stands for the udata one, once that identity is trusted as the
+        # account holder's: verified, or the first second factor of an account without one.
+        # It may come from a ProConnect session opened earlier, which is why the login stays
+        # not fresh below.
+        skip_udata_second_factor = login.second_factor and (
+            trusted_sub == login.sub if trusted_sub else trusts_first_second_factor(user)
+        )
+        if current_app.config["SECURITY_TWO_FACTOR"] and not skip_udata_second_factor:
+            session[PENDING_LOGIN_KEY] = asdict(login)
             # Enter 2FA check if required
             response = current_app.extensions["security"].two_factor_plugins.tf_enter(
                 user=user,
@@ -187,16 +267,109 @@ class ProconnectAuthAPI(API):
                 else:
                     page = cdata_url("/tf-validate")
                 return redirect(page) if page else response
+            session.pop(PENDING_LOGIN_KEY, None)
 
         if not login_user(user):
             return {"message": "ProConnect Authentication failed"}, 401
+        record_login(user, login, udata_second_factor=False)
         # `login_user` dated the session now, while an open ProConnect session may have
         # signed the agent in without asking them anything: only a reauthentication, or
         # the code of the udata 2FA above, makes it fresh. Without `fs_paa`, flask-security
         # ignores the grace period a previous user of this browser may have left.
         session.pop("fs_paa", None)
 
+        if user.password and can_switch_to_proconnect_only(user):
+            # The password is a way in without the ProConnect second factor: cdata invites
+            # the agent to drop it.
+            return redirect(homepage_url(flash="proconnect_only_available"))
         return redirect(homepage_url(flash="connected"))
+
+
+def can_switch_to_proconnect_only(user: User) -> bool:
+    """Whether this session may drop the password and the udata 2FA of `user`, its ProConnect
+    second factor becoming the only one: the session must have presented it."""
+    login = session_login(LOGIN_KEY)
+    return login is not None and login.presents_trusted_second_factor(user)
+
+
+@ns.route("/only/", endpoint="proconnect_only")
+class ProconnectOnlyAPI(API):
+    @api.secure
+    @api.doc("proconnect_only")
+    @api.response(204, "The account signs in with ProConnect only")
+    @api.response(400, "The account already signs in with ProConnect only")
+    @api.response(403, "This session wasn't opened by the trusted ProConnect identity")
+    def post(self):
+        """Drop the password and the udata 2FA: the account signs in with ProConnect only."""
+        security = current_app.extensions["security"]
+        within = current_app.config["SECURITY_FRESHNESS"]
+        grace = current_app.config["SECURITY_FRESHNESS_GRACE_PERIOD"]
+        if not check_and_update_authn_fresh(within, grace):
+            return security._reauthn_handler(within, grace)
+
+        user = current_user._get_current_object()
+        if not can_switch_to_proconnect_only(user):
+            api.abort(403, "Sign in with ProConnect and its second factor first")
+        if user.signs_in_with_proconnect_only:
+            api.abort(400, "This account already signs in with ProConnect only")
+
+        # Also signs out the other sessions, including any opened with the password. The API
+        # keys stay: scripts depend on them.
+        datastore.reset_user_access(user)
+        user.password = None
+        datastore.put(user)
+        login_user(user)
+        login = session_login(LOGIN_KEY)
+        session[LOGIN_KEY] = asdict(replace(login, fs_uniquifier=user.fs_uniquifier))
+        mails.signs_in_with_proconnect_only().send(user)
+        return "", 204
+
+
+def trusts_first_second_factor(user: User) -> bool:
+    """Whether a ProConnect identity presenting a second factor becomes trusted as the holder's of
+    `user`: whoever sets up the first second factor of an account without a udata 2FA owns it.
+
+    The account then relies on it (`User.second_factor_at_proconnect_only`): a login without it
+    is sent back to ProConnect with it required.
+    """
+    return not user.tf_primary_method
+
+
+def record_login(user: User, login: ProConnectLogin, udata_second_factor: bool) -> None:
+    """Remember the ProConnect identity `user` just signed in with."""
+    session[LOGIN_KEY] = asdict(login)
+
+    identity = user.proconnect
+    trusted_sub = user.trusted_proconnect_sub
+    if trusted_sub and trusted_sub != login.sub and not udata_second_factor:
+        # Only a login that passed the udata 2FA replaces the trusted identity.
+        return
+    if identity is None or identity.sub != login.sub:
+        identity = ProConnectIdentity(sub=login.sub)
+    identity.second_factor = login.second_factor
+    if (
+        identity.verified_at is None
+        and login.second_factor
+        and (udata_second_factor or trusts_first_second_factor(user))
+    ):
+        identity.verified_at = datetime.now(UTC)
+    user.proconnect = identity
+    datastore.put(user)
+
+
+@tf_code_confirmed.connect
+def complete_pending_login(sender, user: User, **kwargs):
+    """The udata 2FA of a ProConnect login succeeded (code validated, or first one set up)."""
+    login = session_login(PENDING_LOGIN_KEY)
+    session.pop(PENDING_LOGIN_KEY, None)
+    if login is not None and login.is_of(user):
+        record_login(user, login, udata_second_factor=True)
+
+
+@user_logged_out.connect
+def forget_proconnect_login(sender, **kwargs):
+    session.pop(PENDING_LOGIN_KEY, None)
+    session.pop(LOGIN_KEY, None)
 
 
 def reauthenticate():
@@ -206,13 +379,19 @@ def reauthenticate():
         return redirect(login_page_url())
 
     try:
-        proconnect_user = authenticate().userinfo
+        authentication = authenticate()
     except OAuthError:
         # The agent cancelled, or ProConnect refused the exchange.
         return redirect(verify_page_url("proconnect_reauth_failed"))
 
-    # Compared like the login resolves an account from a ProConnect identity.
-    if proconnect_user["email"] != current_user.email:
+    # Compared like the login resolves an account from a ProConnect identity: by the trusted
+    # identity when there is one, which another one at the same address isn't.
+    trusted_sub = current_user.trusted_proconnect_sub
+    if trusted_sub:
+        mismatch = authentication.sub != trusted_sub
+    else:
+        mismatch = authentication.userinfo["email"] != current_user.email
+    if mismatch:
         return redirect(verify_page_url("proconnect_reauth_identity_mismatch"))
 
     # Signed out of ProConnect beforehand: their identity provider asked them to authenticate,

@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-11-10 16:45+0100\n"
+"POT-Creation-Date: 2026-11-12 17:05+0100\n"
 "PO-Revision-Date: 2025-11-19 12:59+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: ar\n"
@@ -27,11 +27,11 @@ msgstr "الرجاء التأكد من البريد الإلكتروني الخ�
 msgid "Login instructions"
 msgstr "تعليمات تسجيل الدخول"
 
-#: udata/auth/mails.py:127 udata/settings.py:148
+#: udata/auth/mails.py:144 udata/settings.py:148
 msgid "Your password has been reset"
 msgstr "لقد تم إعادة تعيين كلمة المرور الخاصة بك"
 
-#: udata/auth/mails.py:139 udata/settings.py:149
+#: udata/auth/mails.py:153 udata/settings.py:149
 msgid "Your password has been changed"
 msgstr "تم تغيير كلمة المرور الخاصه بك"
 
@@ -39,7 +39,7 @@ msgstr "تم تغيير كلمة المرور الخاصه بك"
 msgid "Password reset instructions"
 msgstr "إرشادات إعادة تعيين كلمة المرور"
 
-#: udata/settings.py:582
+#: udata/settings.py:580
 msgid "This dataset has been archived"
 msgstr ""
 
@@ -94,144 +94,191 @@ msgstr ""
 "خطأ في التحقق من صحة: لا يمكن تحديث البيانات الخاصة بك في الوقت الراهن، "
 "لقد تم إعلامنا من الخطأ وسوف نقوم بإصلاحه في أقرب وقت ممكن."
 
-#: udata/api/oauth2.py:67
+#: udata/api/oauth2.py:68
 msgid "Bearer Token"
 msgstr "رمز حامل"
 
-#: udata/api/oauth2.py:70
+#: udata/api/oauth2.py:71
 msgid "Default scope"
 msgstr "النطاق الافتراضي"
 
-#: udata/api/oauth2.py:70
+#: udata/api/oauth2.py:71
 msgid "System administrator rights"
 msgstr "حقوق مسؤول النظام"
 
-#: udata/auth/forms.py:24
+#: udata/auth/forms.py:27
 msgid "Captcha code"
 msgstr ""
 
-#: udata/auth/forms.py:25
+#: udata/auth/forms.py:28
 msgid "Captcha ID"
 msgstr ""
 
-#: udata/auth/forms.py:31
+#: udata/auth/forms.py:34
 msgid "Invalid Captcha"
 msgstr ""
 
-#: udata/auth/forms.py:37
+#: udata/auth/forms.py:40
 msgid "First name"
 msgstr "الإ سم"
 
-#: udata/auth/forms.py:39
+#: udata/auth/forms.py:42
 msgid "First name is required"
 msgstr ""
 
-#: udata/auth/forms.py:40 udata/auth/forms.py:47 udata/core/checks.py:13
+#: udata/auth/forms.py:43 udata/auth/forms.py:50 udata/core/checks.py:13
 msgid "URLs not allowed in this field"
 msgstr ""
 
-#: udata/auth/forms.py:44
+#: udata/auth/forms.py:47
 msgid "Last name"
 msgstr "اللقب "
 
-#: udata/auth/forms.py:46
+#: udata/auth/forms.py:49
 msgid "Last name is required"
 msgstr ""
 
-#: udata/auth/forms.py:51
+#: udata/auth/forms.py:54
 msgid "J'accepte les conditions générales d'utilisation"
 msgstr ""
 
-#: udata/auth/forms.py:53
+#: udata/auth/forms.py:56
 msgid "You must accept the terms of use to continue."
 msgstr ""
 
-#: udata/auth/forms.py:76 udata/tests/forms/test_current_user_field.py:194
+#: udata/auth/forms.py:75
+msgid "This account signs in with ProConnect only."
+msgstr ""
+
+#: udata/auth/forms.py:88 udata/tests/forms/test_current_user_field.py:194
 msgid "Password must be changed for security reasons"
 msgstr ""
 
-#: udata/auth/forms.py:110 udata/tests/api/test_security_api.py:141
+#: udata/auth/forms.py:145 udata/tests/api/test_proconnect_api.py:52
+msgid ""
+"Your account is protected by the two-factor authentication of ProConnect:"
+" sign in with ProConnect to set up another one."
+msgstr ""
+
+#: udata/auth/forms.py:156 udata/tests/api/test_security_api.py:142
 msgid "This account has no password."
 msgstr ""
 
-#: udata/auth/forms.py:117
+#: udata/auth/forms.py:163
 msgid "New email"
 msgstr ""
 
-#: udata/auth/forms.py:119
+#: udata/auth/forms.py:165
 msgid "Retype email"
 msgstr ""
 
-#: udata/auth/forms.py:120
+#: udata/auth/forms.py:166
 msgid "Email does not match"
 msgstr ""
 
-#: udata/auth/forms.py:122 udata/templates/security/change_email.html:10
+#: udata/auth/forms.py:168 udata/templates/security/change_email.html:10
 #: udata/templates/security/change_email.html:16
 msgid "Change email"
 msgstr ""
 
-#: udata/auth/mails.py:69 udata/auth/mails.py:73 udata/auth/mails.py:98
-#: udata/auth/mails.py:101 udata/tests/api/test_security_api.py:111
+#: udata/auth/mails.py:75 udata/auth/mails.py:79 udata/auth/mails.py:100
+#: udata/auth/mails.py:103 udata/tests/api/test_security_api.py:112
 msgid "Confirm your email address"
 msgstr ""
 
-#: udata/auth/mails.py:71
+#: udata/auth/mails.py:77
 #, python-format
 msgid "Welcome to %(site)s!"
 msgstr ""
 
-#: udata/auth/mails.py:72 udata/auth/mails.py:100
+#: udata/auth/mails.py:78 udata/auth/mails.py:102
 msgid "Please confirm your email address."
 msgstr ""
 
-#: udata/auth/mails.py:82
+#: udata/auth/mails.py:86
 msgid "Your email address is already associated with an account"
 msgstr ""
 
-#: udata/auth/mails.py:85
+#: udata/auth/mails.py:89
 #, python-format
 msgid "Someone (you?) tried to create an account on %(site)s with your email."
 msgstr ""
 
-#: udata/auth/mails.py:88
+#: udata/auth/mails.py:92
 msgid "If you forgot your password, you can reset it."
 msgstr ""
 
-#: udata/auth/mails.py:89 udata/auth/mails.py:111 udata/auth/mails.py:118
-#: udata/auth/mails.py:146
+#: udata/auth/mails.py:93 udata/auth/mails.py:130 udata/auth/mails.py:137
+#: udata/auth/mails.py:160
 msgid "Reset your password"
 msgstr ""
 
-#: udata/auth/mails.py:114
+#: udata/auth/mails.py:110
+msgid "Your account signs in with ProConnect"
+msgstr ""
+
+#: udata/auth/mails.py:113 udata/auth/mails.py:133
 #, python-format
 msgid "Someone requested a password reset for your %(site)s account."
 msgstr ""
 
-#: udata/auth/mails.py:117
+#: udata/auth/mails.py:116 udata/tests/api/test_proconnect_api.py:665
+msgid "Your account has no password: it signs in with ProConnect only."
+msgstr ""
+
+#: udata/auth/mails.py:117 udata/auth/mails.py:136
 msgid "If this wasn't you, please ignore this email."
 msgstr ""
 
-#: udata/auth/mails.py:129
+#: udata/auth/mails.py:118
+msgid "Sign in with ProConnect"
+msgstr ""
+
+#: udata/auth/mails.py:146
 msgid "Your data.gouv.fr password has been reset."
 msgstr ""
 
-#: udata/auth/mails.py:142
+#: udata/auth/mails.py:156
 #, python-format
 msgid "Your %(site)s account password has been changed."
 msgstr ""
 
-#: udata/auth/mails.py:145
+#: udata/auth/mails.py:159
 msgid "If you did not change your password, please reset it."
 msgstr ""
 
-#: udata/auth/mails.py:155
+#: udata/auth/mails.py:167
+msgid "The email address of your account has changed"
+msgstr ""
+
+#: udata/auth/mails.py:170
+#, python-format
+msgid "The email address of your %(site)s account is now %(email)s."
+msgstr ""
+
+#: udata/auth/mails.py:174 udata/auth/mails.py:198
+msgid "If this wasn't you, contact us right away."
+msgstr ""
+
+#: udata/auth/mails.py:181
 msgid "User can't access mail account"
 msgstr ""
 
-#: udata/auth/mails.py:157
+#: udata/auth/mails.py:183
 #, python-format
 msgid "%(email)s can not access mail account"
+msgstr ""
+
+#: udata/auth/mails.py:190
+msgid "Your account now signs in with ProConnect only"
+msgstr ""
+
+#: udata/auth/mails.py:193
+#, python-format
+msgid ""
+"Your %(site)s account now signs in with ProConnect and its two-factor "
+"authentication only: its password and its %(site)s two-factor "
+"authentication, if it had any, have been removed."
 msgstr ""
 
 #: udata/auth/password_validation.py:26
@@ -292,6 +339,10 @@ msgstr ""
 #: udata/forms/fields.py:716 udata/tests/api/test_dataservices_api.py:616
 msgid "Permission denied for this organization"
 msgstr "تم رفض الإذن لهذه المؤسسة"
+
+#: udata/core/owned.py:125
+msgid "An object belongs either to a user or to an organization, not both"
+msgstr ""
 
 #: udata/core/access_type/constants.py:46
 msgid "Confidentiality of public authorities proceedings"
@@ -513,15 +564,15 @@ msgstr ""
 msgid "Contact point {id} does not belong to the owner of this object"
 msgstr ""
 
-#: udata/core/dataservices/activities.py:24
+#: udata/core/dataservices/activities.py:22
 msgid "created a dataservice"
 msgstr ""
 
-#: udata/core/dataservices/activities.py:30
+#: udata/core/dataservices/activities.py:28
 msgid "updated a dataservice"
 msgstr ""
 
-#: udata/core/dataservices/activities.py:37
+#: udata/core/dataservices/activities.py:35
 msgid "deleted a dataservice"
 msgstr ""
 
@@ -537,12 +588,12 @@ msgstr ""
 msgid "dataservice"
 msgstr ""
 
-#: udata/core/dataservices/models.py:314 udata/core/dataset/models.py:672
+#: udata/core/dataservices/models.py:314 udata/core/dataset/models.py:673
 #: udata/mongo/datetime_fields.py:61
 msgid "Creation date"
 msgstr "تاريخ الإنشاء"
 
-#: udata/core/dataservices/models.py:321 udata/core/dataset/models.py:678
+#: udata/core/dataservices/models.py:321 udata/core/dataset/models.py:679
 #: udata/mongo/datetime_fields.py:68
 msgid "Last modification date"
 msgstr "تاريخ التعديل الأخير"
@@ -551,27 +602,27 @@ msgstr "تاريخ التعديل الأخير"
 msgid "New APIs"
 msgstr ""
 
-#: udata/core/dataset/activities.py:25
+#: udata/core/dataset/activities.py:23
 msgid "created a dataset"
 msgstr "قام بإنشاء مجموعة بيانات"
 
-#: udata/core/dataset/activities.py:31
+#: udata/core/dataset/activities.py:29
 msgid "updated a dataset"
 msgstr "قام بتحديث مجموعة بيانات"
 
-#: udata/core/dataset/activities.py:38
+#: udata/core/dataset/activities.py:36
 msgid "deleted a dataset"
 msgstr "قام بحذف مجموعة بيانات"
 
-#: udata/core/dataset/activities.py:44
+#: udata/core/dataset/activities.py:42
 msgid "added a resource to a dataset"
 msgstr ""
 
-#: udata/core/dataset/activities.py:50
+#: udata/core/dataset/activities.py:48
 msgid "updated a resource"
 msgstr ""
 
-#: udata/core/dataset/activities.py:56
+#: udata/core/dataset/activities.py:54
 msgid "removed a resource from a dataset"
 msgstr ""
 
@@ -588,196 +639,196 @@ msgstr ""
 msgid "Latest datasets"
 msgstr ""
 
-#: udata/core/dataset/constants.py:20
+#: udata/core/dataset/constants.py:23
 msgid "Real time"
 msgstr "في الوقت الحالى"
 
-#: udata/core/dataset/constants.py:21
+#: udata/core/dataset/constants.py:24
 msgid "Every minute"
 msgstr ""
 
-#: udata/core/dataset/constants.py:22
+#: udata/core/dataset/constants.py:25
 msgid "Every five minutes"
 msgstr ""
 
-#: udata/core/dataset/constants.py:23
+#: udata/core/dataset/constants.py:26
 msgid "Every ten minutes"
 msgstr ""
 
-#: udata/core/dataset/constants.py:26
+#: udata/core/dataset/constants.py:29
 msgid "Every fifteen minutes"
 msgstr ""
 
-#: udata/core/dataset/constants.py:29
+#: udata/core/dataset/constants.py:32
 msgid "Every thirty minute"
 msgstr ""
 
-#: udata/core/dataset/constants.py:30
+#: udata/core/dataset/constants.py:33
 msgid "Every hour"
 msgstr ""
 
-#: udata/core/dataset/constants.py:31
+#: udata/core/dataset/constants.py:34
 msgid "Every two hours"
 msgstr ""
 
-#: udata/core/dataset/constants.py:32
+#: udata/core/dataset/constants.py:35
 msgid "Every three hours"
 msgstr ""
 
-#: udata/core/dataset/constants.py:33
+#: udata/core/dataset/constants.py:36
 msgid "Every twelve hours"
 msgstr ""
 
-#: udata/core/dataset/constants.py:34
+#: udata/core/dataset/constants.py:37
 msgid "Several times a day"
 msgstr ""
 
-#: udata/core/dataset/constants.py:35
+#: udata/core/dataset/constants.py:38
 msgid "Three times a day"
 msgstr "ثلاث مرات في اليوم"
 
-#: udata/core/dataset/constants.py:36
+#: udata/core/dataset/constants.py:39
 msgid "Twice a day"
 msgstr ""
 
-#: udata/core/dataset/constants.py:37 udata/harvest/models.py:46
+#: udata/core/dataset/constants.py:40 udata/harvest/models.py:46
 msgid "Daily"
 msgstr "يوميا"
 
-#: udata/core/dataset/constants.py:38
+#: udata/core/dataset/constants.py:41
 msgid "Five times a week"
 msgstr ""
 
-#: udata/core/dataset/constants.py:41
+#: udata/core/dataset/constants.py:44
 msgid "Three times a week"
 msgstr "ثلاث مرات في الاسبوع"
 
-#: udata/core/dataset/constants.py:44
+#: udata/core/dataset/constants.py:47
 msgid "Twice a week"
 msgstr ""
 
-#: udata/core/dataset/constants.py:45 udata/harvest/models.py:45
+#: udata/core/dataset/constants.py:48 udata/harvest/models.py:45
 msgid "Weekly"
 msgstr "أسبوعيا"
 
-#: udata/core/dataset/constants.py:46
+#: udata/core/dataset/constants.py:49
 msgid "Every two weeks"
 msgstr ""
 
-#: udata/core/dataset/constants.py:49
+#: udata/core/dataset/constants.py:52
 msgid "Three times a month"
 msgstr "ثلاث مرات في الشهر"
 
-#: udata/core/dataset/constants.py:52
+#: udata/core/dataset/constants.py:55
 msgid "Twice a month"
 msgstr ""
 
-#: udata/core/dataset/constants.py:53 udata/harvest/models.py:44
+#: udata/core/dataset/constants.py:56 udata/harvest/models.py:44
 msgid "Monthly"
 msgstr "شهريا"
 
-#: udata/core/dataset/constants.py:54
+#: udata/core/dataset/constants.py:57
 msgid "Every two months"
 msgstr ""
 
-#: udata/core/dataset/constants.py:55
+#: udata/core/dataset/constants.py:58
 msgid "Quarterly"
 msgstr "ربع سنوي"
 
-#: udata/core/dataset/constants.py:58
+#: udata/core/dataset/constants.py:61
 msgid "Three times a year"
 msgstr "ثلاث مرات في السنة"
 
-#: udata/core/dataset/constants.py:61
+#: udata/core/dataset/constants.py:64
 msgid "Twice a year"
 msgstr ""
 
-#: udata/core/dataset/constants.py:62
+#: udata/core/dataset/constants.py:65
 msgid "Annually"
 msgstr ""
 
-#: udata/core/dataset/constants.py:63
+#: udata/core/dataset/constants.py:66
 msgid "Every two years"
 msgstr ""
 
-#: udata/core/dataset/constants.py:64
+#: udata/core/dataset/constants.py:67
 msgid "Every three years"
 msgstr ""
 
-#: udata/core/dataset/constants.py:65
+#: udata/core/dataset/constants.py:68
 msgid "Every four years"
 msgstr ""
 
-#: udata/core/dataset/constants.py:66
+#: udata/core/dataset/constants.py:69
 msgid "Every five years"
 msgstr ""
 
-#: udata/core/dataset/constants.py:67
+#: udata/core/dataset/constants.py:70
 msgid "Every ten years"
 msgstr ""
 
-#: udata/core/dataset/constants.py:68
+#: udata/core/dataset/constants.py:71
 msgid "Every twenty years"
 msgstr ""
 
-#: udata/core/dataset/constants.py:69
+#: udata/core/dataset/constants.py:72
 msgid "Every thirty years"
 msgstr ""
 
-#: udata/core/dataset/constants.py:70
+#: udata/core/dataset/constants.py:73
 msgid "Punctual"
 msgstr "في وقت محدد"
 
-#: udata/core/dataset/constants.py:71
+#: udata/core/dataset/constants.py:74
 msgid "Irregular"
 msgstr "غير منتظم"
 
-#: udata/core/dataset/constants.py:72
+#: udata/core/dataset/constants.py:75
 msgid "Never"
 msgstr ""
 
-#: udata/core/dataset/constants.py:73
+#: udata/core/dataset/constants.py:76
 msgid "Not planned"
 msgstr ""
 
-#: udata/core/dataset/constants.py:74 udata/core/dataset/constants.py:184
+#: udata/core/dataset/constants.py:77 udata/core/dataset/constants.py:187
 #: udata/core/spatial/constants.py:5
 msgid "Other"
 msgstr "آخر"
 
-#: udata/core/dataset/constants.py:75 udata/tests/test_mail.py:17
+#: udata/core/dataset/constants.py:78 udata/tests/test_mail.py:17
 #: udata/tests/test_mail.py:32 udata/tests/test_mail.py:45
 #: udata/tests/test_mail.py:61 udata/tests/test_mail.py:75
 #: udata/tests/test_mail.py:93 udata/tests/test_mail.py:108
-#: udata/tests/test_mail.py:130 udata/tests/test_mail.py:150
+#: udata/tests/test_mail.py:130 udata/tests/test_mail.py:176
 msgid "Unknown"
 msgstr "غير معروف"
 
-#: udata/core/dataset/constants.py:179
+#: udata/core/dataset/constants.py:182
 msgid "Main file"
 msgstr ""
 
-#: udata/core/dataset/constants.py:180
+#: udata/core/dataset/constants.py:183
 msgid "Documentation"
 msgstr ""
 
-#: udata/core/dataset/constants.py:181
+#: udata/core/dataset/constants.py:184
 msgid "Update"
 msgstr ""
 
-#: udata/core/dataset/constants.py:182 udata/core/reuse/constants.py:4
+#: udata/core/dataset/constants.py:185 udata/core/reuse/constants.py:4
 msgid "API"
 msgstr "واجهة برمجة تطبيق (API)"
 
-#: udata/core/dataset/constants.py:183
+#: udata/core/dataset/constants.py:186
 msgid "Code repository"
 msgstr ""
 
-#: udata/core/dataset/constants.py:191
+#: udata/core/dataset/constants.py:194
 msgid "Uploaded file"
 msgstr "الملف الذي تم تحميله"
 
-#: udata/core/dataset/constants.py:192
+#: udata/core/dataset/constants.py:195
 msgid "Remote file"
 msgstr "ملف بعيد"
 
@@ -933,75 +984,75 @@ msgstr "خاص"
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "قم بتقييد رؤية البيانات لك أو لمؤسستك فقط."
 
-#: udata/core/dataset/models.py:101
+#: udata/core/dataset/models.py:102
 msgid "Pivotal data"
 msgstr "بيانات محورية"
 
-#: udata/core/dataset/models.py:102
+#: udata/core/dataset/models.py:103
 msgid "Reference data public service"
 msgstr ""
 
-#: udata/core/dataset/models.py:103
+#: udata/core/dataset/models.py:104
 msgid "Inspire"
 msgstr ""
 
-#: udata/core/dataset/models.py:104
+#: udata/core/dataset/models.py:105
 msgid "High value datasets"
 msgstr ""
 
-#: udata/core/dataset/models.py:105
+#: udata/core/dataset/models.py:106
 msgid "Certified statistic series"
 msgstr ""
 
-#: udata/core/dataset/models.py:106
+#: udata/core/dataset/models.py:107
 msgid "Statistical series of general interest"
 msgstr ""
 
-#: udata/core/dataset/models.py:187
+#: udata/core/dataset/models.py:188
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr ""
 
-#: udata/core/dataset/models.py:219 udata/tests/api/test_datasets_api.py:1553
+#: udata/core/dataset/models.py:220 udata/tests/api/test_datasets_api.py:1553
 #: udata/tests/api/test_datasets_api.py:1564
 #, python-brace-format
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:238 udata/tests/api/test_datasets_api.py:1576
+#: udata/core/dataset/models.py:239 udata/tests/api/test_datasets_api.py:1576
 #, python-brace-format
 msgid ""
 "Version \"{version}\" is not an allowed value for the schema \"{name}\". "
 "Allowed versions: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:510 udata/core/dataset/rdf.py:758
-#: udata/tests/dataset/test_dataset_rdf.py:996
-#: udata/tests/dataset/test_dataset_rdf.py:1009
+#: udata/core/dataset/models.py:511 udata/core/dataset/rdf.py:759
+#: udata/tests/dataset/test_dataset_rdf.py:1003
+#: udata/tests/dataset/test_dataset_rdf.py:1016
 msgid "Nameless resource"
 msgstr "مورد مجهول"
 
-#: udata/core/dataset/models.py:629
+#: udata/core/dataset/models.py:630
 msgid "Future date of update"
 msgstr "تاريخ التحديث في المستقبل"
 
-#: udata/core/dataset/models.py:686
+#: udata/core/dataset/models.py:687
 msgid "Last update of the dataset resources"
 msgstr ""
 
-#: udata/core/dataset/models.py:748
+#: udata/core/dataset/models.py:753
 msgid "dataset"
 msgstr "مجموعة البيانات"
 
-#: udata/core/dataset/models.py:812
+#: udata/core/dataset/models.py:817
 msgid "A dataset with a DOI cannot be deleted, it can only be archived"
 msgstr ""
 
-#: udata/core/dataset/models.py:817
+#: udata/core/dataset/models.py:822
 msgid "A dataset with a DOI cannot be made private"
 msgstr ""
 
-#: udata/core/dataset/rdf.py:756 udata/tests/dataset/test_dataset_rdf.py:966
-#: udata/tests/dataset/test_dataset_rdf.py:983
+#: udata/core/dataset/rdf.py:757 udata/tests/dataset/test_dataset_rdf.py:973
+#: udata/tests/dataset/test_dataset_rdf.py:990
 #, python-brace-format
 msgid "{format} resource"
 msgstr ""
@@ -1180,11 +1231,11 @@ msgstr ""
 msgid "Deletion of your %(content_type)s"
 msgstr ""
 
-#: udata/core/organization/activities.py:19
+#: udata/core/organization/activities.py:18
 msgid "created an organization"
 msgstr "أنشأ منظمة"
 
-#: udata/core/organization/activities.py:26
+#: udata/core/organization/activities.py:25
 msgid "updated an organization"
 msgstr "قام بتحديث منظمة"
 
@@ -1504,15 +1555,15 @@ msgstr ""
 msgid "Spam"
 msgstr ""
 
-#: udata/core/reuse/activities.py:19
+#: udata/core/reuse/activities.py:18
 msgid "created a reuse"
 msgstr "قام بإنشاء استخدام"
 
-#: udata/core/reuse/activities.py:25
+#: udata/core/reuse/activities.py:24
 msgid "updated a reuse"
 msgstr "قام بتحديث استخدام"
 
-#: udata/core/reuse/activities.py:32
+#: udata/core/reuse/activities.py:31
 msgid "deleted a reuse"
 msgstr "قام بحذف استخدام"
 
@@ -1724,28 +1775,28 @@ msgstr ""
 msgid "French arrondissement"
 msgstr ""
 
-#: udata/core/topic/activities.py:27
+#: udata/core/topic/activities.py:26
 msgid "created a topic"
 msgstr ""
 
-#: udata/core/topic/activities.py:33
+#: udata/core/topic/activities.py:32
 msgid "updated a topic"
 msgstr ""
 
-#: udata/core/topic/activities.py:40
+#: udata/core/topic/activities.py:39
 msgid "added an element to a topic"
 msgstr ""
 
-#: udata/core/topic/activities.py:46
+#: udata/core/topic/activities.py:45
 msgid "updated an element in a topic"
 msgstr ""
 
-#: udata/core/topic/activities.py:53
+#: udata/core/topic/activities.py:52
 msgid "removed an element from a topic"
 msgstr ""
 
-#: udata/core/topic/models.py:39 udata/tests/apiv2/test_topics.py:1048
-#: udata/tests/apiv2/test_topics.py:1061
+#: udata/core/topic/models.py:39 udata/tests/apiv2/test_topics.py:1061
+#: udata/tests/apiv2/test_topics.py:1074
 msgid "A topic element must have a title or an element."
 msgstr ""
 
@@ -1753,35 +1804,35 @@ msgstr ""
 msgid "collection"
 msgstr ""
 
-#: udata/core/user/activities.py:36
+#: udata/core/user/activities.py:35
 msgid "followed a user"
 msgstr "تابع مستعمل"
 
-#: udata/core/user/activities.py:43
+#: udata/core/user/activities.py:42
 msgid "discussed a dataservice"
 msgstr ""
 
-#: udata/core/user/activities.py:48
+#: udata/core/user/activities.py:47
 msgid "discussed a dataset"
 msgstr "ناقش مجموعة بيانات"
 
-#: udata/core/user/activities.py:53
+#: udata/core/user/activities.py:52
 msgid "discussed a reuse"
 msgstr "ناقش إعادة إستخدام"
 
-#: udata/core/user/activities.py:58
+#: udata/core/user/activities.py:57
 msgid "followed a dataservice"
 msgstr ""
 
-#: udata/core/user/activities.py:63
+#: udata/core/user/activities.py:62
 msgid "followed a dataset"
 msgstr "تابع مجموعة بيانات"
 
-#: udata/core/user/activities.py:68
+#: udata/core/user/activities.py:67
 msgid "followed a reuse"
 msgstr "تابع إعادة إستخدام"
 
-#: udata/core/user/activities.py:73
+#: udata/core/user/activities.py:72
 msgid "followed an organization"
 msgstr "تابع منظمة"
 
@@ -1803,7 +1854,7 @@ msgstr ""
 msgid "Your account on %(site)s has been deleted due to inactivity"
 msgstr ""
 
-#: udata/core/user/mails.py:33 udata/tests/user/test_user_tasks.py:36
+#: udata/core/user/mails.py:33 udata/tests/user/test_user_tasks.py:38
 #, python-brace-format
 msgid "Inactivity of your {site} account"
 msgstr ""
@@ -1834,7 +1885,7 @@ msgid ""
 "can always re-create an account on the %(site)s platform if necessary."
 msgstr ""
 
-#: udata/core/user/models.py:262
+#: udata/core/user/models.py:286
 msgid "account"
 msgstr ""
 
@@ -2073,19 +2124,19 @@ msgstr ""
 msgid "Refused harvesters"
 msgstr ""
 
-#: udata/harvest/backends/dcat.py:285
+#: udata/harvest/backends/dcat.py:385
 msgid "Remote URL prefix"
 msgstr ""
 
-#: udata/harvest/backends/dcat.py:288
+#: udata/harvest/backends/dcat.py:388
 msgid "A prefix used to build the remote URL of the harvested items."
 msgstr ""
 
-#: udata/harvest/backends/dcat.py:496
+#: udata/harvest/backends/dcat.py:596
 msgid "GeoDCAT-AP"
 msgstr ""
 
-#: udata/harvest/backends/dcat.py:497
+#: udata/harvest/backends/dcat.py:597
 msgid "Request GeoDCAT-AP to the CSW server (must be supported by the server)."
 msgstr ""
 
@@ -2171,11 +2222,11 @@ msgstr ""
 msgid "Hi %(user)s"
 msgstr ""
 
-#: udata/templates/mail/message.html:36
+#: udata/templates/mail/message.html:38
 msgid "Have a great day"
 msgstr ""
 
-#: udata/templates/mail/message.html:37
+#: udata/templates/mail/message.html:39
 #, python-format
 msgid "The %(site)s team"
 msgstr ""
@@ -2317,7 +2368,7 @@ msgstr ""
 msgid "Some text"
 msgstr ""
 
-#: udata/tests/test_mail.py:76 udata/tests/test_mail.py:151
+#: udata/tests/test_mail.py:76 udata/tests/test_mail.py:177
 #, python-format
 msgid "Some text %(org)s"
 msgstr ""
@@ -2327,7 +2378,14 @@ msgstr ""
 msgid "Some text:"
 msgstr ""
 
-#: udata/tests/api/test_activities_api.py:28
+#: udata/tests/test_mail.py:152 udata/tests/test_mail.py:154
+#: udata/tests/test_mail.py:155 udata/tests/test_mail.py:156
+#: udata/tests/test_mail.py:158
+#, python-format
+msgid "Some text %(name)s"
+msgstr ""
+
+#: udata/tests/api/test_activities_api.py:33
 msgid "did something to a dataset"
 msgstr ""
 
@@ -2355,7 +2413,7 @@ msgstr "مستخدم"
 msgid "Heavily reused"
 msgstr "مستخدم بشكل كبير"
 
-#: udata/tests/user/test_user_tasks.py:108
+#: udata/tests/user/test_user_tasks.py:110
 #, python-brace-format
 msgid "Deletion of your inactive {site} account"
 msgstr ""
@@ -2497,9 +2555,4 @@ msgstr ""
 
 #~ msgid "Enabled"
 #~ msgstr "متاح"
-
-#~ msgid ""
-#~ "Assistant is enabled but the Albert "
-#~ "API key (AI_API_KEY) is not configured."
-#~ msgstr ""
 
