@@ -4,6 +4,7 @@ from udata.utils import (
     daterange_end,
     daterange_start,
     get_by,
+    normalize_uuid,
     recursive_get,
     safe_unicode,
     to_bool,
@@ -260,3 +261,13 @@ class AwareDateTest:
         naive_datetime = to_naive_datetime(random_date)
         assert isinstance(naive_datetime, datetime)
         assert naive_datetime.tzname() is None
+
+
+class NormalizeUuidTest:
+    def test_canonical_form(self):
+        braced = "{5C4AE7A0-E3F1-4A3F-8B1D-2E9F00000000}"
+        assert normalize_uuid(braced) == "5c4ae7a0-e3f1-4a3f-8b1d-2e9f00000000"
+
+    def test_invalid_values_are_none(self):
+        for value in ("not-a-uuid", "", None, 42, ["x"]):
+            assert normalize_uuid(value) is None

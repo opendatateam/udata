@@ -22,6 +22,8 @@ FilterCondition = Literal[
 ]
 Aggregate = Literal["avg", "sum", "count", "min", "max"]
 PAGE_SIZE = 50
+# query_data calls allowed per user question (per agent run).
+MAX_QUERIES_PER_QUESTION = 3
 
 
 class Filter(BaseModel):
@@ -114,7 +116,7 @@ def _param(f: Filter) -> str | None:
         return null
     if not f.value:
         return None
-    return f"{column}__{_encode(f.condition)}={_encode_twice(f.value)}"
+    return f"{column}__{f.condition}={_encode_twice(f.value)}"
 
 
 def _condition(f: Filter) -> str | None:
@@ -124,19 +126,28 @@ def _condition(f: Filter) -> str | None:
         return null
     if not f.value:
         return None
-    return f"{column}__{_encode(f.condition)}.%22{_encode_in_condition(f.value)}%22"
+    return f"{column}__{f.condition}.%22{_encode_in_condition(f.value)}%22"
 
 
-def _group(group: "AndFilters | OrFilters") -> str | None:
-    operator = "or" if isinstance(group, OrFilters) else "and"
+def _group_body(group: "AndFilters | OrFilters") -> str | None:
+    """``(cond,cond,...)`` of a group, without its operator; None if it has no condition."""
     parts = [
         _group(child) if isinstance(child, AndFilters | OrFilters) else _condition(child)
         for child in group.filters
     ]
     parts = [p for p in parts if p is not None]
-    if not parts:
+    return f"({','.join(parts)})" if parts else None
+
+
+def _group(group: "AndFilters | OrFilters") -> str | None:
+    if (body := _group_body(group)) is None:
         return None
-    return f"{operator}({','.join(parts)})"
+    return f"{'or' if isinstance(group, OrFilters) else 'and'}{body}"
+
+
+def _or_param(group: OrFilters) -> str | None:
+    """A top-level or() group, as the `or=(...)` parameter."""
+    return None if (body := _group_body(group)) is None else f"or={body}"
 
 
 def _build_filter_query(filters: GenericFilter) -> list[str]:
@@ -149,10 +160,10 @@ def _build_filter_query(filters: GenericFilter) -> list[str]:
             if isinstance(child, Filter):
                 if (p := _param(child)) is not None:
                     params.append(p)
-            elif (nested := _group(child)) is not None:
-                params.append(f"or={nested[2:]}")
-    elif (nested := _group(filters)) is not None:
-        params.append(f"or={nested[2:]}")
+            elif (p := _or_param(child)) is not None:
+                params.append(p)
+    elif (p := _or_param(filters)) is not None:
+        params.append(p)
     return params
 
 
@@ -171,9 +182,9 @@ def build_data_query(
     if groupby:
         params.append(f"{_encode_twice(groupby)}__groupby")
     if aggregate:
-        params.append(f"{_encode_twice(aggregate[0])}__{_encode(aggregate[1])}")
+        params.append(f"{_encode_twice(aggregate[0])}__{aggregate[1]}")
     if sort:
-        params.append(f"{_encode_twice(sort[0])}__sort={_encode(sort[1])}")
+        params.append(f"{_encode_twice(sort[0])}__sort={sort[1]}")
     if filters:
         params.extend(_build_filter_query(filters))
     return "&".join(params)

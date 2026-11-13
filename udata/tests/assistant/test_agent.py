@@ -1,7 +1,9 @@
 from pydantic_ai.messages import ModelResponse, TextPart
+from pydantic_ai.models.function import AgentInfo, FunctionModel
 from pydantic_ai.models.test import TestModel
 
 from udata.core.assistant.agent import get_agent
+from udata.core.assistant.data_query import MAX_QUERIES_PER_QUESTION, PAGE_SIZE
 from udata.core.assistant.prompts import PROMPT_VERSION, SYSTEM_INSTRUCTIONS
 from udata.core.assistant.tabular import TabularClient
 from udata.core.assistant.tools import AssistantDeps
@@ -26,7 +28,7 @@ class SystemPromptEchoModel(TestModel):
 class AssistantAgentTest(PytestOnlyDBTestCase):
     def make_deps(self):
         with self.app.app_context():
-            tabular = TabularClient(base_url="http://tabular.test", timeout=5)
+            tabular = TabularClient(base_url="http://tabular.test")
         return AssistantDeps(tabular=tabular)
 
     def test_agent_forwards_reasoning_effort_setting(self):
@@ -45,10 +47,22 @@ class AssistantAgentTest(PytestOnlyDBTestCase):
         for expected in ("Markdown", "français", "NULL"):
             assert expected in SYSTEM_INSTRUCTIONS
 
-    def test_instructions_have_no_sql(self):
-        assert "SQL" not in SYSTEM_INSTRUCTIONS
-        assert "execute_sql" not in SYSTEM_INSTRUCTIONS
-
     def test_instructions_name_the_chart_tools(self):
         for tool in ("create_chart", "update_chart", "query_data"):
             assert tool in SYSTEM_INSTRUCTIONS
+
+    def test_instructions_follow_the_tool_limits(self):
+        assert f"au plus {MAX_QUERIES_PER_QUESTION} appels" in SYSTEM_INSTRUCTIONS
+        assert f"au plus {PAGE_SIZE} lignes ou groupes" in SYSTEM_INSTRUCTIONS
+
+    def test_tool_descriptions_follow_the_page_size(self):
+        # The tool definitions the model receives during a run.
+        received = {}
+
+        def record_tools(messages, info: AgentInfo):
+            received.update({tool.name: tool.description for tool in info.function_tools})
+            return ModelResponse(parts=[TextPart("ok")])
+
+        get_agent().run_sync("Bonjour", model=FunctionModel(record_tools), deps=self.make_deps())
+        assert f"au plus {PAGE_SIZE} lignes" in received["query_data"]
+        assert f"dépasse {PAGE_SIZE} points" in received["create_chart"]

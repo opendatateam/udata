@@ -29,7 +29,7 @@ def get_agent() -> Agent[AssistantDeps, str]:
         ),
     )
     model_settings: dict[str, str] = {}
-    if effort := current_app.config.get("AI_REASONING_EFFORT"):
+    if effort := current_app.config["AI_REASONING_EFFORT"]:
         model_settings["openai_reasoning_effort"] = effort
     agent: Agent[AssistantDeps, str] = Agent(
         model,

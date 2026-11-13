@@ -668,7 +668,7 @@ class Defaults(object):
     TABULAR_EXPLORE_URL = None
     TABULAR_ALLOW_REMOTE = True
 
-    # AI assistant settings (Albert + tabular API)
+    # AI assistant settings
     ###########################################################################
     # The assistant is disabled when AI_BASE_URL is None (default). Hard
     # bounds on the agent loop live as module constants next to the code
@@ -681,8 +681,7 @@ class Defaults(object):
     # endpoints that emit thinking deltas (e.g. Mistral-class), None keeps the
     # provider default.
     AI_REASONING_EFFORT = None
-    # Base URL of the api-tabular service (resource profiles and data). No
-    # existing setting covers it, so it stays here.
+    # Base URL of the api-tabular service (resource profiles and data).
     TABULAR_API_URL = None
 
     # JSON-LD settings

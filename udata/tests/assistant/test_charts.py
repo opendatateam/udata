@@ -8,6 +8,7 @@ from udata.core.assistant.charts import (
     profile_columns,
     to_chart_output,
     to_update_output,
+    unknown_column_errors,
     validate_create,
     validate_update,
 )
@@ -37,8 +38,14 @@ def test_unknown_x_column():
 
 
 def test_unknown_series_column():
-    config = make(series=[{"column_y": "zzz", "aggregate_y": "count"}])
+    config = make(series=[{"column_y": "zzz", "aggregate_y": "max"}])
     assert validate_create(config, COLUMNS) == ["Colonne inconnue : zzz."]
+
+
+def test_count_series_column_y_is_not_validated():
+    # A count series counts the X column: its column_y is replaced, never read.
+    config = make(series=[{"column_y": "zzz", "aggregate_y": "count"}])
+    assert validate_create(config, COLUMNS) == []
 
 
 def test_unknown_filter_column():
@@ -121,6 +128,48 @@ def test_output_applies_the_type_and_filters_to_every_series():
         "min": None,
         "max": None,
     }
+
+
+def test_output_count_series_targets_the_x_column():
+    # The chart form reads a series as a count when column_y is column_x.
+    config = make(
+        series=[
+            {"column_y": "n_cum_dose1", "aggregate_y": "count"},
+            {"column_y": "n_cum_dose1", "aggregate_y": "max"},
+            {"column_y": "n_cum_dose1"},
+        ]
+    )
+    out = to_chart_output(config, "rid")
+    assert [(s["column_y"], s["aggregate_y"]) for s in out["series"]] == [
+        ("dep", "count"),
+        ("n_cum_dose1", "max"),
+        ("n_cum_dose1", None),
+    ]
+
+
+def test_output_keeps_one_count_series_in_order():
+    # Every count series becomes the same count of the X column.
+    config = make(
+        series=[
+            {"column_y": "n_cum_dose1", "aggregate_y": "max"},
+            {"column_y": "n_cum_dose1", "aggregate_y": "count"},
+            {"column_y": "n_cum_dose1"},
+            {"column_y": "jour", "aggregate_y": "count"},
+        ]
+    )
+    out = to_chart_output(config, "rid")
+    assert [(s["column_y"], s["aggregate_y"]) for s in out["series"]] == [
+        ("n_cum_dose1", "max"),
+        ("dep", "count"),
+        ("n_cum_dose1", None),
+    ]
+
+
+def test_unknown_column_errors_are_deduplicated_in_order_and_skip_empty_names():
+    assert unknown_column_errors(["b", None, "dep", "a", "b", ""], COLUMNS) == [
+        "Colonne inconnue : b.",
+        "Colonne inconnue : a.",
+    ]
 
 
 def test_output_without_filters_has_none():

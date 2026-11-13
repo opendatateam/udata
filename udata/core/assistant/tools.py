@@ -23,10 +23,12 @@ from udata.core.assistant.charts import (
     query_aggregate_error,
     to_chart_output,
     to_update_output,
+    unknown_column_errors,
     validate_create,
     validate_update,
 )
 from udata.core.assistant.data_query import (
+    MAX_QUERIES_PER_QUESTION,
     PAGE_SIZE,
     Aggregate,
     GenericFilter,
@@ -35,7 +37,12 @@ from udata.core.assistant.data_query import (
     filter_errors,
     with_page,
 )
-from udata.core.assistant.tabular import TabularClient, TabularError, TabularRequestRefused
+from udata.core.assistant.tabular import (
+    TabularClient,
+    TabularError,
+    TabularRequestRefused,
+    TabularResourceUnavailable,
+)
 from udata.core.dataset.models import Dataset, Resource, get_dataset_by_resource_id
 from udata.mongo.queryset import paginate_embedded_list
 
@@ -43,11 +50,11 @@ log = logging.getLogger(__name__)
 
 # Per-turn budgets. Exhausted tool budgets return a refusal the model can
 # explain; MODEL_REQUEST_LIMIT (passed as pydantic-ai usage limits) is the
-# hard stop for a model that keeps calling tools after a refusal.
+# hard stop for a model that keeps calling tools after a refusal. The query_data
+# budget, MAX_QUERIES_PER_QUESTION, lives in data_query next to PAGE_SIZE.
 MAX_STEPS = 5
 # Resources listed in a dataset's metadata, so a huge dataset cannot flood the context.
 MAX_SERIALIZED_RESOURCES = 20
-MAX_QUERIES_PER_QUESTION = 3
 # One request per tool round, plus the refused round and the final answer.
 MODEL_REQUEST_LIMIT = MAX_STEPS + 2
 
@@ -120,7 +127,7 @@ def _dataset_for_resource(resource_id: str) -> Dataset | None:
     return None
 
 
-def _render_profile(profile: dict) -> str:
+def render_profile(profile: dict) -> str:
     """Render the columns and line count of an api-tabular profile, whatever its shape."""
     columns = profile_columns(profile)
     lines = ["Colonnes :", *(f"- {name} ({kind})" for name, kind in columns.items())]
@@ -162,17 +169,23 @@ RESOURCE_NOT_FOUND = (
     "Ressource introuvable : aucune ressource visible ne correspond à cet identifiant."
 )
 TABULAR_UNAVAILABLE = "Le service tabulaire est indisponible."
+RESOURCE_NOT_IN_TABULAR = (
+    "Ressource non disponible dans le service tabulaire : "
+    "ses données ne peuvent pas être interrogées."
+)
 
 
 def _tabular_error_message(error: TabularError) -> str:
-    """French message for the model; the English text of a TabularError is never forwarded."""
+    """French message for the model; the text of a TabularError is only logged."""
     if isinstance(error, TabularRequestRefused):
         return f"Requête refusée par le service tabulaire : {error.detail}."
+    if isinstance(error, TabularResourceUnavailable):
+        return RESOURCE_NOT_IN_TABULAR
     return TABULAR_UNAVAILABLE
 
 
-def _active_columns(ctx: RunContext[AssistantDeps]) -> tuple[str, dict[str, str], dict]:
-    """Active resource id, its profile columns and profile, or raise `_ToolRefusal`."""
+def _active_columns(ctx: RunContext[AssistantDeps]) -> tuple[str, dict[str, str]]:
+    """Active resource id and its profile columns, or raise `_ToolRefusal`."""
     resource_id = ctx.deps.resource_id
     if not resource_id:
         raise _ToolRefusal(NO_ACTIVE_RESOURCE)
@@ -182,7 +195,7 @@ def _active_columns(ctx: RunContext[AssistantDeps]) -> tuple[str, dict[str, str]
         profile = ctx.deps.tabular.get_profile(resource_id)
     except TabularError as error:
         raise _ToolRefusal(_tabular_error_message(error)) from error
-    return resource_id, profile_columns(profile), profile
+    return resource_id, profile_columns(profile)
 
 
 class _ToolRefusal(Exception):
@@ -206,11 +219,13 @@ def _chart_has_more_groups(
     try:
         for series in sorted(config.series, key=lambda series: series.aggregate_y is not None):
             aggregated = series.aggregate_y is not None
+            # Like the chart output: a count series counts the X column.
+            column_y = x if series.aggregate_y == "count" else series.column_y
             query = build_data_query(
                 # Like the viewer: grouped with an aggregate, the two raw columns without.
-                columns=None if aggregated else [x, series.column_y],
+                columns=None if aggregated else [x, column_y],
                 groupby=x if aggregated else None,
-                aggregate=(series.column_y, series.aggregate_y) if aggregated else None,
+                aggregate=(column_y, series.aggregate_y) if aggregated else None,
                 filters=config.filters,
                 sort=(x, "asc"),
             )
@@ -251,6 +266,27 @@ def serialize_dataset_metadata(dataset: Dataset) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2)
 
 
+# Tool descriptions given explicitly, as f-strings, to quote the page size.
+QUERY_DATA_DESCRIPTION = f"""\
+Interroge la ressource active (lecture seule) pour vérifier les données avant un graphique.
+
+Un agrégat sans `groupby` est autorisé : il donne un total global.
+Pour regrouper, renseigne `groupby`, `aggregate_column` et `aggregate`
+(avg, sum, count, min, max). Sans tri explicite, un regroupement est trié
+sur la colonne de regroupement. Avec un agrégat, ne passe pas `columns` et ne
+trie que sur la colonne `groupby` (le service ne trie pas sur une valeur
+agrégée). Retourne au plus {PAGE_SIZE} lignes."""
+
+CREATE_CHART_DESCRIPTION = f"""\
+Crée un graphique sur la ressource active et remplace la structure du graphique en cours.
+
+À n'appeler qu'après une vérification avec `query_data`. Types : line ou
+histogram, 1 à 4 séries. Retourne le graphique validé ou la liste des erreurs
+à corriger. `more_groups` vaut true quand une série dépasse {PAGE_SIZE} points (groupes,
+ou lignes sans agrégat) : le graphique n'en affiche que les {PAGE_SIZE} premiers, dis-le
+à l'utilisateur et propose un filtre ou un agrégat. null : vérification impossible."""
+
+
 def register_tools(agent: Agent) -> None:
     """Attach the assistant tools to a pydantic-ai agent."""
 
@@ -275,9 +311,9 @@ def register_tools(agent: Agent) -> None:
             profile = ctx.deps.tabular.get_profile(resource_id)
         except TabularError as error:
             return _tabular_error_message(error)
-        return _render_profile(profile)
+        return render_profile(profile)
 
-    @agent.tool
+    @agent.tool(description=QUERY_DATA_DESCRIPTION)
     def query_data(
         ctx: RunContext[AssistantDeps],
         groupby: str | None = None,
@@ -288,15 +324,6 @@ def register_tools(agent: Agent) -> None:
         sort_direction: Literal["asc", "desc"] = "asc",
         columns: list[str] | None = None,
     ) -> str:
-        """Interroge la ressource active (lecture seule) pour vérifier les données avant un graphique.
-
-        Un agrégat sans `groupby` est autorisé : il donne un total global.
-        Pour regrouper, renseigne `groupby`, `aggregate_column` et `aggregate`
-        (avg, sum, count, min, max). Sans tri explicite, un regroupement est trié
-        sur la colonne de regroupement. Avec un agrégat, ne passe pas `columns` et ne
-        trie que sur la colonne `groupby` (le service ne trie pas sur une valeur
-        agrégée). Retourne au plus 50 lignes.
-        """
         if refusal := _consume_tool_budget(ctx):
             return refusal
         if bool(aggregate_column) != bool(aggregate):
@@ -312,13 +339,12 @@ def register_tools(agent: Agent) -> None:
                 "Trie côté graphique avec sort_x_by=axis_y."
             )
         try:
-            resource_id, known, _ = _active_columns(ctx)
+            resource_id, known = _active_columns(ctx)
         except _ToolRefusal as refusal:
             return str(refusal)
         used = [groupby, aggregate_column, sort_column, *(columns or []), *filter_columns(filters)]
-        unknown = list(dict.fromkeys(name for name in used if name and name not in known))
-        if unknown:
-            return "\n".join(f"Colonne inconnue : {name}." for name in unknown)
+        if unknown := unknown_column_errors(used, known):
+            return "\n".join(unknown)
         refusals = filter_errors(filters)
         if aggregate and (
             error := query_aggregate_error(aggregate_column, aggregate, known[aggregate_column])
@@ -350,20 +376,12 @@ def register_tools(agent: Agent) -> None:
             return _tabular_error_message(error)
         return rendered
 
-    @agent.tool
+    @agent.tool(description=CREATE_CHART_DESCRIPTION)
     def create_chart(ctx: RunContext[AssistantDeps], config: CreateChartInput) -> dict:
-        """Crée un graphique sur la ressource active et remplace la structure du graphique en cours.
-
-        À n'appeler qu'après une vérification avec `query_data`. Types : line ou
-        histogram, 1 à 4 séries. Retourne le graphique validé ou la liste des erreurs
-        à corriger. `more_groups` vaut true quand une série dépasse 50 points (groupes,
-        ou lignes sans agrégat) : le graphique n'en affiche que les 50 premiers, dis-le
-        à l'utilisateur et propose un filtre ou un agrégat. null : vérification impossible.
-        """
         if refusal := _consume_tool_budget(ctx):
             return {"status": "error", "errors": [refusal]}
         try:
-            resource_id, known, _ = _active_columns(ctx)
+            resource_id, known = _active_columns(ctx)
         except _ToolRefusal as refusal:
             return {"status": "error", "errors": [str(refusal)]}
         if errors := validate_create(config, known):

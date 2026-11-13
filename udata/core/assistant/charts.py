@@ -1,11 +1,13 @@
 """Declarative chart tool inputs, validation and conversion to the chart model."""
 
 import copy
+from collections.abc import Iterable
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 from udata.core.assistant.data_query import (
+    PAGE_SIZE,
     Aggregate,
     GenericFilter,
     filter_columns,
@@ -35,8 +37,8 @@ class XAxisInput(BaseModel):
     limit: int | None = Field(
         None,
         ge=1,
-        le=50,
-        description="Nombre de valeurs affichées après le tri (1 à 50)",
+        le=PAGE_SIZE,
+        description=f"Nombre de valeurs affichées après le tri (1 à {PAGE_SIZE})",
     )
 
 
@@ -108,30 +110,36 @@ def query_aggregate_error(column: str, aggregate: Aggregate, column_type: str | 
     return aggregate_error(column, aggregate, column_type)
 
 
+def unknown_column_errors(names: Iterable[str | None], known: dict[str, str]) -> list[str]:
+    """One French error per distinct unknown column, in order; empty names are skipped."""
+    unknown = dict.fromkeys(name for name in names if name and name not in known)
+    return [f"Colonne inconnue : {name}." for name in unknown]
+
+
 def _empty_text_errors(values: dict[str, str | None]) -> list[str]:
     return [EMPTY_TEXT_ERRORS[name] for name, value in values.items() if value == ""]
 
 
 def validate_create(config: CreateChartInput, columns: dict[str, str]) -> list[str]:
     errors = _empty_text_errors({"title": config.title, "description": config.description})
-
-    def unknown(name: str) -> None:
-        if name not in columns:
-            errors.append(f"Colonne inconnue : {name}.")
-
-    unknown(config.x_axis.column_x)
+    errors += unknown_column_errors(
+        [
+            config.x_axis.column_x,
+            # A count series counts the X column: its column_y is never read.
+            *(series.column_y for series in config.series if series.aggregate_y != "count"),
+            *sorted(filter_columns(config.filters)),
+        ],
+        columns,
+    )
     for series in config.series:
-        unknown(series.column_y)
-    for name in sorted(filter_columns(config.filters)):
-        unknown(name)
-    for series in config.series:
-        column_type = columns.get(series.column_y)
-        if column_type is None or column_type in NUMERIC_TYPES:
+        if series.aggregate_y == "count":
             continue
-        if series.aggregate_y is None:
+        column_type = columns.get(series.column_y)
+        if series.aggregate_y is not None:
+            if error := aggregate_error(series.column_y, series.aggregate_y, column_type):
+                errors.append(error)
+        elif column_type is not None and column_type not in NUMERIC_TYPES:
             errors.append(f"La série {series.column_y} doit être numérique ou agrégée par count.")
-        elif error := aggregate_error(series.column_y, series.aggregate_y, column_type):
-            errors.append(error)
     errors.extend(filter_errors(config.filters))
     return list(dict.fromkeys(errors))
 
@@ -145,8 +153,15 @@ def validate_update(patch: UpdateChartInput) -> list[str]:
 
 
 def to_chart_output(config: CreateChartInput, resource_id: str) -> dict:
+    """Chart of the frontend model; a count series has the X column as `column_y`.
+
+    The chart form reads a series as a count when `column_y` is `column_x`. Every
+    count series is then the same: only the first one is kept, in order.
+    """
     filters = config.filters.model_dump(by_alias=True) if config.filters else None
     y_axis = config.y_axis or YAxisInput()
+    first_count = next((s for s in config.series if s.aggregate_y == "count"), None)
+    series = [s for s in config.series if s.aggregate_y != "count" or s is first_count]
     return {
         "title": config.title,
         "description": config.description,
@@ -155,13 +170,13 @@ def to_chart_output(config: CreateChartInput, resource_id: str) -> dict:
         "series": [
             {
                 "type": config.type,
-                "column_y": s.column_y,
+                "column_y": config.x_axis.column_x if s.aggregate_y == "count" else s.column_y,
                 "aggregate_y": s.aggregate_y,
                 "resource_id": resource_id,
                 "column_x_name_override": None,
                 "filters": copy.deepcopy(filters),
             }
-            for s in config.series
+            for s in series
         ],
     }
 

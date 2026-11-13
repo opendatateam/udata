@@ -20,10 +20,14 @@ from pydantic_ai.models.test import TestModel
 
 from udata.auth import login_user
 from udata.core.assistant.charts import CreateChartInput, UpdateChartInput
-from udata.core.assistant.data_query import PAGE_SIZE, Filter
-from udata.core.assistant.tabular import TabularClient, TabularError, TabularRequestRefused
+from udata.core.assistant.data_query import MAX_QUERIES_PER_QUESTION, PAGE_SIZE, Filter
+from udata.core.assistant.tabular import (
+    TabularClient,
+    TabularError,
+    TabularRequestRefused,
+    TabularResourceUnavailable,
+)
 from udata.core.assistant.tools import (
-    MAX_QUERIES_PER_QUESTION,
     MAX_SERIALIZED_RESOURCES,
     MAX_STEPS,
     AssistantDeps,
@@ -281,6 +285,18 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         result = self.call("inspect_schema", deps, resource_id=str(resource.id))
         assert result == "Le service tabulaire est indisponible."
         assert "tabular.example.com" not in result
+
+    def test_inspect_schema_says_when_the_resource_is_not_in_the_tabular_service(self, mocker):
+        resource = self.owned_resource()
+        deps = self.make_deps()
+        mocker.patch.object(
+            deps.tabular, "get_profile", side_effect=TabularResourceUnavailable("absente")
+        )
+        result = self.call("inspect_schema", deps, resource_id=str(resource.id))
+        assert result == (
+            "Ressource non disponible dans le service tabulaire : "
+            "ses données ne peuvent pas être interrogées."
+        )
 
     def test_tool_budget_refuses_beyond_assistant_max_steps(self, mocker):
         """MAX_STEPS caps tool calls per agent run (steps proxy), independently
@@ -673,18 +689,6 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         get_data.assert_called_once_with(rid, f"{self.AGGREGATED}&page=1&page_size=50")
         more.assert_called_once_with(rid, self.AGGREGATED, self.FULL_PAGE)
 
-    def test_create_chart_ignores_the_distinct_count_of_the_profile(self, mocker):
-        # csv-detective counts no distinct value for a text column
-        deps, _ = self.active(mocker)
-        stats = {"dep": {"nb_distinct": 0, "nb_missing_values": 0}}
-        deps.tabular.get_profile.return_value = {
-            "profile": {**self.PROFILE["profile"], "profile": stats}
-        }
-        mocker.patch.object(deps.tabular, "get_data", return_value=self.FULL_PAGE)
-        mocker.patch.object(deps.tabular, "has_more_rows", return_value=True)
-        result = self.call("create_chart", deps, config=self.chart_config())
-        assert result["more_groups"] is True
-
     def test_create_chart_sends_the_filters_with_the_page(self, mocker):
         deps, resource = self.active(mocker)
         get_data = mocker.patch.object(deps.tabular, "get_data", return_value={"data": []})
@@ -718,9 +722,23 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         rid = str(resource.id)
         assert get_data.call_args_list == [
             mocker.call(rid, f"{self.RAW}&page=1&page_size=50"),
-            mocker.call(rid, "dep__groupby&label__count&dep__sort=asc&page=1&page_size=50"),
+            mocker.call(rid, "dep__groupby&dep__count&dep__sort=asc&page=1&page_size=50"),
             mocker.call(rid, f"{self.AGGREGATED}&page=1&page_size=50"),
         ]
+
+    def test_create_chart_probes_a_count_on_the_x_column(self, mocker):
+        # The chart output counts the X column whatever the column_y: one probe.
+        deps, resource = self.active(mocker)
+        get_data = mocker.patch.object(deps.tabular, "get_data", return_value={"data": []})
+        series = [
+            {"column_y": "label", "aggregate_y": "count"},
+            {"column_y": "n_cum_dose1", "aggregate_y": "count"},
+        ]
+        result = self.call("create_chart", deps, config=self.chart_config(series=series))
+        assert result["more_groups"] is False
+        get_data.assert_called_once_with(
+            str(resource.id), "dep__groupby&dep__count&dep__sort=asc&page=1&page_size=50"
+        )
 
     def test_create_chart_checks_every_series_but_probes_until_an_overflow(self, mocker):
         deps, _ = self.active(mocker)

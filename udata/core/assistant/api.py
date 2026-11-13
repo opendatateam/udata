@@ -9,7 +9,6 @@ import json
 import logging
 import queue
 import threading
-import uuid
 from collections.abc import AsyncIterator
 from contextlib import aclosing
 
@@ -35,18 +34,18 @@ from udata.core.assistant.tabular import TabularClient, TabularError
 from udata.core.assistant.tools import (
     MODEL_REQUEST_LIMIT,
     AssistantDeps,
-    _render_profile,
+    render_profile,
     serialize_dataset_metadata,
 )
 from udata.core.dataset.models import get_dataset_and_resource_by_id
 from udata.i18n import gettext as _
+from udata.utils import normalize_uuid
 
 log = logging.getLogger(__name__)
 
 ns = api.namespace("assistant", "Assistant related operations")
 
-# Hard bound on a single streamed turn. Module constant on purpose: it sizes
-# the agent, not the deployment.
+# Hard bound on a single streamed turn.
 AI_TURN_TIMEOUT = 120
 
 
@@ -56,21 +55,6 @@ MAX_VISUALIZATION_BYTES = 20_000
 # Guards against scripted or tampered clients, far above any real conversation.
 MAX_REQUEST_BYTES = 512 * 1024
 MAX_USER_MESSAGE_CHARS = 4_000
-
-
-def _read_bounded_body() -> bytes:
-    """Request body, or a 413 beyond ``MAX_REQUEST_BYTES``.
-
-    The body may already be cached: Flask-Security reads it to look for an auth
-    token when the request carries no session.
-    """
-    too_large = _("The conversation is too large.")
-    if (request.content_length or 0) > MAX_REQUEST_BYTES:
-        api.abort(413, too_large)
-    body = request.get_data(cache=True)
-    if len(body) > MAX_REQUEST_BYTES:
-        api.abort(413, too_large)
-    return body
 
 
 # Parts our own stream emits, sent back with the history. Others are refused: an
@@ -109,6 +93,18 @@ def _check_messages(messages) -> None:
             )
 
 
+def _is_empty_assistant_message(message) -> bool:
+    """An assistant message without text nor tool call, as an errored stream leaves.
+
+    Providers reject such a message, which would lock the conversation.
+    """
+    return message.role == "assistant" and not any(
+        isinstance(part, ToolUIPart | DynamicToolUIPart)
+        or (isinstance(part, TextUIPart) and part.text.strip())
+        for part in message.parts
+    )
+
+
 def _extract_context(body: bytes) -> tuple[str | None, dict | None]:
     """Extract and validate the optional ``resource_id`` and ``visualization`` fields.
 
@@ -128,11 +124,7 @@ def _extract_context(body: bytes) -> tuple[str | None, dict | None]:
 
     resource_id = payload.get("resource_id")
     if resource_id is not None:
-        if not isinstance(resource_id, str):
-            api.abort(400, _("Invalid resource_id: a resource UUID is expected."))
-        try:
-            resource_id = str(uuid.UUID(resource_id))
-        except ValueError:
+        if (resource_id := normalize_uuid(resource_id)) is None:
             api.abort(400, _("Invalid resource_id: a resource UUID is expected."))
 
     visualization = payload.get("visualization")
@@ -182,7 +174,7 @@ def _build_resource_instructions(resource_id: str, tabular: TabularClient) -> st
     lines.append(_escape_untrusted(serialize_dataset_metadata(dataset)))
     if profile is not None:
         lines.append("Schéma de la ressource :")
-        lines.append(_escape_untrusted(_render_profile(profile)))
+        lines.append(_escape_untrusted(render_profile(profile)))
     lines.append("</untrusted_active_context>")
     return "\n".join(lines)
 
@@ -333,31 +325,27 @@ class AssistantChatAPI(API):
                 503,
             )
 
-        # Strip client-submitted system messages: the server owns the prompt.
-        # Validate before building the agent so a bad body never reaches it.
-        body = _read_bounded_body()
+        # Validate before building the agent so a bad body never reaches it. The
+        # body may already be cached: Flask-Security reads it to look for an auth
+        # token when the request carries no session.
+        if (request.content_length or 0) > MAX_REQUEST_BYTES:
+            api.abort(413)
+        body = request.get_data()
+        if len(body) > MAX_REQUEST_BYTES:
+            api.abort(413)
         resource_id, visualization = _extract_context(body)
         try:
             run_input = VercelAIAdapter.build_run_input(body)
         except ValidationError:
             api.abort(400, _("Invalid request body."))
-        _check_messages(run_input.messages)
+        # The server owns the system prompt: client system messages are dropped
+        # before the adapter loads them. sanitize_messages is not enough: a system
+        # text part carrying a retry_feedback marker loads as a RetryFeedbackPart
+        # that reaches the model unbounded, and a non-text part makes loading raise.
         run_input.messages = [m for m in run_input.messages if m.role != "system"]
-
-        # Drop empty assistant messages (no content, no tool calls): providers
-        # reject them, which would lock the conversation.
-        def _has_substance(message) -> bool:
-            for part in message.parts:
-                if isinstance(part, ToolUIPart | DynamicToolUIPart):
-                    return True
-                if isinstance(part, TextUIPart) and part.text.strip():
-                    return True
-            return False
-
+        _check_messages(run_input.messages)
         before = len(run_input.messages)
-        run_input.messages = [
-            m for m in run_input.messages if m.role != "assistant" or _has_substance(m)
-        ]
+        run_input.messages = [m for m in run_input.messages if not _is_empty_assistant_message(m)]
         if len(run_input.messages) < before:
             log.info(
                 "Assistant: dropped %s empty assistant message(s) from history",
