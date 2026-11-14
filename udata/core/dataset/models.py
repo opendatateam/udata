@@ -643,12 +643,18 @@ class Dataset(
     # model-level scheme check rather than relying on its producer.
     # See Resource.extras for the rationale.
     # The reserved patterns differ from the resource ones: transport, ecologie, the
-    # recommendations job and the DCAT harvester write on the dataset, while hydra
-    # and validata write on its resources.
+    # recommendations job, the zone detection (`analysis:spatial:*`) and the DCAT
+    # harvester write on the dataset, while hydra and validata write on its resources.
     extras = field(
         ExtrasField(
             {"datafairOrigin": URLField, "transport:url": URLField},
-            reserved=("transport:*", "ecologie:*", "recommendations*", DCAT_EXTRAS_KEY),
+            reserved=(
+                "analysis:spatial:*",
+                "transport:*",
+                "ecologie:*",
+                "recommendations*",
+                DCAT_EXTRAS_KEY,
+            ),
         ),
         auditable=False,
     )
