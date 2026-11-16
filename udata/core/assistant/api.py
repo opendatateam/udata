@@ -29,6 +29,13 @@ from pydantic_ai.exceptions import (
     RunCancelled,
     RunTimedOut,
 )
+from pydantic_ai.messages import (
+    BaseToolReturnPart,
+    BinaryContent,
+    FileUrl,
+    UploadedFile,
+    UserPromptPart,
+)
 from pydantic_ai.ui import SSE_CONTENT_TYPE
 from pydantic_ai.ui.vercel_ai import VercelAIAdapter, VercelAIEventStream
 from pydantic_ai.ui.vercel_ai.request_types import (
@@ -108,6 +115,38 @@ def _check_messages(messages) -> None:
                     max=MAX_USER_MESSAGE_CHARS,
                 ),
             )
+
+
+def _holds_file(content) -> bool:
+    """Whether loaded message content holds a file, at any depth of a tool return."""
+    if isinstance(content, FileUrl | BinaryContent | UploadedFile):
+        return True
+    if isinstance(content, list | tuple):
+        return any(_holds_file(item) for item in content)
+    if isinstance(content, dict):
+        return any(_holds_file(item) for item in content.values())
+    return False
+
+
+def _check_no_file_content(messages) -> None:
+    """Reject a history that loads with a file in it.
+
+    The output of a tool part sent back by the client loads as a file when it has a
+    file ``kind``: a forged one would make the server download a URL of the client's
+    choosing, or forward binary data past the text limits. Our tools only return text
+    and JSON. The history is loaded as the agent will load it, so whatever pydantic-ai
+    reads as a file is caught.
+    """
+    try:
+        loaded = VercelAIAdapter.load_messages(messages)
+    except (ValueError, RecursionError):
+        # A tool input string nested too deep for the JSON scanner raises RecursionError.
+        api.abort(400, _("Invalid request body."))
+    for message in loaded:
+        for part in message.parts:
+            # BaseToolReturnPart also covers the provider-executed tool returns.
+            if isinstance(part, UserPromptPart | BaseToolReturnPart) and _holds_file(part.content):
+                api.abort(400, _("Only text messages are accepted."))
 
 
 def _is_empty_assistant_message(message) -> bool:
@@ -373,6 +412,7 @@ class AssistantChatAPI(API):
         # that reaches the model unbounded, and a non-text part makes loading raise.
         run_input.messages = [m for m in run_input.messages if m.role != "system"]
         _check_messages(run_input.messages)
+        _check_no_file_content(run_input.messages)
         before = len(run_input.messages)
         run_input.messages = [m for m in run_input.messages if not _is_empty_assistant_message(m)]
         if len(run_input.messages) < before:
@@ -382,7 +422,11 @@ class AssistantChatAPI(API):
             )
 
         agent = get_agent()
-        adapter = AssistantAdapter(agent, run_input, accept=SSE_CONTENT_TYPE)
+        # No file URL from the client, even if one got past _check_no_file_content: the
+        # adapter drops them before the agent sees the history.
+        adapter = AssistantAdapter(
+            agent, run_input, accept=SSE_CONTENT_TYPE, allowed_file_url_schemes=frozenset()
+        )
         cancellation_token = CancellationToken()
         deps = AssistantDeps(tabular=TabularClient(), resource_id=resource_id)
         blocks = []
