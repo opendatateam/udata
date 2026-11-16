@@ -281,8 +281,12 @@ class AssistantEventStream(VercelAIEventStream):
             yield chunk
 
     async def on_cancelled(self, cancelled: RunCancelled) -> AsyncIterator[BaseChunk]:
+        # The AI SDK ends a stream quietly on an abort chunk, without its reason: a
+        # timeout is an error the user must see. Any other cancellation is the client
+        # leaving, which nobody reads.
         if isinstance(cancelled, RunTimedOut):
-            yield AbortChunk(reason=_("The response took too long and was interrupted."))
+            log.warning("Assistant turn timed out after %s s", AI_TURN_TIMEOUT)
+            yield ErrorChunk(error_text=_("The response took too long and was interrupted."))
         else:
             yield AbortChunk(reason=_("The response was interrupted."))
 

@@ -801,7 +801,7 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert record.levelno == level
         assert record.exc_info[1] is error
 
-    def test_chat_timeout_abort_is_localized(self, mocker):
+    def test_chat_timeout_is_an_error_with_its_reason(self, mocker):
         self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
         self.app.config["AI_API_KEY"] = "test-key"
         self.login()
@@ -815,7 +815,8 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
         response = self.post(url_for("api.assistant_chat"), data=PAYLOAD)
         body = response.get_data(as_text=True)
-        assert '"type":"abort"' in body
+        assert '"type":"error"' in body
+        assert '"type":"abort"' not in body
         assert "timed out" not in body
         assert TIMEOUT_REASON in body
 
