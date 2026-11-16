@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-11-13 14:39+0100\n"
+"POT-Creation-Date: 2026-11-16 09:20+0100\n"
 "PO-Revision-Date: 2025-11-19 12:59+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: es\n"
@@ -443,46 +443,41 @@ msgid "The conversation has no user message."
 msgstr ""
 
 #: udata/core/assistant/api.py:77 udata/core/assistant/api.py:82
+#: udata/core/assistant/api.py:86
 msgid "Only text messages are accepted."
 msgstr ""
 
-#: udata/core/assistant/api.py:84
+#: udata/core/assistant/api.py:88
 msgid "A user message cannot be empty."
 msgstr ""
 
-#: udata/core/assistant/api.py:90
+#: udata/core/assistant/api.py:94
 #, python-format
 msgid "Your message is too long (%(max)s characters maximum)."
 msgstr ""
 
-#: udata/core/assistant/api.py:128
+#: udata/core/assistant/api.py:132
 msgid "Invalid resource_id: a resource UUID is expected."
 msgstr ""
 
-#: udata/core/assistant/api.py:136
+#: udata/core/assistant/api.py:140
 msgid "Invalid visualization context."
 msgstr ""
 
-#: udata/core/assistant/api.py:208 udata/core/assistant/api.py:282
+#: udata/core/assistant/api.py:212 udata/core/assistant/api.py:286
 msgid "An error occurred while generating the response."
 msgstr ""
 
-#: udata/core/assistant/api.py:213
+#: udata/core/assistant/api.py:217
 msgid "The response took too long and was interrupted."
 msgstr ""
 
-#: udata/core/assistant/api.py:215
+#: udata/core/assistant/api.py:219
 msgid "The response was interrupted."
 msgstr ""
 
-#: udata/core/assistant/api.py:313
-msgid "Assistant is not configured (AI_BASE_URL is not set)."
-msgstr ""
-
-#: udata/core/assistant/api.py:321
-msgid ""
-"Assistant is enabled but the AI provider API key (AI_API_KEY) is not "
-"configured."
+#: udata/core/assistant/api.py:316 udata/core/assistant/api.py:319
+msgid "The assistant is not available."
 msgstr ""
 
 #: udata/core/assistant/api.py:340
@@ -2538,5 +2533,14 @@ msgstr ""
 #~ msgstr "Deshabilitado"
 
 #~ msgid "The conversation is too large."
+#~ msgstr ""
+
+#~ msgid "Assistant is not configured (AI_BASE_URL is not set)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Assistant is enabled but the AI "
+#~ "provider API key (AI_API_KEY) is not "
+#~ "configured."
 #~ msgstr ""
 
