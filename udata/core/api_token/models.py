@@ -1,5 +1,3 @@
-import hashlib
-import hmac
 import secrets
 from datetime import datetime, timezone
 
@@ -7,6 +5,7 @@ from flask import current_app
 
 from udata.api import api
 from udata.api_fields import field, generate_fields
+from udata.core.api_token.hashing import hash_token
 from udata.core.user.permissions import UserEditPermission
 from udata.models import db
 
@@ -27,11 +26,6 @@ def parse_future_datetime(value):
     if dt < datetime.now(timezone.utc):
         api.abort(400, "expires_at must be in the future")
     return dt
-
-
-def _hash_token(plaintext):
-    key = current_app.config["API_TOKEN_SECRET"].encode()
-    return hmac.new(key, plaintext.encode(), hashlib.sha256).hexdigest()
 
 
 @generate_fields()
@@ -109,7 +103,7 @@ class ApiToken(db.Document):
         prefix = current_app.config.get("API_TOKEN_PREFIX", "udata_")
         raw = secrets.token_urlsafe(TOKEN_BYTE_LENGTH)
         plaintext = f"{prefix}{raw}"
-        token_hash = _hash_token(plaintext)
+        token_hash = hash_token(plaintext)
         display_prefix = plaintext[: len(prefix) + PREFIX_DISPLAY_LENGTH]
         token = cls(
             token_hash=token_hash,
@@ -129,7 +123,7 @@ class ApiToken(db.Document):
         Returns (ApiToken, None) on success, or (None, error_reason) on failure.
         error_reason is one of: "invalid", "revoked", "expired".
         """
-        token_hash = _hash_token(plaintext_token)
+        token_hash = hash_token(plaintext_token)
         token = cls.objects(token_hash=token_hash).first()
         if token is None:
             return None, "invalid"

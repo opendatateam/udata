@@ -30,6 +30,7 @@ from udata.core import storages
 from udata.core.checks import check_is_email, check_no_urls, only_creation
 from udata.core.linkable import Linkable
 from udata.core.metrics.models import WithMetrics
+from udata.core.organization.constants import CERTIFIED
 from udata.core.spam.models import SpamMixin
 from udata.core.storages import avatars, default_image_basename
 from udata.features.notifications.constants import MailCadence
@@ -316,8 +317,14 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     @property
     def two_factor_required_by_policy(self) -> bool:
         """Whether the configuration requires a second factor from this account, set up or not."""
-        return current_app.config["SECURITY_TWO_FACTOR_REQUIRED"] or (
-            current_app.config["SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN"] and self.sysadmin
+        config = current_app.config
+        return (
+            config["SECURITY_TWO_FACTOR_REQUIRED"]
+            or (config["SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN"] and self.sysadmin)
+            or (
+                config["SECURITY_TWO_FACTOR_REQUIRED_FOR_CERTIFIED_ORGS"]
+                and self.organizations.filter(badges__kind=CERTIFIED).first() is not None
+            )
         )
 
     @property

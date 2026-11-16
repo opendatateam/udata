@@ -155,6 +155,7 @@ class Defaults(object):
     SECURITY_TWO_FACTOR = False
     SECURITY_TWO_FACTOR_REQUIRED = False  # Not required by default
     SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN = False
+    SECURITY_TWO_FACTOR_REQUIRED_FOR_CERTIFIED_ORGS = False
     SECURITY_TWO_FACTOR_ENABLED_METHODS = ["authenticator"]
     SECURITY_TOTP_SECRETS = {"1": "the udata totp secret"}
     SECURITY_TOTP_ISSUER = "udata"
@@ -225,10 +226,11 @@ class Defaults(object):
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
     OAUTH2_TOKEN_EXPIRES_IN = {
         "authorization_code": 30 * 24 * HOUR,
-        "implicit": 10 * 24 * HOUR,
-        "password": 30 * 24 * HOUR,
+        "refresh_token": 30 * 24 * HOUR,
         "client_credentials": 30 * 24 * HOUR,
     }
+    # Counted from the expiration of the access token the refresh token came with.
+    OAUTH2_REFRESH_TOKEN_EXPIRES_IN = 30 * 24 * HOUR
     OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI = False
 
     MD_ALLOWED_TAGS = [

@@ -38,9 +38,10 @@ A secret key used as salt for cryptographic parts.
 
 ### API_TOKEN_SECRET
 
-A secret key used for HMAC-SHA256 hashing of API tokens.
+A secret key used for HMAC-SHA256 hashing of API tokens, OAuth2 tokens and OAuth2 client secrets.
 **You must specify your own secure key, different from `SECRET_KEY`**.
-The app refuses to start without it.
+The app refuses to start without it. Changing it voids all of them: every API token, every
+OAuth2 token, and every OAuth2 client with a secret, which then has to be created again.
 
 ### SITE_ID
 
@@ -290,14 +291,23 @@ The full option list is available in
 **default**:
 ```python
     {
-        'authorization_code': 10 * 24 * HOUR,
-        'implicit': 10 * 24 * HOUR,
-        'password': 10 * 24 * HOUR,
-        'client_credentials': 10 * 24 * HOUR
+        'authorization_code': 30 * 24 * HOUR,
+        'refresh_token': 30 * 24 * HOUR,
+        'client_credentials': 30 * 24 * HOUR
     }
 ```
 
-The OAuth2 token duration.
+The OAuth2 access token duration, per grant type. A grant type missing from this dict falls
+back to Authlib's own defaults: 10 days for `authorization_code`, `password` and
+`client_credentials`, one hour for anything else, `refresh_token` included.
+
+### OAUTH2_REFRESH_TOKEN_EXPIRES_IN
+
+**default**: `30 * 24 * HOUR`
+
+How long, in seconds, a refresh token stays usable once the access token it came with has
+expired. With the default values, an application can refresh a token up to 60 days after it was
+issued.
 
 ## Flask-Security options
 
