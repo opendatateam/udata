@@ -43,8 +43,9 @@ runs:
           exit 0
         fi
 
-        git config user.name "github-actions[bot]"
-        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        # The person who updated the release branch
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR_ID+$GITHUB_ACTOR@users.noreply.github.com"
         git commit --quiet --all --message "Update the changelog of $version"
         git push --quiet origin "$HEAD_REF"
         gh pr edit "$PR_NUMBER" --body-file "$RUNNER_TEMP/release-body.md"

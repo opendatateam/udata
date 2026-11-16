@@ -58,8 +58,9 @@ runs:
       run: |
         set -euo pipefail
         branch="release/v$VERSION"
-        git config user.name "github-actions[bot]"
-        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        # The person who launched the release
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR_ID+$GITHUB_ACTOR@users.noreply.github.com"
         git switch --quiet --create "$branch"
         git add CHANGELOG.md
         if [ -f publiccode.yml ]; then

@@ -43,8 +43,9 @@ runs:
 
         python3 "$GITHUB_ACTION_PATH/../release.py" notes "$version" --output "$RUNNER_TEMP/release-notes.md"
         if [ -z "$tagged_sha" ]; then
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # The person who merged the release PR
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR_ID+$GITHUB_ACTOR@users.noreply.github.com"
           git tag --annotate "$tag" --message "Version $version" "$sha"
           git push --quiet origin "refs/tags/$tag"
         fi
