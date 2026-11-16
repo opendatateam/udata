@@ -313,21 +313,10 @@ class AssistantChatAPI(API):
         # Disabled state is ``AI_BASE_URL`` unset; a missing API key is a
         # misconfiguration. Both make the assistant unavailable: 503.
         if not current_app.config["AI_BASE_URL"]:
-            return (
-                {"error": _("Assistant is not configured (AI_BASE_URL is not set).")},
-                503,
-            )
-
+            api.abort(503, _("The assistant is not available."))
         if not current_app.config["AI_API_KEY"]:
-            return (
-                {
-                    "error": _(
-                        "Assistant is enabled but the AI provider API key (AI_API_KEY) "
-                        "is not configured."
-                    )
-                },
-                503,
-            )
+            log.error("Assistant enabled without an AI provider API key (AI_API_KEY)")
+            api.abort(503, _("The assistant is not available."))
 
         # The raw body is read below, which skips the JSON content type check of
         # request.json. The API is exempt from CSRF: without the check, a text/plain

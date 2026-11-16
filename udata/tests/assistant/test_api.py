@@ -233,16 +233,16 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         )
         assert "call-dynamic-1" in seen
 
-    def test_chat_missing_api_key(self):
+    def test_chat_missing_api_key(self, caplog):
         self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
         self.app.config["AI_API_KEY"] = None
         self.login()
-        response = self.post(url_for("api.assistant_chat"), data=PAYLOAD)
+        with caplog.at_level("ERROR", logger="udata.core.assistant.api"):
+            response = self.post(url_for("api.assistant_chat"), data=PAYLOAD)
         assert response.status_code == 503
-        assert response.json["error"] == (
-            "L'assistant est activé mais la clé d'API du fournisseur d'IA (AI_API_KEY) "
-            "n'est pas configurée."
-        )
+        # The setting name stays in the logs.
+        assert "AI_API_KEY" not in response.json["message"]
+        assert "AI_API_KEY" in caplog.text
 
     def test_chat_rejects_a_non_json_body(self, mocker):
         # A text/plain post needs no CORS preflight: the API is exempt from CSRF.
