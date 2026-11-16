@@ -153,23 +153,31 @@ def _cell(value) -> str:
     return text if len(text) <= MAX_CELL_CHARS else text[:MAX_CELL_CHARS] + "…"
 
 
-def _render_result(result: dict) -> str:
+def _render_result(result: dict, *, aggregated: bool = False) -> str:
     """Render the `data` rows of an api-tabular response as a pipe-separated table.
 
     A query without aggregate has an exact `meta.total`, which tells whether rows are cut.
-    Whole rows past MAX_RESULT_CHARS are left out, with a note.
+    An aggregated one has none: its total is not given. Whole rows past MAX_RESULT_CHARS
+    are left out, with a note.
     """
     rows = result.get("data") if isinstance(result, dict) else None
     rows = [row for row in rows or [] if isinstance(row, dict)]
     if not rows:
         return "Requête exécutée avec succès, aucune ligne retournée."
     meta = result.get("meta")
-    total = meta.get("total") if isinstance(meta, dict) else None
+    total = meta.get("total") if isinstance(meta, dict) and not aggregated else None
     if not isinstance(total, int):
-        total = len(rows)
+        total = None
+    of_total = f" ({total} lignes au total)" if total is not None else ""
     columns = list(rows[0])
     lines = [" | ".join(_cell(column) for column in columns)]
     size = len(lines[0])
+    if size > MAX_RESULT_CHARS:
+        # Too many columns for even the header: nothing useful fits.
+        return (
+            f"Résultat non affiché : ses {len(columns)} colonnes dépassent la taille "
+            f"permise{of_total}. Relance avec `columns` pour n'en garder que quelques-unes."
+        )
     shown = 0
     for row in rows[:PAGE_SIZE]:
         line = " | ".join(_cell(row.get(column)) for column in columns)
@@ -180,10 +188,10 @@ def _render_result(result: dict) -> str:
         shown += 1
     if shown < min(len(rows), PAGE_SIZE):
         lines.append(
-            f"Résultat coupé à {shown} lignes pour sa taille : "
+            f"Résultat coupé à {shown} lignes pour sa taille{of_total} : "
             "sélectionne moins de colonnes ou agrège pour voir la suite."
         )
-    elif total > shown:
+    elif total is not None and total > shown:
         lines.append(
             f"Résultat tronqué : {total} lignes au total, {PAGE_SIZE} premières lignes affichées."
         )
@@ -394,7 +402,7 @@ def register_tools(agent: Agent) -> None:
             result = ctx.deps.tabular.get_data(resource_id, with_page(query))
         except TabularError as error:
             return _tabular_error_message(error)
-        rendered = _render_result(result)
+        rendered = _render_result(result, aggregated=bool(groupby))
         if groupby and has_more_rows(result):
             rendered += (
                 f"\nPlus de {PAGE_SIZE} groupes : seuls les {PAGE_SIZE} premiers "

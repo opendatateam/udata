@@ -813,7 +813,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
 
 def test_render_result_shows_at_most_one_page_of_rows():
     rows = [{"n": i} for i in range(PAGE_SIZE + 1)]
-    lines = _render_result({"data": rows}).split("\n")
+    lines = _render_result({"data": rows, "meta": {"total": PAGE_SIZE + 1}}).split("\n")
     assert lines[PAGE_SIZE] == str(PAGE_SIZE - 1)
     assert (
         lines[-1]
@@ -835,3 +835,27 @@ def test_render_result_leaves_out_whole_rows_past_the_size_bound():
     assert len(rendered) <= MAX_RESULT_CHARS + 200
     assert lines[-1].startswith(f"Résultat coupé à {len(lines) - 2} lignes pour sa taille")
     assert all(line.count(" | ") == 9 for line in lines[:-1])
+
+
+def test_render_result_cut_for_size_keeps_the_total():
+    rows = [{f"c{i}": "v" * MAX_CELL_CHARS for i in range(10)} for _ in range(PAGE_SIZE)]
+    rendered = _render_result({"data": rows, "meta": {"total": 926}})
+    assert "(926 lignes au total)" in rendered.split("\n")[-1]
+
+
+def test_render_result_of_an_aggregate_gives_no_total():
+    # api-tabular gives an aggregated query no exact total: none is stated.
+    rows = [{f"c{i}": "v" * MAX_CELL_CHARS for i in range(10)} for _ in range(PAGE_SIZE)]
+    rendered = _render_result({"data": rows, "meta": {"total": 926}}, aggregated=True)
+    assert "au total" not in rendered
+    assert rendered.split("\n")[-1].startswith("Résultat coupé à")
+
+
+def test_render_result_with_too_many_columns_asks_for_fewer():
+    # 400 long column names: the header alone is past the bound.
+    rows = [{f"colonne_au_nom_long_{i:03}": i for i in range(400)}]
+    rendered = _render_result({"data": rows, "meta": {"total": 12}})
+    assert len(rendered) <= MAX_RESULT_CHARS
+    assert rendered.startswith("Résultat non affiché : ses 400 colonnes")
+    assert "12 lignes au total" in rendered
+    assert "`columns`" in rendered
