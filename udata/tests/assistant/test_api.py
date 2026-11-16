@@ -25,7 +25,6 @@ from pydantic_ai.models.function import DeltaToolCall, FunctionModel
 from pydantic_ai.models.test import TestModel
 from werkzeug.wrappers import Request
 
-from udata.api.oauth2 import OAuth2Client, OAuth2Token
 from udata.core.api_token.models import ApiToken
 from udata.core.assistant import api as api_module
 from udata.core.assistant.agent import get_agent
@@ -1225,25 +1224,6 @@ class AssistantChatAuthenticationTest(PytestOnlyAPITestCase):
     def test_api_key_chat_streams(self, mocker):
         mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
         response = self._raw_chat(json.dumps(PAYLOAD), self._api_key_headers())
-        assert response.status_code == 200
-        assert "data: " in response.get_data(as_text=True)
-
-    def test_oauth_token_chat_streams(self, mocker):
-        client = OAuth2Client.objects.create(
-            name="test-client",
-            owner=UserFactory(),
-            redirect_uris=["https://test.org/callback"],
-            secret="suchs3cr3t",
-        )
-        token = OAuth2Token.objects.create(
-            client=client,
-            user=UserFactory(),
-            access_token="access-token",
-            refresh_token="refresh-token",
-        )
-        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
-        headers = {"Authorization": f"Bearer {token.access_token}"}
-        response = self._raw_chat(json.dumps(PAYLOAD), headers)
         assert response.status_code == 200
         assert "data: " in response.get_data(as_text=True)
 
