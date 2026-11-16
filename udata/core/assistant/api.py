@@ -8,7 +8,9 @@ import asyncio
 import json
 import logging
 import queue
+import re
 import threading
+import unicodedata
 from collections.abc import AsyncIterator
 from contextlib import aclosing
 
@@ -77,6 +79,10 @@ MAX_VISUALIZATION_BYTES = 20_000
 # Guards against scripted or tampered clients, far above any real conversation.
 MAX_REQUEST_BYTES = 512 * 1024
 MAX_USER_MESSAGE_CHARS = 4_000
+
+# What a model could read as the start of an untrusted context tag: a "<", its full-width
+# forms or its HTML entity, then "untrusted" past any space or punctuation, in any case.
+UNTRUSTED_TAG = re.compile(r"(?:<|\uff1c|\ufe64|&lt;)(?=[\W_]*untrusted)", re.IGNORECASE)
 
 
 # Parts our own stream emits, sent back with the history. Others are refused: an
@@ -196,11 +202,16 @@ def _extract_context(body: bytes) -> tuple[str | None, dict | None]:
 
 
 def _escape_untrusted(text: str) -> str:
-    """Escape ``<`` so user-controlled metadata cannot close the
-    ``<untrusted_active_context>`` or ``<untrusted_visualization_context>``
+    """Neutralize the ``untrusted_`` tags, so that user-controlled metadata cannot
+    close the ``<untrusted_active_context>`` or ``<untrusted_visualization_context>``
     delimiter early and inject instructions.
+
+    Invisible format characters are dropped first, so that none can split the tag name.
+    Other ``<`` are kept: a column named ``part_<18ans`` must reach the model as is,
+    or its queries name a column that does not exist.
     """
-    return text.replace("<", "⟨")
+    visible = "".join(char for char in text if unicodedata.category(char) != "Cf")
+    return UNTRUSTED_TAG.sub("⟨", visible)
 
 
 def _build_resource_instructions(resource_id: str, tabular: TabularClient) -> str | None:
