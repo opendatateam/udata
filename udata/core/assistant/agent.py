@@ -13,7 +13,9 @@ from pydantic_ai.providers.openai import OpenAIProvider
 from udata.core.assistant.prompts import SYSTEM_INSTRUCTIONS
 from udata.core.assistant.tools import AssistantDeps, register_tools
 
-# How many times the agent retries a failed model call before giving up.
+# Retries the model gets for invalid tool arguments or output. A failed model call is
+# retried by the OpenAI client itself (twice, on rate limits, 5xx and connection errors),
+# within the turn timeout; a call still failing then ends the turn.
 MODEL_RETRIES = 2
 
 

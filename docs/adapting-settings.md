@@ -524,6 +524,13 @@ List of datasets slugs to query to fill the fixture file.
 
 The chart assistant (`POST /api/1/assistant/chat/`) talks to an OpenAI-compatible provider, such as [Albert](https://albert.sites.beta.gouv.fr/), and reads resource data from [api-tabular](https://github.com/datagouv/api-tabular).
 
+!!! warning
+    Each answer is streamed by the API worker that received it, from a background thread. A turn is cut after 120 seconds, but an api-tabular request running at that moment finishes first: each one can take 30 seconds and a tool can chain several, so a worker can be held for about four minutes in the worst case. Before enabling the assistant:
+
+    * size the API workers for the expected concurrent conversations: with the 5 uWSGI processes of the [installation guide](installation.md), five conversations at once leave no worker for the rest of the API;
+    * enable threads in uWSGI (`enable-threads = true`);
+    * raise the proxy read timeout to about 300 seconds (`uwsgi_read_timeout` or `proxy_read_timeout` with nginx, 60 seconds by default): a turn can stay silent while the model reasons or api-tabular answers, and the timeout message comes at its end.
+
 ### AI_BASE_URL
 
 **default**: `None`
