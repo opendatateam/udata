@@ -117,7 +117,8 @@ def _unauthorized_detail(detail) -> str | None:
         return None
     try:
         allowed = ", ".join(sorted(ast.literal_eval(match["allowed"])))
-    except (ValueError, SyntaxError, TypeError):
+    # The set comes from upstream: a deeply nested one exhausts the stack or memory.
+    except (ValueError, SyntaxError, TypeError, RecursionError, MemoryError):
         allowed = match["allowed"]
     return (
         f"colonne {match['column']} non indexée : seules les colonnes {allowed} "
@@ -143,7 +144,9 @@ def _data_route(resource_id: str, query: str) -> str:
 
 class TabularClient:
     def __init__(self, base_url: str | None = None):
-        self.base_url = base_url if base_url is not None else current_app.config["TABULAR_API_URL"]
+        base_url = base_url if base_url is not None else current_app.config["TABULAR_API_URL"]
+        # A trailing slash would double the one the routes start with.
+        self.base_url = base_url.rstrip("/") if base_url else base_url
 
     def get_profile(self, resource_id: str) -> dict:
         return self._request(PROFILE_ROUTE.format(rid=_validate_resource_id(resource_id)))

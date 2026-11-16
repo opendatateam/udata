@@ -231,6 +231,13 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         result = self.call("inspect_schema", deps, resource_id=str(resource.id))
         assert result == "Aucune information de colonne disponible."
 
+    def test_inspect_schema_reads_a_resource_id_written_in_uppercase(self, mocker):
+        resource = self.owned_resource()
+        deps = self.make_deps()
+        mocker.patch.object(deps.tabular, "get_profile", return_value={"profile": {}})
+        result = self.call("inspect_schema", deps, resource_id=str(resource.id).upper())
+        assert "introuvable" not in result
+
     def test_inspect_schema_unknown_resource_returns_french_error(self, mocker):
         deps = self.make_deps()
         profile = mocker.patch.object(deps.tabular, "get_profile")

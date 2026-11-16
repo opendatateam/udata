@@ -46,6 +46,7 @@ from udata.core.assistant.tabular import (
 )
 from udata.core.dataset.models import Dataset, Resource, get_dataset_by_resource_id
 from udata.mongo.queryset import paginate_embedded_list
+from udata.utils import normalize_uuid
 
 log = logging.getLogger(__name__)
 
@@ -121,8 +122,14 @@ def _dataset_for_current_user(dataset_id: str) -> Dataset | None:
 
 
 def _dataset_for_resource(resource_id: str) -> Dataset | None:
-    """Owner dataset of a resource, readable by the requesting user, else None."""
-    dataset = get_dataset_by_resource_id(resource_id, exclude_resources=True)
+    """Owner dataset of a resource, readable by the requesting user, else None.
+
+    The id is normalized like the endpoint does: the model may write it in uppercase or
+    without dashes, ids are stored in their canonical form.
+    """
+    if (normalized := normalize_uuid(resource_id)) is None:
+        return None
+    dataset = get_dataset_by_resource_id(normalized, exclude_resources=True)
     if dataset is not None and dataset.permissions["read"].can():
         return dataset
     return None

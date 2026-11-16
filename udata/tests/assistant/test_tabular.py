@@ -25,6 +25,11 @@ class TabularClientTest(PytestOnlyTestCase):
         with self.app.test_request_context():
             return TabularClient(**kwargs)
 
+    def test_a_trailing_slash_in_the_base_url_does_not_double(self, requests_mock):
+        requests_mock.get(f"{BASE_URL}/api/resources/{RESOURCE_ID}/profile/", json={})
+        self.make_client(base_url=f"{BASE_URL}/").get_profile(RESOURCE_ID)
+        assert requests_mock.request_history[0].url.startswith(f"{BASE_URL}/api/")
+
     def test_get_profile_returns_json(self, requests_mock):
         requests_mock.get(
             f"{BASE_URL}/api/resources/{RESOURCE_ID}/profile/",
