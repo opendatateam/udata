@@ -80,6 +80,10 @@ def _check_messages(messages) -> None:
             continue
         if not all(isinstance(part, TextUIPart) for part in message.parts):
             api.abort(400, _("Only text messages are accepted."))
+        # Pydantic AI metadata turns a user text part into retry feedback or structured
+        # content, both read from the metadata and not from the counted text.
+        if any("pydantic_ai" in (part.provider_metadata or {}) for part in message.parts):
+            api.abort(400, _("Only text messages are accepted."))
         if not any(part.text.strip() for part in message.parts):
             api.abort(400, _("A user message cannot be empty."))
         length = sum(len(part.text) for part in message.parts)
@@ -324,6 +328,13 @@ class AssistantChatAPI(API):
                 },
                 503,
             )
+
+        # The raw body is read below, which skips the JSON content type check of
+        # request.json. The API is exempt from CSRF: without the check, a text/plain
+        # post from another same-site origin, which needs no preflight, would run the
+        # agent with the user's session cookie.
+        if not request.is_json:
+            api.abort(415)
 
         # Validate before building the agent so a bad body never reaches it. The
         # body may already be cached: Flask-Security reads it to look for an auth

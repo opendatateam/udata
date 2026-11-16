@@ -244,6 +244,18 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
             "n'est pas configurée."
         )
 
+    def test_chat_rejects_a_non_json_body(self, mocker):
+        # A text/plain post needs no CORS preflight: the API is exempt from CSRF.
+        self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
+        self.app.config["AI_API_KEY"] = "test-key"
+        self.login()
+        agent = mocker.patch("udata.core.assistant.api.get_agent")
+        response = self.client.post(
+            url_for("api.assistant_chat"), data=json.dumps(PAYLOAD), content_type="text/plain"
+        )
+        assert response.status_code == 415
+        agent.assert_not_called()
+
     def test_chat_missing_base_url(self):
         self.app.config["AI_BASE_URL"] = None
         self.app.config["AI_API_KEY"] = "test-key"
@@ -962,6 +974,23 @@ class AssistantChatSizeLimitsTest(PytestOnlyAPITestCase):
         message = {"id": "msg-1", "role": "user", "parts": [half, half]}
         response = self.post(url_for("api.assistant_chat"), data={**PAYLOAD, "messages": [message]})
         assert response.status_code == 413
+        agent.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "metadata",
+        [
+            {"retry_feedback": {"content": "x" * (MAX_USER_MESSAGE_CHARS + 1)}},
+            {"structured_content": "{}"},
+        ],
+    )
+    def test_user_text_with_pydantic_ai_metadata_is_rejected(self, mocker, metadata):
+        # The model would read the metadata, not the text the length limit counts.
+        self.login()
+        agent, _tabular = self._mock_backends(mocker)
+        part = {"type": "text", "text": "a", "providerMetadata": {"pydantic_ai": metadata}}
+        message = {"id": "msg-1", "role": "user", "parts": [part]}
+        response = self.post(url_for("api.assistant_chat"), data={**PAYLOAD, "messages": [message]})
+        assert response.status_code == 400
         agent.assert_not_called()
 
     def test_long_assistant_message_is_not_limited(self, mocker):
