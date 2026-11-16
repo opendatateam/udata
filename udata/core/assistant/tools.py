@@ -141,10 +141,23 @@ def render_profile(profile: dict) -> str:
     return "\n".join(lines)
 
 
+# Bounds on what a query result puts in the model's context: the row cap does not
+# bound it, a resource can have hundreds of columns and cells of any length.
+MAX_CELL_CHARS = 200
+MAX_RESULT_CHARS = 10_000
+
+
+def _cell(value) -> str:
+    """A table cell on one line, without the column separator, cut past MAX_CELL_CHARS."""
+    text = " ".join(str(value).split()).replace("|", "/")
+    return text if len(text) <= MAX_CELL_CHARS else text[:MAX_CELL_CHARS] + "…"
+
+
 def _render_result(result: dict) -> str:
     """Render the `data` rows of an api-tabular response as a pipe-separated table.
 
     A query without aggregate has an exact `meta.total`, which tells whether rows are cut.
+    Whole rows past MAX_RESULT_CHARS are left out, with a note.
     """
     rows = result.get("data") if isinstance(result, dict) else None
     rows = [row for row in rows or [] if isinstance(row, dict)]
@@ -155,10 +168,22 @@ def _render_result(result: dict) -> str:
     if not isinstance(total, int):
         total = len(rows)
     columns = list(rows[0])
-    lines = [" | ".join(columns)]
+    lines = [" | ".join(_cell(column) for column in columns)]
+    size = len(lines[0])
+    shown = 0
     for row in rows[:PAGE_SIZE]:
-        lines.append(" | ".join(str(row.get(column)) for column in columns))
-    if total > min(len(rows), PAGE_SIZE):
+        line = " | ".join(_cell(row.get(column)) for column in columns)
+        size += len(line) + 1
+        if size > MAX_RESULT_CHARS:
+            break
+        lines.append(line)
+        shown += 1
+    if shown < min(len(rows), PAGE_SIZE):
+        lines.append(
+            f"Résultat coupé à {shown} lignes pour sa taille : "
+            "sélectionne moins de colonnes ou agrège pour voir la suite."
+        )
+    elif total > shown:
         lines.append(
             f"Résultat tronqué : {total} lignes au total, {PAGE_SIZE} premières lignes affichées."
         )

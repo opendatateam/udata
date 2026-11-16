@@ -28,6 +28,8 @@ from udata.core.assistant.tabular import (
     TabularResourceUnavailable,
 )
 from udata.core.assistant.tools import (
+    MAX_CELL_CHARS,
+    MAX_RESULT_CHARS,
     MAX_SERIALIZED_RESOURCES,
     MAX_STEPS,
     AssistantDeps,
@@ -817,3 +819,19 @@ def test_render_result_shows_at_most_one_page_of_rows():
         lines[-1]
         == f"Résultat tronqué : {PAGE_SIZE + 1} lignes au total, 50 premières lignes affichées."
     )
+
+
+def test_render_result_keeps_each_row_on_one_line_and_cuts_long_cells():
+    rows = [{"a|b": "x | y\nz", "long": "v" * (MAX_CELL_CHARS + 50)}]
+    header, line = _render_result({"data": rows}).split("\n")
+    assert header == "a/b | long"
+    assert line == f"x / y z | {'v' * MAX_CELL_CHARS}…"
+
+
+def test_render_result_leaves_out_whole_rows_past_the_size_bound():
+    rows = [{f"c{i}": "v" * MAX_CELL_CHARS for i in range(10)} for _ in range(PAGE_SIZE)]
+    rendered = _render_result({"data": rows})
+    lines = rendered.split("\n")
+    assert len(rendered) <= MAX_RESULT_CHARS + 200
+    assert lines[-1].startswith(f"Résultat coupé à {len(lines) - 2} lignes pour sa taille")
+    assert all(line.count(" | ") == 9 for line in lines[:-1])
