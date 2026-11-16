@@ -32,8 +32,8 @@ from udata.uris import cdata_url
 
 __all__ = ("Topic", "TopicElement")
 
-# Saving a topic reindexes it, which reads all its elements: when writing elements
-# in bulk, pass this in `signal_kwargs` and save the topic once afterwards.
+# Saving a topic reindexes it, which reads all its elements: `TopicElementsWriter`
+# passes this in `signal_kwargs` so that bulk writes save the topic only once.
 SKIP_TOPIC_SAVE = "skip_topic_save"
 
 
@@ -126,6 +126,29 @@ class TopicElement(Auditable, Document):
         cls.on_delete.send(document)
 
 
+class TopicElementsWriter:
+    """Write elements of a topic without saving the topic for each of them.
+
+    Use it through `Topic.writing_elements()`, which saves the topic once at the end.
+    """
+
+    def __init__(self, topic: "Topic"):
+        # Set on each element: an element loaded from the database would otherwise reload
+        # its own copy of the topic (and of its organization, for the activity) on delete.
+        self.topic = topic
+        self.written = False
+
+    def save(self, element: TopicElement) -> None:
+        element.topic = self.topic
+        element.save(signal_kwargs={SKIP_TOPIC_SAVE: True})
+        self.written = True
+
+    def delete(self, element: TopicElement) -> None:
+        element.topic = self.topic
+        element.delete(signal_kwargs={SKIP_TOPIC_SAVE: True})
+        self.written = True
+
+
 @generate_fields()
 class Topic(Datetimed, Auditable, Linkable, Owned, Document[TopicQuerySet]):
     verbose_name = _("collection")
@@ -189,14 +212,17 @@ class Topic(Datetimed, Auditable, Linkable, Owned, Document[TopicQuerySet]):
 
     @contextmanager
     def writing_elements(self):
-        """Save the topic once after writing several elements, even if one of them fails.
+        """Yield a `TopicElementsWriter`, then save the topic once if anything was written.
 
-        Yields the `signal_kwargs` to pass to each element's `save()` / `delete()`.
+        The topic is saved even if the block fails midway, so that its index reflects
+        the elements already written or deleted.
         """
+        writer = TopicElementsWriter(self)
         try:
-            yield {SKIP_TOPIC_SAVE: True}
+            yield writer
         finally:
-            self.save()
+            if writer.written:
+                self.save()
 
     def get_nested_elements_ids(self, cls: str) -> set[str]:
         """Optimized query to get objects ids from related elements, filtered by class."""

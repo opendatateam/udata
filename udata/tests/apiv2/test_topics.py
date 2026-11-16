@@ -1,15 +1,16 @@
-from contextlib import contextmanager
+from unittest.mock import patch
 
 import pytest
 from bson import ObjectId
 from flask import url_for
-from mongoengine.signals import post_save
+from mongoengine.context_managers import query_counter
 
+from udata.core.activity.tasks import emit_activity
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.models import Discussion
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.models import Member
+from udata.core.organization.models import Member, Organization
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.spatial.factories import SAMPLE_GEOM, SpatialCoverageFactory
 from udata.core.spatial.models import spatial_granularities
@@ -27,22 +28,19 @@ from udata.core.topic.models import Topic, TopicElement
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import _
 from udata.tests.api import APITestCase
-from udata.tests.helpers import create_geozones_fixtures
+from udata.tests.helpers import create_geozones_fixtures, mock_signals
 
 
-@contextmanager
-def count_topic_saves():
-    """Count Topic saves: each one queues a reindex reading every element of the topic."""
-    saves = []
+def topic_saves(calls) -> int:
+    """Topic saves recorded by `mock_signals(Topic.after_save)`: each one queues a full reindex."""
+    return len(calls.get(Topic.after_save, []))
 
-    def receiver(sender, document, **kwargs):
-        saves.append(document.id)
 
-    post_save.connect(receiver, sender=Topic)
-    try:
-        yield saves
-    finally:
-        post_save.disconnect(receiver, sender=Topic)
+def queries_on(counter, model) -> int:
+    """Reads on a model's collection recorded by `query_counter`."""
+    return counter.db.system.profile.count_documents(
+        {"ns": f"{counter.db.name}.{model._get_collection_name()}", "op": "query"}
+    )
 
 
 class TopicsListAPITest(APITestCase):
@@ -312,11 +310,29 @@ class TopicsListAPITest(APITestCase):
             {"element": {"class": "Dataset", "id": str(d.id)}}
             for d in DatasetFactory.create_batch(5)
         ]
-        with count_topic_saves() as saves:
+        with mock_signals(Topic.after_save) as saves:
             response = self.post(url_for("apiv2.topics_list"), data)
         self.assert201(response)
         # once to create the topic, once after the elements to reindex them
-        assert len(saves) == 2
+        assert topic_saves(saves) == 2
+
+    def test_topic_api_create_with_invalid_element_still_saves_topic(self):
+        """The elements written before the validation error must reach the topic index."""
+        self.login()
+        dataset = DatasetFactory()
+        data = {
+            "name": "partial topic",
+            "elements": [
+                {"element": {"class": "Dataset", "id": str(dataset.id)}},
+                # Wrong class for the given id -> raises "Unknown reference"
+                {"element": {"class": "Reuse", "id": str(dataset.id)}},
+            ],
+        }
+        with mock_signals(Topic.after_save) as saves:
+            response = self.post(url_for("apiv2.topics_list"), data)
+        assert response.status_code == 400
+        # once to create the topic, once after the valid element was written
+        assert topic_saves(saves) == 2
 
     def test_topic_api_create_element_no_inherit_parent_fields(self):
         """It should create topic elements without inheriting parent topic's description/tags"""
@@ -597,11 +613,11 @@ class TopicAPITest(APITestCase):
         data["elements"] = [
             TopicElementFactory.element_as_payload(TopicElementDatasetFactory()) for _ in range(5)
         ]
-        with count_topic_saves() as saves:
+        with mock_signals(Topic.after_save) as saves:
             response = self.put(url_for("apiv2.topic", topic=topic), data)
         self.assert200(response)
         # once for the topic fields, once after the elements to reindex them
-        assert len(saves) == 2
+        assert topic_saves(saves) == 2
 
     def test_topic_api_update_without_elements(self):
         """It should update a topic without affecting existing elements when elements field is not provided"""
@@ -668,11 +684,11 @@ class TopicAPITest(APITestCase):
             # Wrong class for the given id -> raises "Unknown reference"
             "elements": [{"element": {"class": "Reuse", "id": str(dataset.id)}}],
         }
-        with count_topic_saves() as saves:
+        with mock_signals(Topic.after_save) as saves:
             response = self.put(url_for("apiv2.topic", topic=topic), data)
         assert response.status_code == 400
         # once for the topic fields, once after the elements were deleted
-        assert len(saves) == 2
+        assert topic_saves(saves) == 2
 
     def test_topic_api_update_with_non_object_body_returns_400(self):
         """Regression test: a non-object JSON body on PUT must return 400,
@@ -1172,13 +1188,13 @@ class TopicElementsAPITest(APITestCase):
         topic = TopicFactory(owner=owner)
         last_modified = topic.reload().last_modified
         datasets = DatasetFactory.create_batch(5)
-        with count_topic_saves() as saves:
+        with mock_signals(Topic.after_save) as saves:
             response = self.post(
                 url_for("apiv2.topic_elements", topic=topic),
                 [{"element": {"class": "Dataset", "id": str(d.id)}} for d in datasets],
             )
         assert response.status_code == 201
-        assert saves == [topic.id]
+        assert topic_saves(saves) == 1
         topic.reload()
         assert topic.last_modified > last_modified
 
@@ -1186,11 +1202,44 @@ class TopicElementsAPITest(APITestCase):
         owner = self.login()
         topic = TopicFactory(owner=owner)
         TopicElementDatasetFactory.create_batch(5, topic=topic)
-        with count_topic_saves() as saves:
+        with mock_signals(Topic.after_save) as saves:
             response = self.delete(url_for("apiv2.topic_elements", topic=topic))
         self.assert204(response)
-        assert saves == [topic.id]
+        assert topic_saves(saves) == 1
         assert TopicElement.objects(topic=topic).count() == 0
+
+    def test_add_no_elements_does_not_save_topic(self):
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        with mock_signals(Topic.after_save) as saves:
+            # not self.post: its `data or {}` would turn the empty list into an object
+            response = self.client.post(url_for("apiv2.topic_elements", topic=topic), json=[])
+        assert response.status_code == 201
+        assert topic_saves(saves) == 0
+
+    def test_clear_elements_of_empty_topic_does_not_save_topic(self):
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        with mock_signals(Topic.after_save) as saves:
+            response = self.delete(url_for("apiv2.topic_elements", topic=topic))
+        self.assert204(response)
+        assert topic_saves(saves) == 0
+
+    def test_clear_elements_does_not_reload_topic_per_element(self):
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        def reads_to_clear(elements_count):
+            topic = TopicFactory(organization=org)
+            TopicElementDatasetFactory.create_batch(elements_count, topic=topic)
+            # Activities are recorded by a worker in production: keep their task out of the count.
+            with patch.object(emit_activity, "delay"), query_counter() as counter:
+                response = self.delete(url_for("apiv2.topic_elements", topic=topic))
+                reads = (queries_on(counter, Topic), queries_on(counter, Organization))
+            self.assert204(response)
+            return reads
+
+        assert reads_to_clear(5) == reads_to_clear(1)
 
     def test_clear_elements(self):
         """It should remove all elements from a Topic"""

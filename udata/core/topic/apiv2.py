@@ -129,11 +129,9 @@ class TopicsAPI(API):
         topic.save()
 
         if elements_data is not None:
-            with topic.writing_elements() as signal_kwargs:
+            with topic.writing_elements() as writer:
                 for element_data in elements_data:
-                    element = patch(TopicElement(), element_data)
-                    element.topic = topic
-                    element.save(signal_kwargs=signal_kwargs)
+                    writer.save(patch(TopicElement(), element_data))
 
         return topic, 201
 
@@ -167,13 +165,11 @@ class TopicAPI(API):
         patch_and_save(topic, data)
 
         if elements_data is not None:
-            with topic.writing_elements() as signal_kwargs:
-                for element in topic.elements:
-                    element.delete(signal_kwargs=signal_kwargs)
+            with topic.writing_elements() as writer:
+                for element in topic.elements.no_cache():
+                    writer.delete(element)
                 for element_data in elements_data:
-                    element = patch(TopicElement(), element_data)
-                    element.topic = topic
-                    element.save(signal_kwargs=signal_kwargs)
+                    writer.save(patch(TopicElement(), element_data))
 
         return topic
 
@@ -227,18 +223,16 @@ class TopicElementsAPI(API):
         elements = []
         for element_data in data:
             try:
-                element = patch(TopicElement(), element_data)
-                element.topic = topic
-                elements.append(element)
+                elements.append(patch(TopicElement(), element_data))
             except FieldValidationError as e:
                 errors.append({e.field: [str(e)]})
 
         if errors:
             apiv2.abort(400, errors=errors)
 
-        with topic.writing_elements() as signal_kwargs:
+        with topic.writing_elements() as writer:
             for element in elements:
-                element.save(signal_kwargs=signal_kwargs)
+                writer.save(element)
 
         return elements, 201
 
@@ -256,9 +250,9 @@ class TopicElementsAPI(API):
             apiv2.abort(403, "Forbidden")
 
         # TODO: still one activity and one element reindex task per element on a huge topic
-        with topic.writing_elements() as signal_kwargs:
-            for element in topic.elements:
-                element.delete(signal_kwargs=signal_kwargs)
+        with topic.writing_elements() as writer:
+            for element in topic.elements.no_cache():
+                writer.delete(element)
 
         return None, 204
 
