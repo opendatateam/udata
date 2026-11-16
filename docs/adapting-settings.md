@@ -290,10 +290,8 @@ The full option list is available in
 **default**:
 ```python
     {
-        'authorization_code': 10 * 24 * HOUR,
-        'implicit': 10 * 24 * HOUR,
-        'password': 10 * 24 * HOUR,
-        'client_credentials': 10 * 24 * HOUR
+        'authorization_code': 30 * 24 * HOUR,
+        'client_credentials': 30 * 24 * HOUR
     }
 ```
 
