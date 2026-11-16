@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-11-16 09:20+0100\n"
+"POT-Creation-Date: 2026-11-16 11:07+0100\n"
 "PO-Revision-Date: 2025-11-19 12:59+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: pt\n"
@@ -440,49 +440,61 @@ msgstr ""
 msgid "You can only set one condition for a given access audience role"
 msgstr ""
 
-#: udata/core/assistant/api.py:73
+#: udata/core/assistant/api.py:86
 msgid "The conversation has no user message."
 msgstr ""
 
-#: udata/core/assistant/api.py:77 udata/core/assistant/api.py:82
-#: udata/core/assistant/api.py:86
+#: udata/core/assistant/api.py:90 udata/core/assistant/api.py:95
+#: udata/core/assistant/api.py:99
 msgid "Only text messages are accepted."
 msgstr ""
 
-#: udata/core/assistant/api.py:88
+#: udata/core/assistant/api.py:101
 msgid "A user message cannot be empty."
 msgstr ""
 
-#: udata/core/assistant/api.py:94
+#: udata/core/assistant/api.py:107
 #, python-format
 msgid "Your message is too long (%(max)s characters maximum)."
 msgstr ""
 
-#: udata/core/assistant/api.py:132
+#: udata/core/assistant/api.py:145
 msgid "Invalid resource_id: a resource UUID is expected."
 msgstr ""
 
-#: udata/core/assistant/api.py:140
+#: udata/core/assistant/api.py:153
 msgid "Invalid visualization context."
 msgstr ""
 
-#: udata/core/assistant/api.py:212 udata/core/assistant/api.py:286
+#: udata/core/assistant/api.py:216
+msgid "The AI service is receiving too many requests. Try again in a few moments."
+msgstr ""
+
+#: udata/core/assistant/api.py:220
+msgid "The AI service is temporarily unavailable. Try again later."
+msgstr ""
+
+#: udata/core/assistant/api.py:222
+msgid "The conversation is too long for the assistant. Start a new one."
+msgstr ""
+
+#: udata/core/assistant/api.py:223 udata/core/assistant/api.py:315
 msgid "An error occurred while generating the response."
 msgstr ""
 
-#: udata/core/assistant/api.py:217
+#: udata/core/assistant/api.py:246
 msgid "The response took too long and was interrupted."
 msgstr ""
 
-#: udata/core/assistant/api.py:219
+#: udata/core/assistant/api.py:248
 msgid "The response was interrupted."
 msgstr ""
 
-#: udata/core/assistant/api.py:316 udata/core/assistant/api.py:319
+#: udata/core/assistant/api.py:345 udata/core/assistant/api.py:348
 msgid "The assistant is not available."
 msgstr ""
 
-#: udata/core/assistant/api.py:340
+#: udata/core/assistant/api.py:369
 msgid "Invalid request body."
 msgstr ""
 
