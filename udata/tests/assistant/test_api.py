@@ -10,7 +10,15 @@ from uuid import uuid4
 import pytest
 from flask import url_for
 from flask.testing import EnvironBuilder
-from pydantic_ai.exceptions import ModelHTTPError
+from pydantic_ai.exceptions import (
+    ModelAuthenticationError,
+    ModelContextWindowExceededError,
+    ModelHTTPError,
+    ModelNotFoundError,
+    ModelRateLimitError,
+    ModelServerError,
+    ModelUnavailableError,
+)
 from pydantic_ai.models.function import DeltaToolCall, FunctionModel
 from pydantic_ai.models.test import TestModel
 from werkzeug.wrappers import Request
@@ -766,12 +774,30 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert record.levelno == logging.ERROR
         assert record.exc_info[1] is error
 
-    def test_chat_provider_http_error_is_logged_as_warning_with_traceback(self, mocker, caplog):
-        error = ModelHTTPError(502, "albert-large", body="bad gateway")
+    @pytest.mark.parametrize(
+        "category,status,message,level",
+        [
+            (ModelRateLimitError, 429, "trop de demandes", logging.WARNING),
+            (ModelUnavailableError, 503, "momentanément indisponible", logging.WARNING),
+            (ModelServerError, 502, "momentanément indisponible", logging.WARNING),
+            (ModelContextWindowExceededError, 400, "trop longue", logging.WARNING),
+            # A wrong key or model name is the instance's to fix: an error, a plain message.
+            (ModelAuthenticationError, 401, "Une erreur est survenue", logging.ERROR),
+            (ModelNotFoundError, 404, "Une erreur est survenue", logging.ERROR),
+        ],
+    )
+    def test_chat_provider_error_tells_whether_waiting_helps(
+        self, mocker, caplog, category, status, message, level
+    ):
+        # As the OpenAI model raises them: an HTTP error of a category.
+        error = ModelHTTPError.for_category(
+            category, status_code=status, model_name="albert-large", body="upstream body"
+        )
         body = self.run_with_failing_model(mocker, error)
-        assert "Une erreur est survenue" in body
+        assert message in body
+        assert "upstream body" not in body
         [record] = [r for r in caplog.records if r.name == "udata.core.assistant.api"]
-        assert record.levelno == logging.WARNING
+        assert record.levelno == level
         assert record.exc_info[1] is error
 
     def test_chat_timeout_abort_is_localized(self, mocker):

@@ -15,7 +15,20 @@ from contextlib import aclosing
 from flask import Response, current_app, request, stream_with_context
 from pydantic import ValidationError
 from pydantic_ai import CancellationToken
-from pydantic_ai.exceptions import AgentRunError, RunCancelled, RunTimedOut
+from pydantic_ai.exceptions import (
+    AgentRunError,
+    ModelAuthenticationError,
+    ModelConnectionError,
+    ModelContextWindowExceededError,
+    ModelNotFoundError,
+    ModelQuotaExceededError,
+    ModelRateLimitError,
+    ModelRequestTimeout,
+    ModelServerError,
+    ModelUnavailableError,
+    RunCancelled,
+    RunTimedOut,
+)
 from pydantic_ai.ui import SSE_CONTENT_TYPE
 from pydantic_ai.ui.vercel_ai import VercelAIAdapter, VercelAIEventStream
 from pydantic_ai.ui.vercel_ai.request_types import (
@@ -197,6 +210,19 @@ def _build_visualization_instructions(visualization: dict) -> str:
     )
 
 
+def _error_message(error: Exception) -> str:
+    """What the user is told of a failed run: whether waiting or a new conversation helps."""
+    if isinstance(error, ModelRateLimitError | ModelQuotaExceededError):
+        return _("The AI service is receiving too many requests. Try again in a few moments.")
+    if isinstance(
+        error, ModelUnavailableError | ModelServerError | ModelConnectionError | ModelRequestTimeout
+    ):
+        return _("The AI service is temporarily unavailable. Try again later.")
+    if isinstance(error, ModelContextWindowExceededError):
+        return _("The conversation is too long for the assistant. Start a new one.")
+    return _("An error occurred while generating the response.")
+
+
 class AssistantEventStream(VercelAIEventStream):
     """Vercel AI event stream whose error and abort events carry localized messages.
 
@@ -204,12 +230,15 @@ class AssistantEventStream(VercelAIEventStream):
     """
 
     async def on_error(self, error: Exception) -> AsyncIterator[BaseChunk]:
-        # Provider failures and run limits are operational; anything else is a bug for Sentry.
-        level = logging.WARNING if isinstance(error, AgentRunError) else logging.ERROR
+        # Provider failures and run limits are operational. A rejected key or an unknown
+        # model is a misconfiguration, and anything else a bug: both are for Sentry.
+        misconfigured = isinstance(error, ModelAuthenticationError | ModelNotFoundError)
+        operational = isinstance(error, AgentRunError) and not misconfigured
+        level = logging.WARNING if operational else logging.ERROR
         log.log(level, "Assistant agent run failed: %s", error, exc_info=error)
         async for chunk in super().on_error(error):
             if isinstance(chunk, ErrorChunk):
-                chunk = ErrorChunk(error_text=_("An error occurred while generating the response."))
+                chunk = ErrorChunk(error_text=_error_message(error))
             yield chunk
 
     async def on_cancelled(self, cancelled: RunCancelled) -> AsyncIterator[BaseChunk]:
