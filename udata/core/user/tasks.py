@@ -16,6 +16,12 @@ from .models import User
 log = logging.getLogger(__name__)
 
 
+@task(route="high.mail")
+def notify_api_token_created(token_id: str):
+    token = ApiToken.objects.get(pk=token_id)
+    auth_mails.api_token_created(token).send(token.user)
+
+
 def users_acting_through_tokens_since(date: datetime) -> set[ObjectId]:
     """The users an API key or an OAuth2 token acted for since `date`: those requests aren't
     logins, `current_login_at` doesn't tell of them."""
