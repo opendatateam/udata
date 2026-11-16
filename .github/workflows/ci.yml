@@ -112,8 +112,8 @@ jobs:
           mkdir -p reports/python
           uv run inv test --report --ci
 
-      - name: Test the release actions
-        run: uv run pytest .github/actions/release/tests
+      - name: Test the release script
+        run: uv run pytest .github/release/tests
 
       - name: Store test results
         if: always()
@@ -122,18 +122,14 @@ jobs:
           name: reports-py${{ matrix.python-version }}-es${{ matrix.elasticsearch-version }}
           path: reports/
 
+  # A tag pushed with the GITHUB_TOKEN triggers no workflow: the release is
+  # tagged before `dist` so that this very run publishes it
   release:
     needs: python
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
     permissions:
       contents: write
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      # A tag pushed with the GITHUB_TOKEN triggers no workflow: the release
-      # is tagged before `dist` so that this very run publishes it
-      - uses: ./.github/actions/release/tag
+    uses: ./.github/workflows/reusable-tag.yml
 
   dist:
     needs: [python, release]

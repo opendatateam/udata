@@ -7,8 +7,8 @@ Every release is a git tag `vX.Y.Z` on `main`, following
 
 ## Release process
 
-A release goes through a pull request, prepared and tagged by the actions of
-`.github/actions/release`.
+A release goes through a pull request, prepared and tagged by the reusable workflows
+`reusable-release.yml` and `reusable-tag.yml` (with their script in `.github/release`).
 
 1. ensure translations are up to date
 2. ensure the [CI][] build is successful on the main branch

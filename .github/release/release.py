@@ -1,6 +1,6 @@
-"""Changelog generation and parsing shared by the release actions.
+"""Changelog generation and parsing shared by the release workflows.
 
-Standard library only: the actions run it with the runner's python3, before
+Standard library only: the workflows run it with the runner's python3, before
 any project dependency is installed.
 """
 

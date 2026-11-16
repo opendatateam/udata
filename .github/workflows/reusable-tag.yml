@@ -1,0 +1,64 @@
+---
+# Release tagging, shared by the repositories releasing through a pull request.
+#
+# When the commit is a "Bump version X.Y.Z" commit, create the vX.Y.Z tag on it
+# and the GitHub release, whose notes are the X.Y.Z section of CHANGELOG.md.
+# Any other commit is left alone, and running it again on the same commit does
+# nothing. A later commit never tags a release: re-run the failed run instead.
+name: Tag (reusable)
+
+on:
+  workflow_call:
+    secrets:
+      token:
+        description: Token creating the tag and the release, GITHUB_TOKEN by default
+        required: false
+
+defaults:
+  run:
+    # An explicit bash shell runs with -eo pipefail
+    shell: bash
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          token: ${{ secrets.token || github.token }}
+
+      - name: Tag the release
+        env:
+          GH_TOKEN: ${{ secrets.token || github.token }}
+        run: |
+          subject=$(git log -1 --format=%s HEAD)
+          # A squash merge appends the PR number to the subject
+          if ! [[ "$subject" =~ ^Bump\ version\ ([0-9]+\.[0-9]+\.[0-9]+)(\ \(#[0-9]+\))?$ ]]; then
+            echo "Not a release commit: $subject"
+            exit 0
+          fi
+          version="${BASH_REMATCH[1]}"
+          tag="v$version"
+          sha=$(git rev-parse HEAD)
+
+          tagged_sha=$(git ls-remote origin "refs/tags/$tag^{}" "refs/tags/$tag" | head -n 1 | cut -f 1)
+          if [ -n "$tagged_sha" ] && [ "$tagged_sha" != "$sha" ]; then
+            echo "::error::Tag $tag already exists on another commit ($tagged_sha)"
+            exit 1
+          fi
+
+          python3 .github/release/release.py notes "$version" --output "$RUNNER_TEMP/release-notes.md"
+          if [ -z "$tagged_sha" ]; then
+            # The person who merged the release PR
+            git config user.name "$GITHUB_ACTOR"
+            git config user.email "$GITHUB_ACTOR_ID+$GITHUB_ACTOR@users.noreply.github.com"
+            git tag --annotate "$tag" --message "Version $version" "$sha"
+            git push --quiet origin "refs/tags/$tag"
+          fi
+          if gh release view "$tag" > /dev/null 2>&1; then
+            echo "Release $tag already exists"
+          else
+            gh release create "$tag" --verify-tag --title "$tag" --notes-file "$RUNNER_TEMP/release-notes.md"
+          fi

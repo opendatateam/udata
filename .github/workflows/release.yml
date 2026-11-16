@@ -14,31 +14,12 @@ on:
     types: [synchronize]
     branches: [main]
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
-  prepare:
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - uses: ./.github/actions/release/prepare
-        with:
-          version: ${{ inputs.version }}
-          breaking: ${{ inputs.breaking }}
-
-  refresh:
-    # A pull request from a fork gets a read-only token, release branches live
-    # in the repository
-    if: >-
-      github.event_name == 'pull_request'
-      && startsWith(github.head_ref, 'release/v')
-      && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - uses: ./.github/actions/release/refresh
+  release:
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: ./.github/workflows/reusable-release.yml
+    with:
+      version: ${{ inputs.version }}
+      breaking: ${{ inputs.breaking }}
