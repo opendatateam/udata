@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 from blinker import Signal
 from flask import url_for
 from mongoengine.errors import DoesNotExist
@@ -29,6 +31,10 @@ from udata.tasks import as_task_param
 from udata.uris import cdata_url
 
 __all__ = ("Topic", "TopicElement")
+
+# Saving a topic reindexes it, which reads all its elements: when writing elements
+# in bulk, pass this in `signal_kwargs` and save the topic once afterwards.
+SKIP_TOPIC_SAVE = "skip_topic_save"
 
 
 def check_title_or_element_required(value, obj, data, **_kwargs):
@@ -103,7 +109,7 @@ class TopicElement(Auditable, Document):
         super().post_save(sender, document, **kwargs)
         if document.topic and document.element and hasattr(document.element, "id"):
             reindex.delay(*as_task_param(document.element))
-        if document.topic:
+        if document.topic and not kwargs.get(SKIP_TOPIC_SAVE):
             document.topic.save()
 
     @classmethod
@@ -112,7 +118,7 @@ class TopicElement(Auditable, Document):
         try:
             if document.topic and document.element and hasattr(document.element, "id"):
                 reindex.delay(*as_task_param(document.element))
-            if document.topic:
+            if document.topic and not kwargs.get(SKIP_TOPIC_SAVE):
                 document.topic.save()
         except DoesNotExist:
             # Topic might have been deleted, causing dereferencing to fail
@@ -180,6 +186,17 @@ class Topic(Datetimed, Auditable, Linkable, Owned, Document[TopicQuerySet]):
     def elements(self):
         """Get elements associated with this topic"""
         return TopicElement.objects(topic=self)
+
+    @contextmanager
+    def writing_elements(self):
+        """Save the topic once after writing several elements, even if one of them fails.
+
+        Yields the `signal_kwargs` to pass to each element's `save()` / `delete()`.
+        """
+        try:
+            yield {SKIP_TOPIC_SAVE: True}
+        finally:
+            self.save()
 
     def get_nested_elements_ids(self, cls: str) -> set[str]:
         """Optimized query to get objects ids from related elements, filtered by class."""

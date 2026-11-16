@@ -129,10 +129,11 @@ class TopicsAPI(API):
         topic.save()
 
         if elements_data is not None:
-            for element_data in elements_data:
-                element = patch(TopicElement(), element_data)
-                element.topic = topic
-                element.save()
+            with topic.writing_elements() as signal_kwargs:
+                for element_data in elements_data:
+                    element = patch(TopicElement(), element_data)
+                    element.topic = topic
+                    element.save(signal_kwargs=signal_kwargs)
 
         return topic, 201
 
@@ -166,11 +167,13 @@ class TopicAPI(API):
         patch_and_save(topic, data)
 
         if elements_data is not None:
-            TopicElement.objects(topic=topic).delete()
-            for element_data in elements_data:
-                element = patch(TopicElement(), element_data)
-                element.topic = topic
-                element.save()
+            with topic.writing_elements() as signal_kwargs:
+                for element in topic.elements:
+                    element.delete(signal_kwargs=signal_kwargs)
+                for element_data in elements_data:
+                    element = patch(TopicElement(), element_data)
+                    element.topic = topic
+                    element.save(signal_kwargs=signal_kwargs)
 
         return topic
 
@@ -233,8 +236,9 @@ class TopicElementsAPI(API):
         if errors:
             apiv2.abort(400, errors=errors)
 
-        for element in elements:
-            element.save()
+        with topic.writing_elements() as signal_kwargs:
+            for element in elements:
+                element.save(signal_kwargs=signal_kwargs)
 
         return elements, 201
 
@@ -251,8 +255,10 @@ class TopicElementsAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        # TODO: this triggers performance issues on a huge topic (too many tasks, too many activities)
-        topic.elements.delete()
+        # TODO: still one activity and one element reindex task per element on a huge topic
+        with topic.writing_elements() as signal_kwargs:
+            for element in topic.elements:
+                element.delete(signal_kwargs=signal_kwargs)
 
         return None, 204
 
