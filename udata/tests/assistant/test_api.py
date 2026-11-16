@@ -11,10 +11,12 @@ import pytest
 from flask import url_for
 from flask.testing import EnvironBuilder
 from pydantic_ai.exceptions import (
+    IncompleteToolCall,
     ModelAuthenticationError,
     ModelContextWindowExceededError,
     ModelHTTPError,
     ModelNotFoundError,
+    ModelQuotaExceededError,
     ModelRateLimitError,
     ModelServerError,
     ModelUnavailableError,
@@ -682,6 +684,7 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         body = response.get_data(as_text=True)
         assert len(calls) == MODEL_REQUEST_LIMIT
         assert '"type":"error"' in body
+        assert "trop d’étapes" in body
 
     def test_chat_exits_agent_after_the_stream(self, mocker):
         """The agent is entered for the turn and exited once the stream ends,
@@ -782,7 +785,8 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
             (ModelUnavailableError, 503, "momentanément indisponible", logging.WARNING),
             (ModelServerError, 502, "momentanément indisponible", logging.WARNING),
             (ModelContextWindowExceededError, 400, "trop longue", logging.WARNING),
-            # A wrong key or model name is the instance's to fix: an error, a plain message.
+            # An exhausted quota, a wrong key or model name is the instance's to fix.
+            (ModelQuotaExceededError, 402, "L'assistant n'est pas disponible", logging.ERROR),
             (ModelAuthenticationError, 401, "Une erreur est survenue", logging.ERROR),
             (ModelNotFoundError, 404, "Une erreur est survenue", logging.ERROR),
         ],
@@ -801,7 +805,15 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert record.levelno == level
         assert record.exc_info[1] is error
 
+    def test_chat_response_cut_by_the_token_bound_is_an_error(self, mocker, caplog):
+        error = IncompleteToolCall("Model token limit (8192) exceeded while generating a tool call")
+        body = self.run_with_failing_model(mocker, error)
+        assert "trop longue" in body
+        [record] = [r for r in caplog.records if r.name == "udata.core.assistant.api"]
+        assert record.levelno == logging.ERROR
+
     def test_chat_timeout_is_an_error_with_its_reason(self, mocker):
+        # The AI SDK drops the reason of an abort chunk: the user would see nothing.
         self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
         self.app.config["AI_API_KEY"] = "test-key"
         self.login()

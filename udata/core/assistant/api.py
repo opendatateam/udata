@@ -17,6 +17,7 @@ from pydantic import ValidationError
 from pydantic_ai import CancellationToken
 from pydantic_ai.exceptions import (
     AgentRunError,
+    IncompleteToolCall,
     ModelAuthenticationError,
     ModelConnectionError,
     ModelContextWindowExceededError,
@@ -28,6 +29,7 @@ from pydantic_ai.exceptions import (
     ModelUnavailableError,
     RunCancelled,
     RunTimedOut,
+    UsageLimitExceeded,
 )
 from pydantic_ai.messages import (
     BaseToolReturnPart,
@@ -251,8 +253,16 @@ def _build_visualization_instructions(visualization: dict) -> str:
 
 def _error_message(error: Exception) -> str:
     """What the user is told of a failed run: whether waiting or a new conversation helps."""
-    if isinstance(error, ModelRateLimitError | ModelQuotaExceededError):
+    if isinstance(error, ModelRateLimitError):
         return _("The AI service is receiving too many requests. Try again in a few moments.")
+    if isinstance(error, ModelQuotaExceededError):
+        # Waiting won't help: the provider account has to be topped up.
+        return _("The assistant is not available.")
+    if isinstance(error, IncompleteToolCall):
+        return _("The response was too long and was interrupted. Ask for a simpler chart.")
+    if isinstance(error, UsageLimitExceeded):
+        # Retrying the same request ends the same way.
+        return _("The request needed too many steps. Rephrase it or split it into simpler ones.")
     if isinstance(
         error, ModelUnavailableError | ModelServerError | ModelConnectionError | ModelRequestTimeout
     ):
@@ -269,9 +279,16 @@ class AssistantEventStream(VercelAIEventStream):
     """
 
     async def on_error(self, error: Exception) -> AsyncIterator[BaseChunk]:
-        # Provider failures and run limits are operational. A rejected key or an unknown
-        # model is a misconfiguration, and anything else a bug: both are for Sentry.
-        misconfigured = isinstance(error, ModelAuthenticationError | ModelNotFoundError)
+        # Provider failures and run limits are operational. A rejected key, an unknown
+        # model, an exhausted quota or a response cut by AI_MAX_OUTPUT_TOKENS is for the
+        # instance to fix, and anything else a bug: all are for Sentry.
+        misconfigured = isinstance(
+            error,
+            ModelAuthenticationError
+            | ModelNotFoundError
+            | ModelQuotaExceededError
+            | IncompleteToolCall,
+        )
         operational = isinstance(error, AgentRunError) and not misconfigured
         level = logging.WARNING if operational else logging.ERROR
         log.log(level, "Assistant agent run failed: %s", error, exc_info=error)
