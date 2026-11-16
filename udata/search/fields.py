@@ -35,9 +35,12 @@ class ListFilter:
 
 
 class BoolFilter(Filter):
-    @staticmethod
-    def as_request_parser_kwargs():
-        return {"type": inputs.boolean}
+    def __init__(self, help=None):
+        super().__init__()
+        self.help = help
+
+    def as_request_parser_kwargs(self):
+        return {"type": inputs.boolean, "help": self.help}
 
 
 class ModelTermsFilter(Filter):
