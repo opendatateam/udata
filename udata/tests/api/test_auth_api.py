@@ -1,4 +1,5 @@
-from datetime import datetime
+import time
+from datetime import UTC, datetime, timedelta
 from urllib.parse import parse_qs
 
 import pytest
@@ -26,6 +27,9 @@ from udata.tests.helpers import (
     assert403,
     assert_status,
 )
+
+TOKEN_LIFETIME = 30 * 24 * 60 * 60
+REFRESH_WINDOW = 30 * 24 * 60 * 60
 
 ns = api.namespace("fake", "A Fake namespace")
 
@@ -62,6 +66,15 @@ def oauth(app, request):
     )
     kwargs.update(custom_kwargs)
     return OAuth2Client.objects.create(**kwargs)
+
+
+@pytest.fixture
+def paris_timezone(monkeypatch):
+    monkeypatch.setenv("TZ", "Europe/Paris")
+    time.tzset()
+    yield
+    monkeypatch.undo()
+    time.tzset()
 
 
 class APIAuthTest(PytestOnlyAPITestCase):
@@ -771,7 +784,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
         assert OAuth2Client.objects.get(owner=user).secret is None
 
-    def test_password_grant_token(self, oauth):
+    def test_password_grant_is_not_supported(self, oauth):
         user = UserFactory(password="password")
 
         response = self.post(
@@ -785,9 +798,9 @@ class APIAuthTest(PytestOnlyAPITestCase):
             json=False,
         )
 
-        assert200(response)
-        assert response.content_type == "application/json"
-        assert "access_token" in response.json
+        assert400(response)
+        assert response.json["error"] == "unsupported_grant_type"
+        assert OAuth2Token.objects.count() == 0
 
     def test_invalid_implicit_grant_token(self, oauth):
         self.login()
@@ -844,11 +857,13 @@ class APIAuthTest(PytestOnlyAPITestCase):
         token_same_user_not_refreshed.reload()
         other_token.reload()
 
-        assert tokens_count == OAuth2Token.objects.count()  # No new token created.
-
-        # Both tokens have been replaced by the hashes of the new ones.
-        assert token_to_be_refreshed.access_token == hash_token(response.json["access_token"])
-        assert token_to_be_refreshed.refresh_token == hash_token(response.json["refresh_token"])
+        assert OAuth2Token.objects.count() == tokens_count + 1
+        assert token_to_be_refreshed.revoked
+        # Stored as the hashes of what the client received.
+        new_token = OAuth2Token.objects.get(access_token=hash_token(response.json["access_token"]))
+        assert new_token.refresh_token == hash_token(response.json["refresh_token"])
+        assert new_token.user == user
+        assert not new_token.revoked
 
         # No change to the user's other token.
         assert token_same_user_not_refreshed.access_token == hash_token("same-user-access-token")
@@ -857,6 +872,135 @@ class APIAuthTest(PytestOnlyAPITestCase):
         # No change to other token.
         assert other_token.access_token == hash_token("other-access-token")
         assert other_token.refresh_token == hash_token("other-refresh-token")
+
+        new_access_token = response.json["access_token"]
+        response = self.post(
+            url_for("api.fake"), headers={"Authorization": f"Bearer {new_access_token}"}
+        )
+        assert200(response)
+
+    @pytest.mark.oauth(confidential=True)
+    @pytest.mark.options(OAUTH2_REFRESH_TOKEN_EXPIRES_IN=REFRESH_WINDOW)
+    def test_refresh_token_restarts_the_token_lifetime(self, oauth):
+        # Past its 30 days of access, still within the refresh window.
+        OAuth2TokenFactory(
+            client=oauth,
+            user=UserFactory(),
+            access="access-token",
+            refresh="refresh-token",
+            expires_in=TOKEN_LIFETIME,
+            created_at=datetime.now(UTC) - timedelta(days=40),
+        )
+
+        response = self.post(
+            url_for("oauth.token"),
+            {"grant_type": "refresh_token", "refresh_token": "refresh-token"},
+            headers=basic_header(oauth),
+            json=False,
+        )
+        assert200(response)
+        access_token = response.json["access_token"]
+        response = self.post(
+            url_for("api.fake"), headers={"Authorization": f"Bearer {access_token}"}
+        )
+        assert200(response)
+
+        # Two days later: past Authlib's default lifetime of one hour.
+        OAuth2Token.objects(access_token=hash_token(access_token)).update(
+            created_at=datetime.now(UTC) - timedelta(days=2)
+        )
+        response = self.post(
+            url_for("api.fake"), headers={"Authorization": f"Bearer {access_token}"}
+        )
+        assert200(response)
+
+    @pytest.mark.oauth(confidential=True)
+    @pytest.mark.options(OAUTH2_REFRESH_TOKEN_EXPIRES_IN=REFRESH_WINDOW)
+    @pytest.mark.parametrize(
+        "token_state",
+        [
+            # Past its 30 days of access and its 30 more days of refresh.
+            {"created_at": datetime.now(UTC) - timedelta(days=61)},
+            {"revoked": True},
+        ],
+    )
+    def test_refresh_token_is_refused(self, oauth, token_state):
+        OAuth2TokenFactory(
+            client=oauth,
+            user=UserFactory(),
+            access="access-token",
+            refresh="refresh-token",
+            expires_in=TOKEN_LIFETIME,
+            **token_state,
+        )
+
+        response = self.post(
+            url_for("oauth.token"),
+            {"grant_type": "refresh_token", "refresh_token": "refresh-token"},
+            headers=basic_header(oauth),
+            json=False,
+        )
+
+        assert400(response)
+        assert response.json["error"] == "invalid_grant"
+
+    @pytest.mark.oauth(confidential=True)
+    @pytest.mark.options(OAUTH2_REFRESH_TOKEN_EXPIRES_IN=2 * REFRESH_WINDOW)
+    def test_refresh_window_follows_the_setting(self, oauth):
+        OAuth2TokenFactory(
+            client=oauth,
+            user=UserFactory(),
+            access="access-token",
+            refresh="refresh-token",
+            expires_in=TOKEN_LIFETIME,
+            # Past the window of the other tests, within the one configured here.
+            created_at=datetime.now(UTC) - timedelta(days=70),
+        )
+
+        response = self.post(
+            url_for("oauth.token"),
+            {"grant_type": "refresh_token", "refresh_token": "refresh-token"},
+            headers=basic_header(oauth),
+            json=False,
+        )
+
+        assert200(response)
+
+    @pytest.mark.oauth(confidential=True)
+    @pytest.mark.options(OAUTH2_REFRESH_TOKEN_EXPIRES_IN=REFRESH_WINDOW)
+    def test_refresh_window_does_not_depend_on_the_server_timezone(self, oauth, paris_timezone):
+        OAuth2TokenFactory(
+            client=oauth,
+            user=UserFactory(),
+            access="access-token",
+            refresh="refresh-token",
+            expires_in=TOKEN_LIFETIME,
+            # Half an hour past the window: less than the offset between Paris and UTC.
+            created_at=datetime.now(UTC) - timedelta(days=60, minutes=30),
+        )
+
+        response = self.post(
+            url_for("oauth.token"),
+            {"grant_type": "refresh_token", "refresh_token": "refresh-token"},
+            headers=basic_header(oauth),
+            json=False,
+        )
+
+        assert400(response)
+        assert response.json["error"] == "invalid_grant"
+
+    def test_expired_access_token_is_refused(self, oauth):
+        OAuth2TokenFactory(
+            client=oauth,
+            user=UserFactory(),
+            access="access-token",
+            expires_in=TOKEN_LIFETIME,
+            created_at=datetime.now(UTC) - timedelta(days=30, hours=1),
+        )
+
+        response = self.post(url_for("api.fake"), headers={"Authorization": "Bearer access-token"})
+
+        assert401(response)
 
     @pytest.mark.parametrize("plaintext", ["access-token", "refresh-token"])
     def test_revoke_token(self, client, oauth, plaintext):

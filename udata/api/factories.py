@@ -33,3 +33,4 @@ class OAuth2TokenFactory(ModelFactory):
     user = factory.SubFactory(UserFactory)
     access_token = factory.LazyAttribute(lambda token: hash_token(token.access))
     refresh_token = factory.LazyAttribute(lambda token: hash_token(token.refresh))
+    expires_in = 30 * 24 * 60 * 60

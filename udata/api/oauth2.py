@@ -30,7 +30,6 @@ from authlib.oauth2.rfc7009 import RevocationEndpoint
 from authlib.oauth2.rfc7636 import CodeChallenge
 from bson import ObjectId
 from flask import abort, current_app, g, jsonify, render_template, request
-from flask_security.utils import verify_password
 from flask_storage.mongo import ImageField
 from mongoengine import NULLIFY, Q
 from mongoengine.fields import (
@@ -61,9 +60,6 @@ require_oauth = ResourceProtector()
 
 
 GRANT_EXPIRATION = 100  # 100 seconds
-TOKEN_EXPIRATION = 30 * 24 * 60 * 60  # 30 days in seconds
-REFRESH_EXPIRATION = 30  # days
-EPOCH = datetime.fromtimestamp(0)
 
 TOKEN_TYPES = {
     "Bearer": _("Bearer Token"),
@@ -171,10 +167,9 @@ class OAuth2Token(Document):
     access_token = StringField(unique=True)
     refresh_token = StringField(unique=True, sparse=True)
     created_at = DateTimeField(default=lambda: datetime.now(UTC), required=True)
-    # A refresh updates this document rather than creating another one: only this field
-    # tells how recently the token acted for its user.
+    # A token lives for weeks: only this field tells how recently it acted for its user.
     last_used_at = DateTimeField()
-    expires_in = IntField(required=True, default=TOKEN_EXPIRATION)
+    expires_in = IntField(required=True)
     scope = StringField(default="")
     revoked = BooleanField(default=False)
 
@@ -194,7 +189,8 @@ class OAuth2Token(Document):
         return self.expires_in
 
     def get_expires_at(self):
-        return (self.created_at - EPOCH).total_seconds() + self.expires_in
+        # MongoEngine loads `created_at` as a naive datetime, in UTC.
+        return self.created_at.replace(tzinfo=UTC).timestamp() + self.expires_in
 
     def get_client_id(self):
         return str(self.client.id)
@@ -205,14 +201,6 @@ class OAuth2Token(Document):
 
     def is_revoked(self):
         return self.revoked
-
-    def is_refresh_token_valid(self):
-        if self.revoked:
-            return False
-        expired_at = datetime.fromtimestamp(self.get_expires_at())
-        expired_at += timedelta(days=REFRESH_EXPIRATION)
-        # expired_at is naive (fromtimestamp), so compare with naive datetime
-        return expired_at > datetime.now(UTC).replace(tzinfo=None)
 
 
 class OAuth2Code(Document):
@@ -275,22 +263,14 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
         return authorization_code.user
 
 
-class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
-    def authenticate_user(self, username, password):
-        from udata.core.user.models import User
-
-        user = User.objects(email=username).first()
-        if user and verify_password(password, user.password):
-            return user
-
-
 class RefreshTokenGrant(grants.RefreshTokenGrant):
     INCLUDE_NEW_REFRESH_TOKEN = True
 
     def authenticate_refresh_token(self, refresh_token):
-        item = OAuth2Token.objects(refresh_token=hash_token(refresh_token)).first()
-        if item and item.is_refresh_token_valid():
-            return item
+        token = OAuth2Token.objects(refresh_token=hash_token(refresh_token)).first()
+        refresh_window = current_app.config["OAUTH2_REFRESH_TOKEN_EXPIRES_IN"]
+        if token and not token.revoked and token.get_expires_at() + refresh_window > time.time():
+            return token
 
     def authenticate_user(self, credential):
         return credential.user
@@ -417,13 +397,7 @@ def save_token(token, request):
     stored = {**token, "access_token": hash_token(token["access_token"])}
     if "refresh_token" in token:
         stored["refresh_token"] = hash_token(token["refresh_token"])
-    if request.grant_type == "refresh_token":
-        old_token = OAuth2Token.objects(
-            refresh_token=request.refresh_token.refresh_token, client=client, user=user, scope=scope
-        ).first()
-        old_token.update(**stored)
-    else:
-        OAuth2Token.objects.create(client=client, user=user, scope=scope, **stored)
+    OAuth2Token.objects.create(client=client, user=user, scope=scope, **stored)
 
 
 def check_credentials():
@@ -440,9 +414,10 @@ def check_credentials():
 def init_app(app):
     oauth.init_app(app, query_client=query_client, save_token=save_token)
 
-    # support all grants
+    # No password grant: it hands out a token on the email and password alone, skipping
+    # the login form's checks (second factor, demanded password rotation, disabled or
+    # unconfirmed account).
     oauth.register_grant(AuthorizationCodeGrant, [CodeChallenge(required=True)])
-    oauth.register_grant(PasswordGrant)
     oauth.register_grant(RefreshTokenGrant)
     oauth.register_grant(grants.ClientCredentialsGrant)
 
