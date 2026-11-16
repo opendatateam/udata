@@ -58,8 +58,8 @@ If you’re not familiar with open-source workflows or our set of technologies, 
 
 When the PR has been approved (at least once), you are free to merge it in main. We have a squash & merge strategy and pay attention to having a clean commit message. You can then delete the branch. If linked with an issue, the issue should be closed automatically.
 
-`CHANGELOG.md` is never edited by hand: it is generated at release time by `tag-version.sh`
-from the squashed commit subjects, which are the PR titles. This is why the title of your PR
+`CHANGELOG.md` is never edited by hand: it is generated at release time by the release
+workflow from the squashed commit subjects, which are the PR titles. This is why the title of your PR
 matters — write it as the changelog entry you want to read, following
 [conventional commits](https://www.conventionalcommits.org/) (`fix:`, `feat:`, `feat!:` for a
 breaking change).

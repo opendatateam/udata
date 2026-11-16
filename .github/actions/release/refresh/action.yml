@@ -1,0 +1,50 @@
+name: Refresh a release
+description: >-
+  On a push to a release/vX.Y.Z pull request, regenerate the X.Y.Z section of
+  CHANGELOG.md from the commits of the base branch the release branch contains,
+  so that updating the branch with the base branch adds what was merged in the
+  meantime. Does nothing on any other pull request, or while the section
+  already lists the same PRs.
+
+inputs:
+  token:
+    description: Token updating the pull request
+    default: ${{ github.token }}
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        HEAD_REF: ${{ github.head_ref }}
+        BASE_REF: ${{ github.base_ref }}
+        GH_TOKEN: ${{ inputs.token }}
+        GH_REPO: ${{ github.repository }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        set -euo pipefail
+        if ! [[ "$HEAD_REF" =~ ^release/v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+          echo "Not a release pull request: $HEAD_REF"
+          exit 0
+        fi
+        version="${BASH_REMATCH[1]}"
+
+        # The pull_request checkout is the detached merge ref, the changelog
+        # is regenerated on the release branch itself
+        if [ "$(git rev-parse --is-shallow-repository)" = true ]; then
+          git fetch --quiet --unshallow --tags origin
+        fi
+        git fetch --quiet --tags origin "$HEAD_REF" "$BASE_REF"
+        git switch --quiet --force-create "$HEAD_REF" "origin/$HEAD_REF"
+        base=$(git merge-base HEAD "origin/$BASE_REF")
+
+        python3 "$GITHUB_ACTION_PATH/../release.py" refresh "$version" --ref "$base" --body-file "$RUNNER_TEMP/release-body.md"
+        if git diff --quiet; then
+          exit 0
+        fi
+
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git commit --quiet --all --message "Update the changelog of $version"
+        git push --quiet origin "$HEAD_REF"
+        gh pr edit "$PR_NUMBER" --body-file "$RUNNER_TEMP/release-body.md"

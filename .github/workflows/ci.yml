@@ -112,6 +112,9 @@ jobs:
           mkdir -p reports/python
           uv run inv test --report --ci
 
+      - name: Test the release actions
+        run: uv run pytest .github/actions/release/tests
+
       - name: Store test results
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -119,8 +122,23 @@ jobs:
           name: reports-py${{ matrix.python-version }}-es${{ matrix.elasticsearch-version }}
           path: reports/
 
-  dist:
+  release:
     needs: python
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # A tag pushed with the GITHUB_TOKEN triggers no workflow: the release
+      # is tagged before `dist` so that this very run publishes it
+      - uses: ./.github/actions/release/tag
+
+  dist:
+    needs: [python, release]
+    # `release` is skipped outside of main, which must not skip the build
+    if: ${{ !failure() && !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
