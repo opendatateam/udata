@@ -437,15 +437,14 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         deps, resource = self.active(mocker)
         rows = [{"dep": str(i), "n_cum_dose1__max": i} for i in range(50)]
         page = {"data": rows, "links": {"next": "https://next"}}
-        mocker.patch.object(deps.tabular, "get_data", return_value=page)
-        more = mocker.patch.object(deps.tabular, "has_more_rows", return_value=True)
+        get_data = mocker.patch.object(deps.tabular, "get_data", return_value=page)
         result = self.call(
             "query_data", deps, groupby="dep", aggregate_column="n_cum_dose1", aggregate="max"
         )
         # cdata parses this exact sentence
         assert result.endswith("\nPlus de 50 groupes : seuls les 50 premiers sont pris en compte.")
-        more.assert_called_once_with(
-            str(resource.id), "dep__groupby&n_cum_dose1__max&dep__sort=asc", page
+        get_data.assert_called_once_with(
+            str(resource.id), "dep__groupby&n_cum_dose1__max&dep__sort=asc&page=1&page_size=50"
         )
 
     def test_query_data_reports_the_total_of_truncated_rows(self, mocker):
@@ -454,12 +453,10 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         mocker.patch.object(
             deps.tabular, "get_data", return_value={"data": rows, "meta": {"total": 926}}
         )
-        more = mocker.patch.object(deps.tabular, "has_more_rows")
         result = self.call("query_data", deps, columns=["dep"])
         assert result.endswith(
             "\nRésultat tronqué : 926 lignes au total, 50 premières lignes affichées."
         )
-        more.assert_not_called()
 
     def test_query_data_does_not_flag_exactly_50_groups(self, mocker):
         deps, _ = self.active(mocker)
@@ -477,10 +474,8 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         get_data = mocker.patch.object(
             deps.tabular, "get_data", return_value={"data": [{"n_cum_dose1__sum": 5}]}
         )
-        more = mocker.patch.object(deps.tabular, "has_more_rows")
         result = self.call("query_data", deps, aggregate_column="n_cum_dose1", aggregate="sum")
         get_data.assert_called_once_with(str(resource.id), "n_cum_dose1__sum&page=1&page_size=50")
-        more.assert_not_called()
         assert "n_cum_dose1__sum" in result
 
     def test_query_data_refuses_groupby_without_aggregate(self, mocker):
@@ -682,12 +677,9 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
     def test_create_chart_flags_more_groups_from_the_first_page(self, mocker):
         deps, resource = self.active(mocker)
         get_data = mocker.patch.object(deps.tabular, "get_data", return_value=self.FULL_PAGE)
-        more = mocker.patch.object(deps.tabular, "has_more_rows", return_value=True)
         result = self.call("create_chart", deps, config=self.chart_config())
         assert result["more_groups"] is True
-        rid = str(resource.id)
-        get_data.assert_called_once_with(rid, f"{self.AGGREGATED}&page=1&page_size=50")
-        more.assert_called_once_with(rid, self.AGGREGATED, self.FULL_PAGE)
+        get_data.assert_called_once_with(str(resource.id), f"{self.AGGREGATED}&page=1&page_size=50")
 
     def test_create_chart_sends_the_filters_with_the_page(self, mocker):
         deps, resource = self.active(mocker)
@@ -726,8 +718,8 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             mocker.call(rid, f"{self.AGGREGATED}&page=1&page_size=50"),
         ]
 
-    def test_create_chart_probes_a_count_on_the_x_column(self, mocker):
-        # The chart output counts the X column whatever the column_y: one probe.
+    def test_create_chart_reads_a_count_on_the_x_column(self, mocker):
+        # The chart output counts the X column whatever the column_y: one read.
         deps, resource = self.active(mocker)
         get_data = mocker.patch.object(deps.tabular, "get_data", return_value={"data": []})
         series = [
@@ -740,23 +732,19 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             str(resource.id), "dep__groupby&dep__count&dep__sort=asc&page=1&page_size=50"
         )
 
-    def test_create_chart_checks_every_series_but_probes_until_an_overflow(self, mocker):
+    def test_create_chart_checks_every_series_after_an_overflow(self, mocker):
+        # A later series may still be refused: each one is read.
         deps, _ = self.active(mocker)
         get_data = mocker.patch.object(deps.tabular, "get_data", return_value=self.FULL_PAGE)
-        more = mocker.patch.object(deps.tabular, "has_more_rows", return_value=True)
         series = [{"column_y": "n_cum_dose1"}, {"column_y": "label", "aggregate_y": "count"}]
         result = self.call("create_chart", deps, config=self.chart_config(series=series))
         assert result["more_groups"] is True
         assert get_data.call_count == 2
-        more.assert_called_once()
 
-    @pytest.mark.parametrize("failing", ["get_data", "has_more_rows"])
-    def test_create_chart_returns_a_refused_query_as_an_error(self, mocker, failing):
+    def test_create_chart_returns_a_refused_query_as_an_error(self, mocker):
         deps, _ = self.active(mocker)
-        mocker.patch.object(deps.tabular, "get_data", return_value=self.FULL_PAGE)
-        mocker.patch.object(deps.tabular, "has_more_rows", return_value=False)
         refusal = TabularRequestRefused('invalid input syntax for type bigint: "abc"')
-        getattr(deps.tabular, failing).side_effect = refusal
+        mocker.patch.object(deps.tabular, "get_data", side_effect=refusal)
         result = self.call("create_chart", deps, config=self.chart_config())
         assert result == {
             "status": "error",

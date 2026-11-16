@@ -42,6 +42,7 @@ from udata.core.assistant.tabular import (
     TabularError,
     TabularRequestRefused,
     TabularResourceUnavailable,
+    has_more_rows,
 )
 from udata.core.dataset.models import Dataset, Resource, get_dataset_by_resource_id
 from udata.mongo.queryset import paginate_embedded_list
@@ -106,9 +107,9 @@ def _consume_query_budget(ctx: RunContext[AssistantDeps]) -> str | None:
 def _dataset_for_current_user(dataset_id: str) -> Dataset | None:
     """Fetch a dataset the requesting user is allowed to read, else None.
 
-    Hidden datasets (private, archived or deleted) are only exposed to their
-    owner, their organization or an admin — the same OwnableReadPermission
-    rule as the dataset API.
+    Private and deleted datasets are only exposed to their owner, their
+    organization or an admin — the same OwnableReadPermission rule as the
+    dataset API. Archived ones stay readable: they are only left out of search.
     """
     try:
         dataset = Dataset.objects.exclude("resources").get(id=dataset_id)
@@ -234,7 +235,7 @@ def _chart_has_more_groups(
                 continue
             read.add(key)
             first_page = tabular.get_data(resource_id, with_page(query))
-            more_groups = more_groups or tabular.has_more_rows(resource_id, query, first_page)
+            more_groups = more_groups or has_more_rows(first_page)
     except TabularRequestRefused:
         raise
     except TabularError:
@@ -366,14 +367,14 @@ def register_tools(agent: Agent) -> None:
         )
         try:
             result = ctx.deps.tabular.get_data(resource_id, with_page(query))
-            rendered = _render_result(result)
-            if groupby and ctx.deps.tabular.has_more_rows(resource_id, query, result):
-                rendered += (
-                    f"\nPlus de {PAGE_SIZE} groupes : seuls les {PAGE_SIZE} premiers "
-                    "sont pris en compte."
-                )
         except TabularError as error:
             return _tabular_error_message(error)
+        rendered = _render_result(result)
+        if groupby and has_more_rows(result):
+            rendered += (
+                f"\nPlus de {PAGE_SIZE} groupes : seuls les {PAGE_SIZE} premiers "
+                "sont pris en compte."
+            )
         return rendered
 
     @agent.tool(description=CREATE_CHART_DESCRIPTION)

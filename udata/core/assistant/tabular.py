@@ -17,7 +17,7 @@ import re
 import requests
 from flask import current_app
 
-from udata.core.assistant.data_query import PAGE_SIZE, with_page
+from udata.core.assistant.data_query import PAGE_SIZE
 from udata.utils import normalize_uuid
 
 log = logging.getLogger(__name__)
@@ -156,39 +156,14 @@ class TabularClient:
         """
         return self._request(_data_route(resource_id, query))
 
-    def has_more_rows(self, resource_id: str, query: str, first_page: dict) -> bool:
-        """Whether ``query`` matches more rows than ``first_page``, its page 1 of PAGE_SIZE.
-
-        A raw query has an exact ``meta.total``. An aggregated one has none: a missing
-        ``links.next`` ends it, otherwise page 51 is probed: api-tabular 0.4 links every full
-        page to a next one. PostgREST answers 416 beyond the last row.
-        """
-        rows = first_page.get("data") if isinstance(first_page, dict) else None
-        if not isinstance(rows, list) or len(rows) < PAGE_SIZE:
-            return False
-        meta = first_page.get("meta")
-        total = meta.get("total") if isinstance(meta, dict) else None
-        if isinstance(total, int):
-            return total > PAGE_SIZE
-        links = first_page.get("links")
-        if not isinstance(links, dict) or not links.get("next"):
-            return False
-        probe = self._request(
-            _data_route(resource_id, with_page(query, page=PAGE_SIZE + 1, page_size=1)),
-            out_of_range_ok=True,
-        )
-        return bool(probe.get("data")) if isinstance(probe, dict) else False
-
-    def _request(self, route: str, out_of_range_ok: bool = False) -> dict:
-        """JSON of an api-tabular GET; with ``out_of_range_ok``, a 416 is an empty dict."""
+    def _request(self, route: str) -> dict:
+        """JSON of an api-tabular GET."""
         if not self.base_url:
             log.warning("api-tabular is not configured (TABULAR_API_URL is not set)")
             raise TabularError("api-tabular is not configured (TABULAR_API_URL is not set)")
         url = f"{self.base_url}{route}"
         try:
             response = requests.get(url, timeout=TABULAR_TIMEOUT)
-            if out_of_range_ok and response.status_code == 416:
-                return {}
             response.raise_for_status()
             return response.json()
         except requests.exceptions.HTTPError as error:
@@ -201,9 +176,27 @@ class TabularClient:
                     "la ressource n'est pas disponible dans le service tabulaire."
                 ) from error
             raise TabularError("le service tabulaire a renvoyé une erreur.") from error
+        # Before RequestException, its parent class.
+        except requests.exceptions.JSONDecodeError as error:
+            log.warning("api-tabular returned invalid JSON: %s: %s", url, error)
+            raise TabularError("le service tabulaire a renvoyé une réponse invalide.") from error
         except requests.exceptions.RequestException as error:
             log.warning("api-tabular request failed: %s: %s", url, error)
             raise TabularError("le service tabulaire a renvoyé une erreur.") from error
-        except ValueError as error:
-            log.warning("api-tabular returned invalid JSON: %s: %s", url, error)
-            raise TabularError("le service tabulaire a renvoyé une réponse invalide.") from error
+
+
+def has_more_rows(first_page: dict) -> bool:
+    """Whether the query of ``first_page``, its page 1 of PAGE_SIZE, matches more rows.
+
+    A raw query has an exact ``meta.total``. An aggregated one has none, but api-tabular
+    links its page to a next one only when that next page has rows.
+    """
+    rows = first_page.get("data") if isinstance(first_page, dict) else None
+    if not isinstance(rows, list) or len(rows) < PAGE_SIZE:
+        return False
+    meta = first_page.get("meta")
+    total = meta.get("total") if isinstance(meta, dict) else None
+    if isinstance(total, int):
+        return total > PAGE_SIZE
+    links = first_page.get("links")
+    return isinstance(links, dict) and bool(links.get("next"))

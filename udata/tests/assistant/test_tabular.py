@@ -9,6 +9,7 @@ from udata.core.assistant.tabular import (
     TabularError,
     TabularRequestRefused,
     TabularResourceUnavailable,
+    has_more_rows,
 )
 from udata.tests import PytestOnlyTestCase
 
@@ -372,72 +373,28 @@ class TabularClientTest(PytestOnlyTestCase):
 
     NEXT = {"next": "https://tabular.example.com/next"}
 
-    def test_has_more_rows_is_false_on_a_partial_page_without_any_request(self, requests_mock):
-        first_page = {"data": [{"a": 1}] * (PAGE_SIZE - 1), "links": self.NEXT}
-        assert self.make_client().has_more_rows(RESOURCE_ID, "a__groupby", first_page) is False
-        assert not requests_mock.request_history
+    def test_has_more_rows_is_false_on_a_partial_page(self):
+        assert has_more_rows({"data": [{"a": 1}] * (PAGE_SIZE - 1), "links": self.NEXT}) is False
 
     @pytest.mark.parametrize("total,expected", [(926, True), (51, True), (50, False)])
-    def test_has_more_rows_reads_the_exact_total_of_a_raw_query(
-        self, requests_mock, total, expected
-    ):
-        first_page = self.full_page(links=self.NEXT, meta={"total": total})
-        assert self.make_client().has_more_rows(RESOURCE_ID, "columns=a", first_page) is expected
-        assert not requests_mock.request_history
+    def test_has_more_rows_reads_the_exact_total_of_a_raw_query(self, total, expected):
+        assert has_more_rows(self.full_page(links=self.NEXT, meta={"total": total})) is expected
 
     @pytest.mark.parametrize("links", [{"next": None}, {}, None])
-    def test_has_more_rows_trusts_a_full_page_without_next_link(self, requests_mock, links):
-        # api-tabular's exact next link: no next page means no 51st group
-        first_page = self.full_page(links=links)
-        assert self.make_client().has_more_rows(RESOURCE_ID, "a__groupby", first_page) is False
-        assert not requests_mock.request_history
+    def test_has_more_rows_is_false_on_a_full_page_without_next_link(self, links):
+        # api-tabular links an aggregated page to the next one only when it has rows
+        assert has_more_rows(self.full_page(links=links)) is False
 
-    def test_has_more_rows_probes_the_51st_group_behind_a_next_link(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/", json={"data": [{"a": "x"}]}
-        )
-        first_page = self.full_page(links=self.NEXT)
-        assert self.make_client().has_more_rows(RESOURCE_ID, "a__groupby", first_page) is True
-        assert requests_mock.request_history[0].url.endswith("?a__groupby&page=51&page_size=1")
+    def test_has_more_rows_follows_the_next_link_of_an_aggregated_page(self):
+        assert has_more_rows(self.full_page(links=self.NEXT)) is True
 
-    def test_has_more_rows_is_false_on_an_empty_51st_page(self, requests_mock):
-        requests_mock.get(f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/", json={"data": []})
-        first_page = self.full_page(links=self.NEXT)
-        assert self.make_client().has_more_rows(RESOURCE_ID, "a__groupby", first_page) is False
+    @pytest.mark.parametrize("page", [None, [], {"data": "rows"}])
+    def test_has_more_rows_is_false_on_an_unexpected_page(self, page):
+        assert has_more_rows(page) is False
 
-    def test_has_more_rows_probes_with_an_empty_query(self, requests_mock):
-        requests_mock.get(f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/", json={"data": []})
-        self.make_client().has_more_rows(RESOURCE_ID, "", self.full_page(links=self.NEXT))
-        assert requests_mock.request_history[0].url.endswith("/data/?page=51&page_size=1")
-
-    def test_has_more_rows_is_false_when_the_51st_page_is_out_of_range(self, requests_mock, caplog):
-        # PostgREST refuses an offset beyond the filtered rows instead of an empty page
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/",
-            status_code=416,
-            json=self.database_error("PGRST103", "Requested range not satisfiable"),
-        )
-        first_page = self.full_page(links=self.NEXT)
+    def test_invalid_json_is_reported_as_an_invalid_response(self, requests_mock, caplog):
+        requests_mock.get(f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/", text="<html>")
         with caplog.at_level("WARNING", logger="udata.core.assistant.tabular"):
-            assert self.make_client().has_more_rows(RESOURCE_ID, "a__groupby", first_page) is False
-        assert not caplog.records
-
-    def test_has_more_rows_raises_a_refused_probe(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/",
-            status_code=400,
-            json=self.database_error("22P02", 'invalid input syntax for type bigint: "abc"'),
-        )
-        with pytest.raises(TabularRequestRefused):
-            self.make_client().has_more_rows(
-                RESOURCE_ID, "a__groupby", self.full_page(links=self.NEXT)
-            )
-
-    def test_get_data_out_of_range_is_still_an_error(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/",
-            status_code=416,
-            json=self.database_error("PGRST103", "Requested range not satisfiable"),
-        )
-        with pytest.raises(TabularError):
-            self.make_client().get_data(RESOURCE_ID, "page=51&page_size=1")
+            with pytest.raises(TabularError, match="réponse invalide"):
+                self.make_client().get_data(RESOURCE_ID, "a__groupby")
+        assert "invalid JSON" in caplog.text
