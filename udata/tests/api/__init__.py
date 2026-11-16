@@ -1,4 +1,5 @@
 import time
+from base64 import b64encode
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
@@ -7,11 +8,17 @@ import pytest
 from flask import current_app, g, json, url_for
 from flask_security.utils import login_user, logout_user, set_request_attr
 
+from udata.api.factories import CLIENT_SECRET
 from udata.core.api_token.models import ApiToken
 from udata.core.user.factories import UserFactory
 from udata.core.user.models import User
 from udata.mongo import db
 from udata.tests import PytestOnlyTestCase, TestCase, helpers
+
+
+def basic_header(client, secret=CLIENT_SECRET):
+    credentials = b64encode(f"{client.client_id}:{secret}".encode()).decode()
+    return {"Authorization": f"Basic {credentials}"}
 
 
 @pytest.mark.usefixtures("instance_path")

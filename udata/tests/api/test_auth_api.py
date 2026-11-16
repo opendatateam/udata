@@ -1,5 +1,4 @@
 import time
-from base64 import b64encode
 from datetime import UTC, datetime, timedelta
 from urllib.parse import parse_qs
 
@@ -12,14 +11,15 @@ from authlib.oauth2.rfc7636 import (
 from flask import current_app, url_for
 
 from udata.api import API, api
-from udata.api.factories import OAuth2TokenFactory
+from udata.api.factories import CLIENT_SECRET, OAuth2TokenFactory
 from udata.api.oauth2 import OAuth2Client, OAuth2Token
 from udata.auth import PermissionDenied
+from udata.core.api_token.hashing import hash_token
 from udata.core.api_token.models import ApiToken
 from udata.core.user.factories import UserFactory
 from udata.core.user.models import User
 from udata.forms import Form, fields, validators
-from udata.tests.api import PytestOnlyAPITestCase
+from udata.tests.api import PytestOnlyAPITestCase, basic_header
 from udata.tests.helpers import (
     assert200,
     assert400,
@@ -54,12 +54,6 @@ class FakeAPI(API):
         return {"success": True}
 
 
-def basic_header(client):
-    payload = ":".join((client.client_id, client.secret))
-    token = b64encode(payload.encode("utf-8")).decode("utf8")
-    return {"Authorization": "Basic {}".format(token)}
-
-
 @pytest.fixture
 def oauth(app, request):
     marker = request.node.get_closest_marker("oauth")
@@ -68,7 +62,7 @@ def oauth(app, request):
         name="test-client",
         owner=UserFactory(),
         redirect_uris=["https://test.org/callback"],
-        secret="suchs3cr3t",
+        secret=hash_token(CLIENT_SECRET),
     )
     kwargs.update(custom_kwargs)
     return OAuth2Client.objects.create(**kwargs)
@@ -113,31 +107,35 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
     def test_oauth_auth(self, oauth):
         """Should handle OAuth header authentication"""
-        user = UserFactory()
-        token = OAuth2TokenFactory(
-            client=oauth,
-            user=user,
-            access_token="access-token",
-            refresh_token="refresh-token",
-        )
+        OAuth2TokenFactory(client=oauth, access="access-token", refresh="refresh-token")
 
-        response = self.post(
-            url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", token.access_token])}
-        )
+        response = self.post(url_for("api.fake"), headers={"Authorization": "Bearer access-token"})
 
         assert200(response)
         assert response.content_type == "application/json"
         assert response.json == {"success": True}
 
+    def test_oauth_auth_refuses_the_stored_tokens(self, oauth):
+        # What a dump of the database gives.
+        token = OAuth2TokenFactory(client=oauth, access="access-token", refresh="refresh-token")
+
+        response = self.post(
+            url_for("api.fake"), headers={"Authorization": f"Bearer {token.access_token}"}
+        )
+        assert401(response)
+
+        response = self.post(
+            url_for("oauth.token"),
+            {"grant_type": "refresh_token", "refresh_token": token.refresh_token},
+            headers=basic_header(oauth),
+            json=False,
+        )
+        assert400(response)
+        assert response.json["error"] == "invalid_grant"
+
     def test_bad_oauth_auth(self, oauth):
         """Should handle wrong OAuth header authentication"""
-        user = UserFactory()
-        OAuth2TokenFactory(
-            client=oauth,
-            user=user,
-            access_token="access-token",
-            refresh_token="refresh-token",
-        )
+        OAuth2TokenFactory(client=oauth, access="access-token", refresh="refresh-token")
 
         response = self.post(
             url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", "not-my-token"])}
@@ -432,8 +430,11 @@ class APIAuthTest(PytestOnlyAPITestCase):
         assert200(response)
         assert response.content_type == "application/json"
         assert "access_token" in response.json
-        tokens = OAuth2Token.objects(access_token=response.json["access_token"])
-        assert len(tokens) == 1  # A token has been created and saved.
+        # A token has been created and saved, hashed.
+        assert OAuth2Token.objects(access_token=response.json["access_token"]).count() == 0
+        tokens = OAuth2Token.objects(access_token=hash_token(response.json["access_token"]))
+        assert len(tokens) == 1
+        assert tokens[0].refresh_token == hash_token(response.json["refresh_token"])
 
     def test_s256_code_challenge_success_client_secret_basic(self, oauth):
         code_verifier = generate_token(48)
@@ -513,7 +514,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
                 "code": code,
                 "code_verifier": code_verifier,
                 "client_id": oauth.client_id,
-                "client_secret": oauth.secret,
+                "client_secret": CLIENT_SECRET,
             },
             json=False,
         )
@@ -683,7 +684,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
                 "grant_type": "authorization_code",
                 "code": code,
                 "client_id": oauth.client_id,
-                "client_secret": oauth.secret,
+                "client_secret": CLIENT_SECRET,
             },
             json=False,
         )
@@ -724,6 +725,64 @@ class APIAuthTest(PytestOnlyAPITestCase):
         assert200(response)
         assert response.content_type == "application/json"
         assert "access_token" in response.json
+
+    def test_client_credentials_grant_refuses_a_wrong_secret(self, oauth):
+        response = self.post(
+            url_for("oauth.token"),
+            {"grant_type": "client_credentials"},
+            headers=basic_header(oauth, "wrong-secret"),
+            json=False,
+        )
+
+        assert401(response)
+        assert response.json["error"] == "invalid_client"
+
+    def test_client_credentials_grant_refuses_the_stored_secret(self, oauth):
+        # What a dump of the database gives.
+        response = self.post(
+            url_for("oauth.token"),
+            {"grant_type": "client_credentials"},
+            headers=basic_header(oauth, oauth.secret),
+            json=False,
+        )
+
+        assert401(response)
+        assert response.json["error"] == "invalid_client"
+
+    @pytest.mark.oauth(secret=None)
+    def test_client_credentials_grant_refuses_a_secret_for_a_public_client(self, oauth):
+        response = self.post(
+            url_for("oauth.token"),
+            {"grant_type": "client_credentials"},
+            headers=basic_header(oauth),
+            json=False,
+        )
+
+        assert401(response)
+        assert response.json["error"] == "invalid_client"
+
+    def test_create_oauth_client_prints_the_secret_it_stores_hashed(self):
+        user = UserFactory()
+
+        result = self.cli("api", "create-oauth-client", "-u", user.email)
+
+        secret = result.output.split("Client's secret ")[1].split()[0]
+        client = OAuth2Client.objects.get(owner=user)
+        assert client.secret == hash_token(secret)
+        response = self.post(
+            url_for("oauth.token"),
+            {"grant_type": "client_credentials"},
+            headers=basic_header(client, secret),
+            json=False,
+        )
+        assert200(response)
+
+    def test_create_public_oauth_client_stores_no_secret(self):
+        user = UserFactory()
+
+        self.cli("api", "create-oauth-client", "-u", user.email, "-p")
+
+        assert OAuth2Client.objects.get(owner=user).secret is None
 
     def test_password_grant_is_not_supported(self, oauth):
         user = UserFactory(password="password")
@@ -766,22 +825,16 @@ class APIAuthTest(PytestOnlyAPITestCase):
     def test_refresh_token(self, oauth):
         user = UserFactory()
         token_to_be_refreshed = OAuth2TokenFactory(
-            client=oauth,
-            user=user,
-            access_token="access-token",
-            refresh_token="refresh-token",
+            client=oauth, user=user, access="access-token", refresh="refresh-token"
         )
         token_same_user_not_refreshed = OAuth2TokenFactory(
             client=oauth,
             user=user,
-            access_token="same-user-access-token",
-            refresh_token="same-user-refresh-token",
+            access="same-user-access-token",
+            refresh="same-user-refresh-token",
         )
         other_token = OAuth2TokenFactory(
-            client=oauth,
-            user=UserFactory(),
-            access_token="other-access-token",
-            refresh_token="other-refresh-token",
+            client=oauth, access="other-access-token", refresh="other-refresh-token"
         )
         tokens_count = OAuth2Token.objects.count()
 
@@ -789,7 +842,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
             url_for("oauth.token"),
             {
                 "grant_type": "refresh_token",
-                "refresh_token": token_to_be_refreshed.refresh_token,
+                "refresh_token": "refresh-token",
             },
             headers=basic_header(oauth),
             json=False,
@@ -806,18 +859,19 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
         assert OAuth2Token.objects.count() == tokens_count + 1
         assert token_to_be_refreshed.revoked
-        new_token = OAuth2Token.objects.get(access_token=response.json["access_token"])
-        assert new_token.refresh_token == response.json["refresh_token"]
+        # Stored as the hashes of what the client received.
+        new_token = OAuth2Token.objects.get(access_token=hash_token(response.json["access_token"]))
+        assert new_token.refresh_token == hash_token(response.json["refresh_token"])
         assert new_token.user == user
         assert not new_token.revoked
 
         # No change to the user's other token.
-        assert token_same_user_not_refreshed.access_token == "same-user-access-token"
-        assert token_same_user_not_refreshed.refresh_token == "same-user-refresh-token"
+        assert token_same_user_not_refreshed.access_token == hash_token("same-user-access-token")
+        assert token_same_user_not_refreshed.refresh_token == hash_token("same-user-refresh-token")
 
         # No change to other token.
-        assert other_token.access_token == "other-access-token"
-        assert other_token.refresh_token == "other-refresh-token"
+        assert other_token.access_token == hash_token("other-access-token")
+        assert other_token.refresh_token == hash_token("other-refresh-token")
 
         new_access_token = response.json["access_token"]
         response = self.post(
@@ -832,8 +886,8 @@ class APIAuthTest(PytestOnlyAPITestCase):
         OAuth2TokenFactory(
             client=oauth,
             user=UserFactory(),
-            access_token="access-token",
-            refresh_token="refresh-token",
+            access="access-token",
+            refresh="refresh-token",
             expires_in=TOKEN_LIFETIME,
             created_at=datetime.now(UTC) - timedelta(days=40),
         )
@@ -852,7 +906,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         assert200(response)
 
         # Two days later: past Authlib's default lifetime of one hour.
-        OAuth2Token.objects(access_token=access_token).update(
+        OAuth2Token.objects(access_token=hash_token(access_token)).update(
             created_at=datetime.now(UTC) - timedelta(days=2)
         )
         response = self.post(
@@ -874,8 +928,8 @@ class APIAuthTest(PytestOnlyAPITestCase):
         OAuth2TokenFactory(
             client=oauth,
             user=UserFactory(),
-            access_token="access-token",
-            refresh_token="refresh-token",
+            access="access-token",
+            refresh="refresh-token",
             expires_in=TOKEN_LIFETIME,
             **token_state,
         )
@@ -896,8 +950,8 @@ class APIAuthTest(PytestOnlyAPITestCase):
         OAuth2TokenFactory(
             client=oauth,
             user=UserFactory(),
-            access_token="access-token",
-            refresh_token="refresh-token",
+            access="access-token",
+            refresh="refresh-token",
             expires_in=TOKEN_LIFETIME,
             # Past the window of the other tests, within the one configured here.
             created_at=datetime.now(UTC) - timedelta(days=70),
@@ -918,8 +972,8 @@ class APIAuthTest(PytestOnlyAPITestCase):
         OAuth2TokenFactory(
             client=oauth,
             user=UserFactory(),
-            access_token="access-token",
-            refresh_token="refresh-token",
+            access="access-token",
+            refresh="refresh-token",
             expires_in=TOKEN_LIFETIME,
             # Half an hour past the window: less than the offset between Paris and UTC.
             created_at=datetime.now(UTC) - timedelta(days=60, minutes=30),
@@ -939,7 +993,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         OAuth2TokenFactory(
             client=oauth,
             user=UserFactory(),
-            access_token="access-token",
+            access="access-token",
             expires_in=TOKEN_LIFETIME,
             created_at=datetime.now(UTC) - timedelta(days=30, hours=1),
         )
@@ -948,19 +1002,13 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
         assert401(response)
 
-    @pytest.mark.parametrize("token_type", ["access_token", "refresh_token"])
-    def test_revoke_token(self, client, oauth, token_type):
-        user = UserFactory()
-        token = OAuth2TokenFactory(
-            client=oauth,
-            user=user,
-            access_token="access-token",
-            refresh_token="refresh-token",
-        )
+    @pytest.mark.parametrize("plaintext", ["access-token", "refresh-token"])
+    def test_revoke_token(self, client, oauth, plaintext):
+        token = OAuth2TokenFactory(client=oauth, access="access-token", refresh="refresh-token")
         response = self.post(
             url_for("oauth.revoke_token"),
             {
-                "token": getattr(token, token_type),
+                "token": plaintext,
             },
             headers=basic_header(oauth),
             json=False,
@@ -971,18 +1019,15 @@ class APIAuthTest(PytestOnlyAPITestCase):
         tok = OAuth2Token.objects(pk=token.pk).first()
         assert tok.revoked is True
 
-    @pytest.mark.parametrize("token_type", ["access_token", "refresh_token"])
-    def test_revoke_token_with_hint(self, client, oauth, token_type):
-        user = UserFactory()
-        token = OAuth2TokenFactory(
-            client=oauth,
-            user=user,
-            access_token="access-token",
-            refresh_token="refresh-token",
-        )
+    @pytest.mark.parametrize(
+        "token_type, plaintext",
+        [("access_token", "access-token"), ("refresh_token", "refresh-token")],
+    )
+    def test_revoke_token_with_hint(self, client, oauth, token_type, plaintext):
+        token = OAuth2TokenFactory(client=oauth, access="access-token", refresh="refresh-token")
         response = self.post(
             url_for("oauth.revoke_token"),
-            {"token": getattr(token, token_type), "token_type_hint": token_type},
+            {"token": plaintext, "token_type_hint": token_type},
             headers=basic_header(oauth),
             json=False,
         )
@@ -992,18 +1037,12 @@ class APIAuthTest(PytestOnlyAPITestCase):
         assert tok.revoked is True
 
     def test_revoke_token_with_bad_hint(self, oauth):
-        user = UserFactory()
-        token = OAuth2TokenFactory(
-            client=oauth,
-            user=user,
-            access_token="access-token",
-            refresh_token="refresh-token",
-        )
+        token = OAuth2TokenFactory(client=oauth, access="access-token", refresh="refresh-token")
 
         response = self.post(
             url_for("oauth.revoke_token"),
             {
-                "token": token.access_token,
+                "token": "access-token",
                 "token_type_hint": "refresh_token",
             },
             headers=basic_header(oauth),
@@ -1069,10 +1108,10 @@ class HeaderAuthTest(PytestOnlyAPITestCase):
 
     def test_oauth_token(self, oauth):
         user = UserFactory(current_login_at=self.LAST_LOGIN)
-        token = OAuth2TokenFactory(client=oauth, user=user, access_token="access-token")
+        token = OAuth2TokenFactory(client=oauth, user=user, access="access-token")
 
         self.assert_authenticated_this_request_only(
-            self.post({"Authorization": f"Bearer {token.access_token}"}), user
+            self.post({"Authorization": "Bearer access-token"}), user
         )
         token.reload()
         assert token.last_used_at is not None

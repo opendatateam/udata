@@ -2208,14 +2208,14 @@ class FollowWhatOneWorksOnTest(APITestCase):
     def test_a_script_publishing_with_an_oauth_token_follows_nothing(self):
         editor = UserFactory()
         dataset = DatasetFactory(organization=OrganizationFactory(editors=[editor]))
-        token = OAuth2TokenFactory(user=editor)
+        OAuth2TokenFactory(user=editor, access="access-token")
         data = dataset.to_dict()
         data["description"] = "new description"
 
         response = self.put(
             url_for("api.dataset", dataset=dataset),
             data,
-            headers={"Authorization": f"Bearer {token.access_token}"},
+            headers={"Authorization": "Bearer access-token"},
         )
 
         self.assert200(response)

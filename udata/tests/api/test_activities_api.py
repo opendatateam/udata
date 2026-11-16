@@ -283,12 +283,12 @@ class ActivityAPITest(APITestCase):
     def test_an_edit_through_an_oauth2_token_is_attributed_to_the_token(self) -> None:
         owner = UserFactory()
         dataset = DatasetFactory(owner=owner)
-        token = OAuth2TokenFactory(user=owner)
+        token = OAuth2TokenFactory(user=owner, access="access-token")
 
         response = self.put(
             url_for("api.dataset", dataset=dataset),
             {"title": "New title"},
-            headers={"Authorization": f"Bearer {token.access_token}"},
+            headers={"Authorization": "Bearer access-token"},
         )
 
         assert200(response)
