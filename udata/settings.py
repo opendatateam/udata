@@ -678,6 +678,15 @@ class Defaults(object):
     # Base URL of the api-tabular service (resource profiles and read-only
     # SQL). No existing setting covers it, so it stays here.
     TABULAR_SQL_URL = None
+    # Langfuse tracing of the assistant, with full content: enabled only when
+    # all three are set (assistant.observability).
+    LANGFUSE_PUBLIC_KEY = None
+    LANGFUSE_SECRET_KEY = None
+    LANGFUSE_BASE_URL = None
+    # Let a caller's W3C ``traceparent``/``baggage`` headers parent the turn's
+    # trace (e.g. an eval run). Off by default: any client could otherwise
+    # graft its turns into arbitrary traces.
+    AI_TRACE_ACCEPT_PARENT = False
 
     # JSON-LD settings
     ###########################################################################
@@ -778,6 +787,17 @@ class Testing(object):
     DATASET_HIDDEN_BADGES = []
     ELASTICSEARCH_URL = None
     ELASTICSEARCH_INDEX_BASENAME = "udata-test"
+    # Never trace tests to the Langfuse of a local udata.cfg.
+    LANGFUSE_PUBLIC_KEY = None
+    LANGFUSE_SECRET_KEY = None
+    LANGFUSE_BASE_URL = None
+    # Nor call the model provider or api-tabular of a local udata.cfg.
+    AI_BASE_URL = None
+    AI_API_KEY = None
+    AI_MODEL = "openai/gpt-oss-120b"
+    AI_REASONING_EFFORT = None
+    TABULAR_SQL_URL = None
+    AI_TRACE_ACCEPT_PARENT = False
 
 
 class Debug(Defaults):

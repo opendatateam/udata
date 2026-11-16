@@ -95,6 +95,7 @@ dependencies = [
     "markdown>=3.10,<4.0",
     "pyproj>=3.7.2",
     "sqlglot>=26,<27",
+    "langfuse>=5.2.0,<6.0.0",
 ]
 
 [project.urls]

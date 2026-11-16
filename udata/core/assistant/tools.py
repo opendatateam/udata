@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from mongoengine.errors import DoesNotExist, ValidationError
 from pydantic_ai import Agent, RunContext
 
+from udata.core.assistant.observability import mark_tool_warning
 from udata.core.assistant.tabular import TabularClient, TabularError
 from udata.core.dataset.models import Dataset
 from udata.sql_guard import UnsafeSQLError, assert_read_only
@@ -40,6 +41,12 @@ class AssistantDeps:
     tool_count: int = 0
 
 
+def _warn(message: str) -> str:
+    """Return a refusal or failure message, flagging the tool span as a WARNING."""
+    mark_tool_warning(message)
+    return message
+
+
 def _consume_tool_budget(ctx: RunContext[AssistantDeps]) -> str | None:
     """Enforce MAX_STEPS as a per-turn tool-call cap.
 
@@ -47,7 +54,9 @@ def _consume_tool_budget(ctx: RunContext[AssistantDeps]) -> str | None:
     otherwise, so the model can still explain the limit in its answer.
     """
     if ctx.deps.tool_count >= MAX_STEPS:
-        return f"Action refusée : la limite de {MAX_STEPS} appels d'outils par tour est atteinte."
+        return _warn(
+            f"Action refusée : la limite de {MAX_STEPS} appels d'outils par tour est atteinte."
+        )
     ctx.deps.tool_count += 1
     return None
 
@@ -151,7 +160,10 @@ def register_tools(agent: Agent) -> None:
         try:
             profile = ctx.deps.tabular.get_profile(resource_id)
         except TabularError:
-            return "Impossible d'inspecter le schéma de la ressource : le service tabulaire est indisponible."
+            return _warn(
+                "Impossible d'inspecter le schéma de la ressource : "
+                "le service tabulaire est indisponible."
+            )
         return _render_profile(profile)
 
     @agent.tool
@@ -167,12 +179,12 @@ def register_tools(agent: Agent) -> None:
             assert_read_only(sql)
         except UnsafeSQLError as error:
             # The guard's reason lets the model fix the query on its next try.
-            return (
+            return _warn(
                 "Requête refusée : l'assistant fonctionne en lecture seule "
                 f"et cette requête n'est pas autorisée ({error})."
             )
         if ctx.deps.sql_count >= MAX_SQL_PER_QUESTION:
-            return (
+            return _warn(
                 f"Requête refusée : la limite de {MAX_SQL_PER_QUESTION} "
                 "requêtes SQL par question est atteinte."
             )
@@ -180,7 +192,9 @@ def register_tools(agent: Agent) -> None:
         try:
             result = ctx.deps.tabular.execute_sql(resource_id, sql)
         except TabularError:
-            return "L'exécution de la requête a échoué : le service tabulaire est indisponible."
+            return _warn(
+                "L'exécution de la requête a échoué : le service tabulaire est indisponible."
+            )
         return _render_result(result)
 
     @agent.tool
