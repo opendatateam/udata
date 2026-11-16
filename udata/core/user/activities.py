@@ -1,4 +1,3 @@
-from flask_security import current_user
 from mongoengine.fields import ReferenceField
 
 from udata.core.dataservices.activities import DataserviceRelatedActivity
@@ -75,26 +74,24 @@ class UserFollowedOrganization(FollowActivity, OrgRelatedActivity, Activity):
 
 @on_follow.connect
 def write_activity_on_follow(follow, **kwargs):
-    if current_user.is_authenticated:
-        if isinstance(follow.following, Dataservice):
-            UserFollowedDataservice.emit(follow.following)
-        elif isinstance(follow.following, Dataset):
-            UserFollowedDataset.emit(follow.following)
-        elif isinstance(follow.following, Reuse):
-            UserFollowedReuse.emit(follow.following)
-        elif isinstance(follow.following, Organization):
-            UserFollowedOrganization.emit(follow.following)
-        elif isinstance(follow.following, User):
-            UserFollowedUser.emit(follow.following)
+    if isinstance(follow.following, Dataservice):
+        UserFollowedDataservice.emit(follow.following)
+    elif isinstance(follow.following, Dataset):
+        UserFollowedDataset.emit(follow.following)
+    elif isinstance(follow.following, Reuse):
+        UserFollowedReuse.emit(follow.following)
+    elif isinstance(follow.following, Organization):
+        UserFollowedOrganization.emit(follow.following)
+    elif isinstance(follow.following, User):
+        UserFollowedUser.emit(follow.following)
 
 
 @on_new_discussion.connect
 @on_new_discussion_comment.connect
 def write_activity_on_discuss(discussion, **kwargs):
-    if current_user.is_authenticated:
-        if isinstance(discussion.subject, Dataservice):
-            UserDiscussedDataservice.emit(discussion.subject)
-        if isinstance(discussion.subject, Dataset):
-            UserDiscussedDataset.emit(discussion.subject)
-        elif isinstance(discussion.subject, Reuse):
-            UserDiscussedReuse.emit(discussion.subject)
+    if isinstance(discussion.subject, Dataservice):
+        UserDiscussedDataservice.emit(discussion.subject)
+    if isinstance(discussion.subject, Dataset):
+        UserDiscussedDataset.emit(discussion.subject)
+    elif isinstance(discussion.subject, Reuse):
+        UserDiscussedReuse.emit(discussion.subject)

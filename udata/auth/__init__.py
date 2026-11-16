@@ -4,6 +4,7 @@ from functools import wraps
 
 from flask import current_app, render_template
 from flask_mail import Message
+from flask_principal import Identity, identity_changed
 from flask_principal import Permission as BasePermission
 from flask_principal import PermissionDenied as PermissionDenied
 from flask_principal import RoleNeed as RoleNeed
@@ -38,6 +39,25 @@ class Permission(BasePermission):
 
 
 admin_permission = Permission()
+
+
+def authenticate_request(user) -> bool:
+    """Authenticate `user` for this request only.
+
+    An API key or an OAuth2 token stands for its holder on the request it comes with. Unlike
+    `login_user`, nothing goes in the session: its cookie would let whoever sent the
+    credential in without it, after its revocation and fresh for the sensitive operations.
+    Nor is it a login: `current_login_at` stays the date of the last one, the token records
+    its own use.
+
+    Flask-Security has no public API for this: these two calls are the ones its own basic auth
+    makes (`flask_security.decorators._check_http_auth`).
+    """
+    if not user.active:
+        return False
+    current_app.extensions["security"].login_manager._update_request_context_with_user(user)
+    identity_changed.send(current_app._get_current_object(), identity=Identity(user.fs_uniquifier))
+    return True
 
 
 def fresh_session_required(func):

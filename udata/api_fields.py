@@ -78,6 +78,12 @@ def required_if(**conditions):
     return check
 
 
+def visible_only_if(attribute: str | Callable, visible_if: Callable[[Any], bool]) -> Callable:
+    """Read `attribute` like flask-restx does, but only when `visible_if(obj)` holds:
+    `None` otherwise, so the field stays in the schema whoever reads it."""
+    return lambda obj: restx_fields.get_value(attribute, obj) if visible_if(obj) else None
+
+
 lazy_reference = api.model(
     "LazyReference",
     {
@@ -637,6 +643,12 @@ def generate_fields(**kwargs) -> Callable:
                 if write is not None:
                     api_key_to_attribute[api_key] = key
 
+            if read is not None and info.get("visible_if"):
+                # The full object reads its container, which this rewrite does not reach.
+                if info.get("full_object") is not None:
+                    raise ValueError(f"`{key}`: `visible_if` is not supported with `full_object`")
+                read.attribute = visible_only_if(read.attribute or key, info["visible_if"])
+
             if read:
                 read_fields[api_key] = read
             if write:
@@ -668,14 +680,6 @@ def generate_fields(**kwargs) -> Callable:
             if additional_field_info is None:
                 continue
 
-            def make_lambda(method):
-                """
-                Factory function to create a lambda with the correct scope.
-                If we don't have this factory function, the `method` will be the
-                last method assigned in this loop?
-                """
-                return lambda o: method(o)
-
             nested_fields: dict | None = additional_field_info.get("nested_fields")
             if nested_fields is None:
                 return_type = typing.get_type_hints(method).get("return")
@@ -689,8 +693,11 @@ def generate_fields(**kwargs) -> Callable:
             # entry in `api_key_to_attribute`: the rename only applies on the read side.
             api_method_key = additional_field_info.get("rename") or method_name
 
+            visible_if = additional_field_info.get("visible_if")
+            # flask-restx calls a callable `attribute` with the object being serialized.
+            attribute = visible_only_if(method, visible_if) if visible_if else method
             read_fields[api_method_key] = field_constructor(
-                attribute=make_lambda(method), **{"readonly": True, **additional_field_info}
+                attribute=attribute, **{"readonly": True, **additional_field_info}
             )
             if additional_field_info.get("show_as_ref", False):
                 ref_fields[api_method_key] = read_fields[api_method_key]
@@ -874,6 +881,7 @@ class _FieldKwargs(TypedDict, total=False):
     convert_to: Callable | None
     allow_null: bool | None
     full_object: Literal[True] | restx_fields.Raw | None
+    visible_if: Callable[[Any], bool] | None
 
 
 @overload
@@ -930,6 +938,7 @@ def field(
     convert_to: Callable | None = None,
     allow_null: bool | None = None,
     full_object: Literal[True] | restx_fields.Raw | None = None,
+    visible_if: Callable[[Any], bool] | None = None,
     **kwargs: Any,  # Accept any additional parameters, forward to flask rest x constructor.
 ):
     """Universal field decorator/wrapper for API field metadata.
@@ -981,7 +990,10 @@ def field(
             `ReferenceField` or a `ListField(ReferenceField)`, whose nested reference
             model is the full object, or the RestX field rendering the full object of a
             scalar field (e.g. an `{id, label}` object for a value with a label). Not
-            supported with `rename`, lazy or generic references.
+            supported with `rename`, `visible_if`, lazy or generic references.
+        visible_if: Predicate on the serialized object, e.g. "the reader is a sysadmin or
+            the owner": the field reads `None` when it does not hold. A getter is not even
+            called then. Not supported with `full_object`.
         **kwargs: Any additional parameters not explicitly defined
 
     Returns:

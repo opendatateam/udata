@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-11-10 10:03+0100\n"
+"POT-Creation-Date: 2026-11-10 14:29+0100\n"
 "PO-Revision-Date: 2025-11-19 13:03+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
@@ -156,7 +156,7 @@ msgstr ""
 "Le mot de passe doit être modifié pour des raisons de sécurité. Veuillez "
 "utiliser la récupération de mot de passe afin d’en définir un nouveau"
 
-#: udata/auth/forms.py:145
+#: udata/auth/forms.py:145 udata/tests/api/test_proconnect_api.py:52
 msgid ""
 "Your account is protected by the two-factor authentication of ProConnect:"
 " sign in with ProConnect to set up another one."
@@ -164,7 +164,7 @@ msgstr ""
 "Votre compte est protégé par l'authentification à deux facteurs de "
 "ProConnect : connectez-vous avec ProConnect pour en configurer une autre."
 
-#: udata/auth/forms.py:156 udata/tests/api/test_security_api.py:142
+#: udata/auth/forms.py:156 udata/tests/api/test_security_api.py:143
 msgid "This account has no password."
 msgstr "Ce compte n'a pas de mot de passe."
 
@@ -186,7 +186,7 @@ msgid "Change email"
 msgstr "Modifier l'adresse email"
 
 #: udata/auth/mails.py:75 udata/auth/mails.py:79 udata/auth/mails.py:100
-#: udata/auth/mails.py:103 udata/tests/api/test_security_api.py:112
+#: udata/auth/mails.py:103 udata/tests/api/test_security_api.py:113
 msgid "Confirm your email address"
 msgstr "Confirmez votre adresse e-mail"
 
@@ -230,7 +230,7 @@ msgstr ""
 "Quelqu'un a demandé une réinitialisation du mot de passe pour votre "
 "compte %(site)s."
 
-#: udata/auth/mails.py:116
+#: udata/auth/mails.py:116 udata/tests/api/test_proconnect_api.py:665
 msgid "Your account has no password: it signs in with ProConnect only."
 msgstr ""
 "Votre compte n'a pas de mot de passe : il se connecte uniquement avec "
@@ -258,32 +258,41 @@ msgid "If you did not change your password, please reset it."
 msgstr "Si vous n'avez pas changé votre mot de passe, veuillez le réinitialiser."
 
 #: udata/auth/mails.py:167
+msgid "The email address of your account has changed"
+msgstr "L'adresse e-mail de votre compte a changé"
+
+#: udata/auth/mails.py:170
+#, python-format
+msgid "The email address of your %(site)s account is now %(email)s."
+msgstr "L'adresse e-mail de votre compte %(site)s est désormais %(email)s."
+
+#: udata/auth/mails.py:174 udata/auth/mails.py:198
+msgid "If this wasn't you, contact us right away."
+msgstr "Si ce n'était pas vous, contactez-nous immédiatement."
+
+#: udata/auth/mails.py:181
 msgid "User can't access mail account"
 msgstr "L'utilisateur ne peut pas accéder à son compte mail"
 
-#: udata/auth/mails.py:169
+#: udata/auth/mails.py:183
 #, python-format
 msgid "%(email)s can not access mail account"
 msgstr "%(email)s ne peut pas accéder à son compte mail"
 
-#: udata/auth/mails.py:176
+#: udata/auth/mails.py:190
 msgid "Your account now signs in with ProConnect only"
 msgstr "Votre compte se connecte désormais uniquement avec ProConnect"
 
-#: udata/auth/mails.py:179
+#: udata/auth/mails.py:193
 #, python-format
 msgid ""
 "Your %(site)s account now signs in with ProConnect and its two-factor "
 "authentication only: its password and its %(site)s two-factor "
 "authentication, if it had any, have been removed."
 msgstr ""
-"Votre compte %(site)s se connecte désormais uniquement avec ProConnect et "
-"son authentification à deux facteurs : son mot de passe et, le cas "
+"Votre compte %(site)s se connecte désormais uniquement avec ProConnect et"
+" son authentification à deux facteurs : son mot de passe et, le cas "
 "échéant, son authentification à deux facteurs %(site)s ont été supprimés."
-
-#: udata/auth/mails.py:184
-msgid "If this wasn't you, contact us right away."
-msgstr "Si ce n'était pas vous, contactez-nous immédiatement."
 
 #: udata/auth/password_validation.py:26
 #, python-brace-format
@@ -548,8 +557,7 @@ msgstr "Un point de contact ne peut pas changer de propriétaire."
 #: udata/tests/api/test_datasets_api.py:1455
 #, python-brace-format
 msgid "Contact point {id} does not belong to the owner of this object"
-msgstr ""
-"Le point de contact {id} n'appartient pas au propriétaire de cet objet"
+msgstr "Le point de contact {id} n'appartient pas au propriétaire de cet objet"
 
 #: udata/core/dataservices/activities.py:24
 msgid "created a dataservice"
@@ -1043,8 +1051,8 @@ msgstr "jeu de données"
 #: udata/core/dataset/models.py:817
 msgid "A dataset with a DOI cannot be deleted, it can only be archived"
 msgstr ""
-"Un jeu de données avec un DOI ne peut pas être supprimé, il peut seulement "
-"être archivé"
+"Un jeu de données avec un DOI ne peut pas être supprimé, il peut "
+"seulement être archivé"
 
 #: udata/core/dataset/models.py:822
 msgid "A dataset with a DOI cannot be made private"
@@ -1528,8 +1536,7 @@ msgstr "Derniers articles"
 
 #: udata/core/post/api.py:127
 msgid "This page has sub-pages: move or delete them first"
-msgstr ""
-"Cette page a des sous-pages : déplacez-les ou supprimez-les d'abord"
+msgstr "Cette page a des sous-pages : déplacez-les ou supprimez-les d'abord"
 
 #: udata/core/post/constants.py:9
 msgid "Markdown"
@@ -2244,8 +2251,8 @@ msgid ""
 "Read your profile, your email address, the organization you belong to, "
 "your publications"
 msgstr ""
-"Lire votre profil, votre adresse e-mail, les organisations dont vous êtes "
-"membre, vos publications"
+"Lire votre profil, votre adresse e-mail, les organisations dont vous êtes"
+" membre, vos publications"
 
 #: udata/templates/api/oauth_authorize.html:37
 msgid "Publish data"

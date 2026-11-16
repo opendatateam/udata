@@ -91,7 +91,7 @@ class HarvestError(EmbeddedDocument):
     details = field(
         StringField(),
         readonly=True,
-        attribute=lambda o: o.details if admin_permission.can() else None,
+        visible_if=lambda _error: admin_permission.can(),
         description="Optional details (only for super-admins)",
     )
 
@@ -261,6 +261,7 @@ check_config_matches_backend.always_run = True
 class HarvestSource(Owned, Document[HarvestSourceQuerySet]):
     name = field(
         StringField(max_length=255, required=True),
+        show_as_ref=True,
         description="The source display name",
     )
     slug = field(

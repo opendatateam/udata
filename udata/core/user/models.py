@@ -78,20 +78,9 @@ def _visible_email(user):
     return f"***@{domain}"
 
 
-def _admin_or_self(name: str):
-    """An `attribute` giving the field `name` only to a sysadmin or to the user
-    themselves, `None` otherwise."""
-
-    def visible(user):
-        return getattr(user, name) if current_user_is_admin_or_self() else None
-
-    return visible
-
-
-def _visible_login_date(user):
-    if current_user_is_admin_or_self() or _is_org_private_context():
-        return user.current_login_at
-    return None
+def _admin_or_self(_user) -> bool:
+    """A `visible_if` for the fields only a sysadmin or the user themselves may read."""
+    return current_user_is_admin_or_self()
 
 
 # TODO: use simple text for role
@@ -143,7 +132,7 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         # Stricter than `_visible_email`, which always yields at least a domain: the user
         # API (`/me`, `/users/`, `/users/<id>`) never hands a third party anything at all,
         # whereas `_visible_email` serves the org contexts where members may reach out.
-        attribute=_admin_or_self("email"),
+        visible_if=_admin_or_self,
         # The address is an identity: `Organization.create_invitation` resolves one into
         # an existing account, and registration proves it (`SECURITY_CONFIRMABLE`). Only
         # the `/change-email` flow carries that proof over, by mailing a token to the new
@@ -203,13 +192,13 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         DateTimeField(),
         auditable=False,
         readonly=True,
-        attribute=_admin_or_self("password_rotation_demanded"),
+        visible_if=_admin_or_self,
     )
     password_rotation_performed = field(
         DateTimeField(),
         auditable=False,
         readonly=True,
-        attribute=_admin_or_self("password_rotation_performed"),
+        visible_if=_admin_or_self,
     )
 
     # The 5 fields below are required for Flask-security when SECURITY_TRACKABLE is True.
@@ -221,7 +210,8 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         DateTimeField(),
         auditable=False,
         readonly=True,
-        attribute=_visible_login_date,
+        attribute="current_login_at",
+        visible_if=lambda _user: current_user_is_admin_or_self() or _is_org_private_context(),
     )
     current_login_at = DateTimeField()
     last_login_ip = StringField()
@@ -239,7 +229,7 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         allow_null=True,
         auditable=False,
         readonly=True,
-        attribute=_admin_or_self("proconnect"),
+        visible_if=_admin_or_self,
     )
 
     deleted = field(
@@ -260,13 +250,13 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     # them is decided by their `NotificationSetting` rules; this is only the rhythm.
     mail_cadence = field(
         EnumField(MailCadence, default=MailCadence.IMMEDIATE, required=True),
-        attribute=_admin_or_self("mail_cadence"),
+        visible_if=_admin_or_self,
     )
     # "Turn everything off": nothing reaches the user but what asks for an action. A
     # field rather than a rule, so that no rule, however precise, can bring anything back.
     notifications_paused = field(
         BooleanField(default=False),
-        attribute=_admin_or_self("notifications_paused"),
+        visible_if=_admin_or_self,
     )
 
     before_save = Signal()
@@ -351,22 +341,29 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
     @field(
         description="Whether this session may drop the password and the udata 2FA of the account",
         allow_null=True,
+        visible_if=_admin_or_self,
     )
     def can_switch_to_proconnect_only(self) -> bool:
         # Circular import: the ProConnect login imports this model.
         from udata.auth.proconnect import can_switch_to_proconnect_only
 
-        if not current_user_is_admin_or_self():
-            return None
         return not self.signs_in_with_proconnect_only and can_switch_to_proconnect_only(self)
 
-    @field(description="Whether the account can sign in with a password", allow_null=True)
+    @field(
+        description="Whether the account can sign in with a password",
+        allow_null=True,
+        visible_if=_admin_or_self,
+    )
     def has_password(self) -> bool:
-        return bool(self.password) if current_user_is_admin_or_self() else None
+        return bool(self.password)
 
-    @field(description="Whether the account has set up the udata 2FA", allow_null=True)
+    @field(
+        description="Whether the account has set up the udata 2FA",
+        allow_null=True,
+        visible_if=_admin_or_self,
+    )
     def has_two_factor(self) -> bool:
-        return bool(self.tf_primary_method) if current_user_is_admin_or_self() else None
+        return bool(self.tf_primary_method)
 
     def check_tf_required(
         self, tf_setup_methods: list[tuple[str, str]], tf_fresh: bool

@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from flask import url_for
@@ -8,7 +8,7 @@ from flask_security.utils import get_message
 from udata.commands.fixtures import UserFactory
 from udata.core.user.factories import AdminFactory
 from udata.i18n import lazy_gettext as _
-from udata.tests.api import PytestOnlyAPITestCase
+from udata.tests.api import PytestOnlyAPITestCase, SessionCookieMixin
 from udata.tests.helpers import capture_mails
 
 
@@ -141,6 +141,50 @@ class SecurityAPITest(PytestOnlyAPITestCase):
         assert response.json["response"]["field_errors"]["password"] == [
             _("This account has no password.")
         ]
+
+
+@pytest.mark.options(
+    CAPTCHETAT_BASE_URL=None,
+    SESSION_COOKIE_SECURE=False,
+    SESSION_COOKIE_DOMAIN=None,
+    SECURITY_FRESHNESS=timedelta(hours=24),
+)
+class ChangeEmailFreshnessTest(SessionCookieMixin, PytestOnlyAPITestCase):
+    def change_email(self, new_email: str):
+        return self.post(
+            url_for("security.change_email"),
+            {"new_email": new_email, "new_email_confirm": new_email, "submit": True},
+        )
+
+    def test_change_email_requires_a_fresh_session(self):
+        self.sign_in_with_password(signed_in_ago=timedelta(days=2))
+
+        with capture_mails() as mails:
+            response = self.change_email("jane2@example.org")
+
+        self.assert401(response)
+        assert response.json["response"]["reauth_required"]
+        assert mails == []
+
+    def test_change_email_form_requires_a_fresh_session(self):
+        # cdata loads the form to know whether to send the user to /verify first.
+        self.sign_in_with_password(signed_in_ago=timedelta(days=2))
+
+        response = self.get(
+            url_for("security.change_email"), headers={"Accept": "application/json"}
+        )
+
+        self.assert401(response)
+        assert response.json["response"]["reauth_required"]
+
+    def test_change_email_after_reauthentication(self):
+        self.sign_in_with_password(signed_in_ago=timedelta(days=2))
+        self.assert200(self.post(url_for("security.verify"), {"password": "password"}))
+
+        with capture_mails() as mails:
+            self.assert200(self.change_email("jane2@example.org"))
+
+        assert [mail.recipients for mail in mails] == [["jane2@example.org"]]
 
 
 class TwoFactorSecurityAPITest(PytestOnlyAPITestCase):
