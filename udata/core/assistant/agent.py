@@ -7,7 +7,7 @@ endpoint streams it through pydantic-ai's Vercel AI adapter.
 
 from flask import current_app
 from pydantic_ai import Agent
-from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.models.openai import OpenAIChatModel, OpenAIChatModelSettings
 from pydantic_ai.providers.openai import OpenAIProvider
 
 from udata.core.assistant.prompts import SYSTEM_INSTRUCTIONS
@@ -28,7 +28,9 @@ def get_agent() -> Agent[AssistantDeps, str]:
             api_key=current_app.config["AI_API_KEY"] or "not-configured",
         ),
     )
-    model_settings: dict[str, str] = {}
+    model_settings: OpenAIChatModelSettings = {}
+    if max_tokens := current_app.config["AI_MAX_OUTPUT_TOKENS"]:
+        model_settings["max_tokens"] = max_tokens
     if effort := current_app.config["AI_REASONING_EFFORT"]:
         model_settings["openai_reasoning_effort"] = effort
     agent: Agent[AssistantDeps, str] = Agent(

@@ -31,10 +31,18 @@ class AssistantAgentTest(PytestOnlyDBTestCase):
             tabular = TabularClient(base_url="http://tabular.test")
         return AssistantDeps(tabular=tabular)
 
-    def test_agent_forwards_reasoning_effort_setting(self):
+    def test_agent_forwards_the_model_settings(self):
         self.app.config["AI_REASONING_EFFORT"] = "none"
+        self.app.config["AI_MAX_OUTPUT_TOKENS"] = 2048
         agent = get_agent()
-        assert agent.model_settings == {"openai_reasoning_effort": "none"}
+        assert agent.model_settings == {"max_tokens": 2048, "openai_reasoning_effort": "none"}
+
+    def test_agent_bounds_the_output_tokens_by_default(self):
+        assert get_agent().model_settings == {"max_tokens": 8192}
+
+    def test_agent_keeps_the_provider_defaults_without_settings(self):
+        self.app.config["AI_MAX_OUTPUT_TOKENS"] = None
+        assert get_agent().model_settings is None
 
     def test_agent_runs_with_test_model(self):
         agent = get_agent()

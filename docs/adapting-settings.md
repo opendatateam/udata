@@ -540,7 +540,13 @@ API key sent to the provider. The endpoint answers `503` when `AI_BASE_URL` is s
 
 **default**: `openai/gpt-oss-120b`
 
-Name of the provider model the assistant uses.
+Name of the provider model the assistant uses. With Albert, use the `id` of a model listed by `GET /v1/models`, never one of its `aliases`: Albert renames aliases without notice.
+
+### AI_MAX_OUTPUT_TOKENS
+
+**default**: `8192`
+
+Bound on the tokens of each model response, reasoning included. `None` keeps the provider default.
 
 ### AI_REASONING_EFFORT
 
