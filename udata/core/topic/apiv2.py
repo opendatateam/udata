@@ -10,7 +10,7 @@ from udata.api_fields import lazy_reference, patch, patch_and_save
 from udata.auth import admin_permission
 from udata.core.discussions.models import Discussion
 from udata.core.topic import DEFAULT_PAGE_SIZE
-from udata.core.topic.models import Topic, TopicElement
+from udata.core.topic.models import Topic, TopicElement, TopicElementsWriter
 from udata.core.topic.parsers import TopicApiParser, TopicElementsParser
 from udata.core.topic.permissions import TopicEditPermission
 from udata.core.topic.search import TopicSearch
@@ -129,7 +129,7 @@ class TopicsAPI(API):
         topic.save()
 
         if elements_data is not None:
-            with topic.writing_elements() as writer:
+            with TopicElementsWriter(topic) as writer:
                 for element_data in elements_data:
                     writer.save(patch(TopicElement(), element_data))
 
@@ -165,7 +165,7 @@ class TopicAPI(API):
         patch_and_save(topic, data)
 
         if elements_data is not None:
-            with topic.writing_elements() as writer:
+            with TopicElementsWriter(topic) as writer:
                 for element in topic.elements.no_cache():
                     writer.delete(element)
                 for element_data in elements_data:
@@ -230,7 +230,7 @@ class TopicElementsAPI(API):
         if errors:
             apiv2.abort(400, errors=errors)
 
-        with topic.writing_elements() as writer:
+        with TopicElementsWriter(topic) as writer:
             for element in elements:
                 writer.save(element)
 
@@ -250,7 +250,7 @@ class TopicElementsAPI(API):
             apiv2.abort(403, "Forbidden")
 
         # TODO: still one activity and one element reindex task per element on a huge topic
-        with topic.writing_elements() as writer:
+        with TopicElementsWriter(topic) as writer:
             for element in topic.elements.no_cache():
                 writer.delete(element)
 

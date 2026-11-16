@@ -15,7 +15,11 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.spatial.factories import SAMPLE_GEOM, SpatialCoverageFactory
 from udata.core.spatial.models import spatial_granularities
 from udata.core.topic import DEFAULT_PAGE_SIZE
-from udata.core.topic.activities import UserCreatedTopicElement, UserUpdatedTopicElement
+from udata.core.topic.activities import (
+    UserCreatedTopicElement,
+    UserDeletedTopicElement,
+    UserUpdatedTopicElement,
+)
 from udata.core.topic.factories import (
     TopicElementDataserviceFactory,
     TopicElementDatasetFactory,
@@ -28,7 +32,7 @@ from udata.core.topic.models import Topic, TopicElement
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import _
 from udata.tests.api import APITestCase
-from udata.tests.helpers import create_geozones_fixtures, mock_signals
+from udata.tests.helpers import assert_not_emit, create_geozones_fixtures, mock_signals
 
 
 def topic_saves(calls) -> int:
@@ -1211,19 +1215,17 @@ class TopicElementsAPITest(APITestCase):
     def test_add_no_elements_does_not_save_topic(self):
         owner = self.login()
         topic = TopicFactory(owner=owner)
-        with mock_signals(Topic.after_save) as saves:
+        with assert_not_emit(Topic.after_save):
             # not self.post: its `data or {}` would turn the empty list into an object
             response = self.client.post(url_for("apiv2.topic_elements", topic=topic), json=[])
         assert response.status_code == 201
-        assert topic_saves(saves) == 0
 
     def test_clear_elements_of_empty_topic_does_not_save_topic(self):
         owner = self.login()
         topic = TopicFactory(owner=owner)
-        with mock_signals(Topic.after_save) as saves:
+        with assert_not_emit(Topic.after_save):
             response = self.delete(url_for("apiv2.topic_elements", topic=topic))
         self.assert204(response)
-        assert topic_saves(saves) == 0
 
     def test_clear_elements_does_not_reload_topic_per_element(self):
         user = self.login()
@@ -1240,6 +1242,22 @@ class TopicElementsAPITest(APITestCase):
             return reads
 
         assert reads_to_clear(5) == reads_to_clear(1)
+
+    def test_clear_elements_creates_deleted_activities(self):
+        user = self.login()
+        org = OrganizationFactory(members=[Member(user=user, role="admin")])
+        topic = TopicFactory(organization=org)
+        elements = TopicElementDatasetFactory.create_batch(3, topic=topic)
+
+        response = self.delete(url_for("apiv2.topic_elements", topic=topic))
+        self.assert204(response)
+
+        activities = UserDeletedTopicElement.objects(related_to=topic)
+        assert len(activities) == 3
+        assert {a.extras["element_id"] for a in activities} == {str(e.id) for e in elements}
+        for activity in activities:
+            assert activity.actor == user
+            assert activity.organization == org
 
     def test_clear_elements(self):
         """It should remove all elements from a Topic"""

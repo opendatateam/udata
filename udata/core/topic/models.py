@@ -1,5 +1,3 @@
-from contextlib import contextmanager
-
 from blinker import Signal
 from flask import url_for
 from mongoengine.errors import DoesNotExist
@@ -31,10 +29,6 @@ from udata.tasks import as_task_param
 from udata.uris import cdata_url
 
 __all__ = ("Topic", "TopicElement")
-
-# Saving a topic reindexes it, which reads all its elements: `TopicElementsWriter`
-# passes this in `signal_kwargs` so that bulk writes save the topic only once.
-SKIP_TOPIC_SAVE = "skip_topic_save"
 
 
 def check_title_or_element_required(value, obj, data, **_kwargs):
@@ -109,7 +103,7 @@ class TopicElement(Auditable, Document):
         super().post_save(sender, document, **kwargs)
         if document.topic and document.element and hasattr(document.element, "id"):
             reindex.delay(*as_task_param(document.element))
-        if document.topic and not kwargs.get(SKIP_TOPIC_SAVE):
+        if document.topic and "topic_save" not in kwargs.get("ignores", []):
             document.topic.save()
 
     @classmethod
@@ -118,7 +112,7 @@ class TopicElement(Auditable, Document):
         try:
             if document.topic and document.element and hasattr(document.element, "id"):
                 reindex.delay(*as_task_param(document.element))
-            if document.topic and not kwargs.get(SKIP_TOPIC_SAVE):
+            if document.topic and "topic_save" not in kwargs.get("ignores", []):
                 document.topic.save()
         except DoesNotExist:
             # Topic might have been deleted, causing dereferencing to fail
@@ -127,9 +121,15 @@ class TopicElement(Auditable, Document):
 
 
 class TopicElementsWriter:
-    """Write elements of a topic without saving the topic for each of them.
+    """Write elements of a topic, then save the topic once if anything was written.
 
-    Use it through `Topic.writing_elements()`, which saves the topic once at the end.
+    Saving a topic reindexes it, which reads all its elements: saving it for each element
+    written made bulk writes quadratic. Elements are written with `"topic_save"` in their
+    signal `ignores`, and the topic is saved on exit, even if the block fails midway, so
+    that its index reflects the elements already written or deleted.
+
+        with TopicElementsWriter(topic) as writer:
+            writer.save(element)
     """
 
     def __init__(self, topic: "Topic"):
@@ -138,14 +138,21 @@ class TopicElementsWriter:
         self.topic = topic
         self.written = False
 
+    def __enter__(self) -> "TopicElementsWriter":
+        return self
+
+    def __exit__(self, *exc_info) -> None:
+        if self.written:
+            self.topic.save()
+
     def save(self, element: TopicElement) -> None:
         element.topic = self.topic
-        element.save(signal_kwargs={SKIP_TOPIC_SAVE: True})
+        element.save(signal_kwargs={"ignores": ["topic_save"]})
         self.written = True
 
     def delete(self, element: TopicElement) -> None:
         element.topic = self.topic
-        element.delete(signal_kwargs={SKIP_TOPIC_SAVE: True})
+        element.delete(signal_kwargs={"ignores": ["topic_save"]})
         self.written = True
 
 
@@ -209,20 +216,6 @@ class Topic(Datetimed, Auditable, Linkable, Owned, Document[TopicQuerySet]):
     def elements(self):
         """Get elements associated with this topic"""
         return TopicElement.objects(topic=self)
-
-    @contextmanager
-    def writing_elements(self):
-        """Yield a `TopicElementsWriter`, then save the topic once if anything was written.
-
-        The topic is saved even if the block fails midway, so that its index reflects
-        the elements already written or deleted.
-        """
-        writer = TopicElementsWriter(self)
-        try:
-            yield writer
-        finally:
-            if writer.written:
-                self.save()
 
     def get_nested_elements_ids(self, cls: str) -> set[str]:
         """Optimized query to get objects ids from related elements, filtered by class."""
