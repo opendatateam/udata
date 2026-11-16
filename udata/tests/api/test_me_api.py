@@ -789,8 +789,17 @@ class ApiTokenCreationTest(SessionCookieMixin, PytestOnlyAPITestCase):
                 {"name": "Another key"},
                 headers={"X-API-KEY": plaintext},
             )
+            self.assert401(response)
+            assert response.json["response"]["reauth_required"]
 
-        self.assert401(response)
-        assert response.json["response"]["reauth_required"]
+            # The client keeps the cookies of the first request: none must make the second pass.
+            response = self.post(
+                url_for("api.my_api_tokens"),
+                {"name": "Another key"},
+                headers={"X-API-KEY": plaintext},
+            )
+            self.assert401(response)
+            assert response.json["response"]["reauth_required"]
+
         assert mails == []
         assert ApiToken.objects(user=user).count() == 1
