@@ -134,7 +134,7 @@ class SiteAPITest(APITestCase):
         """The front cards show a status badge (draft, archived, deleted, access type):
         the card masks must carry every field that badge is computed from."""
         archived_at = datetime(2026, 1, 1)
-        dataset = DatasetFactory(archived=archived_at)
+        dataset = DatasetFactory(archived=archived_at, access_type="open_with_account")
         reuse = ReuseFactory(archived=archived_at)
         dataservice = DataserviceFactory(archived_at=archived_at, access_type="restricted")
         self._set_site_blocs(
@@ -147,8 +147,9 @@ class SiteAPITest(APITestCase):
         self.assert200(response)
 
         dataset_card = response.json["datasets_blocs"][0]["blocs"][0]["dataset"]
-        assert {"private", "archived", "deleted"} <= dataset_card.keys()
+        assert {"private", "archived", "deleted", "access_type"} <= dataset_card.keys()
         assert dataset_card["archived"] is not None
+        assert dataset_card["access_type"] == "open_with_account"
 
         reuse_card = response.json["reuses_blocs"][0]["blocs"][0]["reuse"]
         assert {"private", "archived", "deleted"} <= reuse_card.keys()

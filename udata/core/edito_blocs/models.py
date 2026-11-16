@@ -19,7 +19,7 @@ from udata.mongo.errors import FieldValidationError
 from udata.mongo.uuid_fields import AutoUUIDField
 
 # Each card mask carries the fields its front card computes its status badge from
-DATASET_CARD_MASK = "{id,title,acronym,slug,description,page,uri,private,archived,deleted,organization,owner,last_update,quality,metrics,badges,tags}"
+DATASET_CARD_MASK = "{id,title,acronym,slug,description,page,uri,private,archived,deleted,access_type,organization,owner,last_update,quality,metrics,badges,tags}"
 dataset_card_fields = api.model("Dataset (card)", dict(dataset_fields), mask=DATASET_CARD_MASK)
 
 REUSE_CARD_MASK = "{id,title,slug,description,type,url,image,image_thumbnail,page,uri,organization,owner,metrics,badges,tags,topic,private,archived,deleted,created_at,last_modified}"
