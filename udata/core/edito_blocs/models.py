@@ -18,13 +18,14 @@ from udata.core.reuse.models import Reuse
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.uuid_fields import AutoUUIDField
 
-DATASET_CARD_MASK = "{id,title,acronym,slug,description,page,uri,private,archived,organization,owner,last_update,quality,metrics,badges,tags}"
+# Each card mask carries the fields its front card computes its status badge from
+DATASET_CARD_MASK = "{id,title,acronym,slug,description,page,uri,private,archived,deleted,organization,owner,last_update,quality,metrics,badges,tags}"
 dataset_card_fields = api.model("Dataset (card)", dict(dataset_fields), mask=DATASET_CARD_MASK)
 
-REUSE_CARD_MASK = "{id,title,slug,description,type,url,image,image_thumbnail,page,uri,organization,owner,metrics,badges,tags,topic,private,created_at,last_modified}"
+REUSE_CARD_MASK = "{id,title,slug,description,type,url,image,image_thumbnail,page,uri,organization,owner,metrics,badges,tags,topic,private,archived,deleted,created_at,last_modified}"
 reuse_card_fields = api.model("Reuse (card)", dict(Reuse.__read_fields__), mask=REUSE_CARD_MASK)
 
-DATASERVICE_CARD_MASK = "{id,title,acronym,slug,description,base_api_url,format,self_api_url,self_web_url,organization,owner,quality,metrics,badges,tags,private,created_at,metadata_modified_at}"
+DATASERVICE_CARD_MASK = "{id,title,acronym,slug,description,base_api_url,format,self_api_url,self_web_url,organization,owner,quality,metrics,badges,tags,private,archived_at,deleted_at,access_type,created_at,metadata_modified_at}"
 dataservice_card_fields = api.model(
     "Dataservice (card)", dict(Dataservice.__read_fields__), mask=DATASERVICE_CARD_MASK
 )
