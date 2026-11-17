@@ -25,9 +25,7 @@ def get_agent() -> Agent[AssistantDeps, str]:
         current_app.config["AI_MODEL"],
         provider=OpenAIProvider(
             base_url=current_app.config["AI_BASE_URL"],
-            # Placeholder keeps the agent buildable without a key; the endpoint
-            # 503s before any run when AI_API_KEY is unset.
-            api_key=current_app.config["AI_API_KEY"] or "not-configured",
+            api_key=current_app.config["AI_API_KEY"],
         ),
     )
     model_settings: OpenAIChatModelSettings = {}

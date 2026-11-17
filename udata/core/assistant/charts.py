@@ -141,7 +141,7 @@ def validate_create(config: CreateChartInput, columns: dict[str, str]) -> list[s
         elif column_type is not None and column_type not in NUMERIC_TYPES:
             errors.append(f"La série {series.column_y} doit être numérique ou agrégée par count.")
     errors.extend(filter_errors(config.filters))
-    return list(dict.fromkeys(errors))
+    return errors
 
 
 def validate_update(patch: UpdateChartInput) -> list[str]:

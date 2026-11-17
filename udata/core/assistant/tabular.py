@@ -97,8 +97,6 @@ def _refusal_detail(response: requests.Response) -> str | None:
     if status == 403:
         return _unauthorized_detail(detail) if title == "Unauthorized parameters" else None
     if isinstance(detail, dict) and status in (400, 404):
-        if detail.get("code") in MISSING_TABLE_CODES:
-            return None
         detail = detail.get("message")
     elif status != 400:
         return None
@@ -138,13 +136,9 @@ def _validate_resource_id(resource_id: str) -> str:
     return normalized
 
 
-def _data_route(resource_id: str, query: str) -> str:
-    return f"{DATA_ROUTE.format(rid=_validate_resource_id(resource_id))}?{query}"
-
-
 class TabularClient:
-    def __init__(self, base_url: str | None = None):
-        base_url = base_url if base_url is not None else current_app.config["TABULAR_API_URL"]
+    def __init__(self):
+        base_url = current_app.config["TABULAR_API_URL"]
         # A trailing slash would double the one the routes start with.
         self.base_url = base_url.rstrip("/") if base_url else base_url
 
@@ -157,7 +151,7 @@ class TabularClient:
         The URL is built by concatenation, never through ``params=``, so that
         pre-encoded (possibly double-encoded) parts are not re-encoded.
         """
-        return self._request(_data_route(resource_id, query))
+        return self._request(f"{DATA_ROUTE.format(rid=_validate_resource_id(resource_id))}?{query}")
 
     def _request(self, route: str) -> dict:
         """JSON of an api-tabular GET."""
@@ -171,18 +165,14 @@ class TabularClient:
             return response.json()
         except requests.exceptions.HTTPError as error:
             log.warning("api-tabular request failed: %s: %s", url, error)
-            status = error.response.status_code if error.response is not None else None
-            if error.response is not None and (detail := _refusal_detail(error.response)):
+            missing_table = _is_missing_table(error.response)
+            if not missing_table and (detail := _refusal_detail(error.response)):
                 raise TabularRequestRefused(detail) from error
-            if status == 404 or (error.response is not None and _is_missing_table(error.response)):
+            if missing_table or error.response.status_code == 404:
                 raise TabularResourceUnavailable(
                     "la ressource n'est pas disponible dans le service tabulaire."
                 ) from error
             raise TabularError("le service tabulaire a renvoyé une erreur.") from error
-        # Before RequestException, its parent class.
-        except requests.exceptions.JSONDecodeError as error:
-            log.warning("api-tabular returned invalid JSON: %s: %s", url, error)
-            raise TabularError("le service tabulaire a renvoyé une réponse invalide.") from error
         except requests.exceptions.RequestException as error:
             log.warning("api-tabular request failed: %s: %s", url, error)
             raise TabularError("le service tabulaire a renvoyé une erreur.") from error

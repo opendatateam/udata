@@ -400,7 +400,7 @@ def register_tools(agent: Agent) -> None:
             sort = (groupby, "asc")
         query = build_data_query(
             groupby=groupby,
-            aggregate=(aggregate_column, aggregate) if aggregate_column and aggregate else None,
+            aggregate=(aggregate_column, aggregate) if aggregate else None,
             filters=filters,
             sort=sort,
             columns=columns,

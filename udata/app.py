@@ -52,15 +52,12 @@ class UDataRequest(Request):
 
     Extensions read the body before the view runs (Flask-Security parses the JSON
     of sessionless requests in a ``before_request`` hook), so a limit set inside
-    the view would come too late. A value set on the request still wins, ``None``
-    restoring the app default as in Flask.
+    the view would come too late. A value set on the request still wins.
     """
-
-    _max_content_length_set = False
 
     @property
     def max_content_length(self) -> int | None:
-        if not self._max_content_length_set and current_app and self.url_rule is not None:
+        if self._max_content_length is None and self.url_rule is not None:
             view = current_app.view_functions.get(self.url_rule.endpoint)
             limit = getattr(getattr(view, "view_class", None), "max_content_length", None)
             if limit is not None:
@@ -70,7 +67,6 @@ class UDataRequest(Request):
     @max_content_length.setter
     def max_content_length(self, value: int | None) -> None:
         self._max_content_length = value
-        self._max_content_length_set = True
 
 
 class UDataApp(Flask):

@@ -21,21 +21,19 @@ class TabularClientTest(PytestOnlyTestCase):
     def setup_method(self, method):
         self.app.config["TABULAR_API_URL"] = BASE_URL
 
-    def make_client(self, **kwargs) -> TabularClient:
-        with self.app.test_request_context():
-            return TabularClient(**kwargs)
-
     def test_a_trailing_slash_in_the_base_url_does_not_double(self, requests_mock):
+        self.app.config["TABULAR_API_URL"] = f"{BASE_URL}/"
         requests_mock.get(f"{BASE_URL}/api/resources/{RESOURCE_ID}/profile/", json={})
-        self.make_client(base_url=f"{BASE_URL}/").get_profile(RESOURCE_ID)
+        TabularClient().get_profile(RESOURCE_ID)
         assert requests_mock.request_history[0].url.startswith(f"{BASE_URL}/api/")
 
-    def test_get_profile_returns_json(self, requests_mock):
+    def test_get_profile_returns_json_within_the_timeout(self, requests_mock):
         requests_mock.get(
             f"{BASE_URL}/api/resources/{RESOURCE_ID}/profile/",
             json={"profile": {"a": "int"}},
         )
-        assert self.make_client().get_profile(RESOURCE_ID) == {"profile": {"a": "int"}}
+        assert TabularClient().get_profile(RESOURCE_ID) == {"profile": {"a": "int"}}
+        assert requests_mock.request_history[0].timeout == TABULAR_TIMEOUT
 
     @pytest.mark.parametrize(
         "bad_id",
@@ -52,7 +50,7 @@ class TabularClientTest(PytestOnlyTestCase):
     )
     def test_malformed_resource_id_is_rejected_before_any_request(self, requests_mock, bad_id):
         """Only plain UUIDs may reach the upstream URL path."""
-        client = self.make_client()
+        client = TabularClient()
         with pytest.raises(TabularError):
             client.get_profile(bad_id)
         with pytest.raises(TabularError):
@@ -65,7 +63,7 @@ class TabularClientTest(PytestOnlyTestCase):
             json={"ok": True},
         )
         braced = "{5C4AE7A0-E3F1-4A3F-8B1D-2E9F00000000}"
-        assert self.make_client().get_profile(braced) == {"ok": True}
+        assert TabularClient().get_profile(braced) == {"ok": True}
 
     def test_http_error_raises_sanitized_tabular_error(self, requests_mock, caplog):
         requests_mock.get(
@@ -73,12 +71,9 @@ class TabularClientTest(PytestOnlyTestCase):
             status_code=500,
             json={"error": "boom"},
         )
-        with (
-            self.app.test_request_context(),
-            caplog.at_level("WARNING", logger="udata.core.assistant.tabular"),
-        ):
+        with caplog.at_level("WARNING", logger="udata.core.assistant.tabular"):
             with pytest.raises(TabularError) as excinfo:
-                self.make_client().get_data(RESOURCE_ID, "a__groupby")
+                TabularClient().get_data(RESOURCE_ID, "a__groupby")
         # The client-facing error is sanitized: no URL, no upstream details.
         message = str(excinfo.value)
         assert BASE_URL not in message
@@ -96,7 +91,7 @@ class TabularClientTest(PytestOnlyTestCase):
             },
         )
         with pytest.raises(TabularRequestRefused) as excinfo:
-            self.make_client().get_data(RESOURCE_ID, "a__groupby")
+            TabularClient().get_data(RESOURCE_ID, "a__groupby")
         assert excinfo.value.detail == "Unknown column: x"
         assert str(excinfo.value) == "Unknown column: x"
 
@@ -105,7 +100,7 @@ class TabularClientTest(PytestOnlyTestCase):
             f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby", status_code=400, text="nope"
         )
         with pytest.raises(TabularError) as excinfo:
-            self.make_client().get_data(RESOURCE_ID, "a__groupby")
+            TabularClient().get_data(RESOURCE_ID, "a__groupby")
         assert type(excinfo.value) is TabularError
 
     def test_missing_resource_says_it_is_not_available(self, requests_mock):
@@ -117,7 +112,7 @@ class TabularClientTest(PytestOnlyTestCase):
             headers={"Content-Type": "text/plain; charset=utf-8"},
         )
         with pytest.raises(TabularResourceUnavailable):
-            self.make_client().get_data(RESOURCE_ID, "a__groupby")
+            TabularClient().get_data(RESOURCE_ID, "a__groupby")
 
     @staticmethod
     def database_error(code: str, message: str, hint: str | None = None) -> dict:
@@ -139,7 +134,7 @@ class TabularClientTest(PytestOnlyTestCase):
             json=self.database_error("22P02", 'invalid input syntax for type bigint: "1.5"'),
         )
         with pytest.raises(TabularRequestRefused) as excinfo:
-            self.make_client().get_data(RESOURCE_ID, "n__exact=1.5")
+            TabularClient().get_data(RESOURCE_ID, "n__exact=1.5")
         assert excinfo.value.detail == 'invalid input syntax for type bigint: "1.5"'
 
     def test_a_database_error_hides_the_internal_table_name(self, requests_mock):
@@ -151,7 +146,7 @@ class TabularClientTest(PytestOnlyTestCase):
             ),
         )
         with pytest.raises(TabularRequestRefused) as excinfo:
-            self.make_client().get_data(RESOURCE_ID, "nope__exact=1")
+            TabularClient().get_data(RESOURCE_ID, "nope__exact=1")
         assert excinfo.value.detail == "column ressource.nope does not exist"
 
     @pytest.mark.parametrize(
@@ -181,7 +176,7 @@ class TabularClientTest(PytestOnlyTestCase):
             json=self.database_error("42803", message),
         )
         with pytest.raises(TabularRequestRefused) as excinfo:
-            self.make_client().get_data(RESOURCE_ID, "a__groupby")
+            TabularClient().get_data(RESOURCE_ID, "a__groupby")
         assert excinfo.value.detail == hidden
 
     def test_a_long_database_error_is_bounded_after_hiding_the_table_name(self, requests_mock):
@@ -192,7 +187,7 @@ class TabularClientTest(PytestOnlyTestCase):
             json=self.database_error("42703", message),
         )
         with pytest.raises(TabularRequestRefused) as excinfo:
-            self.make_client().get_data(RESOURCE_ID, "a__groupby")
+            TabularClient().get_data(RESOURCE_ID, "a__groupby")
         assert excinfo.value.detail == ("column ressource." + "x" * 400)[:MAX_DETAIL_LENGTH]
 
     def test_a_database_error_404_is_a_refusal(self, requests_mock):
@@ -207,7 +202,7 @@ class TabularClientTest(PytestOnlyTestCase):
             ),
         )
         with pytest.raises(TabularRequestRefused) as excinfo:
-            self.make_client().get_data(RESOURCE_ID, "label__sum")
+            TabularClient().get_data(RESOURCE_ID, "label__sum")
         assert excinfo.value.detail == "function sum(character varying) does not exist"
 
     @pytest.mark.parametrize("status", [400, 404])
@@ -221,7 +216,7 @@ class TabularClientTest(PytestOnlyTestCase):
             ),
         )
         with pytest.raises(TabularResourceUnavailable):
-            self.make_client().get_data(RESOURCE_ID, "a__groupby")
+            TabularClient().get_data(RESOURCE_ID, "a__groupby")
 
     def test_a_forbidden_aggregation_is_a_refusal(self, requests_mock):
         requests_mock.get(
@@ -239,7 +234,7 @@ class TabularClientTest(PytestOnlyTestCase):
             },
         )
         with pytest.raises(TabularRequestRefused) as excinfo:
-            self.make_client().get_data(RESOURCE_ID, "a__groupby&b__sum")
+            TabularClient().get_data(RESOURCE_ID, "a__groupby&b__sum")
         assert excinfo.value.detail == "agrégation non autorisée sur cette ressource"
 
     def test_a_column_without_index_is_a_refusal_listing_the_indexed_columns(self, requests_mock):
@@ -258,7 +253,7 @@ class TabularClientTest(PytestOnlyTestCase):
             },
         )
         with pytest.raises(TabularRequestRefused) as excinfo:
-            self.make_client().get_data(RESOURCE_ID, "score__groupby")
+            TabularClient().get_data(RESOURCE_ID, "score__groupby")
         assert excinfo.value.detail == (
             "colonne score non indexée : seules les colonnes birth, id "
             "peuvent être regroupées ou agrégées"
@@ -271,7 +266,7 @@ class TabularClientTest(PytestOnlyTestCase):
             json={"errors": [{"title": "Unauthorized parameters", "detail": "something else"}]},
         )
         with pytest.raises(TabularError) as excinfo:
-            self.make_client().get_data(RESOURCE_ID, "a__groupby")
+            TabularClient().get_data(RESOURCE_ID, "a__groupby")
         assert not isinstance(excinfo.value, TabularRequestRefused)
 
     def test_another_403_is_a_generic_error(self, requests_mock):
@@ -281,7 +276,7 @@ class TabularClientTest(PytestOnlyTestCase):
             text="Forbidden",
         )
         with pytest.raises(TabularError) as excinfo:
-            self.make_client().get_data(RESOURCE_ID, "a__groupby")
+            TabularClient().get_data(RESOURCE_ID, "a__groupby")
         assert not isinstance(excinfo.value, TabularRequestRefused)
 
     def test_a_database_error_on_a_server_error_stays_generic(self, requests_mock):
@@ -291,7 +286,7 @@ class TabularClientTest(PytestOnlyTestCase):
             json=self.database_error("XX000", "internal error"),
         )
         with pytest.raises(TabularError) as excinfo:
-            self.make_client().get_data(RESOURCE_ID, "a__groupby")
+            TabularClient().get_data(RESOURCE_ID, "a__groupby")
         assert not isinstance(excinfo.value, TabularRequestRefused)
 
     def test_timeout_raises_sanitized_tabular_error(self, requests_mock, caplog):
@@ -299,12 +294,9 @@ class TabularClientTest(PytestOnlyTestCase):
             f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby",
             exc=requests.exceptions.ConnectTimeout,
         )
-        with (
-            self.app.test_request_context(),
-            caplog.at_level("WARNING", logger="udata.core.assistant.tabular"),
-        ):
+        with caplog.at_level("WARNING", logger="udata.core.assistant.tabular"):
             with pytest.raises(TabularError) as excinfo:
-                self.make_client().get_data(RESOURCE_ID, "a__groupby")
+                TabularClient().get_data(RESOURCE_ID, "a__groupby")
         assert BASE_URL not in str(excinfo.value)
         assert any(BASE_URL in record.getMessage() for record in caplog.records)
 
@@ -313,19 +305,19 @@ class TabularClientTest(PytestOnlyTestCase):
             f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby",
             text="not json",
         )
-        with (
-            self.app.test_request_context(),
-            caplog.at_level("WARNING", logger="udata.core.assistant.tabular"),
-        ):
+        with caplog.at_level("WARNING", logger="udata.core.assistant.tabular"):
             with pytest.raises(TabularError) as excinfo:
-                self.make_client().get_data(RESOURCE_ID, "a__groupby")
+                TabularClient().get_data(RESOURCE_ID, "a__groupby")
         assert "not json" not in str(excinfo.value)
         # The server-side log keeps the diagnostic details (URL, error).
-        assert any(BASE_URL in record.getMessage() for record in caplog.records)
+        assert any(
+            BASE_URL in record.getMessage() and "Expecting value" in record.getMessage()
+            for record in caplog.records
+        )
 
     def test_unconfigured_raises_tabular_error(self, caplog):
         self.app.config["TABULAR_API_URL"] = None
-        client = self.make_client()
+        client = TabularClient()
         with caplog.at_level("WARNING", logger="udata.core.assistant.tabular"):
             with pytest.raises(TabularError):
                 client.get_profile(RESOURCE_ID)
@@ -334,40 +326,14 @@ class TabularClientTest(PytestOnlyTestCase):
         # A misconfigured deployment leaves a trace in the logs.
         assert any("TABULAR_API_URL" in record.getMessage() for record in caplog.records)
 
-    def test_explicit_overrides(self, requests_mock):
-        requests_mock.get(
-            f"https://override.example.com/api/resources/{RESOURCE_ID}/profile/",
-            json={"ok": True},
-        )
-        client = self.make_client(base_url="https://override.example.com")
-        assert client.get_profile(RESOURCE_ID) == {"ok": True}
-
-    def test_default_timeout_comes_from_module_constant(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/profile/",
-            json={"ok": True},
-        )
-        client = self.make_client()
-        assert client.get_profile(RESOURCE_ID) == {"ok": True}
-        assert requests_mock.request_history[0].timeout == TABULAR_TIMEOUT
-
-    def test_get_data_returns_json(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/",
-            json={"data": [{"a": 1}], "links": {}},
-        )
-        assert self.make_client().get_data(RESOURCE_ID, "a__groupby") == {
-            "data": [{"a": 1}],
-            "links": {},
-        }
-
     def test_get_data_sends_the_query_string_verbatim(self, requests_mock):
         requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/", json={"data": [], "links": {}}
+            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/", json={"data": [{"a": 1}], "links": {}}
         )
-        self.make_client().get_data(
+        result = TabularClient().get_data(
             RESOURCE_ID, "a__groupby&b__sum&page=1&page_size=50&c__exact=x%252Ey"
         )
+        assert result == {"data": [{"a": 1}], "links": {}}
         assert requests_mock.request_history[0].url.endswith(
             "?a__groupby&b__sum&page=1&page_size=50&c__exact=x%252Ey"
         )
@@ -396,10 +362,3 @@ class TabularClientTest(PytestOnlyTestCase):
     @pytest.mark.parametrize("page", [None, [], {"data": "rows"}])
     def test_has_more_rows_is_false_on_an_unexpected_page(self, page):
         assert has_more_rows(page) is False
-
-    def test_invalid_json_is_reported_as_an_invalid_response(self, requests_mock, caplog):
-        requests_mock.get(f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/", text="<html>")
-        with caplog.at_level("WARNING", logger="udata.core.assistant.tabular"):
-            with pytest.raises(TabularError, match="réponse invalide"):
-                self.make_client().get_data(RESOURCE_ID, "a__groupby")
-        assert "invalid JSON" in caplog.text
