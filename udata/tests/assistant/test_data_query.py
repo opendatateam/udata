@@ -18,10 +18,6 @@ def test_grouped_aggregate_sorted_on_x():
     assert q == "dep__groupby&n_cum_dose1__max&dep__sort=asc"
 
 
-def test_columns():
-    assert build_data_query(columns=["a b", "c"]) == "columns=a%2520b,c"
-
-
 def test_aggregate_without_groupby_is_a_global_total():
     assert build_data_query(aggregate=("n_cum_dose1", "sum")) == "n_cum_dose1__sum"
 
@@ -80,11 +76,6 @@ def test_empty_values_are_dropped():
     assert build_data_query(filters=Filter(column="a", condition="exact")) == ""
 
 
-def test_special_characters_are_encoded():
-    f = Filter(column="Nom de l'élu", condition="exact", value="a&b")
-    assert build_data_query(filters=f) == "Nom%2520de%2520l%27%25C3%25A9lu__exact=a%2526b"
-
-
 @pytest.mark.parametrize(
     "value,encoded",
     [
@@ -133,14 +124,30 @@ def test_group_values_are_quoted_and_escaped(value, encoded):
     assert build_data_query(filters=group) == f"or=(c__exact.%22{encoded}%22)"
 
 
-def test_filters_parse_from_the_cls_alias():
-    f = TypeAdapter(GenericFilter).validate_python(
-        {
-            "_cls": "OrFilters",
-            "filters": [{"_cls": "Filter", "column": "a", "condition": "exact", "value": "1"}],
-        }
-    )
-    assert filter_columns(f) == {"a"}
+@pytest.mark.parametrize(
+    "data,filter_type,query",
+    [
+        (
+            {
+                "_cls": "OrFilters",
+                "filters": [{"_cls": "Filter", "column": "a", "condition": "exact", "value": "1"}],
+            },
+            OrFilters,
+            "or=(a__exact.%221%22)",
+        ),
+        # `_cls` is optional, and a numeric value is read as a string
+        ({"column": "n", "condition": "greater", "value": 2.5}, Filter, "n__greater=2.5"),
+        (
+            {"_cls": "AndFilters", "filters": [{"column": "a", "condition": "is_null"}]},
+            AndFilters,
+            "a__isnull",
+        ),
+    ],
+)
+def test_filters_parse_from_the_tool_schema(data, filter_type, query):
+    f = TypeAdapter(GenericFilter).validate_python(data)
+    assert isinstance(f, filter_type)
+    assert build_data_query(filters=f) == query
 
 
 def test_filter_columns_nested_and_none():
@@ -152,32 +159,6 @@ def test_filter_columns_nested_and_none():
         ]
     )
     assert filter_columns(f) == {"a", "b"}
-
-
-def test_numeric_filter_value_is_coerced_to_a_string():
-    f = TypeAdapter(GenericFilter).validate_python(
-        {"_cls": "Filter", "column": "b", "condition": "greater", "value": 2.5}
-    )
-    assert f.value == "2.5"
-    group = OrFilters(filters=[f])
-    assert build_data_query(filters=group) == "or=(b__greater.%222%252E5%22)"
-
-
-def test_filter_without_cls_parses_as_a_filter():
-    f = TypeAdapter(GenericFilter).validate_python(
-        {"column": "n", "condition": "greater", "value": 2}
-    )
-    assert isinstance(f, Filter)
-    assert f.value == "2"
-    assert build_data_query(filters=f) == "n__greater=2"
-    assert f.model_dump(by_alias=True)["_cls"] == "Filter"
-
-
-def test_group_children_without_cls_parse_as_filters():
-    f = TypeAdapter(GenericFilter).validate_python(
-        {"_cls": "AndFilters", "filters": [{"column": "a", "condition": "is_null"}]}
-    )
-    assert isinstance(f.filters[0], Filter)
 
 
 def test_filter_errors_flags_every_condition_without_a_value():

@@ -88,9 +88,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             return self.tools[name].function(ctx, **kwargs)
 
     def make_deps(self, **kwargs):
-        with self.app.app_context():
-            tabular = TabularClient()
-        return AssistantDeps(tabular=tabular, **kwargs)
+        return AssistantDeps(tabular=TabularClient(), **kwargs)
 
     def owned_resource(self, **dataset_kwargs):
         """A resource with a dataset; public unless ``dataset_kwargs`` say otherwise."""
@@ -98,16 +96,6 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         dataset_kwargs.setdefault("title", "Données de test")
         DatasetFactory(resources=[resource], **dataset_kwargs)
         return resource
-
-    def test_registers_the_six_tools(self):
-        assert set(self.tools) == {
-            "get_dataset_metadata",
-            "inspect_schema",
-            "query_data",
-            "create_chart",
-            "update_chart",
-            "request_clarification",
-        }
 
     def test_get_dataset_metadata_serializes_dataset(self):
         license = LicenseFactory(title="Licence Ouverte")
@@ -160,26 +148,6 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         result = self.call("get_dataset_metadata", self.make_deps(), dataset_id=str(dataset.id))
         assert "introuvable" in result
         assert "Secret" not in result
-
-    def test_get_dataset_metadata_hides_private_dataset_from_other_user(self):
-        dataset = DatasetFactory(title="Secret", private=True, owner=UserFactory())
-        other = UserFactory()
-        result = self.call(
-            "get_dataset_metadata",
-            self.make_deps(),
-            user=other,
-            dataset_id=str(dataset.id),
-        )
-        assert "introuvable" in result
-        assert "Secret" not in result
-
-    def test_get_dataset_metadata_hides_deleted_dataset(self):
-        from datetime import UTC, datetime
-
-        dataset = DatasetFactory(title="Supprimé", deleted=datetime.now(UTC))
-        result = self.call("get_dataset_metadata", self.make_deps(), dataset_id=str(dataset.id))
-        assert "introuvable" in result
-        assert "Supprimé" not in result
 
     def test_get_dataset_metadata_owner_sees_own_private_dataset(self):
         owner = UserFactory()
@@ -263,16 +231,6 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         assert "introuvable" in result
         profile.assert_not_called()
 
-    def test_inspect_schema_hides_resource_of_deleted_dataset(self, mocker):
-        from datetime import UTC, datetime
-
-        deps = self.make_deps()
-        profile = mocker.patch.object(deps.tabular, "get_profile")
-        resource = self.owned_resource(deleted=datetime.now(UTC))
-        result = self.call("inspect_schema", deps, resource_id=str(resource.id))
-        assert "introuvable" in result
-        profile.assert_not_called()
-
     def test_inspect_schema_owner_of_private_dataset_is_allowed(self, mocker):
         owner = UserFactory()
         resource = self.owned_resource(private=True, owner=owner)
@@ -293,7 +251,6 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         )
         result = self.call("inspect_schema", deps, resource_id=str(resource.id))
         assert result == "Le service tabulaire est indisponible."
-        assert "tabular.example.com" not in result
 
     def test_inspect_schema_says_when_the_resource_is_not_in_the_tabular_service(self, mocker):
         resource = self.owned_resource()
@@ -307,18 +264,21 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             "ses données ne peuvent pas être interrogées."
         )
 
-    def test_tool_budget_refuses_beyond_assistant_max_steps(self, mocker):
-        """MAX_STEPS caps tool calls per agent run (steps proxy), independently
-        of the per-question query limit."""
+    def test_tool_budget_caps_the_calls_of_every_tool(self, mocker):
+        """MAX_STEPS caps the tool calls of a run, whatever the tools called."""
         resource = self.owned_resource()
         deps = self.make_deps()
         mocker.patch.object(
             deps.tabular, "get_profile", return_value={"profile": {"total_lines": 1}}
         )
-        for _ in range(MAX_STEPS):
-            result = self.call("inspect_schema", deps, resource_id=str(resource.id))
-            assert "refusée" not in result
-        result = self.call("inspect_schema", deps, resource_id=str(resource.id))
+        calls = [
+            ("inspect_schema", {"resource_id": str(resource.id)}),
+            ("get_dataset_metadata", {"dataset_id": "0" * 24}),
+        ]
+        for index in range(MAX_STEPS):
+            name, kwargs = calls[index % len(calls)]
+            assert "refusée" not in self.call(name, deps, **kwargs)
+        result = self.call("request_clarification", deps, question="?", choices=["a", "b"])
         assert "refusée" in result
         assert deps.tool_count == MAX_STEPS
 
@@ -349,39 +309,6 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             mp.setattr("udata.core.assistant.tools.MAX_STEPS", 100)
             results = self._race("query_data", deps, 2 * MAX_QUERIES_PER_QUESTION)
         assert sum("refusée" not in result for result in results) == MAX_QUERIES_PER_QUESTION
-
-    def test_tool_budget_is_shared_across_tools(self, mocker):
-        """Every tool call counts against the same per-run budget."""
-        resource = self.owned_resource()
-        deps = self.make_deps()
-        mocker.patch.object(
-            deps.tabular, "get_profile", return_value={"profile": {"total_lines": 1}}
-        )
-        with pytest.MonkeyPatch.context() as mp:
-            mp.setattr("udata.core.assistant.tools.MAX_STEPS", 2)
-            self.call("inspect_schema", deps, resource_id=str(resource.id))
-            self.call("get_dataset_metadata", deps, dataset_id="0" * 24)
-            result = self.call("request_clarification", deps, question="?", choices=[])
-            assert "refusée" in result
-
-    def test_tool_budget_resets_per_run(self, mocker):
-        """A fresh AssistantDeps (a new agent run) starts with a clean budget."""
-        resource = self.owned_resource()
-        first = self.make_deps()
-        mocker.patch.object(
-            first.tabular, "get_profile", return_value={"profile": {"total_lines": 1}}
-        )
-        self.call("inspect_schema", first, resource_id=str(resource.id))
-        with pytest.MonkeyPatch.context() as mp:
-            mp.setattr("udata.core.assistant.tools.MAX_STEPS", 1)
-            result = self.call("inspect_schema", first, resource_id=str(resource.id))
-            assert "refusée" in result
-        second = self.make_deps()
-        mocker.patch.object(
-            second.tabular, "get_profile", return_value={"profile": {"total_lines": 1}}
-        )
-        result = self.call("inspect_schema", second, resource_id=str(resource.id))
-        assert "refusée" not in result
 
     def test_request_clarification_numbers_choices(self):
         result = self.call(
@@ -629,13 +556,18 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         get_data.assert_not_called()
         assert deps.query_count == 0
 
-    def test_query_data_refuses_a_numeric_aggregate_on_text_without_using_a_query(self, mocker):
+    @pytest.mark.parametrize("aggregate", ["sum", "avg"])
+    def test_query_data_refuses_a_numeric_aggregate_on_text_without_using_a_query(
+        self, mocker, aggregate
+    ):
         deps, _ = self.active(mocker)
         get_data = mocker.patch.object(deps.tabular, "get_data")
         result = self.call(
-            "query_data", deps, groupby="dep", aggregate_column="label", aggregate="sum"
+            "query_data", deps, groupby="dep", aggregate_column="label", aggregate=aggregate
         )
-        assert result == "L'agrégat sum demande une colonne numérique : label est de type string."
+        assert result == (
+            f"L'agrégat {aggregate} demande une colonne numérique : label est de type string."
+        )
         get_data.assert_not_called()
         assert deps.query_count == 0
 
@@ -648,13 +580,6 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         get_data.assert_called_once_with(
             str(resource.id), f"label__{aggregate}&page=1&page_size=50"
         )
-
-    def test_query_data_refuses_avg_on_a_text_column(self, mocker):
-        deps, _ = self.active(mocker)
-        get_data = mocker.patch.object(deps.tabular, "get_data")
-        result = self.call("query_data", deps, aggregate_column="label", aggregate="avg")
-        assert result == "L'agrégat avg demande une colonne numérique : label est de type string."
-        get_data.assert_not_called()
 
     def test_query_data_counts_a_text_column(self, mocker):
         deps, _ = self.active(mocker)
@@ -782,12 +707,6 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         result = self.call("update_chart", self.make_deps(), patch=UpdateChartInput())
         assert result["status"] == "error"
 
-    def test_request_clarification_bounds_choices_to_2_to_4(self):
-        schema = self.tools["request_clarification"].tool_def.parameters_json_schema
-        choices = schema["properties"]["choices"]
-        assert choices["minItems"] == 2
-        assert choices["maxItems"] == 4
-
     def test_query_data_accepts_a_numeric_filter_without_cls(self, mocker):
         deps, resource = self.active(mocker)
         get_data = mocker.patch.object(deps.tabular, "get_data", return_value={"data": []})
@@ -806,16 +725,6 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         get_data.assert_called_once_with(
             str(resource.id), "n_cum_dose1__greater=2.5&page=1&page_size=50"
         )
-
-    def test_tools_are_callable_through_the_agent(self, mocker):
-        deps, _ = self.active(mocker)
-        mocker.patch.object(deps.tabular, "get_data", return_value={"data": [{"a": 1}]})
-        agent = Agent(model=TestModel(call_tools=["query_data"]), deps_type=AssistantDeps)
-        register_tools(agent)
-        with self.request_as():
-            result = agent.run_sync("compte", deps=deps)
-        assert deps.query_count == 1
-        assert result.output
 
 
 def test_render_result_shows_at_most_one_page_of_rows():

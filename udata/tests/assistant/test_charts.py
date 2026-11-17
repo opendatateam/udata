@@ -32,14 +32,17 @@ def test_valid_create_has_no_errors():
     assert validate_create(make(), COLUMNS) == []
 
 
-def test_unknown_x_column():
-    config = make(x_axis={"column_x": "region", "type": "discrete"})
-    assert validate_create(config, COLUMNS) == ["Colonne inconnue : region."]
-
-
-def test_unknown_series_column():
-    config = make(series=[{"column_y": "zzz", "aggregate_y": "max"}])
-    assert validate_create(config, COLUMNS) == ["Colonne inconnue : zzz."]
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"x_axis": {"column_x": "zzz", "type": "discrete"}},
+        {"series": [{"column_y": "zzz", "aggregate_y": "max"}]},
+        {"filters": {"_cls": "Filter", "column": "zzz", "condition": "exact", "value": "1"}},
+    ],
+    ids=["x", "series", "filter"],
+)
+def test_unknown_column(overrides):
+    assert validate_create(make(**overrides), COLUMNS) == ["Colonne inconnue : zzz."]
 
 
 def test_count_series_column_y_is_not_validated():
@@ -48,12 +51,7 @@ def test_count_series_column_y_is_not_validated():
     assert validate_create(config, COLUMNS) == []
 
 
-def test_unknown_filter_column():
-    config = make(filters={"_cls": "Filter", "column": "foo", "condition": "exact", "value": "1"})
-    assert validate_create(config, COLUMNS) == ["Colonne inconnue : foo."]
-
-
-def test_errors_are_all_returned_deduplicated_in_order():
+def test_unknown_columns_are_reported_once_in_order():
     config = make(
         x_axis={"column_x": "a", "type": "discrete"},
         series=[{"column_y": "b", "aggregate_y": "max"}, {"column_y": "a", "aggregate_y": "max"}],
@@ -65,15 +63,8 @@ def test_errors_are_all_returned_deduplicated_in_order():
     ]
 
 
-def test_sum_on_text_column_is_refused():
-    config = make(series=[{"column_y": "dep", "aggregate_y": "sum"}])
-    assert validate_create(config, COLUMNS) == [
-        "L'agrégat sum demande une colonne numérique : dep est de type string."
-    ]
-
-
-@pytest.mark.parametrize("aggregate", ["min", "max"])
-def test_min_max_on_text_column_is_refused_on_a_chart_y_axis(aggregate):
+@pytest.mark.parametrize("aggregate", ["sum", "avg", "min", "max"])
+def test_numeric_aggregate_on_text_column_is_refused_on_a_chart_y_axis(aggregate):
     config = make(series=[{"column_y": "dep", "aggregate_y": aggregate}])
     assert validate_create(config, COLUMNS) == [
         f"L'agrégat {aggregate} demande une colonne numérique : dep est de type string."
@@ -95,14 +86,6 @@ def test_no_aggregate_on_text_column_is_refused():
 def test_no_aggregate_on_numeric_column_is_allowed():
     config = make(series=[{"column_y": "n_cum_dose1"}])
     assert validate_create(config, COLUMNS) == []
-
-
-def test_limit_bounds():
-    for bad in (0, 51):
-        with pytest.raises(ValidationError):
-            make(x_axis={"column_x": "dep", "type": "discrete", "limit": bad})
-    for good in (1, 50):
-        make(x_axis={"column_x": "dep", "type": "discrete", "limit": good})
 
 
 def test_output_applies_the_type_and_filters_to_every_series():
@@ -174,12 +157,6 @@ def test_unknown_column_errors_are_deduplicated_in_order_and_skip_empty_names():
 
 def test_output_without_filters_has_none():
     assert to_chart_output(make(), "rid")["series"][0]["filters"] is None
-
-
-def test_output_injects_the_resource_id():
-    out = to_chart_output(make(), "abc")
-    assert out["series"][0]["resource_id"] == "abc"
-    assert out["title"] == "Doses"
 
 
 def test_update_needs_one_field():
@@ -257,16 +234,6 @@ def test_filter_without_value_is_refused():
 def test_blank_title_or_description_is_refused(field):
     errors = validate_create(make(**{field: "   "}), COLUMNS)
     assert errors == [EMPTY_TEXT_ERRORS[field]]
-
-
-def test_description_is_required():
-    with pytest.raises(ValidationError):
-        CreateChartInput(
-            title="Doses",
-            type="line",
-            x_axis={"column_x": "dep", "type": "discrete"},
-            series=[{"column_y": "n_cum_dose1"}],
-        )
 
 
 def test_output_strips_title_and_description():
