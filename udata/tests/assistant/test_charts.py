@@ -47,7 +47,7 @@ def test_valid_create_has_no_errors():
     ids=["x", "series", "filter"],
 )
 def test_unknown_column(overrides):
-    assert validate_create(make(**overrides), COLUMNS) == ["Colonne inconnue : zzz."]
+    assert validate_create(make(**overrides), COLUMNS) == ["Unknown column: zzz."]
 
 
 def test_count_series_column_y_is_not_validated():
@@ -63,8 +63,8 @@ def test_unknown_columns_are_reported_once_in_order():
         filters={"_cls": "Filter", "column": "a", "condition": "exact", "value": "1"},
     )
     assert validate_create(config, COLUMNS) == [
-        "Colonne inconnue : a.",
-        "Colonne inconnue : b.",
+        "Unknown column: a.",
+        "Unknown column: b.",
     ]
 
 
@@ -72,7 +72,7 @@ def test_unknown_columns_are_reported_once_in_order():
 def test_numeric_aggregate_on_text_column_is_refused_on_a_chart_y_axis(aggregate):
     config = make(series=[{"column_y": "dep", "aggregate_y": aggregate}])
     assert validate_create(config, COLUMNS) == [
-        f"L'agrégat {aggregate} demande une colonne numérique : dep est de type string."
+        f"The {aggregate} aggregate needs a numeric column: dep is of type string."
     ]
 
 
@@ -84,7 +84,7 @@ def test_count_on_text_column_is_allowed():
 def test_no_aggregate_on_text_column_is_refused():
     config = make(series=[{"column_y": "dep"}])
     assert validate_create(config, COLUMNS) == [
-        "La série dep doit être numérique ou agrégée par count."
+        "The dep series must be numeric or aggregated by count."
     ]
 
 
@@ -155,8 +155,8 @@ def test_output_keeps_one_count_series_in_order():
 
 def test_unknown_column_errors_are_deduplicated_in_order_and_skip_empty_names():
     assert unknown_column_errors(["b", None, "dep", "a", "b", ""], COLUMNS) == [
-        "Colonne inconnue : b.",
-        "Colonne inconnue : a.",
+        "Unknown column: b.",
+        "Unknown column: a.",
     ]
 
 
@@ -165,10 +165,8 @@ def test_output_without_filters_has_none():
 
 
 def test_update_needs_one_field():
-    assert validate_update(UpdateChartInput()) == ["Au moins une modification est requise."]
-    assert validate_update(UpdateChartInput(y_axis={})) == [
-        "Au moins une modification est requise."
-    ]
+    assert validate_update(UpdateChartInput()) == ["At least one change is required."]
+    assert validate_update(UpdateChartInput(y_axis={})) == ["At least one change is required."]
     assert validate_update(UpdateChartInput(title="x")) == []
 
 
@@ -197,7 +195,7 @@ def test_profile_columns_malformed_returns_empty():
 
 def test_update_with_only_nulls_is_an_error():
     patch = UpdateChartInput(title=None, y_axis=None)
-    assert validate_update(patch) == ["Au moins une modification est requise."]
+    assert validate_update(patch) == ["At least one change is required."]
     assert to_update_output(patch) == {}
 
 
@@ -232,7 +230,7 @@ def test_update_refuses_structural_fields(field, value):
 
 def test_filter_without_value_is_refused():
     config = make(filters={"column": "dep", "condition": "exact", "value": None})
-    assert validate_create(config, COLUMNS) == ["Le filtre exact sur dep demande une valeur."]
+    assert validate_create(config, COLUMNS) == ["The exact filter on dep needs a value."]
 
 
 @pytest.mark.parametrize("field", ["title", "description"])

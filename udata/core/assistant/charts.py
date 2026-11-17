@@ -19,8 +19,8 @@ NUMERIC_TYPES = frozenset({"int", "float"})
 
 # A chart needs both to be saved (`Chart.title` and `Chart.description` are required).
 EMPTY_TEXT_ERRORS = {
-    "title": "Le titre est obligatoire et ne peut pas être vide.",
-    "description": "La description est obligatoire et ne peut pas être vide.",
+    "title": "The title is required and cannot be empty.",
+    "description": "The description is required and cannot be empty.",
 }
 
 StrippedText = Annotated[str, StringConstraints(strip_whitespace=True)]
@@ -32,20 +32,20 @@ UnitPosition = model_choices(YAxis.unit_position)
 
 
 class XAxisInput(BaseModel):
-    column_x: str = Field(description="Colonne de l'axe X")
+    column_x: str = Field(description="Column of the X axis")
     type: AxisType = Field(
-        description="discrete pour des catégories, continuous pour des dates ou nombres ordonnés"
+        description="discrete for categories, continuous for ordered dates or numbers"
     )
     sort_x_by: SortBy = Field(
-        "axis_x", description="axis_x : trier par X ; axis_y : trier par la valeur Y"
+        "axis_x", description="axis_x: sort by X; axis_y: sort by the Y value"
     )
-    sort_x_direction: SortDirection = Field("asc", description="Sens du tri")
+    sort_x_direction: SortDirection = Field("asc", description="Sort direction")
     limit: int | None = Field(
         None,
         ge=XAxis.limit.min_value,
         le=XAxis.limit.max_value,
-        description=f"Nombre de valeurs affichées après le tri "
-        f"({XAxis.limit.min_value} à {XAxis.limit.max_value})",
+        description="Number of values shown after the sort "
+        f"({XAxis.limit.min_value} to {XAxis.limit.max_value})",
     )
 
 
@@ -55,16 +55,16 @@ class SeriesInput(BaseModel):
 
 
 class YAxisInput(BaseModel):
-    label: str | None = Field(None, description="Libellé de l'axe Y")
-    unit: str | None = Field(None, max_length=20, description="Unité des valeurs")
-    unit_position: UnitPosition | None = Field(None, description="prefix ou suffix")
-    min: float | None = Field(None, description="Borne minimale de l'axe Y")
-    max: float | None = Field(None, description="Borne maximale de l'axe Y")
+    label: str | None = Field(None, description="Label of the Y axis")
+    unit: str | None = Field(None, max_length=20, description="Unit of the values")
+    unit_position: UnitPosition | None = Field(None, description="prefix or suffix")
+    min: float | None = Field(None, description="Lower bound of the Y axis")
+    max: float | None = Field(None, description="Upper bound of the Y axis")
 
 
 class CreateChartInput(BaseModel):
-    title: StrippedText = Field(description="Titre du graphique, non vide")
-    description: StrippedText = Field(description="Description du graphique, non vide")
+    title: StrippedText = Field(description="Title of the chart, not empty")
+    description: StrippedText = Field(description="Description of the chart, not empty")
     type: ChartType
     x_axis: XAxisInput
     series: list[SeriesInput] = Field(min_length=1, max_length=4)
@@ -105,9 +105,7 @@ def aggregate_error(column: str, aggregate: Aggregate, column_type: str | None) 
     """Refusal of an aggregate other than count on a column the profile does not type as numeric."""
     if aggregate == "count" or column_type is None or column_type in NUMERIC_TYPES:
         return None
-    return (
-        f"L'agrégat {aggregate} demande une colonne numérique : {column} est de type {column_type}."
-    )
+    return f"The {aggregate} aggregate needs a numeric column: {column} is of type {column_type}."
 
 
 def query_aggregate_error(column: str, aggregate: Aggregate, column_type: str | None) -> str | None:
@@ -118,9 +116,9 @@ def query_aggregate_error(column: str, aggregate: Aggregate, column_type: str | 
 
 
 def unknown_column_errors(names: Iterable[str | None], known: dict[str, str]) -> list[str]:
-    """One French error per distinct unknown column, in order; empty names are skipped."""
+    """One error per distinct unknown column, in order; empty names are skipped."""
     unknown = dict.fromkeys(name for name in names if name and name not in known)
-    return [f"Colonne inconnue : {name}." for name in unknown]
+    return [f"Unknown column: {name}." for name in unknown]
 
 
 def _empty_text_errors(values: dict[str, str | None]) -> list[str]:
@@ -146,7 +144,7 @@ def validate_create(config: CreateChartInput, columns: dict[str, str]) -> list[s
             if error := aggregate_error(series.column_y, series.aggregate_y, column_type):
                 errors.append(error)
         elif column_type is not None and column_type not in NUMERIC_TYPES:
-            errors.append(f"La série {series.column_y} doit être numérique ou agrégée par count.")
+            errors.append(f"The {series.column_y} series must be numeric or aggregated by count.")
     errors.extend(filter_errors(config.filters))
     return errors
 
@@ -155,7 +153,7 @@ def validate_update(patch: UpdateChartInput) -> list[str]:
     if errors := _empty_text_errors({"title": patch.title, "description": patch.description}):
         return errors
     if not to_update_output(patch):
-        return ["Au moins une modification est requise."]
+        return ["At least one change is required."]
     return []
 
 

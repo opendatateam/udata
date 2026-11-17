@@ -1,7 +1,7 @@
 """Tools attached to the AI assistant agent.
 
 `create_chart` and `update_chart` return dicts (validated chart or patch, or
-a list of errors); the other tools return a French text. Outputs feed back
+a list of errors); the other tools return a text. Outputs feed back
 into the LLM as tool results, and error cases must be explained, never
 raised — an exception escaping a tool kills the whole agent run.
 """
@@ -81,25 +81,23 @@ class AssistantDeps:
 def _consume_tool_budget(ctx: RunContext[AssistantDeps]) -> str | None:
     """Enforce MAX_STEPS as a per-turn tool-call cap.
 
-    Returns a French refusal message once the budget is exhausted, None
+    Returns a refusal message once the budget is exhausted, None
     otherwise, so the model can still explain the limit in its answer.
     """
     with ctx.deps.budget_lock:
         if ctx.deps.tool_count >= MAX_STEPS:
-            return (
-                f"Action refusée : la limite de {MAX_STEPS} appels d'outils par tour est atteinte."
-            )
+            return f"Action refused: the limit of {MAX_STEPS} tool calls per turn is reached."
         ctx.deps.tool_count += 1
     return None
 
 
 def _consume_query_budget(ctx: RunContext[AssistantDeps]) -> str | None:
-    """Enforce MAX_QUERIES_PER_QUESTION, returning a French refusal once it is exhausted."""
+    """Enforce MAX_QUERIES_PER_QUESTION, returning a refusal once it is exhausted."""
     with ctx.deps.budget_lock:
         if ctx.deps.query_count >= MAX_QUERIES_PER_QUESTION:
             return (
-                f"Requête refusée : la limite de {MAX_QUERIES_PER_QUESTION} "
-                "requêtes par question est atteinte."
+                f"Query refused: the limit of {MAX_QUERIES_PER_QUESTION} "
+                "queries per question is reached."
             )
         ctx.deps.query_count += 1
     return None
@@ -138,13 +136,13 @@ def _dataset_for_resource(resource_id: str) -> Dataset | None:
 def render_profile(profile: dict) -> str:
     """Render the columns and line count of an api-tabular profile, whatever its shape."""
     columns = profile_columns(profile)
-    lines = ["Colonnes :", *(f"- {name} ({kind})" for name, kind in columns.items())]
+    lines = ["Columns:", *(f"- {name} ({kind})" for name, kind in columns.items())]
     if not columns:
-        lines = ["Aucune information de colonne disponible."]
+        lines = ["No column information available."]
     details = profile.get("profile") if isinstance(profile, dict) else None
     total_lines = details.get("total_lines") if isinstance(details, dict) else None
     if isinstance(total_lines, int):
-        lines.append(f"Nombre de lignes : {total_lines}")
+        lines.append(f"Line count: {total_lines}")
     return "\n".join(lines)
 
 
@@ -170,20 +168,20 @@ def _render_result(result: dict, *, aggregated: bool = False) -> str:
     rows = result.get("data") if isinstance(result, dict) else None
     rows = [row for row in rows or [] if isinstance(row, dict)]
     if not rows:
-        return "Requête exécutée avec succès, aucune ligne retournée."
+        return "Query run successfully, no row returned."
     meta = result.get("meta")
     total = meta.get("total") if isinstance(meta, dict) and not aggregated else None
     if not isinstance(total, int):
         total = None
-    of_total = f" ({total} lignes au total)" if total is not None else ""
+    of_total = f" ({total} rows in total)" if total is not None else ""
     columns = list(rows[0])
     lines = [" | ".join(_cell(column) for column in columns)]
     size = len(lines[0])
     if size > MAX_RESULT_CHARS:
         # Too many columns for even the header: nothing useful fits.
         return (
-            f"Résultat non affiché : ses {len(columns)} colonnes dépassent la taille "
-            f"permise{of_total}. Relance avec `columns` pour n'en garder que quelques-unes."
+            f"Result not shown: its {len(columns)} columns exceed the allowed "
+            f"size{of_total}. Run it again with `columns` to keep only a few of them."
         )
     shown = 0
     for row in rows[:PAGE_SIZE]:
@@ -195,31 +193,26 @@ def _render_result(result: dict, *, aggregated: bool = False) -> str:
         shown += 1
     if shown < min(len(rows), PAGE_SIZE):
         lines.append(
-            f"Résultat coupé à {shown} lignes pour sa taille{of_total} : "
-            "sélectionne moins de colonnes ou agrège pour voir la suite."
+            f"Result cut to {shown} rows for its size{of_total}: "
+            "select fewer columns or aggregate to see the rest."
         )
     elif total is not None and total > shown:
-        lines.append(
-            f"Résultat tronqué : {total} lignes au total, {PAGE_SIZE} premières lignes affichées."
-        )
+        lines.append(f"Truncated result: {total} rows in total, first {PAGE_SIZE} rows shown.")
     return "\n".join(lines)
 
 
-NO_ACTIVE_RESOURCE = "Aucune ressource active : ouvrez une ressource dans le data studio."
-RESOURCE_NOT_FOUND = (
-    "Ressource introuvable : aucune ressource visible ne correspond à cet identifiant."
-)
-TABULAR_UNAVAILABLE = "Le service tabulaire est indisponible."
+NO_ACTIVE_RESOURCE = "No active resource: open a resource in the data studio."
+RESOURCE_NOT_FOUND = "Resource not found: no visible resource matches this identifier."
+TABULAR_UNAVAILABLE = "The tabular service is unavailable."
 RESOURCE_NOT_IN_TABULAR = (
-    "Ressource non disponible dans le service tabulaire : "
-    "ses données ne peuvent pas être interrogées."
+    "Resource not available in the tabular service: its data cannot be queried."
 )
 
 
 def _tabular_error_message(error: TabularError) -> str:
-    """French message for the model; the text of a TabularError is only logged."""
+    """Message for the model; the text of a TabularError is only logged."""
     if isinstance(error, TabularRequestRefused):
-        return f"Requête refusée par le service tabulaire : {error.detail}."
+        return f"Query refused by the tabular service: {error.detail}."
     if isinstance(error, TabularResourceUnavailable):
         return RESOURCE_NOT_IN_TABULAR
     return TABULAR_UNAVAILABLE
@@ -303,29 +296,29 @@ def serialize_dataset_metadata(dataset: Dataset) -> str:
         ],
     }
     if total > len(resources):
-        payload["more_resources"] = f"… et {total - len(resources)} autres"
+        payload["more_resources"] = f"… and {total - len(resources)} more"
     return json.dumps(payload, ensure_ascii=False, indent=2)
 
 
 # Tool descriptions given explicitly, as f-strings, to quote the page size.
 QUERY_DATA_DESCRIPTION = f"""\
-Interroge la ressource active (lecture seule) pour vérifier les données avant un graphique.
+Query the active resource (read only) to check the data before a chart.
 
-Un agrégat sans `groupby` est autorisé : il donne un total global.
-Pour regrouper, renseigne `groupby`, `aggregate_column` et `aggregate`
-(avg, sum, count, min, max). Sans tri explicite, un regroupement est trié
-sur la colonne de regroupement. Avec un agrégat, ne passe pas `columns` et ne
-trie que sur la colonne `groupby` (le service ne trie pas sur une valeur
-agrégée). Retourne au plus {PAGE_SIZE} lignes."""
+An aggregate without `groupby` is allowed: it gives an overall total.
+To group, set `groupby`, `aggregate_column` and `aggregate`
+(avg, sum, count, min, max). Without an explicit sort, a grouping is sorted
+on the groupby column. With an aggregate, do not pass `columns` and only
+sort on the `groupby` column (the service does not sort on an aggregated
+value). Returns at most {PAGE_SIZE} rows."""
 
 CREATE_CHART_DESCRIPTION = f"""\
-Crée un graphique sur la ressource active et remplace la structure du graphique en cours.
+Create a chart on the active resource, replacing the structure of the current chart.
 
-À n'appeler qu'après une vérification avec `query_data`. Types : line ou
-histogram, 1 à 4 séries. Retourne le graphique validé ou la liste des erreurs
-à corriger. `more_groups` vaut true quand une série dépasse {PAGE_SIZE} points (groupes,
-ou lignes sans agrégat) : le graphique n'en affiche que les {PAGE_SIZE} premiers, dis-le
-à l'utilisateur et propose un filtre ou un agrégat. null : vérification impossible."""
+Only call it after a check with `query_data`. Types: line or histogram,
+1 to 4 series. Returns the validated chart or the list of errors to fix.
+`more_groups` is true when a series has more than {PAGE_SIZE} points (groups,
+or rows without aggregate): the chart only shows the first {PAGE_SIZE}, so tell
+the user and suggest a filter or an aggregate. null: the check was not possible."""
 
 
 def register_tools(agent: Agent) -> None:
@@ -333,17 +326,17 @@ def register_tools(agent: Agent) -> None:
 
     @agent.tool
     def get_dataset_metadata(ctx: RunContext[AssistantDeps], dataset_id: str) -> str:
-        """Récupère les métadonnées d'un dataset : titre, licence, organisation et ressources."""
+        """Get the metadata of a dataset: title, license, organization and resources."""
         if refusal := _consume_tool_budget(ctx):
             return refusal
         dataset = _dataset_for_current_user(dataset_id)
         if dataset is None:
-            return f"Dataset introuvable : aucun dataset ne correspond à « {dataset_id} »."
+            return f'Dataset not found: no dataset matches "{dataset_id}".'
         return serialize_dataset_metadata(dataset)
 
     @agent.tool
     def inspect_schema(ctx: RunContext[AssistantDeps], resource_id: str) -> str:
-        """Inspecte le schéma d'une ressource tabulaire : colonnes, types et nombre de lignes."""
+        """Inspect the schema of a tabular resource: columns, types and line count."""
         if refusal := _consume_tool_budget(ctx):
             return refusal
         if _dataset_for_resource(resource_id) is None:
@@ -368,16 +361,16 @@ def register_tools(agent: Agent) -> None:
         if refusal := _consume_tool_budget(ctx):
             return refusal
         if bool(aggregate_column) != bool(aggregate):
-            return "Requête invalide : aggregate_column et aggregate vont ensemble."
+            return "Invalid query: aggregate_column and aggregate go together."
         if groupby and not aggregate:
-            return "Requête invalide : groupby demande un agrégat (aggregate_column et aggregate)."
+            return "Invalid query: groupby needs an aggregate (aggregate_column and aggregate)."
         if aggregate and columns:
-            return "Requête invalide : columns ne peut pas être combiné avec un agrégat ; retire columns."
+            return "Invalid query: columns cannot be combined with an aggregate; remove columns."
         if aggregate and sort_column and sort_column != groupby:
             return (
-                "Requête invalide : le tri n'est possible que sur la colonne groupby ; "
-                "le service ne trie pas sur une valeur agrégée. "
-                "Trie côté graphique avec sort_x_by=axis_y."
+                "Invalid query: sorting is only possible on the groupby column; "
+                "the service does not sort on an aggregated value. "
+                "Sort in the chart with sort_x_by=axis_y."
             )
         try:
             resource_id, known = _active_columns(ctx)
@@ -412,8 +405,8 @@ def register_tools(agent: Agent) -> None:
         rendered = _render_result(result, aggregated=bool(groupby))
         if groupby and has_more_rows(result):
             rendered += (
-                f"\nPlus de {PAGE_SIZE} groupes : seuls les {PAGE_SIZE} premiers "
-                "sont pris en compte."
+                f"\nMore than {PAGE_SIZE} groups: only the first {PAGE_SIZE} "
+                "are taken into account."
             )
         return rendered
 
@@ -439,10 +432,10 @@ def register_tools(agent: Agent) -> None:
 
     @agent.tool
     def update_chart(ctx: RunContext[AssistantDeps], patch: UpdateChartInput) -> dict:
-        """Modifie la présentation du graphique en cours : titre, description, type, axe Y.
+        """Update the presentation of the current chart: title, description, type, Y axis.
 
-        Ne jamais l'utiliser pour changer les colonnes, les agrégats, les filtres
-        ou l'axe X : utilise `create_chart` dans ce cas.
+        Never use it to change the columns, aggregates, filters or X axis:
+        use `create_chart` for that.
         """
         if refusal := _consume_tool_budget(ctx):
             return {"status": "error", "errors": [refusal]}
@@ -456,7 +449,7 @@ def register_tools(agent: Agent) -> None:
         question: str,
         choices: Annotated[list[str], Field(min_length=2, max_length=4)],
     ) -> str:
-        """Demande une clarification à l'utilisateur en proposant une liste de choix numérotés."""
+        """Ask the user for a clarification, offering a list of numbered choices."""
         if refusal := _consume_tool_budget(ctx):
             return refusal
         lines = [question, ""]

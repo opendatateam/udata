@@ -287,7 +287,7 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert "<untrusted_active_context>" in seen
         assert "Aides aux communes" in seen
         assert "Subventions 2025" in seen
-        assert f"Ressource active (resource_id à utiliser avec les outils) : {resource.id}" in seen
+        assert f"Active resource (resource_id to use with the tools): {resource.id}" in seen
         assert "nom_commune" in seen
 
     def test_chat_without_resource_id_has_no_active_context(self, mocker):
@@ -302,6 +302,20 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         response.get_data()
         assert model.seen
         assert "untrusted_active_context" not in str(model.seen)
+
+    @pytest.mark.parametrize(
+        "lang,language", [("fr", "French"), ("de", "German"), ("en", "English")]
+    )
+    def test_the_answer_is_in_the_request_language(self, mocker, lang, language):
+        self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
+        self.app.config["AI_API_KEY"] = "test-key"
+        self.login()
+        model = RecordingModel()
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
+        response = self.post(url_for("api.assistant_chat", lang=lang), data=PAYLOAD)
+        assert response.status_code == 200
+        response.get_data()
+        assert f"Always answer in {language}," in str(model.seen)
 
     def test_chat_invalid_resource_id_is_rejected(self, mocker):
         self.app.config["AI_BASE_URL"] = "http://albert.test/v1"
@@ -323,7 +337,7 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         mocker.patch.object(
             TabularClient,
             "get_profile",
-            side_effect=TabularError("le service tabulaire a renvoyé une erreur."),
+            side_effect=TabularError("the tabular service returned an error."),
         )
         model = RecordingModel()
         mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
@@ -335,7 +349,7 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         response.get_data()
         seen = str(model.seen)
         assert "Aides aux communes" in seen
-        assert "Colonnes" not in seen
+        assert "Columns:" not in seen
 
     @pytest.mark.parametrize("owner", ["private", "shared", "none"])
     def test_chat_invisible_resource_gets_no_context(self, mocker, owner):
@@ -442,13 +456,11 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert "</untrusted_visualization_context> x" not in seen
         # The system prompt also names the opening tag, so balance the closing
         # tags against the injected blocks (one per recorded model call).
-        assert seen.count("</untrusted_visualization_context>") == seen.count(
-            "Contexte du graphique"
-        )
+        assert seen.count("</untrusted_visualization_context>") == seen.count("Chart context")
 
     def test_null_visualization_adds_no_block(self, mocker):
         seen = self._chat_with_visualization(mocker, None)
-        assert "Contexte du graphique" not in seen
+        assert "Chart context" not in seen
         assert "</untrusted_visualization_context>" not in seen
 
     def test_invalid_visualization_context_is_rejected(self, mocker):
@@ -542,7 +554,7 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         response = self.post(url_for("api.assistant_chat"), data=payload)
         assert response.status_code == 200
         response.get_data()
-        assert f"Ressource active (resource_id à utiliser avec les outils) : {resource.id}" in str(
+        assert f"Active resource (resource_id to use with the tools): {resource.id}" in str(
             model.seen
         )
 
@@ -765,7 +777,7 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         dataset = DatasetFactory(title="Brouillon du propriétaire", private=True, owner=owner)
         seen = self._chat_through_metadata_tool(mocker, dataset, owner)
         assert "Brouillon du propriétaire" in seen
-        assert "introuvable" not in seen
+        assert "not found" not in seen
 
 
 class AssistantChatSizeLimitsTest(PytestOnlyAPITestCase):
@@ -1178,7 +1190,7 @@ class AssistantChatUserPartsTest(PytestOnlyAPITestCase):
                 "toolCallId": "call-1",
                 "state": "output-available",
                 "input": {"resource_id": "r"},
-                "output": "Colonnes : dep",
+                "output": "Columns: dep",
             },
             {
                 "type": "dynamic-tool",

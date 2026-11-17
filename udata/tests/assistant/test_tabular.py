@@ -147,23 +147,23 @@ class TabularClientTest(PytestOnlyTestCase):
         )
         with pytest.raises(TabularRequestRefused) as excinfo:
             TabularClient().get_data(RESOURCE_ID, "nope__exact=1")
-        assert excinfo.value.detail == "column ressource.nope does not exist"
+        assert excinfo.value.detail == "column resource.nope does not exist"
 
     @pytest.mark.parametrize(
         "message,hidden",
         [
             (
                 'column "70f4c60b4f9828beb7922b1fe0dae8da.votants" must appear in the GROUP BY',
-                'column "ressource.votants" must appear in the GROUP BY',
+                'column "resource.votants" must appear in the GROUP BY',
             ),
-            ('column "70f4c60b4f9828beb7922b1fe0dae8da"."a b" x', 'column "ressource"."a b" x'),
+            ('column "70f4c60b4f9828beb7922b1fe0dae8da"."a b" x', 'column "resource"."a b" x'),
             (
                 'relation "csvapi.70f4c60b4f9828beb7922b1fe0dae8da" is locked',
-                'relation "ressource" is locked',
+                'relation "resource" is locked',
             ),
-            ("table '70f4c60b4f9828beb7922b1fe0dae8da' x", "table 'ressource' x"),
-            ("on 70f4c60b4f9828beb7922b1fe0dae8da for x", "on ressource for x"),
-            ("70f4c60b4f9828beb7922b1fe0dae8da", "ressource"),
+            ("table '70f4c60b4f9828beb7922b1fe0dae8da' x", "table 'resource' x"),
+            ("on 70f4c60b4f9828beb7922b1fe0dae8da for x", "on resource for x"),
+            ("70f4c60b4f9828beb7922b1fe0dae8da", "resource"),
             ("value 170f4c60b4f9828beb7922b1fe0dae8da", "value 170f4c60b4f9828beb7922b1fe0dae8da"),
         ],
     )
@@ -188,7 +188,7 @@ class TabularClientTest(PytestOnlyTestCase):
         )
         with pytest.raises(TabularRequestRefused) as excinfo:
             TabularClient().get_data(RESOURCE_ID, "a__groupby")
-        assert excinfo.value.detail == ("column ressource." + "x" * 400)[:MAX_DETAIL_LENGTH]
+        assert excinfo.value.detail == ("column resource." + "x" * 400)[:MAX_DETAIL_LENGTH]
 
     def test_a_database_error_404_is_a_refusal(self, requests_mock):
         # PostgREST answers 404 to an aggregate PostgreSQL has no function for
@@ -235,7 +235,7 @@ class TabularClientTest(PytestOnlyTestCase):
         )
         with pytest.raises(TabularRequestRefused) as excinfo:
             TabularClient().get_data(RESOURCE_ID, "a__groupby&b__sum")
-        assert excinfo.value.detail == "agrégation non autorisée sur cette ressource"
+        assert excinfo.value.detail == "aggregation not allowed on this resource"
 
     def test_a_column_without_index_is_a_refusal_listing_the_indexed_columns(self, requests_mock):
         # api-tabular's raise_if_not_index, on a resource with table_indexes
@@ -255,8 +255,7 @@ class TabularClientTest(PytestOnlyTestCase):
         with pytest.raises(TabularRequestRefused) as excinfo:
             TabularClient().get_data(RESOURCE_ID, "score__groupby")
         assert excinfo.value.detail == (
-            "colonne score non indexée : seules les colonnes birth, id "
-            "peuvent être regroupées ou agrégées"
+            "column score is not indexed: only the columns birth, id can be grouped or aggregated"
         )
 
     def test_an_unknown_unauthorized_detail_is_a_generic_error(self, requests_mock):

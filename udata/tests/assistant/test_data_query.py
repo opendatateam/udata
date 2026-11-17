@@ -175,8 +175,8 @@ def test_filter_errors_flags_every_condition_without_a_value():
         ]
     )
     assert filter_errors(f) == [
-        "Le filtre exact sur a demande une valeur.",
-        "Le filtre greater sur b demande une valeur.",
+        "The exact filter on a needs a value.",
+        "The greater filter on b needs a value.",
     ]
 
 
@@ -187,7 +187,7 @@ def test_filter_errors_accepts_null_conditions_and_no_filter():
 
 def test_filter_errors_treats_a_blank_value_as_missing():
     assert filter_errors(Filter(column="a", condition="exact", value="  \t")) == [
-        "Le filtre exact sur a demande une valeur."
+        "The exact filter on a needs a value."
     ]
 
 

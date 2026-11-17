@@ -5,7 +5,7 @@ Data is read through the declarative query-string API:
 aggregations, sorting, pagination).
 
 ``TabularError`` messages are never shown to clients nor to the model: the
-tools translate each error into their own French message, keeping only the
+tools translate each error into their own message, keeping only the
 refusal detail of ``TabularRequestRefused``. Internal URLs and upstream
 details stay in the logs.
 """
@@ -55,7 +55,7 @@ class TabularResourceUnavailable(TabularError):
 # Bound on the refusal detail fed back to the agent.
 MAX_DETAIL_LENGTH = 300
 
-FORBIDDEN_AGGREGATION = "agrégation non autorisée sur cette ressource"
+FORBIDDEN_AGGREGATION = "aggregation not allowed on this resource"
 # api-tabular's two "Unauthorized parameters" details (build_sql_query_string, raise_if_not_index).
 FORBIDDEN_AGGREGATION_DETAIL = re.compile(r"^Aggregation parameters .* are not allowed")
 NOT_INDEXED_DETAIL = re.compile(
@@ -63,7 +63,7 @@ NOT_INDEXED_DETAIL = re.compile(
 )
 # The resource's table is gone: the resource is not available, not the query wrong.
 MISSING_TABLE_CODES = {"42P01", "PGRST205"}
-# The resource's internal table name, possibly schema-qualified, read as "ressource".
+# The resource's internal table name, possibly schema-qualified, read as "resource".
 TABLE_NAME = re.compile(r"\b(?:csvapi\.)?[0-9a-f]{32}\b")
 
 
@@ -102,7 +102,7 @@ def _refusal_detail(response: requests.Response) -> str | None:
         return None
     if not isinstance(detail, str) or not detail:
         return None
-    return TABLE_NAME.sub("ressource", detail)
+    return TABLE_NAME.sub("resource", detail)
 
 
 def _unauthorized_detail(detail) -> str | None:
@@ -119,8 +119,8 @@ def _unauthorized_detail(detail) -> str | None:
     except (ValueError, SyntaxError, TypeError, RecursionError, MemoryError):
         allowed = match["allowed"]
     return (
-        f"colonne {match['column']} non indexée : seules les colonnes {allowed} "
-        "peuvent être regroupées ou agrégées"
+        f"column {match['column']} is not indexed: only the columns {allowed} "
+        "can be grouped or aggregated"
     )
 
 
@@ -132,7 +132,7 @@ def _validate_resource_id(resource_id: str) -> str:
     query injection through ``?`` or ``#``).
     """
     if (normalized := normalize_uuid(resource_id)) is None:
-        raise TabularError("resource_id invalide : un UUID est attendu.")
+        raise TabularError("invalid resource_id: a UUID is expected.")
     return normalized
 
 
@@ -170,12 +170,12 @@ class TabularClient:
                 raise TabularRequestRefused(detail) from error
             if missing_table or error.response.status_code == 404:
                 raise TabularResourceUnavailable(
-                    "la ressource n'est pas disponible dans le service tabulaire."
+                    "the resource is not available in the tabular service."
                 ) from error
-            raise TabularError("le service tabulaire a renvoyé une erreur.") from error
+            raise TabularError("the tabular service returned an error.") from error
         except requests.exceptions.RequestException as error:
             log.warning("api-tabular request failed: %s: %s", url, error)
-            raise TabularError("le service tabulaire a renvoyé une erreur.") from error
+            raise TabularError("the tabular service returned an error.") from error
 
 
 def has_more_rows(first_page: dict) -> bool:

@@ -128,7 +128,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         payload = json.loads(result)
         listed = [resource["id"] for resource in payload["resources"]]
         assert listed == [str(r.id) for r in resources[:MAX_SERIALIZED_RESOURCES]]
-        assert payload["more_resources"] == "… et 3 autres"
+        assert payload["more_resources"] == "… and 3 more"
 
     def test_get_dataset_metadata_of_a_dataset_stored_without_resources(self):
         dataset = DatasetFactory(title="Sans ressources")
@@ -139,14 +139,14 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         assert payload["resources"] == []
         assert "more_resources" not in payload
 
-    def test_get_dataset_metadata_unknown_id_returns_french_error(self):
+    def test_get_dataset_metadata_unknown_id_returns_an_error(self):
         result = self.call("get_dataset_metadata", self.make_deps(), dataset_id="0" * 24)
-        assert "introuvable" in result
+        assert "not found" in result
 
     def test_get_dataset_metadata_hides_private_dataset_from_anonymous(self):
         dataset = DatasetFactory(title="Secret", private=True)
         result = self.call("get_dataset_metadata", self.make_deps(), dataset_id=str(dataset.id))
-        assert "introuvable" in result
+        assert "not found" in result
         assert "Secret" not in result
 
     def test_get_dataset_metadata_owner_sees_own_private_dataset(self):
@@ -180,7 +180,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         )
         result = self.call("inspect_schema", deps, resource_id=str(resource.id))
         assert "- col_a (int)\n- col_b (string)" in result
-        assert "Nombre de lignes : 42" in result
+        assert "Line count: 42" in result
 
     @pytest.mark.parametrize(
         "profile",
@@ -197,20 +197,20 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         deps = self.make_deps()
         mocker.patch.object(deps.tabular, "get_profile", return_value=profile)
         result = self.call("inspect_schema", deps, resource_id=str(resource.id))
-        assert result == "Aucune information de colonne disponible."
+        assert result == "No column information available."
 
     def test_inspect_schema_reads_a_resource_id_written_in_uppercase(self, mocker):
         resource = self.owned_resource()
         deps = self.make_deps()
         mocker.patch.object(deps.tabular, "get_profile", return_value={"profile": {}})
         result = self.call("inspect_schema", deps, resource_id=str(resource.id).upper())
-        assert "introuvable" not in result
+        assert "not found" not in result
 
-    def test_inspect_schema_unknown_resource_returns_french_error(self, mocker):
+    def test_inspect_schema_unknown_resource_returns_an_error(self, mocker):
         deps = self.make_deps()
         profile = mocker.patch.object(deps.tabular, "get_profile")
         result = self.call("inspect_schema", deps, resource_id=str(ResourceFactory().id))
-        assert "introuvable" in result
+        assert "not found" in result
         profile.assert_not_called()
 
     def test_inspect_schema_refuses_a_resource_id_shared_by_several_datasets(self, mocker):
@@ -220,7 +220,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         deps = self.make_deps()
         profile = mocker.patch.object(deps.tabular, "get_profile")
         result = self.call("inspect_schema", deps, resource_id=str(shared_id))
-        assert "introuvable" in result
+        assert "not found" in result
         profile.assert_not_called()
 
     def test_inspect_schema_hides_resource_of_private_dataset(self, mocker):
@@ -228,7 +228,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         profile = mocker.patch.object(deps.tabular, "get_profile")
         resource = self.owned_resource(private=True)
         result = self.call("inspect_schema", deps, resource_id=str(resource.id))
-        assert "introuvable" in result
+        assert "not found" in result
         profile.assert_not_called()
 
     def test_inspect_schema_owner_of_private_dataset_is_allowed(self, mocker):
@@ -239,18 +239,18 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             deps.tabular, "get_profile", return_value={"profile": {"total_lines": 1}}
         )
         result = self.call("inspect_schema", deps, user=owner, resource_id=str(resource.id))
-        assert "introuvable" not in result
+        assert "not found" not in result
 
-    def test_inspect_schema_tabular_error_returns_sanitized_french_message(self, mocker):
+    def test_inspect_schema_tabular_error_returns_a_sanitized_message(self, mocker):
         resource = self.owned_resource()
         deps = self.make_deps()
         mocker.patch.object(
             deps.tabular,
             "get_profile",
-            side_effect=TabularError("le service tabulaire a renvoyé une erreur."),
+            side_effect=TabularError("the tabular service returned an error."),
         )
         result = self.call("inspect_schema", deps, resource_id=str(resource.id))
-        assert result == "Le service tabulaire est indisponible."
+        assert result == "The tabular service is unavailable."
 
     def test_inspect_schema_says_when_the_resource_is_not_in_the_tabular_service(self, mocker):
         resource = self.owned_resource()
@@ -260,8 +260,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         )
         result = self.call("inspect_schema", deps, resource_id=str(resource.id))
         assert result == (
-            "Ressource non disponible dans le service tabulaire : "
-            "ses données ne peuvent pas être interrogées."
+            "Resource not available in the tabular service: its data cannot be queried."
         )
 
     def test_tool_budget_caps_the_calls_of_every_tool(self, mocker):
@@ -277,9 +276,9 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         ]
         for index in range(MAX_STEPS):
             name, kwargs = calls[index % len(calls)]
-            assert "refusée" not in self.call(name, deps, **kwargs)
+            assert "refused" not in self.call(name, deps, **kwargs)
         result = self.call("request_clarification", deps, question="?", choices=["a", "b"])
-        assert "refusée" in result
+        assert "refused" in result
         assert deps.tool_count == MAX_STEPS
 
     def _race(self, name, deps, calls, **kwargs):
@@ -298,7 +297,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         results = self._race(
             "request_clarification", deps, 2 * MAX_STEPS, question="?", choices=["a", "b"]
         )
-        assert sum("refusée" not in result for result in results) == MAX_STEPS
+        assert sum("refused" not in result for result in results) == MAX_STEPS
 
     def test_query_budget_holds_under_parallel_calls(self, mocker):
         resource = self.owned_resource()
@@ -308,7 +307,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         with pytest.MonkeyPatch.context() as mp:
             mp.setattr("udata.core.assistant.tools.MAX_STEPS", 100)
             results = self._race("query_data", deps, 2 * MAX_QUERIES_PER_QUESTION)
-        assert sum("refusée" not in result for result in results) == MAX_QUERIES_PER_QUESTION
+        assert sum("refused" not in result for result in results) == MAX_QUERIES_PER_QUESTION
 
     def test_request_clarification_numbers_choices(self):
         result = self.call(
@@ -353,7 +352,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
 
     def test_query_data_requires_an_active_resource(self):
         result = self.call("query_data", self.make_deps())
-        assert "Aucune ressource active" in result
+        assert "No active resource" in result
 
     def test_query_data_groups_and_sorts_on_x(self, mocker):
         deps, resource = self.active(mocker)
@@ -378,7 +377,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             "query_data", deps, groupby="dep", aggregate_column="n_cum_dose1", aggregate="max"
         )
         # cdata parses this exact sentence
-        assert result.endswith("\nPlus de 50 groupes : seuls les 50 premiers sont pris en compte.")
+        assert result.endswith("\nMore than 50 groups: only the first 50 are taken into account.")
         get_data.assert_called_once_with(
             str(resource.id), "dep__groupby&n_cum_dose1__max&dep__sort=asc&page=1&page_size=50"
         )
@@ -390,9 +389,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             deps.tabular, "get_data", return_value={"data": rows, "meta": {"total": 926}}
         )
         result = self.call("query_data", deps, columns=["dep"])
-        assert result.endswith(
-            "\nRésultat tronqué : 926 lignes au total, 50 premières lignes affichées."
-        )
+        assert result.endswith("\nTruncated result: 926 rows in total, first 50 rows shown.")
 
     def test_query_data_does_not_flag_exactly_50_groups(self, mocker):
         deps, _ = self.active(mocker)
@@ -418,7 +415,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         deps, _ = self.active(mocker)
         get_data = mocker.patch.object(deps.tabular, "get_data")
         result = self.call("query_data", deps, groupby="dep")
-        assert "groupby demande un agrégat" in result
+        assert "groupby needs an aggregate" in result
         get_data.assert_not_called()
 
     def test_query_data_refuses_columns_with_an_aggregate(self, mocker):
@@ -434,7 +431,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             columns=["dep"],
         )
         assert result == (
-            "Requête invalide : columns ne peut pas être combiné avec un agrégat ; retire columns."
+            "Invalid query: columns cannot be combined with an aggregate; remove columns."
         )
         get_data.assert_not_called()
         get_profile.assert_not_called()
@@ -456,7 +453,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             sort_column="n_cum_dose1",
             sort_direction="desc",
         )
-        assert "le tri n'est possible que sur la colonne groupby" in result
+        assert "sorting is only possible on the groupby column" in result
         assert "sort_x_by=axis_y" in result
         get_data.assert_not_called()
         get_profile.assert_not_called()
@@ -486,7 +483,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             aggregate="sum",
             sort_column="dep",
         )
-        assert "le tri n'est possible que sur la colonne groupby" in result
+        assert "sorting is only possible on the groupby column" in result
         get_data.assert_not_called()
         get_profile.assert_not_called()
         assert deps.query_count == 0
@@ -495,7 +492,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         deps, _ = self.active(mocker)
         get_data = mocker.patch.object(deps.tabular, "get_data")
         result = self.call("query_data", deps, sort_column="foo")
-        assert "Colonne inconnue : foo." in result
+        assert "Unknown column: foo." in result
         get_data.assert_not_called()
 
     def test_query_data_feeds_the_service_refusal_back(self, mocker):
@@ -504,29 +501,29 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             deps.tabular, "get_data", side_effect=TabularRequestRefused("bad param")
         )
         result = self.call("query_data", deps)
-        assert result == "Requête refusée par le service tabulaire : bad param."
+        assert result == "Query refused by the tabular service: bad param."
 
-    def test_query_data_tabular_error_is_a_french_message(self, mocker):
+    def test_query_data_tabular_error_is_a_message(self, mocker):
         deps, _ = self.active(mocker)
         mocker.patch.object(deps.tabular, "get_data", side_effect=TabularError("english"))
         result = self.call("query_data", deps)
-        assert result == "Le service tabulaire est indisponible."
+        assert result == "The tabular service is unavailable."
 
     def test_query_data_hides_resource_of_private_dataset(self, mocker):
         resource = self.owned_resource(private=True)
         deps = self.make_deps(resource_id=str(resource.id))
         profile = mocker.patch.object(deps.tabular, "get_profile")
         result = self.call("query_data", deps)
-        assert "introuvable" in result
+        assert "not found" in result
         profile.assert_not_called()
 
     def test_query_data_caps_queries_per_question(self, mocker):
         deps, _ = self.active(mocker)
         mocker.patch.object(deps.tabular, "get_data", return_value={"data": []})
         for _ in range(MAX_QUERIES_PER_QUESTION):
-            assert "refusée" not in self.call("query_data", deps)
+            assert "refused" not in self.call("query_data", deps)
         result = self.call("query_data", deps)
-        assert result == "Requête refusée : la limite de 3 requêtes par question est atteinte."
+        assert result == "Query refused: the limit of 3 queries per question is reached."
 
     def test_create_chart_returns_the_validated_chart(self, mocker):
         deps, resource = self.active(mocker)
@@ -544,7 +541,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         get_data = mocker.patch.object(deps.tabular, "get_data")
         config = self.chart_config(x_axis={"column_x": "foo", "type": "discrete"})
         result = self.call("create_chart", deps, config=config)
-        assert result == {"status": "error", "errors": ["Colonne inconnue : foo."]}
+        assert result == {"status": "error", "errors": ["Unknown column: foo."]}
         get_data.assert_not_called()
 
     def test_query_data_refuses_a_filter_without_value_without_using_a_query(self, mocker):
@@ -552,7 +549,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         get_data = mocker.patch.object(deps.tabular, "get_data")
         flt = {"column": "dep", "condition": "exact", "value": ""}
         result = self.call("query_data", deps, filters=Filter(**flt))
-        assert result == "Le filtre exact sur dep demande une valeur."
+        assert result == "The exact filter on dep needs a value."
         get_data.assert_not_called()
         assert deps.query_count == 0
 
@@ -566,7 +563,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             "query_data", deps, groupby="dep", aggregate_column="label", aggregate=aggregate
         )
         assert result == (
-            f"L'agrégat {aggregate} demande une colonne numérique : label est de type string."
+            f"The {aggregate} aggregate needs a numeric column: label is of type string."
         )
         get_data.assert_not_called()
         assert deps.query_count == 0
@@ -587,7 +584,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         result = self.call(
             "query_data", deps, groupby="dep", aggregate_column="label", aggregate="count"
         )
-        assert "numérique" not in result
+        assert "numeric" not in result
         assert deps.query_count == 1
 
     def test_create_chart_refuses_a_filter_without_value(self, mocker):
@@ -596,13 +593,13 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         result = self.call("create_chart", deps, config=config)
         assert result == {
             "status": "error",
-            "errors": ["Le filtre greater sur dep demande une valeur."],
+            "errors": ["The greater filter on dep needs a value."],
         }
 
     def test_create_chart_requires_an_active_resource(self):
         result = self.call("create_chart", self.make_deps(), config=self.chart_config())
         assert result["status"] == "error"
-        assert "Aucune ressource active" in result["errors"][0]
+        assert "No active resource" in result["errors"][0]
 
     AGGREGATED = "dep__groupby&n_cum_dose1__max&dep__sort=asc"
     RAW = "columns=dep,n_cum_dose1&dep__sort=asc"
@@ -683,8 +680,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         assert result == {
             "status": "error",
             "errors": [
-                "Requête refusée par le service tabulaire : "
-                'invalid input syntax for type bigint: "abc".'
+                'Query refused by the tabular service: invalid input syntax for type bigint: "abc".'
             ],
         }
 
@@ -731,10 +727,7 @@ def test_render_result_shows_at_most_one_page_of_rows():
     rows = [{"n": i} for i in range(PAGE_SIZE + 1)]
     lines = _render_result({"data": rows, "meta": {"total": PAGE_SIZE + 1}}).split("\n")
     assert lines[PAGE_SIZE] == str(PAGE_SIZE - 1)
-    assert (
-        lines[-1]
-        == f"Résultat tronqué : {PAGE_SIZE + 1} lignes au total, 50 premières lignes affichées."
-    )
+    assert lines[-1] == f"Truncated result: {PAGE_SIZE + 1} rows in total, first 50 rows shown."
 
 
 def test_render_result_keeps_each_row_on_one_line_and_cuts_long_cells():
@@ -749,14 +742,14 @@ def test_render_result_leaves_out_whole_rows_past_the_size_bound():
     rendered = _render_result({"data": rows})
     lines = rendered.split("\n")
     assert len(rendered) <= MAX_RESULT_CHARS + 200
-    assert lines[-1].startswith(f"Résultat coupé à {len(lines) - 2} lignes pour sa taille")
+    assert lines[-1].startswith(f"Result cut to {len(lines) - 2} rows for its size")
     assert all(line.count(" | ") == 9 for line in lines[:-1])
 
 
 def test_render_result_cut_for_size_keeps_the_total():
     rows = [{f"c{i}": "v" * MAX_CELL_CHARS for i in range(10)} for _ in range(PAGE_SIZE)]
     rendered = _render_result({"data": rows, "meta": {"total": 926}})
-    assert "(926 lignes au total)" in rendered.split("\n")[-1]
+    assert "(926 rows in total)" in rendered.split("\n")[-1]
 
 
 def test_render_result_of_an_aggregate_gives_no_total():
@@ -764,7 +757,7 @@ def test_render_result_of_an_aggregate_gives_no_total():
     rows = [{f"c{i}": "v" * MAX_CELL_CHARS for i in range(10)} for _ in range(PAGE_SIZE)]
     rendered = _render_result({"data": rows, "meta": {"total": 926}}, aggregated=True)
     assert "au total" not in rendered
-    assert rendered.split("\n")[-1].startswith("Résultat coupé à")
+    assert rendered.split("\n")[-1].startswith("Result cut to")
 
 
 def test_render_result_with_too_many_columns_asks_for_fewer():
@@ -772,6 +765,6 @@ def test_render_result_with_too_many_columns_asks_for_fewer():
     rows = [{f"colonne_au_nom_long_{i:03}": i for i in range(400)}]
     rendered = _render_result({"data": rows, "meta": {"total": 12}})
     assert len(rendered) <= MAX_RESULT_CHARS
-    assert rendered.startswith("Résultat non affiché : ses 400 colonnes")
-    assert "12 lignes au total" in rendered
+    assert rendered.startswith("Result not shown: its 400 columns")
+    assert "12 rows in total" in rendered
     assert "`columns`" in rendered

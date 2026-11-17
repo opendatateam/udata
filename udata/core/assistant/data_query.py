@@ -195,13 +195,13 @@ def with_page(query: str, page: int = 1, page_size: int = PAGE_SIZE) -> str:
 
 
 def filter_errors(filters: GenericFilter | None) -> list[str]:
-    """One French error per condition that needs a value but has none."""
+    """One error per condition that needs a value but has none."""
     if filters is None:
         return []
     if isinstance(filters, Filter):
         if filters.condition in ("is_null", "is_not_null") or (filters.value or "").strip():
             return []
-        return [f"Le filtre {filters.condition} sur {filters.column} demande une valeur."]
+        return [f"The {filters.condition} filter on {filters.column} needs a value."]
     return [error for child in filters.filters for error in filter_errors(child)]
 
 

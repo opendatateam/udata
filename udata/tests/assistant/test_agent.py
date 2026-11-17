@@ -29,8 +29,8 @@ class AssistantAgentTest(PytestOnlyDBTestCase):
         assert get_agent().model_settings is None
 
     def test_instructions_follow_the_tool_limits(self):
-        assert f"au plus {MAX_QUERIES_PER_QUESTION} appels" in SYSTEM_INSTRUCTIONS
-        assert f"au plus {PAGE_SIZE} lignes ou groupes" in SYSTEM_INSTRUCTIONS
+        assert f"at most {MAX_QUERIES_PER_QUESTION} calls" in SYSTEM_INSTRUCTIONS
+        assert f"at most {PAGE_SIZE} rows or groups" in SYSTEM_INSTRUCTIONS
 
     def test_the_model_receives_the_instructions_and_tool_descriptions(self):
         received = {}
@@ -43,5 +43,5 @@ class AssistantAgentTest(PytestOnlyDBTestCase):
         deps = AssistantDeps(tabular=TabularClient())
         get_agent().run_sync("Bonjour", model=FunctionModel(record), deps=deps)
         assert PROMPT_VERSION in received["instructions"]
-        assert f"au plus {PAGE_SIZE} lignes" in received["query_data"]
-        assert f"dépasse {PAGE_SIZE} points" in received["create_chart"]
+        assert f"at most {PAGE_SIZE} rows" in received["query_data"]
+        assert f"more than {PAGE_SIZE} points" in received["create_chart"]
