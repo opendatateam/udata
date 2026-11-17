@@ -555,7 +555,7 @@ API key sent to the provider. The endpoint answers `503` when `AI_BASE_URL` is s
 
 ### AI_MODELS
 
-**default**: `[{"name": "openai/gpt-oss-120b", "max_output_tokens": 8192, "reasoning_effort": None}]`
+**default**: `[{"name": "gpt-oss-120b", "max_output_tokens": 8192, "reasoning_effort": None}]`
 
 Provider models available to the assistant, which uses the first one. Each model is a dict:
 

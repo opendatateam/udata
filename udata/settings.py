@@ -678,7 +678,7 @@ class Defaults(object):
     # The assistant uses the first one. `name`: the `id` of a model listed by `GET /v1/models`,
     # never one of its `aliases`.
     AI_MODELS = [
-        {"name": "openai/gpt-oss-120b", "max_output_tokens": 8192, "reasoning_effort": None},
+        {"name": "gpt-oss-120b", "max_output_tokens": 8192, "reasoning_effort": None},
     ]
     TABULAR_API_URL = None
 

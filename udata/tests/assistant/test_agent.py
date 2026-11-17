@@ -25,7 +25,7 @@ class AssistantAgentTest(PytestOnlyDBTestCase):
         assert get_agent().model_settings == {"max_tokens": 8192}
 
     def test_agent_keeps_the_provider_defaults_without_settings(self):
-        self.app.config["AI_MODELS"] = [{"name": "openai/gpt-oss-120b"}]
+        self.app.config["AI_MODELS"] = [{"name": "gpt-oss-120b"}]
         assert get_agent().model_settings is None
 
     def test_instructions_follow_the_tool_limits(self):
