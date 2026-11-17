@@ -10,17 +10,16 @@ from urllib.parse import quote
 
 from pydantic import BaseModel, ConfigDict, Discriminator, Field, Tag
 
-FilterCondition = Literal[
-    "exact",
-    "differs",
-    "is_null",
-    "is_not_null",
-    "greater",
-    "less",
-    "strictly_greater",
-    "strictly_less",
-]
-Aggregate = Literal["avg", "sum", "count", "min", "max"]
+from udata.core.visualizations import models as chart_models
+
+
+def model_choices(field) -> type:
+    """`Literal` of a model field's `choices`, so the tool schemas follow the chart model."""
+    return Literal[tuple(field.choices)]
+
+
+FilterCondition = model_choices(chart_models.Filter.condition)
+Aggregate = model_choices(chart_models.DataSeries.aggregate_y)
 PAGE_SIZE = 50
 # query_data calls allowed per user question (per agent run).
 MAX_QUERIES_PER_QUESTION = 3

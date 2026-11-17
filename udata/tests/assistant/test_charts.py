@@ -1,4 +1,7 @@
+from uuid import uuid4
+
 import pytest
+from flask import url_for
 from pydantic import ValidationError
 
 from udata.core.assistant.charts import (
@@ -12,6 +15,8 @@ from udata.core.assistant.charts import (
     validate_create,
     validate_update,
 )
+from udata.core.visualizations.models import Chart
+from udata.tests.api import PytestOnlyAPITestCase
 
 COLUMNS = {"dep": "string", "n_cum_dose1": "int", "jour": "date"}
 
@@ -248,3 +253,52 @@ def test_update_refuses_a_blank_title_or_description(field):
 
 def test_update_output_strips_the_title():
     assert to_update_output(UpdateChartInput(title=" Neuf ")) == {"title": "Neuf"}
+
+
+class ChartOutputMatchesTheChartModelTest(PytestOnlyAPITestCase):
+    """The visualization API accepts what the assistant builds, as cdata saves it."""
+
+    @pytest.mark.parametrize(
+        "overrides",
+        [
+            {},
+            {
+                "type": "histogram",
+                "x_axis": {
+                    "column_x": "dep",
+                    "type": "continuous",
+                    "sort_x_by": "axis_y",
+                    "sort_x_direction": "desc",
+                    "limit": 50,
+                },
+                "series": [
+                    {"column_y": "n_cum_dose1", "aggregate_y": "sum"},
+                    {"column_y": "dep", "aggregate_y": "count"},
+                ],
+                "y_axis": {"label": "Doses", "unit": "%", "unit_position": "prefix", "min": 0},
+            },
+            {
+                "filters": {
+                    "_cls": "AndFilters",
+                    "filters": [
+                        {"column": "jour", "condition": "greater", "value": "2021-01-01"},
+                        {
+                            "_cls": "OrFilters",
+                            "filters": [
+                                {"column": "dep", "condition": "exact", "value": "75"},
+                                {"column": "dep", "condition": "is_null"},
+                            ],
+                        },
+                    ],
+                },
+            },
+        ],
+    )
+    def test_the_chart_api_accepts_the_chart_output(self, overrides):
+        self.login()
+        chart = to_chart_output(make(**overrides), str(uuid4()))
+
+        response = self.post(url_for("api.visualizations"), chart)
+
+        assert response.status_code == 201, response.json
+        assert Chart.objects.count() == 1

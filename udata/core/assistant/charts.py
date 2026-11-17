@@ -2,17 +2,18 @@
 
 import copy
 from collections.abc import Iterable
-from typing import Annotated, Literal
+from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 from udata.core.assistant.data_query import (
-    PAGE_SIZE,
     Aggregate,
     GenericFilter,
     filter_columns,
     filter_errors,
+    model_choices,
 )
+from udata.core.visualizations.models import DataSeries, XAxis, YAxis
 
 NUMERIC_TYPES = frozenset({"int", "float"})
 
@@ -23,22 +24,28 @@ EMPTY_TEXT_ERRORS = {
 }
 
 StrippedText = Annotated[str, StringConstraints(strip_whitespace=True)]
+ChartType = model_choices(DataSeries.type)
+AxisType = model_choices(XAxis.type)
+SortBy = model_choices(XAxis.sort_x_by)
+SortDirection = model_choices(XAxis.sort_x_direction)
+UnitPosition = model_choices(YAxis.unit_position)
 
 
 class XAxisInput(BaseModel):
     column_x: str = Field(description="Colonne de l'axe X")
-    type: Literal["discrete", "continuous"] = Field(
+    type: AxisType = Field(
         description="discrete pour des catégories, continuous pour des dates ou nombres ordonnés"
     )
-    sort_x_by: Literal["axis_x", "axis_y"] = Field(
+    sort_x_by: SortBy = Field(
         "axis_x", description="axis_x : trier par X ; axis_y : trier par la valeur Y"
     )
-    sort_x_direction: Literal["asc", "desc"] = Field("asc", description="Sens du tri")
+    sort_x_direction: SortDirection = Field("asc", description="Sens du tri")
     limit: int | None = Field(
         None,
-        ge=1,
-        le=PAGE_SIZE,
-        description=f"Nombre de valeurs affichées après le tri (1 à {PAGE_SIZE})",
+        ge=XAxis.limit.min_value,
+        le=XAxis.limit.max_value,
+        description=f"Nombre de valeurs affichées après le tri "
+        f"({XAxis.limit.min_value} à {XAxis.limit.max_value})",
     )
 
 
@@ -50,7 +57,7 @@ class SeriesInput(BaseModel):
 class YAxisInput(BaseModel):
     label: str | None = Field(None, description="Libellé de l'axe Y")
     unit: str | None = Field(None, max_length=20, description="Unité des valeurs")
-    unit_position: Literal["prefix", "suffix"] | None = Field(None, description="prefix ou suffix")
+    unit_position: UnitPosition | None = Field(None, description="prefix ou suffix")
     min: float | None = Field(None, description="Borne minimale de l'axe Y")
     max: float | None = Field(None, description="Borne maximale de l'axe Y")
 
@@ -58,7 +65,7 @@ class YAxisInput(BaseModel):
 class CreateChartInput(BaseModel):
     title: StrippedText = Field(description="Titre du graphique, non vide")
     description: StrippedText = Field(description="Description du graphique, non vide")
-    type: Literal["line", "histogram"]
+    type: ChartType
     x_axis: XAxisInput
     series: list[SeriesInput] = Field(min_length=1, max_length=4)
     filters: GenericFilter | None = None
@@ -70,7 +77,7 @@ class UpdateChartInput(BaseModel):
 
     title: StrippedText | None = None
     description: StrippedText | None = None
-    type: Literal["line", "histogram"] | None = None
+    type: ChartType | None = None
     y_axis: YAxisInput | None = None
 
 
