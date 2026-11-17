@@ -296,7 +296,7 @@ class AssistantEventStream(VercelAIEventStream):
 
     async def on_error(self, error: Exception) -> AsyncIterator[BaseChunk]:
         # Provider failures and run limits are operational. A rejected key, an unknown
-        # model, an exhausted quota or a response cut by AI_MAX_OUTPUT_TOKENS is for the
+        # model, an exhausted quota or a response cut by `max_output_tokens` is for the
         # instance to fix, and anything else a bug: all are for Sentry.
         misconfigured = isinstance(
             error,

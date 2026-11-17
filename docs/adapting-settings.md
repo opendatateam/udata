@@ -553,23 +553,15 @@ Base URL of the OpenAI-compatible provider API (ex: `https://albert.api.etalab.g
 
 API key sent to the provider. The endpoint answers `503` when `AI_BASE_URL` is set without it.
 
-### AI_MODEL
+### AI_MODELS
 
-**default**: `openai/gpt-oss-120b`
+**default**: `[{"name": "openai/gpt-oss-120b", "max_output_tokens": 8192, "reasoning_effort": None}]`
 
-Name of the provider model the assistant uses. With Albert, use the `id` of a model listed by `GET /v1/models`, never one of its `aliases`: Albert renames aliases without notice.
+Provider models available to the assistant, which uses the first one. Each model is a dict:
 
-### AI_MAX_OUTPUT_TOKENS
-
-**default**: `8192`
-
-Bound on the tokens of each model response, reasoning included. `None` keeps the provider default.
-
-### AI_REASONING_EFFORT
-
-**default**: `None`
-
-Reasoning effort sent to the provider (`openai_reasoning_effort`). `None` keeps the provider default; `"none"` disables reasoning on models that would otherwise stream it.
+* `name` (required): name of the provider model. With Albert, use the `id` of a model listed by `GET /v1/models`, never one of its `aliases`: Albert renames aliases without notice.
+* `max_output_tokens`: bound on the tokens of each model response, reasoning included. Missing or `None` keeps the provider default.
+* `reasoning_effort`: reasoning effort sent to the provider (`openai_reasoning_effort`). Missing or `None` keeps the provider default; `"none"` disables reasoning on models that would otherwise stream it.
 
 ### TABULAR_API_URL
 

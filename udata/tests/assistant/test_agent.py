@@ -12,17 +12,20 @@ from udata.tests.api import PytestOnlyDBTestCase
 
 @pytest.mark.options(AI_API_KEY="test-key")
 class AssistantAgentTest(PytestOnlyDBTestCase):
-    def test_agent_forwards_the_model_settings(self):
-        self.app.config["AI_REASONING_EFFORT"] = "none"
-        self.app.config["AI_MAX_OUTPUT_TOKENS"] = 2048
+    def test_agent_uses_the_first_model_and_its_settings(self):
+        self.app.config["AI_MODELS"] = [
+            {"name": "first", "max_output_tokens": 2048, "reasoning_effort": "none"},
+            {"name": "second", "max_output_tokens": 1024},
+        ]
         agent = get_agent()
+        assert agent.model.model_name == "first"
         assert agent.model_settings == {"max_tokens": 2048, "openai_reasoning_effort": "none"}
 
     def test_agent_bounds_the_output_tokens_by_default(self):
         assert get_agent().model_settings == {"max_tokens": 8192}
 
     def test_agent_keeps_the_provider_defaults_without_settings(self):
-        self.app.config["AI_MAX_OUTPUT_TOKENS"] = None
+        self.app.config["AI_MODELS"] = [{"name": "openai/gpt-oss-120b"}]
         assert get_agent().model_settings is None
 
     def test_instructions_follow_the_tool_limits(self):

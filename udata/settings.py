@@ -675,10 +675,11 @@ class Defaults(object):
     # The assistant is disabled while AI_BASE_URL is None.
     AI_BASE_URL = None
     AI_API_KEY = None
-    # The `id` of a model listed by `GET /v1/models`, never one of its `aliases`.
-    AI_MODEL = "openai/gpt-oss-120b"
-    AI_MAX_OUTPUT_TOKENS = 8192
-    AI_REASONING_EFFORT = None
+    # The assistant uses the first one. `name`: the `id` of a model listed by `GET /v1/models`,
+    # never one of its `aliases`.
+    AI_MODELS = [
+        {"name": "openai/gpt-oss-120b", "max_output_tokens": 8192, "reasoning_effort": None},
+    ]
     TABULAR_API_URL = None
 
     # JSON-LD settings

@@ -21,17 +21,18 @@ MODEL_RETRIES = 2
 
 def get_agent() -> Agent[AssistantDeps, str]:
     """Build the assistant agent configured from the Flask settings."""
+    model_config = current_app.config["AI_MODELS"][0]
     model = OpenAIChatModel(
-        current_app.config["AI_MODEL"],
+        model_config["name"],
         provider=OpenAIProvider(
             base_url=current_app.config["AI_BASE_URL"],
             api_key=current_app.config["AI_API_KEY"],
         ),
     )
     model_settings: OpenAIChatModelSettings = {}
-    if max_tokens := current_app.config["AI_MAX_OUTPUT_TOKENS"]:
+    if max_tokens := model_config.get("max_output_tokens"):
         model_settings["max_tokens"] = max_tokens
-    if effort := current_app.config["AI_REASONING_EFFORT"]:
+    if effort := model_config.get("reasoning_effort"):
         model_settings["openai_reasoning_effort"] = effort
     agent: Agent[AssistantDeps, str] = Agent(
         model,
