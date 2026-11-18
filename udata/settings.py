@@ -155,6 +155,7 @@ class Defaults:
     SECURITY_TWO_FACTOR = False
     SECURITY_TWO_FACTOR_REQUIRED = False  # Not required by default
     SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN = False
+    SECURITY_TWO_FACTOR_REQUIRED_FOR_CERTIFIED_ORGS = False
     SECURITY_TWO_FACTOR_ENABLED_METHODS = ["authenticator"]
     SECURITY_TOTP_SECRETS = {"1": "the udata totp secret"}
     SECURITY_TOTP_ISSUER = "udata"
@@ -225,10 +226,11 @@ class Defaults:
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
     OAUTH2_TOKEN_EXPIRES_IN = {
         "authorization_code": 30 * 24 * HOUR,
-        "implicit": 10 * 24 * HOUR,
-        "password": 30 * 24 * HOUR,
+        "refresh_token": 30 * 24 * HOUR,
         "client_credentials": 30 * 24 * HOUR,
     }
+    # Counted from the expiration of the access token the refresh token came with.
+    OAUTH2_REFRESH_TOKEN_EXPIRES_IN = 30 * 24 * HOUR
     OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI = False
 
     MD_ALLOWED_TAGS = [
@@ -350,10 +352,6 @@ class Defaults:
     HARVEST_GRAPHS_S3_FILENAME_PREFIX = ""  # Useful to store the graphs inside a subfolder of the bucket. For example by setting `HARVEST_GRAPHS_S3_FILENAME_PREFIX = 'graphs/'`
 
     HARVEST_ISO19139_XSLT_URL = "https://raw.githubusercontent.com/datagouv/iso-19139-to-dcat-ap/refs/heads/3.x-datagouv/iso-19139-to-dcat-ap.xsl"
-
-    # If set, harvest emit activities associated with this user as actor
-    # It should be a dedicated service account
-    HARVEST_ACTIVITY_USER_ID = None
 
     # S3 connection details
     ###########################################################################
@@ -762,7 +760,6 @@ class Testing:
     }  # Disables deliverability for email domain name
     SECURITY_TWO_FACTOR = True  # should be set before security init_app for views to be loaded
     PUBLISH_ON_RESOURCE_EVENTS = False
-    HARVEST_ACTIVITY_USER_ID = None
     CDATA_BASE_URL = None
     SCHEMA_CATALOG_URL = None
     API_TOKEN_SECRET = "test-secret"

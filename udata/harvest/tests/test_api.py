@@ -990,7 +990,7 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert response.json["errors"][0]["details"] == "secret stack trace"
 
     def test_get_job_source_is_a_reference_object(self):
-        """A job exposes its source as a {id, class} reference, not a bare string ID.
+        """A job exposes its source as a {id, class, name} reference, not a bare string ID.
 
         This is a contract change vs the v1 API (which returned the source ID as a string).
         Locking it here so the breaking change shows up in the diff if it's ever reverted.
@@ -1003,6 +1003,7 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert response.json["source"] == {
             "id": str(source.id),
             "class": "HarvestSource",
+            "name": source.name,
         }
 
     def test_get_job_items_link(self):

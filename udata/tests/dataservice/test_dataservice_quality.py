@@ -1,7 +1,6 @@
 from udata.core.access_type.constants import AccessType
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataset.factories import LicenseFactory
 from udata.tests.api import PytestOnlyAPITestCase
 
 
@@ -13,7 +12,6 @@ class DataserviceComputeQualityTest(PytestOnlyAPITestCase):
             machine_documentation_url=None,
             technical_documentation_url=None,
             business_documentation_url=None,
-            license=None,
             availability=None,
             availability_url=None,
             rate_limiting=None,
@@ -26,7 +24,6 @@ class DataserviceComputeQualityTest(PytestOnlyAPITestCase):
         assert quality["has_description"] is False
         assert quality["has_machine_documentation"] is False
         assert quality["has_technical_documentation"] is False
-        assert quality["license"] is False
         assert quality["has_contact_point"] is False
         assert quality["has_base_api_url"] is False
         assert quality["availability_documented"] is False
@@ -42,7 +39,6 @@ class DataserviceComputeQualityTest(PytestOnlyAPITestCase):
             machine_documentation_url="https://api.example.com/openapi.json",
             technical_documentation_url="https://api.example.com/docs",
             business_documentation_url="https://example.com/about",
-            license=LicenseFactory(),
             availability=99.9,
             rate_limiting="100 req/min",
             contact_points=[contact],
@@ -58,7 +54,6 @@ class DataserviceComputeQualityTest(PytestOnlyAPITestCase):
                 "has_machine_documentation",
                 "has_technical_documentation",
                 "has_business_documentation",
-                "license",
                 "has_contact_point",
                 "has_base_api_url",
                 "availability_documented",
@@ -89,9 +84,8 @@ class DataserviceQualityScoreTest(PytestOnlyAPITestCase):
         ds = DataserviceFactory.build()
         quality = {
             "has_description": True,  # weight 2
-            "has_machine_documentation": True,  # weight 3 → swagger-present weights, total=14
+            "has_machine_documentation": True,  # weight 3 → swagger-present weights, total=13
             "has_technical_documentation": False,
-            "license": True,  # weight 1
             "has_contact_point": False,
             "has_base_api_url": True,  # weight 1
             "availability_documented": False,
@@ -99,7 +93,7 @@ class DataserviceQualityScoreTest(PytestOnlyAPITestCase):
             "has_business_documentation": False,
             "access_conditions_clear": True,  # weight 1
         }
-        assert ds.compute_quality_score(quality) == 8 / 14
+        assert ds.compute_quality_score(quality) == 7 / 13
 
     def test_all_false_scores_zero(self):
         ds = DataserviceFactory.build()
@@ -109,7 +103,6 @@ class DataserviceQualityScoreTest(PytestOnlyAPITestCase):
                 "has_description",
                 "has_machine_documentation",
                 "has_technical_documentation",
-                "license",
                 "has_contact_point",
                 "has_base_api_url",
                 "availability_documented",
@@ -128,7 +121,6 @@ class DataserviceQualityScoreTest(PytestOnlyAPITestCase):
                 "has_description",
                 "has_machine_documentation",
                 "has_technical_documentation",
-                "license",
                 "has_contact_point",
                 "has_base_api_url",
                 "availability_documented",
@@ -148,7 +140,6 @@ class DataserviceQualityScoreTest(PytestOnlyAPITestCase):
             "has_technical_documentation": False,
             "rate_limiting_documented": False,
             "access_conditions_clear": False,
-            "license": False,
             "availability_documented": False,
             "has_contact_point": False,
             "has_business_documentation": False,
@@ -167,12 +158,11 @@ class DataserviceQualityScoreTest(PytestOnlyAPITestCase):
             "has_technical_documentation": True,
             "rate_limiting_documented": True,
             "access_conditions_clear": True,
-            "license": True,
             "availability_documented": True,
             "has_contact_point": True,
             "has_business_documentation": True,
         }
-        assert ds.compute_quality_score(no_swagger_all_others_true) == 13 / 14
+        assert ds.compute_quality_score(no_swagger_all_others_true) == 12 / 13
 
 
 class DataserviceQualityPropertyTest(PytestOnlyAPITestCase):
@@ -182,7 +172,7 @@ class DataserviceQualityPropertyTest(PytestOnlyAPITestCase):
         assert "score" in quality
         assert quality["has_description"] is True
         assert quality["has_base_api_url"] is True
-        assert quality["score"] == 5 / 14
+        assert quality["score"] == 5 / 13
 
 
 class DataserviceQualityApiTest(PytestOnlyAPITestCase):
@@ -203,12 +193,12 @@ class DataserviceQualityCacheTest(PytestOnlyAPITestCase):
         assert ds.quality_cached["has_base_api_url"] is True
 
     def test_quality_cached_updates_when_fields_change(self):
-        ds = DataserviceFactory(license=None)
-        assert ds.quality_cached["license"] is False
-        ds.license = LicenseFactory()
+        ds = DataserviceFactory(base_api_url=None)
+        assert ds.quality_cached["has_base_api_url"] is False
+        ds.base_api_url = "https://api.example.com"
         ds.save()
         ds.reload()
-        assert ds.quality_cached["license"] is True
+        assert ds.quality_cached["has_base_api_url"] is True
 
     def test_quality_cache_is_refreshed_when_contact_point_is_deleted(self):
         contact_point = ContactPointFactory()

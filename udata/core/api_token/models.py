@@ -1,5 +1,3 @@
-import hashlib
-import hmac
 import secrets
 from datetime import UTC, datetime
 
@@ -7,6 +5,8 @@ from flask import current_app
 
 from udata.api import api
 from udata.api_fields import field, generate_fields
+from udata.core.api_token.hashing import hash_token
+from udata.core.user.permissions import UserEditPermission
 from udata.models import db
 
 TOKEN_BYTE_LENGTH = 48
@@ -28,11 +28,6 @@ def parse_future_datetime(value):
     return dt
 
 
-def _hash_token(plaintext):
-    key = current_app.config["API_TOKEN_SECRET"].encode()
-    return hmac.new(key, plaintext.encode(), hashlib.sha256).hexdigest()
-
-
 @generate_fields()
 class ApiToken(db.Document):
     token_hash = db.StringField(required=True, unique=True)
@@ -41,10 +36,22 @@ class ApiToken(db.Document):
         readonly=True,
         description="First characters of the token for identification",
     )
-    user = db.ReferenceField("User", required=True, reverse_delete_rule=db.CASCADE)
+    # Exposed as `owner` rather than `user`: the API does not promise that a token
+    # always belongs to a person.
+    user = field(
+        db.ReferenceField("User", required=True, reverse_delete_rule=db.CASCADE),
+        readonly=True,
+        show_as_ref=True,
+        rename="owner",
+        description="On whose behalf the token acts",
+    )
     name = field(
         db.StringField(max_length=255),
-        description="User-given label for this token",
+        # The reference is public, as an activity actor, while the label is the owner's
+        # own wording, e.g. which machine or script the token is for.
+        visible_if=lambda token: UserEditPermission(token.user).can(),
+        show_as_ref=True,
+        description="User-given label for this token, only visible to its owner and sysadmins",
     )
     scopes = field(
         db.ListField(db.StringField(choices=["admin"]), default=lambda: ["admin"]),
@@ -96,7 +103,7 @@ class ApiToken(db.Document):
         prefix = current_app.config.get("API_TOKEN_PREFIX", "udata_")
         raw = secrets.token_urlsafe(TOKEN_BYTE_LENGTH)
         plaintext = f"{prefix}{raw}"
-        token_hash = _hash_token(plaintext)
+        token_hash = hash_token(plaintext)
         display_prefix = plaintext[: len(prefix) + PREFIX_DISPLAY_LENGTH]
         token = cls(
             token_hash=token_hash,
@@ -116,7 +123,7 @@ class ApiToken(db.Document):
         Returns (ApiToken, None) on success, or (None, error_reason) on failure.
         error_reason is one of: "invalid", "revoked", "expired".
         """
-        token_hash = _hash_token(plaintext_token)
+        token_hash = hash_token(plaintext_token)
         token = cls.objects(token_hash=token_hash).first()
         if token is None:
             return None, "invalid"
