@@ -3338,13 +3338,7 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(updated.mime, original_mime)
         self.assertEqual(updated.format, original_format)
 
-    def test_community_resource_update_does_not_override_filetype(self):
-        """A stale client payload must not change the filetype of a hosted file
-
-        Unlike ResourceAPI.put, the community resource PUT endpoint has no
-        explicit guard rejecting filetype changes: the protection relies solely
-        on BaseResourceForm.populate_obj.
-        """
+    def test_community_resource_cannot_update_filetype_file_to_remote(self):
         user = self.login()
         community_resource = CommunityResourceFactory(dataset=DatasetFactory(), owner=user)
         data = {
@@ -3353,8 +3347,41 @@ class CommunityResourceAPITest(APITestCase):
             "filetype": "remote",
         }
         response = self.put(url_for("api.community_resource", community=community_resource), data)
-        self.assert200(response)
+        self.assert400(response)
         self.assertEqual(CommunityResource.objects.first().filetype, "file")
+
+    def test_community_resource_cannot_update_filetype_remote_to_file(self):
+        """A remote link must not be turned into a hosted file without any upload"""
+        user = self.login()
+        community_resource = CommunityResourceFactory(
+            dataset=DatasetFactory(), owner=user, filetype="remote", format="url"
+        )
+        data = {
+            "title": faker.sentence(),
+            "url": community_resource.url,
+            "filetype": "file",
+            "format": "pdf",
+            "mime": "application/pdf",
+            "filesize": 123456,
+        }
+        response = self.put(url_for("api.community_resource", community=community_resource), data)
+        self.assert400(response)
+        updated = CommunityResource.objects.first()
+        self.assertEqual(updated.filetype, "remote")
+        self.assertEqual(updated.format, "url")
+
+    def test_community_resource_update_remote_without_filetype(self):
+        """Omitting filetype keeps the current one instead of the form default"""
+        user = self.login()
+        community_resource = CommunityResourceFactory(
+            dataset=DatasetFactory(), owner=user, filetype="remote"
+        )
+        data = {"title": "new title", "url": community_resource.url}
+        response = self.put(url_for("api.community_resource", community=community_resource), data)
+        self.assert200(response)
+        updated = CommunityResource.objects.first()
+        self.assertEqual(updated.title, "new title")
+        self.assertEqual(updated.filetype, "remote")
 
     def test_community_resource_file_update_old_file_deletion(self):
         """It should update a community resource's file and delete the old one"""

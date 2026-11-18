@@ -898,6 +898,11 @@ class CommunityResourceAPI(API):
         """Update a given community resource"""
         community.permissions["edit"].test()
         form = api.validate(CommunityResourceForm, community)
+        if (
+            form._fields.get("filetype").data
+            and form._fields.get("filetype").data != community.filetype
+        ):
+            abort(400, "Cannot modify filetype after creation")
         # Server-computed fields (url, checksum, filesize…) of hosted resources are
         # protected from client override in BaseResourceForm.populate_obj.
         form.populate_obj(community)
