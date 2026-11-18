@@ -162,12 +162,12 @@ def login_page_url() -> str:
 
 
 def logged_in_url(flash: str) -> str:
-    """Where a ProConnect login lands: the page it started from, or the homepage."""
+    """Where a ProConnect login lands: the cdata page it started from, or the homepage."""
     next_url = session.pop(NEXT_KEY, None)
-    base_url = current_app.config["CDATA_BASE_URL"] or request.host_url
-    url = urljoin(base_url, next_url) if next_url else None
+    base_url = current_app.config["CDATA_BASE_URL"]
+    url = urljoin(base_url, next_url) if base_url and next_url else None
     # `next` comes from the browser: a page of another site isn't followed.
-    if not url or urlsplit(url).netloc != urlsplit(base_url).netloc:
+    if not url or urlsplit(url)[:2] != urlsplit(base_url)[:2]:
         return homepage_url(flash=flash)
     return add_params_to_uri(url, [("flash", flash)])
 

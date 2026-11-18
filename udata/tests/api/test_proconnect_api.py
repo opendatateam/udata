@@ -143,14 +143,29 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
 
     @pytest.mark.parametrize(
         "next",
-        ["https://evil.example/", "//evil.example/", "/\\evil.example/", "/\t/evil.example/"],
+        [
+            "https://evil.example/",
+            "//evil.example/",
+            "/\\evil.example/",
+            "/\t/evil.example/",
+            "javascript://cdata.test/%0aalert(1)",
+        ],
     )
     def test_login_does_not_land_off_the_site(self, proconnect, next):
         UserFactory(email="jane@example.org")
 
         response = self.sign_in(proconnect, "jane@example.org", next=next)
 
-        assert urlsplit(response.location).netloc == urlsplit(CDATA).netloc
+        assert urlsplit(response.location)[:2] == urlsplit(CDATA)[:2]
+
+    def test_login_without_cdata_lands_on_the_homepage(self, proconnect, app):
+        # Not a method `options` mark: pytest-flask applies the class one last, it would win.
+        app.config["CDATA_BASE_URL"] = None
+        UserFactory(email="jane@example.org")
+
+        response = self.sign_in(proconnect, "jane@example.org", next="/datasets/")
+
+        assert response.location == homepage_url(flash="connected")
 
     def test_login_without_a_page_does_not_land_on_the_one_of_an_earlier_login(self, proconnect):
         UserFactory(email="jane@example.org")
