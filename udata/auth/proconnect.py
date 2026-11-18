@@ -2,7 +2,7 @@ import json
 import time
 from dataclasses import asdict, dataclass, replace
 from datetime import UTC, datetime
-from urllib.parse import quote, urljoin, urlsplit, urlunsplit
+from urllib.parse import urljoin, urlsplit
 
 from authlib.common.urls import add_params_to_uri
 from authlib.integrations.base_client import OAuthError
@@ -161,25 +161,15 @@ def login_page_url() -> str:
     return cdata_url("/login") or homepage_url()
 
 
-def site_path(url: str | None) -> str | None:
-    """`url` as a path of this site, or None when it may lead off it."""
-    if not url:
-        return None
-    parts = urlsplit(url)
-    if parts.scheme or parts.netloc or not parts.path.startswith("/"):
-        return None
-    # Browsers drop control characters and read backslashes as slashes: `/\evil.example` or
-    # `/\t/evil.example` would lead to that host. Quoted, they stay in the path.
-    return urlunsplit(("", "", quote(parts.path, safe="/%"), parts.query, parts.fragment))
-
-
 def logged_in_url(flash: str) -> str:
     """Where a ProConnect login lands: the page it started from, or the homepage."""
-    path = session.pop(NEXT_KEY, None)
-    if not path:
-        return homepage_url(flash=flash)
+    next_url = session.pop(NEXT_KEY, None)
     base_url = current_app.config["CDATA_BASE_URL"] or request.host_url
-    return add_params_to_uri(urljoin(base_url, path), [("flash", flash)])
+    url = urljoin(base_url, next_url) if next_url else None
+    # `next` comes from the browser: a page of another site isn't followed.
+    if not url or urlsplit(url).netloc != urlsplit(base_url).netloc:
+        return homepage_url(flash=flash)
+    return add_params_to_uri(url, [("flash", flash)])
 
 
 @ns.route("/login/", endpoint="proconnect_login")
@@ -191,10 +181,7 @@ class ProconnectLoginAPI(API):
             tf_clean_session()
         session.pop(PENDING_LOGIN_KEY, None)
         session.pop(SECOND_FACTOR_ASKED_KEY, None)
-        if path := site_path(request.args.get("next")):
-            session[NEXT_KEY] = path
-        else:
-            session.pop(NEXT_KEY, None)
+        session[NEXT_KEY] = request.args.get("next")
 
         return authorize_redirect()
 
