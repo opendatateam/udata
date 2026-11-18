@@ -5,14 +5,15 @@ using pydantic-ai's UI adapter.
 """
 
 import asyncio
+import dataclasses
 import json
 import logging
 import queue
 import re
 import threading
-import unicodedata
 from collections.abc import AsyncIterator
 from contextlib import aclosing
+from functools import cached_property
 
 from flask import Response, current_app, request, stream_with_context
 from pydantic import ValidationError
@@ -37,6 +38,8 @@ from pydantic_ai.messages import (
     BaseToolReturnPart,
     BinaryContent,
     FileUrl,
+    ModelMessage,
+    ModelRequest,
     UploadedFile,
     UserPromptPart,
 )
@@ -54,15 +57,17 @@ from pydantic_ai.usage import UsageLimits
 
 from udata.api import API, api
 from udata.core.assistant.agent import get_agent
+from udata.core.assistant.charts import profile_columns
 from udata.core.assistant.prompts import language_instructions
-from udata.core.assistant.tabular import TabularClient, TabularError
+from udata.core.assistant.tabular import TabularClient
 from udata.core.assistant.tools import (
     MODEL_REQUEST_LIMIT,
+    ActiveResource,
     AssistantDeps,
+    load_active_resource,
     render_profile,
     serialize_dataset_metadata,
 )
-from udata.core.dataset.models import get_dataset_and_resource_by_id
 from udata.i18n import get_locale
 from udata.i18n import gettext as _
 from udata.utils import normalize_uuid
@@ -82,9 +87,8 @@ MAX_VISUALIZATION_BYTES = 20_000
 MAX_REQUEST_BYTES = 512 * 1024
 MAX_USER_MESSAGE_CHARS = 4_000
 
-# What a model could read as the start of an untrusted context tag: a "<", its full-width
-# forms or its HTML entity, then "untrusted" past any space or punctuation, in any case.
-UNTRUSTED_TAG = re.compile(r"(?:<|\uff1c|\ufe64|&lt;)(?=[\W_]*untrusted)", re.IGNORECASE)
+# The start of an untrusted context tag, opening or closing.
+UNTRUSTED_TAG = re.compile(r"<(?=/?untrusted)", re.IGNORECASE)
 
 
 # Parts our own stream emits, sent back with the history. Others are refused: an
@@ -171,29 +175,20 @@ def _is_empty_assistant_message(message) -> bool:
     )
 
 
-def _extract_context(body: bytes) -> tuple[str | None, dict | None]:
-    """Extract and validate the optional ``resource_id`` and ``visualization`` fields.
+def _extract_context(extra: dict | None) -> tuple[str | None, dict | None]:
+    """Validate the optional ``resource_id`` and ``visualization`` fields of the body.
 
-    The raw JSON is parsed because neither field is part of the Vercel AI
-    protocol. A malformed body returns ``(None, None)`` so ``build_run_input``
-    can reject it with its own 400 (the app's JSON provider also turns a nesting
-    too deep for the stack into a ``ValueError``). An invalid UUID or an invalid
-    visualization (not an object, or larger than ``MAX_VISUALIZATION_BYTES``)
-    aborts with a 400.
+    Neither is part of the Vercel AI protocol: they are the extra fields its request
+    models allow. An invalid UUID or an invalid visualization (not an object, or
+    larger than ``MAX_VISUALIZATION_BYTES``) aborts with a 400.
     """
-    try:
-        payload = current_app.json.loads(body)
-    except ValueError:
-        return None, None
-    if not isinstance(payload, dict):
-        return None, None
-
-    resource_id = payload.get("resource_id")
+    extra = extra or {}
+    resource_id = extra.get("resource_id")
     if resource_id is not None:
         if (resource_id := normalize_uuid(resource_id)) is None:
             api.abort(400, _("Invalid resource_id: a resource UUID is expected."))
 
-    visualization = payload.get("visualization")
+    visualization = extra.get("visualization")
     if visualization is not None:
         if (
             not isinstance(visualization, dict)
@@ -204,55 +199,45 @@ def _extract_context(body: bytes) -> tuple[str | None, dict | None]:
 
 
 def _escape_untrusted(text: str) -> str:
-    """Neutralize the ``untrusted_`` tags, so that user-controlled metadata cannot
-    close the ``<untrusted_active_context>`` or ``<untrusted_visualization_context>``
-    delimiter early and inject instructions.
+    """Neutralize the ``<untrusted`` and ``</untrusted`` of a text, so that
+    user-controlled metadata cannot close a context block early.
 
-    Invisible format characters are dropped first, so that none can split the tag name.
-    Other ``<`` are kept: a column named ``part_<18ans`` must reach the model as is,
-    or its queries name a column that does not exist.
+    Only the literal tags: no filter catches every look-alike, and the blocks reach
+    the model as a user message, never as instructions. Other ``<`` are kept: a
+    column named ``part_<18ans`` must reach the model as is, or its queries name a
+    column that does not exist.
     """
-    visible = "".join(char for char in text if unicodedata.category(char) != "Cf")
-    return UNTRUSTED_TAG.sub("⟨", visible)
+    return UNTRUSTED_TAG.sub("⟨", text)
 
 
-def _build_resource_instructions(resource_id: str, tabular: TabularClient) -> str | None:
-    """Build the per-request resource context injected into the instructions.
-
-    Hidden datasets leak nothing: no context is injected unless the current
-    user can read the owning dataset. A profile fetch failure degrades to
-    dataset metadata only. Returns None when the resource is not visible.
-    """
-    dataset, resource = get_dataset_and_resource_by_id(resource_id)
-    if dataset is None or resource is None or not dataset.permissions["read"].can():
-        return None
-    profile = None
-    try:
-        profile = tabular.get_profile(resource_id)
-    except TabularError:
-        log.info("Assistant resource context: profile fetch failed for %s", resource_id)
-    lines = [
-        f"Active resource (resource_id to use with the tools): {resource.id}"
-        f" — {_escape_untrusted(resource.title or '')}",
-        "Metadata of the dataset owning the resource:",
-        _escape_untrusted(serialize_dataset_metadata(dataset)),
-    ]
-    if profile is not None:
-        lines += ["Schema of the resource:", _escape_untrusted(render_profile(profile))]
-    return _untrusted_block(
-        "Active context: the user explores a given resource of data.gouv.fr.",
-        "untrusted_active_context",
-        lines,
-    )
-
-
-def _build_visualization_instructions(visualization: dict) -> str:
-    """Build the per-request chart-state context injected into the instructions."""
-    return _untrusted_block(
-        "Chart context: the current state of the user's chart.",
-        "untrusted_visualization_context",
-        [_escape_untrusted(json.dumps(visualization, ensure_ascii=False))],
-    )
+def build_context(active: ActiveResource | None, visualization: dict | None) -> str | None:
+    """The per-request context: active resource, its dataset and schema, chart state."""
+    blocks = []
+    if active is not None:
+        lines = [
+            f"Active resource (resource_id to use with the tools): {active.resource.id}"
+            f" — {_escape_untrusted(active.resource.title or '')}",
+            "Metadata of the dataset owning the resource:",
+            _escape_untrusted(serialize_dataset_metadata(active.dataset)),
+        ]
+        if active.profile is not None:
+            lines += ["Schema of the resource:", _escape_untrusted(render_profile(active.profile))]
+        blocks.append(
+            _untrusted_block(
+                "Active context: the user explores a given resource of data.gouv.fr.",
+                "untrusted_active_context",
+                lines,
+            )
+        )
+    if visualization:
+        blocks.append(
+            _untrusted_block(
+                "Chart context: the current state of the user's chart.",
+                "untrusted_visualization_context",
+                [_escape_untrusted(json.dumps(visualization, ensure_ascii=False))],
+            )
+        )
+    return "\n\n".join(blocks) or None
 
 
 def _untrusted_block(intro: str, tag: str, lines: list[str]) -> str:
@@ -327,6 +312,29 @@ class AssistantEventStream(VercelAIEventStream):
 
 
 class AssistantAdapter(VercelAIAdapter):
+    # Server context added to the last user message (see `build_context`).
+    context: str | None = None
+
+    @cached_property
+    def messages(self) -> list[ModelMessage]:
+        """The client's messages, the context put first in the last user request.
+
+        Recomputed on each request and never sent back: the context stays next to the
+        question it is about, with the trust of a user message, not of the instructions.
+        """
+        messages = super().messages
+        if not self.context:
+            return messages
+        for index in range(len(messages) - 1, -1, -1):
+            message = messages[index]
+            if isinstance(message, ModelRequest) and any(
+                isinstance(part, UserPromptPart) for part in message.parts
+            ):
+                parts = [UserPromptPart(content=self.context), *message.parts]
+                messages[index] = dataclasses.replace(message, parts=parts)
+                break
+        return messages
+
     def build_event_stream(self) -> AssistantEventStream:
         return AssistantEventStream(
             self.run_input,
@@ -409,14 +417,13 @@ def _stream_in_thread(agent, stream, cancellation_token, sdk_version: int):
 
 @ns.route("/chat/", endpoint="assistant_chat")
 class AssistantChatAPI(API):
-    # Bounds every read of the body (see UDataRequest). Werkzeug truncates a chunked
-    # body at the limit without a 413: the extra byte reveals an oversized one.
-    max_content_length = MAX_REQUEST_BYTES + 1
-
     @api.secure
     @api.doc("assistant_chat")
     def post(self):
         """Stream an assistant reply as Vercel AI SSE events"""
+        # Bounds every read of the body from here on. Werkzeug truncates a chunked body
+        # at the limit without a 413: the extra byte reveals an oversized one.
+        request.max_content_length = MAX_REQUEST_BYTES + 1
         # Disabled state is ``AI_BASE_URL`` unset; a missing API key is a
         # misconfiguration. Both make the assistant unavailable: 503.
         if not current_app.config["AI_BASE_URL"]:
@@ -440,11 +447,11 @@ class AssistantChatAPI(API):
         body = request.get_data()
         if len(body) > MAX_REQUEST_BYTES:
             api.abort(413)
-        resource_id, visualization = _extract_context(body)
         try:
             run_input = VercelAIAdapter.build_run_input(body)
-        except ValidationError:
+        except (ValidationError, ValueError, RecursionError):
             api.abort(400, _("Invalid request body."))
+        resource_id, visualization = _extract_context(run_input.model_extra)
         # The server owns the system prompt: client system messages are dropped
         # before the adapter loads them. sanitize_messages is not enough: a system
         # text part carrying a retry_feedback marker loads as a RetryFeedbackPart
@@ -454,20 +461,22 @@ class AssistantChatAPI(API):
         _check_no_file_content(run_input.messages)
         run_input.messages = [m for m in run_input.messages if not _is_empty_assistant_message(m)]
 
+        tabular = TabularClient()
+        active = load_active_resource(resource_id, tabular) if resource_id else None
+        deps = AssistantDeps(
+            tabular=tabular,
+            resource_id=str(active.resource.id) if active else None,
+            columns=profile_columns(active.profile) if active and active.profile else None,
+        )
         agent = get_agent()
         # No file URL from the client, even if one got past _check_no_file_content: the
         # adapter drops them before the agent sees the history.
         adapter = AssistantAdapter(
             agent, run_input, accept=SSE_CONTENT_TYPE, allowed_file_url_schemes=frozenset()
         )
+        adapter.context = build_context(active, visualization)
         cancellation_token = CancellationToken()
-        deps = AssistantDeps(tabular=TabularClient(), resource_id=resource_id)
-        blocks = [language_instructions(get_locale())]
-        if resource_id and (block := _build_resource_instructions(resource_id, deps.tabular)):
-            blocks.append(block)
-        if visualization:
-            blocks.append(_build_visualization_instructions(visualization))
-        instructions = "\n\n".join(blocks)
+        instructions = language_instructions(get_locale())
 
         stream = adapter.encode_stream(
             adapter.run_stream(
