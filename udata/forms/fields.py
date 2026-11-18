@@ -407,10 +407,9 @@ class ModelField(Field):
                     expected_model, specs["class"]
                 )
                 raise validators.ValidationError(msg)
-        elif isinstance(model_field, GenericReferenceField):
-            if "class" not in specs:
-                msg = _("Expect both class and identifier")
-                raise validators.ValidationError(msg)
+        elif isinstance(model_field, GenericReferenceField) and "class" not in specs:
+            msg = _("Expect both class and identifier")
+            raise validators.ValidationError(msg)
 
         # No try/except required
         # In case of error, ValueError is raised
