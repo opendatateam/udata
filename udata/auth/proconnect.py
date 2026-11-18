@@ -2,6 +2,7 @@ import json
 import time
 from dataclasses import asdict, dataclass, replace
 from datetime import UTC, datetime
+from urllib.parse import quote, urljoin, urlsplit, urlunsplit
 
 from authlib.common.urls import add_params_to_uri
 from authlib.integrations.base_client import OAuthError
@@ -37,6 +38,8 @@ PENDING_LOGIN_KEY = "proconnect_pending_login"
 LOGIN_KEY = "proconnect_login"
 # Set when a login is sent back to ProConnect for the second factor the account relies on.
 SECOND_FACTOR_ASKED_KEY = "proconnect_second_factor_asked"
+# The page the agent signed in from (an OAuth authorization, say), to land back on.
+NEXT_KEY = "proconnect_next"
 
 
 def init_app(app):
@@ -158,6 +161,27 @@ def login_page_url() -> str:
     return cdata_url("/login") or homepage_url()
 
 
+def site_path(url: str | None) -> str | None:
+    """`url` as a path of this site, or None when it may lead off it."""
+    if not url:
+        return None
+    parts = urlsplit(url)
+    if parts.scheme or parts.netloc or not parts.path.startswith("/"):
+        return None
+    # Browsers drop control characters and read backslashes as slashes: `/\evil.example` or
+    # `/\t/evil.example` would lead to that host. Quoted, they stay in the path.
+    return urlunsplit(("", "", quote(parts.path, safe="/%"), parts.query, parts.fragment))
+
+
+def logged_in_url(flash: str) -> str:
+    """Where a ProConnect login lands: the page it started from, or the homepage."""
+    path = session.pop(NEXT_KEY, None)
+    if not path:
+        return homepage_url(flash=flash)
+    base_url = current_app.config["CDATA_BASE_URL"] or request.host_url
+    return add_params_to_uri(urljoin(base_url, path), [("flash", flash)])
+
+
 @ns.route("/login/", endpoint="proconnect_login")
 class ProconnectLoginAPI(API):
     def get(self):
@@ -167,6 +191,10 @@ class ProconnectLoginAPI(API):
             tf_clean_session()
         session.pop(PENDING_LOGIN_KEY, None)
         session.pop(SECOND_FACTOR_ASKED_KEY, None)
+        if path := site_path(request.args.get("next")):
+            session[NEXT_KEY] = path
+        else:
+            session.pop(NEXT_KEY, None)
 
         return authorize_redirect()
 
@@ -280,8 +308,8 @@ class ProconnectAuthAPI(API):
         if user.password and can_switch_to_proconnect_only(user):
             # The password is a way in without the ProConnect second factor: cdata invites
             # the agent to drop it.
-            return redirect(homepage_url(flash="proconnect_only_available"))
-        return redirect(homepage_url(flash="connected"))
+            return redirect(logged_in_url("proconnect_only_available"))
+        return redirect(logged_in_url("connected"))
 
 
 def can_switch_to_proconnect_only(user: User) -> bool:
