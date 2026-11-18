@@ -31,10 +31,12 @@ def log_timing(func):
     return timeit_wrapper
 
 
-def save_model(model: type[Document[Any]], model_id: str, metrics: dict[str, int]) -> None:
+def save_model(model: type[Document[Any]], model_id: str, metrics: dict[str, int | None]) -> None:
     try:
+        # `iterate_on_metrics` returns rows matching any of the value keys, so a row
+        # matched on one key can carry null for the others: store those as 0.
         result = model.objects(id=model_id).update(
-            **{f"set__metrics__{key}": value for key, value in metrics.items()}
+            **{f"set__metrics__{key}": value or 0 for key, value in metrics.items()}
         )
 
         if result is None:
