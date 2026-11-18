@@ -1,5 +1,19 @@
 # Changelog
 
+## 17.27.0 (2026-11-18)
+
+- chore(deps): update dependency dnspython to v2.9.2 [security] ([#4104](https://github.com/opendatateam/udata/pull/4104))
+- chore(deps): update rustfs/rustfs docker tag to v1.0.6 ([#4105](https://github.com/opendatateam/udata/pull/4105))
+- feat: add a setting to require the 2FA from members of certified organizations ([#4102](https://github.com/opendatateam/udata/pull/4102))
+- feat: detect geozone from spatial.geom ([#3857](https://github.com/opendatateam/udata/pull/3857))
+- feat: require a fresh session to create an API token and mail its creation ([#4090](https://github.com/opendatateam/udata/pull/4090))
+- fix(api): restore the list masks of reuses and contact points ([#4042](https://github.com/opendatateam/udata/pull/4042))
+- fix(edito): expose the status and access type fields the front cards read in the bloc card masks ([#4108](https://github.com/opendatateam/udata/pull/4108))
+- fix: issue a working token on an OAuth2 refresh ([#4100](https://github.com/opendatateam/udata/pull/4100))
+- fix: remove the OAuth2 password grant ([#4099](https://github.com/opendatateam/udata/pull/4099))
+- fix: store OAuth2 client secrets and tokens hashed ([#4101](https://github.com/opendatateam/udata/pull/4101))
+
+
 ## 17.26.0 (2026-11-13)
 
 - chore(deps): update dependency faker to >=40.54, <40.55 ([#4085](https://github.com/opendatateam/udata/pull/4085))
