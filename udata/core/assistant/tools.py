@@ -1,22 +1,22 @@
 """Tools attached to the AI assistant agent.
 
-`create_chart` and `update_chart` return dicts (validated chart or patch, or
-a list of errors); the other tools return a text. Outputs feed back
-into the LLM as tool results, and error cases must be explained, never
-raised — an exception escaping a tool kills the whole agent run.
+Every tool returns a pydantic model: its result, or a `ToolError` listing what to
+fix. The model reads them as JSON tool results, and cdata reads the same fields to
+build its tool trace. Error cases must be explained, never raised: an exception
+escaping a tool kills the whole agent run.
 """
 
 import json
 import logging
 import threading
 from dataclasses import dataclass, field
-from typing import Annotated, Literal
+from typing import Any, Literal
 
-from mongoengine.errors import DoesNotExist, ValidationError
-from pydantic import Field
+from pydantic import BaseModel
 from pydantic_ai import Agent, RunContext
 
 from udata.core.assistant.charts import (
+    ChartOutput,
     CreateChartInput,
     UpdateChartInput,
     profile_columns,
@@ -31,7 +31,9 @@ from udata.core.assistant.data_query import (
     MAX_QUERIES_PER_QUESTION,
     PAGE_SIZE,
     Aggregate,
+    Aggregation,
     GenericFilter,
+    Sort,
     build_data_query,
     filter_columns,
     filter_errors,
@@ -41,12 +43,10 @@ from udata.core.assistant.tabular import (
     TabularClient,
     TabularError,
     TabularRequestRefused,
-    TabularResourceUnavailable,
     has_more_rows,
 )
-from udata.core.dataset.models import Dataset, Resource, get_dataset_by_resource_id
+from udata.core.dataset.models import Dataset, Resource, get_dataset_and_resource_by_id
 from udata.mongo.queryset import paginate_embedded_list
-from udata.utils import normalize_uuid
 
 log = logging.getLogger(__name__)
 
@@ -65,13 +65,14 @@ MODEL_REQUEST_LIMIT = MAX_STEPS + 2
 class AssistantDeps:
     """Per-turn state shared with the assistant agent.
 
-    Tool calls run in a pydantic-ai worker thread that inherits the request
-    context (contextvars), so permission checks use the requesting user's
-    identity exactly like the rest of the API.
+    `resource_id` is the active resource, set only when the requesting user can read
+    it (see `load_active_resource`), and `columns` its profile columns, None while
+    the profile could not be fetched.
     """
 
     tabular: TabularClient
     resource_id: str | None = None
+    columns: dict[str, str] | None = None
     tool_count: int = 0
     query_count: int = 0
     # Parallel tool calls run in separate threads: budgets are checked and spent atomically.
@@ -103,34 +104,27 @@ def _consume_query_budget(ctx: RunContext[AssistantDeps]) -> str | None:
     return None
 
 
-def _dataset_for_current_user(dataset_id: str) -> Dataset | None:
-    """Fetch a dataset the requesting user is allowed to read, else None.
+@dataclass
+class ActiveResource:
+    dataset: Dataset
+    resource: Resource
+    profile: dict | None
 
-    Private and deleted datasets are only exposed to their owner, their
-    organization or an admin — the same OwnableReadPermission rule as the
-    dataset API. Archived ones stay readable: they are only left out of search.
+
+def load_active_resource(resource_id: str, tabular: TabularClient) -> ActiveResource | None:
+    """The resource, its dataset and its profile, None unless the user can read the dataset.
+
+    A profile fetch failure leaves `profile` None: the tools fetch it again.
     """
+    dataset, resource = get_dataset_and_resource_by_id(resource_id)
+    if dataset is None or resource is None or not dataset.permissions["read"].can():
+        return None
     try:
-        dataset = Dataset.objects.exclude("resources").get(id=dataset_id)
-    except (DoesNotExist, ValidationError):
-        return None
-    if dataset.permissions["read"].can():
-        return dataset
-    return None
-
-
-def _dataset_for_resource(resource_id: str) -> Dataset | None:
-    """Owner dataset of a resource, readable by the requesting user, else None.
-
-    The id is normalized like the endpoint does: the model may write it in uppercase or
-    without dashes, ids are stored in their canonical form.
-    """
-    if (normalized := normalize_uuid(resource_id)) is None:
-        return None
-    dataset = get_dataset_by_resource_id(normalized, exclude_resources=True)
-    if dataset is not None and dataset.permissions["read"].can():
-        return dataset
-    return None
+        profile = tabular.get_profile(resource_id)
+    except TabularError:
+        log.info("Assistant: profile fetch failed for %s", resource_id)
+        profile = None
+    return ActiveResource(dataset, resource, profile)
 
 
 def render_profile(profile: dict) -> str:
@@ -158,30 +152,62 @@ def _cell(value) -> str:
     return text if len(text) <= MAX_CELL_CHARS else text[:MAX_CELL_CHARS] + "…"
 
 
-def _render_result(result: dict, *, aggregated: bool = False) -> str:
-    """Render the `data` rows of an api-tabular response as a pipe-separated table.
+class ToolError(BaseModel):
+    status: Literal["error"] = "error"
+    errors: list[str]
 
-    A query without aggregate has an exact `meta.total`, which tells whether rows are cut.
-    An aggregated one has none: its total is not given. Whole rows past MAX_RESULT_CHARS
-    are left out, with a note.
+
+class QueryOutput(BaseModel):
+    """A `query_data` result: the table the model reads, and its counts for cdata."""
+
+    status: Literal["ok"] = "ok"
+    table: str
+    # Rows in `table`.
+    rows: int
+    # Rows the query matches, known only without an aggregate.
+    total: int | None = None
+    # More than PAGE_SIZE groups: only the first ones are in `table`.
+    more_groups: bool = False
+
+
+class ChartToolOutput(BaseModel):
+    status: Literal["ok"] = "ok"
+    chart: ChartOutput
+    more_groups: bool | None
+
+
+class UpdateToolOutput(BaseModel):
+    status: Literal["ok"] = "ok"
+    # A dict, not a model: fields left out must not come out as nulls.
+    patch: dict[str, Any]
+
+
+def _refused(*errors: str) -> ToolError:
+    return ToolError(errors=list(errors))
+
+
+def _render_result(result: dict, *, aggregated: bool = False) -> QueryOutput | ToolError:
+    """The `data` rows of an api-tabular response as a pipe-separated table.
+
+    A query without aggregate has an exact `meta.total`; an aggregated one has none.
+    Whole rows past MAX_RESULT_CHARS are left out, with a note.
     """
     rows = result.get("data") if isinstance(result, dict) else None
     rows = [row for row in rows or [] if isinstance(row, dict)]
-    if not rows:
-        return "Query run successfully, no row returned."
-    meta = result.get("meta")
+    meta = result.get("meta") if isinstance(result, dict) else None
     total = meta.get("total") if isinstance(meta, dict) and not aggregated else None
     if not isinstance(total, int):
         total = None
-    of_total = f" ({total} rows in total)" if total is not None else ""
+    if not rows:
+        return QueryOutput(table="", rows=0, total=total)
     columns = list(rows[0])
     lines = [" | ".join(_cell(column) for column in columns)]
     size = len(lines[0])
     if size > MAX_RESULT_CHARS:
         # Too many columns for even the header: nothing useful fits.
-        return (
-            f"Result not shown: its {len(columns)} columns exceed the allowed "
-            f"size{of_total}. Run it again with `columns` to keep only a few of them."
+        return _refused(
+            f"Result not shown: its {len(columns)} columns exceed the allowed size. "
+            "Run it again with `columns` to keep only a few of them."
         )
     shown = 0
     for row in rows[:PAGE_SIZE]:
@@ -193,43 +219,39 @@ def _render_result(result: dict, *, aggregated: bool = False) -> str:
         shown += 1
     if shown < min(len(rows), PAGE_SIZE):
         lines.append(
-            f"Result cut to {shown} rows for its size{of_total}: "
+            f"Result cut to {shown} rows for its size: "
             "select fewer columns or aggregate to see the rest."
         )
-    elif total is not None and total > shown:
-        lines.append(f"Truncated result: {total} rows in total, first {PAGE_SIZE} rows shown.")
-    return "\n".join(lines)
+    return QueryOutput(table="\n".join(lines), rows=shown, total=total)
 
 
 NO_ACTIVE_RESOURCE = "No active resource: open a resource in the data studio."
-RESOURCE_NOT_FOUND = "Resource not found: no visible resource matches this identifier."
 TABULAR_UNAVAILABLE = "The tabular service is unavailable."
-RESOURCE_NOT_IN_TABULAR = (
-    "Resource not available in the tabular service: its data cannot be queried."
-)
 
 
 def _tabular_error_message(error: TabularError) -> str:
-    """Message for the model; the text of a TabularError is only logged."""
+    """Message for the model: api-tabular's own answer when it gave one."""
     if isinstance(error, TabularRequestRefused):
-        return f"Query refused by the tabular service: {error.detail}."
-    if isinstance(error, TabularResourceUnavailable):
-        return RESOURCE_NOT_IN_TABULAR
+        return f"The tabular service answered {error.status}: {error.detail}"
     return TABULAR_UNAVAILABLE
 
 
 def _active_columns(ctx: RunContext[AssistantDeps]) -> tuple[str, dict[str, str]]:
-    """Active resource id and its profile columns, or raise `_ToolRefusal`."""
-    resource_id = ctx.deps.resource_id
-    if not resource_id:
+    """Active resource id and its profile columns, or raise `_ToolRefusal`.
+
+    The columns come from the request's profile fetch; a failed one is tried again,
+    and its result kept for the next tools. Parallel tool calls may both fetch it:
+    the profile is the same.
+    """
+    deps = ctx.deps
+    if not deps.resource_id:
         raise _ToolRefusal(NO_ACTIVE_RESOURCE)
-    if _dataset_for_resource(resource_id) is None:
-        raise _ToolRefusal(RESOURCE_NOT_FOUND)
-    try:
-        profile = ctx.deps.tabular.get_profile(resource_id)
-    except TabularError as error:
-        raise _ToolRefusal(_tabular_error_message(error)) from error
-    return resource_id, profile_columns(profile)
+    if deps.columns is None:
+        try:
+            deps.columns = profile_columns(deps.tabular.get_profile(deps.resource_id))
+        except TabularError as error:
+            raise _ToolRefusal(_tabular_error_message(error)) from error
+    return deps.resource_id, deps.columns
 
 
 class _ToolRefusal(Exception):
@@ -239,13 +261,17 @@ class _ToolRefusal(Exception):
 def _chart_has_more_groups(
     tabular: TabularClient, resource_id: str, config: CreateChartInput
 ) -> bool | None:
-    """Whether the viewer truncates a series to its first PAGE_SIZE rows, None if unknown.
+    """Whether the viewer warns that a series is cut to its first PAGE_SIZE rows, None if unknown.
 
     Each series is read like the viewer reads it, so a query api-tabular refuses
     raises `TabularRequestRefused`. Raw series share the chart filters, hence
     their row count: they are read once, first, as the most likely to overflow.
     An unavailable service leaves the count unknown: the chart is valid against
     the profile, and the viewer reports the outage itself.
+
+    Like the viewer, an X order with a limit within PAGE_SIZE is never cut: the limit
+    keeps the first values of the extract, which are the right ones. The series are
+    still read, to catch a refused query.
     """
     x = config.x_axis.column_x
     read = set()
@@ -259,9 +285,9 @@ def _chart_has_more_groups(
                 # Like the viewer: grouped with an aggregate, the two raw columns without.
                 columns=None if aggregated else [x, column_y],
                 groupby=x if aggregated else None,
-                aggregate=(column_y, series.aggregate_y) if aggregated else None,
+                aggregate=Aggregation(column_y, series.aggregate_y) if aggregated else None,
                 filters=config.filters,
-                sort=(x, "asc"),
+                sort=Sort(x, "asc"),
             )
             key = query if aggregated else None
             if key in read:
@@ -269,19 +295,22 @@ def _chart_has_more_groups(
             read.add(key)
             first_page = tabular.get_data(resource_id, with_page(query))
             more_groups = more_groups or has_more_rows(first_page)
-    except TabularRequestRefused:
-        raise
+    except TabularRequestRefused as refusal:
+        if refusal.status < 500:
+            raise
+        log.warning("Could not check the group count of a chart", exc_info=True)
+        return None
     except TabularError:
         log.warning("Could not check the group count of a chart", exc_info=True)
         return None
+    limit = config.x_axis.limit
+    if config.x_axis.sort_x_by != "axis_y" and limit is not None and limit <= PAGE_SIZE:
+        return False
     return more_groups
 
 
 def serialize_dataset_metadata(dataset: Dataset) -> str:
-    """JSON metadata of a dataset loaded without its resources, listing the first ones only.
-
-    Shared by the tool and the chat endpoint.
-    """
+    """JSON metadata of a dataset loaded without its resources, listing the first ones only."""
     resources, total = paginate_embedded_list(
         Dataset, dataset.id, "resources", Resource, page=1, page_size=MAX_SERIALIZED_RESOURCES
     )
@@ -309,7 +338,9 @@ To group, set `groupby`, `aggregate_column` and `aggregate`
 (avg, sum, count, min, max). Without an explicit sort, a grouping is sorted
 on the groupby column. With an aggregate, do not pass `columns` and only
 sort on the `groupby` column (the service does not sort on an aggregated
-value). Returns at most {PAGE_SIZE} rows."""
+value). Returns at most {PAGE_SIZE} rows in `table`, with `rows` the number
+shown, `total` the number of matching rows when known (without aggregate),
+and `more_groups` true when there are more than {PAGE_SIZE} groups."""
 
 CREATE_CHART_DESCRIPTION = f"""\
 Create a chart on the active resource, replacing the structure of the current chart.
@@ -317,35 +348,14 @@ Create a chart on the active resource, replacing the structure of the current ch
 Only call it after a check with `query_data`. Types: line or histogram,
 1 to 4 series. Returns the validated chart or the list of errors to fix.
 `more_groups` is true when a series has more than {PAGE_SIZE} points (groups,
-or rows without aggregate): the chart only shows the first {PAGE_SIZE}, so tell
-the user and suggest a filter or an aggregate. null: the check was not possible."""
+or rows without aggregate) and the chart only shows the first {PAGE_SIZE}: tell
+the user and suggest a filter or an aggregate. It is false with an X sort and a
+limit up to {PAGE_SIZE}, which the chart shows in full. null: the check was not
+possible."""
 
 
 def register_tools(agent: Agent) -> None:
     """Attach the assistant tools to a pydantic-ai agent."""
-
-    @agent.tool
-    def get_dataset_metadata(ctx: RunContext[AssistantDeps], dataset_id: str) -> str:
-        """Get the metadata of a dataset: title, license, organization and resources."""
-        if refusal := _consume_tool_budget(ctx):
-            return refusal
-        dataset = _dataset_for_current_user(dataset_id)
-        if dataset is None:
-            return f'Dataset not found: no dataset matches "{dataset_id}".'
-        return serialize_dataset_metadata(dataset)
-
-    @agent.tool
-    def inspect_schema(ctx: RunContext[AssistantDeps], resource_id: str) -> str:
-        """Inspect the schema of a tabular resource: columns, types and line count."""
-        if refusal := _consume_tool_budget(ctx):
-            return refusal
-        if _dataset_for_resource(resource_id) is None:
-            return RESOURCE_NOT_FOUND
-        try:
-            profile = ctx.deps.tabular.get_profile(resource_id)
-        except TabularError as error:
-            return _tabular_error_message(error)
-        return render_profile(profile)
 
     @agent.tool(description=QUERY_DATA_DESCRIPTION)
     def query_data(
@@ -357,17 +367,21 @@ def register_tools(agent: Agent) -> None:
         sort_column: str | None = None,
         sort_direction: Literal["asc", "desc"] = "asc",
         columns: list[str] | None = None,
-    ) -> str:
+    ) -> QueryOutput | ToolError:
         if refusal := _consume_tool_budget(ctx):
-            return refusal
+            return _refused(refusal)
         if bool(aggregate_column) != bool(aggregate):
-            return "Invalid query: aggregate_column and aggregate go together."
+            return _refused("Invalid query: aggregate_column and aggregate go together.")
         if groupby and not aggregate:
-            return "Invalid query: groupby needs an aggregate (aggregate_column and aggregate)."
+            return _refused(
+                "Invalid query: groupby needs an aggregate (aggregate_column and aggregate)."
+            )
         if aggregate and columns:
-            return "Invalid query: columns cannot be combined with an aggregate; remove columns."
+            return _refused(
+                "Invalid query: columns cannot be combined with an aggregate; remove columns."
+            )
         if aggregate and sort_column and sort_column != groupby:
-            return (
+            return _refused(
                 "Invalid query: sorting is only possible on the groupby column; "
                 "the service does not sort on an aggregated value. "
                 "Sort in the chart with sort_x_by=axis_y."
@@ -375,25 +389,25 @@ def register_tools(agent: Agent) -> None:
         try:
             resource_id, known = _active_columns(ctx)
         except _ToolRefusal as refusal:
-            return str(refusal)
+            return _refused(str(refusal))
         used = [groupby, aggregate_column, sort_column, *(columns or []), *filter_columns(filters)]
         if unknown := unknown_column_errors(used, known):
-            return "\n".join(unknown)
+            return _refused(*unknown)
         refusals = filter_errors(filters)
         if aggregate and (
             error := query_aggregate_error(aggregate_column, aggregate, known[aggregate_column])
         ):
             refusals.append(error)
         if refusals:
-            return "\n".join(refusals)
+            return _refused(*refusals)
         if refusal := _consume_query_budget(ctx):
-            return refusal
-        sort = (sort_column, sort_direction) if sort_column else None
+            return _refused(refusal)
+        sort = Sort(sort_column, sort_direction) if sort_column else None
         if sort is None and groupby:
-            sort = (groupby, "asc")
+            sort = Sort(groupby, "asc")
         query = build_data_query(
             groupby=groupby,
-            aggregate=(aggregate_column, aggregate) if aggregate else None,
+            aggregate=Aggregation(aggregate_column, aggregate) if aggregate else None,
             filters=filters,
             sort=sort,
             columns=columns,
@@ -401,58 +415,41 @@ def register_tools(agent: Agent) -> None:
         try:
             result = ctx.deps.tabular.get_data(resource_id, with_page(query))
         except TabularError as error:
-            return _tabular_error_message(error)
-        rendered = _render_result(result, aggregated=bool(groupby))
-        if groupby and has_more_rows(result):
-            rendered += (
-                f"\nMore than {PAGE_SIZE} groups: only the first {PAGE_SIZE} "
-                "are taken into account."
-            )
-        return rendered
+            return _refused(_tabular_error_message(error))
+        output = _render_result(result, aggregated=bool(groupby))
+        if isinstance(output, QueryOutput) and groupby:
+            output.more_groups = has_more_rows(result)
+        return output
 
     @agent.tool(description=CREATE_CHART_DESCRIPTION)
-    def create_chart(ctx: RunContext[AssistantDeps], config: CreateChartInput) -> dict:
+    def create_chart(
+        ctx: RunContext[AssistantDeps], config: CreateChartInput
+    ) -> ChartToolOutput | ToolError:
         if refusal := _consume_tool_budget(ctx):
-            return {"status": "error", "errors": [refusal]}
+            return _refused(refusal)
         try:
             resource_id, known = _active_columns(ctx)
         except _ToolRefusal as refusal:
-            return {"status": "error", "errors": [str(refusal)]}
+            return _refused(str(refusal))
         if errors := validate_create(config, known):
-            return {"status": "error", "errors": errors}
+            return _refused(*errors)
         try:
             more_groups = _chart_has_more_groups(ctx.deps.tabular, resource_id, config)
         except TabularRequestRefused as refusal:
-            return {"status": "error", "errors": [_tabular_error_message(refusal)]}
-        return {
-            "status": "ok",
-            "chart": to_chart_output(config, resource_id),
-            "more_groups": more_groups,
-        }
+            return _refused(_tabular_error_message(refusal))
+        return ChartToolOutput(chart=to_chart_output(config, resource_id), more_groups=more_groups)
 
     @agent.tool
-    def update_chart(ctx: RunContext[AssistantDeps], patch: UpdateChartInput) -> dict:
+    def update_chart(
+        ctx: RunContext[AssistantDeps], patch: UpdateChartInput
+    ) -> UpdateToolOutput | ToolError:
         """Update the presentation of the current chart: title, description, type, Y axis.
 
         Never use it to change the columns, aggregates, filters or X axis:
         use `create_chart` for that.
         """
         if refusal := _consume_tool_budget(ctx):
-            return {"status": "error", "errors": [refusal]}
+            return _refused(refusal)
         if errors := validate_update(patch):
-            return {"status": "error", "errors": errors}
-        return {"status": "ok", "patch": to_update_output(patch)}
-
-    @agent.tool
-    def request_clarification(
-        ctx: RunContext[AssistantDeps],
-        question: str,
-        choices: Annotated[list[str], Field(min_length=2, max_length=4)],
-    ) -> str:
-        """Ask the user for a clarification, offering a list of numbered choices."""
-        if refusal := _consume_tool_budget(ctx):
-            return refusal
-        lines = [question, ""]
-        for index, choice in enumerate(choices, start=1):
-            lines.append(f"{index}. {choice}")
-        return "\n".join(lines)
+            return _refused(*errors)
+        return UpdateToolOutput(patch=to_update_output(patch))

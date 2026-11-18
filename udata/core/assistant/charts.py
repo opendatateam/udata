@@ -2,7 +2,7 @@
 
 import copy
 from collections.abc import Iterable
-from typing import Annotated
+from typing import Annotated, Any
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
@@ -56,7 +56,7 @@ class SeriesInput(BaseModel):
 
 class YAxisInput(BaseModel):
     label: str | None = Field(None, description="Label of the Y axis")
-    unit: str | None = Field(None, max_length=20, description="Unit of the values")
+    unit: str | None = Field(None, description="Unit of the values")
     unit_position: UnitPosition | None = Field(None, description="prefix or suffix")
     min: float | None = Field(None, description="Lower bound of the Y axis")
     max: float | None = Field(None, description="Upper bound of the Y axis")
@@ -157,33 +157,53 @@ def validate_update(patch: UpdateChartInput) -> list[str]:
     return []
 
 
-def to_chart_output(config: CreateChartInput, resource_id: str) -> dict:
+class SeriesOutput(BaseModel):
+    """A series of the chart model, as cdata sends it to the visualizations API."""
+
+    type: ChartType
+    column_y: str
+    aggregate_y: Aggregate | None
+    resource_id: str
+    column_x_name_override: str | None = None
+    # The filter tree as the chart model stores it, with its `type` discriminators.
+    filters: dict[str, Any] | None
+
+
+class ChartOutput(BaseModel):
+    """The chart handed to cdata, in the shape of the visualizations API."""
+
+    title: str
+    description: str
+    x_axis: XAxisInput
+    y_axis: YAxisInput
+    series: list[SeriesOutput]
+
+
+def to_chart_output(config: CreateChartInput, resource_id: str) -> ChartOutput:
     """Chart of the frontend model; a count series has the X column as `column_y`.
 
     The chart form reads a series as a count when `column_y` is `column_x`. Every
     count series is then the same: only the first one is kept, in order.
     """
     filters = config.filters.model_dump(by_alias=True) if config.filters else None
-    y_axis = config.y_axis or YAxisInput()
     first_count = next((s for s in config.series if s.aggregate_y == "count"), None)
     series = [s for s in config.series if s.aggregate_y != "count" or s is first_count]
-    return {
-        "title": config.title,
-        "description": config.description,
-        "x_axis": config.x_axis.model_dump(),
-        "y_axis": y_axis.model_dump(),
-        "series": [
-            {
-                "type": config.type,
-                "column_y": config.x_axis.column_x if s.aggregate_y == "count" else s.column_y,
-                "aggregate_y": s.aggregate_y,
-                "resource_id": resource_id,
-                "column_x_name_override": None,
-                "filters": copy.deepcopy(filters),
-            }
+    return ChartOutput(
+        title=config.title,
+        description=config.description,
+        x_axis=config.x_axis,
+        y_axis=config.y_axis or YAxisInput(),
+        series=[
+            SeriesOutput(
+                type=config.type,
+                column_y=config.x_axis.column_x if s.aggregate_y == "count" else s.column_y,
+                aggregate_y=s.aggregate_y,
+                resource_id=resource_id,
+                filters=copy.deepcopy(filters),
+            )
             for s in series
         ],
-    }
+    )
 
 
 def to_update_output(patch: UpdateChartInput) -> dict:

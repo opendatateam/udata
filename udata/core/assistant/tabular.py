@@ -4,15 +4,13 @@ Data is read through the declarative query-string API:
 ``GET /api/resources/<rid>/data/?<query>`` (filters, ``__groupby``,
 aggregations, sorting, pagination).
 
-``TabularError`` messages are never shown to clients nor to the model: the
-tools translate each error into their own message, keeping only the
-refusal detail of ``TabularRequestRefused``. Internal URLs and upstream
-details stay in the logs.
+``TabularRequestRefused`` carries api-tabular's status and error detail, which the
+tools relay to the model as they are: api-tabular is a public API, its errors are
+meant to be read. Other ``TabularError`` messages (network, timeout, invalid JSON)
+stay in the logs, like the internal URLs.
 """
 
-import ast
 import logging
-import re
 
 import requests
 from flask import current_app
@@ -27,6 +25,8 @@ DATA_ROUTE = "/api/resources/{rid}/data/"
 
 # Seconds; a hanging api-tabular call must not stall the agent's tool call.
 TABULAR_TIMEOUT = 30
+# Bound on the error detail fed back to the agent.
+MAX_DETAIL_LENGTH = 300
 
 
 class TabularError(RuntimeError):
@@ -37,91 +37,28 @@ class TabularError(RuntimeError):
 
 
 class TabularRequestRefused(TabularError):
-    """api-tabular refused the query, with the part at fault in ``detail``.
+    """api-tabular answered with an error status, its detail in ``detail``."""
 
-    The detail only quotes the query the agent wrote, or the database error
-    it caused, so it is fed back to the agent to let it fix the query.
-    """
-
-    def __init__(self, detail: str):
+    def __init__(self, status: int, detail: str):
+        self.status = status
         self.detail = detail[:MAX_DETAIL_LENGTH]
-        super().__init__(self.detail)
+        super().__init__(f"{status}: {self.detail}")
 
 
-class TabularResourceUnavailable(TabularError):
-    """api-tabular does not serve the resource: a 404 without a refusal detail, or its table is missing."""
-
-
-# Bound on the refusal detail fed back to the agent.
-MAX_DETAIL_LENGTH = 300
-
-FORBIDDEN_AGGREGATION = "aggregation not allowed on this resource"
-# api-tabular's two "Unauthorized parameters" details (build_sql_query_string, raise_if_not_index).
-FORBIDDEN_AGGREGATION_DETAIL = re.compile(r"^Aggregation parameters .* are not allowed")
-NOT_INDEXED_DETAIL = re.compile(
-    r"^(?P<column>.*) is not among the allowed columns: (?P<allowed>\{.*\})$", re.S
-)
-# The resource's table is gone: the resource is not available, not the query wrong.
-MISSING_TABLE_CODES = {"42P01", "PGRST205"}
-# The resource's internal table name, possibly schema-qualified, read as "resource".
-TABLE_NAME = re.compile(r"\b(?:csvapi\.)?[0-9a-f]{32}\b")
-
-
-def _first_error(response: requests.Response) -> tuple[object, object] | None:
-    """``title`` and ``detail`` of api-tabular's ``errors[0]``, None if the body has none."""
+def _error_detail(response: requests.Response) -> str:
+    """Detail of api-tabular's ``errors[0]``: its text, or the ``message`` of the
+    PostgREST error object it relays, else its title, else the plain-text body."""
     try:
         error = response.json()["errors"][0]
-        return error.get("title"), error.get("detail")
     except (ValueError, AttributeError, IndexError, KeyError, TypeError):
-        return None
-
-
-def _is_missing_table(response: requests.Response) -> bool:
-    """A "Database error" saying the resource's table is gone, whatever its status."""
-    error = _first_error(response)
-    detail = error[1] if error else None
-    return isinstance(detail, dict) and detail.get("code") in MISSING_TABLE_CODES
-
-
-def _refusal_detail(response: requests.Response) -> str | None:
-    """What the agent can fix in a refused query, from api-tabular's ``errors[0]``.
-
-    A 400 of api-tabular's own parser carries a text detail; a "Database error"
-    (400 or 404) relays PostgREST's error object, whose ``message`` is kept.
-    A plain-text 404 is api-tabular not knowing the resource: no detail.
-    """
-    if (error := _first_error(response)) is None:
-        return None
-    title, detail = error
-    status = response.status_code
-    if status == 403:
-        return _unauthorized_detail(detail) if title == "Unauthorized parameters" else None
-    if isinstance(detail, dict) and status in (400, 404):
+        return response.text.strip()
+    detail = error.get("detail") if isinstance(error, dict) else None
+    if isinstance(detail, dict):
         detail = detail.get("message")
-    elif status != 400:
-        return None
-    if not isinstance(detail, str) or not detail:
-        return None
-    return TABLE_NAME.sub("resource", detail)
-
-
-def _unauthorized_detail(detail) -> str | None:
-    """A forbidden aggregation, or a column outside the indexes of a large resource."""
-    if not isinstance(detail, str):
-        return None
-    if FORBIDDEN_AGGREGATION_DETAIL.match(detail):
-        return FORBIDDEN_AGGREGATION
-    if not (match := NOT_INDEXED_DETAIL.match(detail)):
-        return None
-    try:
-        allowed = ", ".join(sorted(ast.literal_eval(match["allowed"])))
-    # The set comes from upstream: a deeply nested one exhausts the stack or memory.
-    except (ValueError, SyntaxError, TypeError, RecursionError, MemoryError):
-        allowed = match["allowed"]
-    return (
-        f"column {match['column']} is not indexed: only the columns {allowed} "
-        "can be grouped or aggregated"
-    )
+    if isinstance(detail, str) and detail:
+        return detail
+    title = error.get("title") if isinstance(error, dict) else None
+    return title if isinstance(title, str) else ""
 
 
 def _validate_resource_id(resource_id: str) -> str:
@@ -165,14 +102,9 @@ class TabularClient:
             return response.json()
         except requests.exceptions.HTTPError as error:
             log.warning("api-tabular request failed: %s: %s", url, error)
-            missing_table = _is_missing_table(error.response)
-            if not missing_table and (detail := _refusal_detail(error.response)):
-                raise TabularRequestRefused(detail) from error
-            if missing_table or error.response.status_code == 404:
-                raise TabularResourceUnavailable(
-                    "the resource is not available in the tabular service."
-                ) from error
-            raise TabularError("the tabular service returned an error.") from error
+            raise TabularRequestRefused(
+                error.response.status_code, _error_detail(error.response)
+            ) from error
         except requests.exceptions.RequestException as error:
             log.warning("api-tabular request failed: %s: %s", url, error)
             raise TabularError("the tabular service returned an error.") from error

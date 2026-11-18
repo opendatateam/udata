@@ -5,7 +5,7 @@ The grammar mirrors cdata's `buildFilterQuery` / `fetchTabularData`
 equivalent of JavaScript's `encodeURIComponent`.
 """
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, NamedTuple
 from urllib.parse import quote
 
 from pydantic import BaseModel, ConfigDict, Discriminator, Field, Tag
@@ -166,12 +166,22 @@ def _build_filter_query(filters: GenericFilter) -> list[str]:
     return params
 
 
+class Aggregation(NamedTuple):
+    column: str
+    function: Aggregate
+
+
+class Sort(NamedTuple):
+    column: str
+    direction: Literal["asc", "desc"]
+
+
 def build_data_query(
     *,
     groupby: str | None = None,
-    aggregate: tuple[str, Aggregate] | None = None,
+    aggregate: Aggregation | None = None,
     filters: GenericFilter | None = None,
-    sort: tuple[str, Literal["asc", "desc"]] | None = None,
+    sort: Sort | None = None,
     columns: list[str] | None = None,
 ) -> str:
     """Query string for `/data/`, without `page` / `page_size` (see `with_page`)."""
@@ -181,9 +191,9 @@ def build_data_query(
     if groupby:
         params.append(f"{_encode_twice(groupby)}__groupby")
     if aggregate:
-        params.append(f"{_encode_twice(aggregate[0])}__{aggregate[1]}")
+        params.append(f"{_encode_twice(aggregate.column)}__{aggregate.function}")
     if sort:
-        params.append(f"{_encode_twice(sort[0])}__sort={sort[1]}")
+        params.append(f"{_encode_twice(sort.column)}__sort={sort.direction}")
     if filters:
         params.extend(_build_filter_query(filters))
     return "&".join(params)

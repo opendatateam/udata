@@ -8,7 +8,6 @@ from udata.core.assistant.tabular import (
     TabularClient,
     TabularError,
     TabularRequestRefused,
-    TabularResourceUnavailable,
     has_more_rows,
 )
 from udata.tests import PytestOnlyTestCase
@@ -65,228 +64,54 @@ class TabularClientTest(PytestOnlyTestCase):
         braced = "{5C4AE7A0-E3F1-4A3F-8B1D-2E9F00000000}"
         assert TabularClient().get_profile(braced) == {"ok": True}
 
-    def test_http_error_raises_sanitized_tabular_error(self, requests_mock, caplog):
+    def refused(self, requests_mock, status, **body) -> TabularRequestRefused:
         requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby",
-            status_code=500,
-            json={"error": "boom"},
-        )
-        with caplog.at_level("WARNING", logger="udata.core.assistant.tabular"):
-            with pytest.raises(TabularError) as excinfo:
-                TabularClient().get_data(RESOURCE_ID, "a__groupby")
-        # The client-facing error is sanitized: no URL, no upstream details.
-        message = str(excinfo.value)
-        assert BASE_URL not in message
-        assert "boom" not in message
-        assert "500" not in message
-        # The details stay in the server logs.
-        assert any(BASE_URL in record.getMessage() for record in caplog.records)
-
-    def test_refused_query_keeps_the_detail_for_the_agent(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby",
-            status_code=400,
-            json={
-                "errors": [{"code": None, "title": "Invalid query", "detail": "Unknown column: x"}]
-            },
+            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby", status_code=status, **body
         )
         with pytest.raises(TabularRequestRefused) as excinfo:
             TabularClient().get_data(RESOURCE_ID, "a__groupby")
-        assert excinfo.value.detail == "Unknown column: x"
-        assert str(excinfo.value) == "Unknown column: x"
-
-    def test_bad_request_without_detail_is_a_generic_error(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby", status_code=400, text="nope"
-        )
-        with pytest.raises(TabularError) as excinfo:
-            TabularClient().get_data(RESOURCE_ID, "a__groupby")
-        assert type(excinfo.value) is TabularError
-
-    def test_missing_resource_says_it_is_not_available(self, requests_mock):
-        # api-tabular's own 404, in plain text, for a resource it does not know
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby",
-            status_code=404,
-            text="404: Not Found",
-            headers={"Content-Type": "text/plain; charset=utf-8"},
-        )
-        with pytest.raises(TabularResourceUnavailable):
-            TabularClient().get_data(RESOURCE_ID, "a__groupby")
+        return excinfo.value
 
     @staticmethod
-    def database_error(code: str, message: str, hint: str | None = None) -> dict:
-        """api-tabular's body for an error PostgREST relays from PostgreSQL."""
-        return {
-            "errors": [
-                {
-                    "code": None,
-                    "title": "Database error",
-                    "detail": {"code": code, "details": None, "hint": hint, "message": message},
-                }
-            ]
-        }
+    def error(detail, title="Invalid query") -> dict:
+        return {"json": {"errors": [{"code": None, "title": title, "detail": detail}]}}
 
-    def test_a_database_error_is_a_refusal_with_its_message(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?n__exact=1.5",
-            status_code=400,
-            json=self.database_error("22P02", 'invalid input syntax for type bigint: "1.5"'),
-        )
-        with pytest.raises(TabularRequestRefused) as excinfo:
-            TabularClient().get_data(RESOURCE_ID, "n__exact=1.5")
-        assert excinfo.value.detail == 'invalid input syntax for type bigint: "1.5"'
+    def test_an_error_status_relays_the_detail(self, requests_mock):
+        refusal = self.refused(requests_mock, 400, **self.error("Unknown column: x"))
+        assert (refusal.status, refusal.detail) == (400, "Unknown column: x")
 
-    def test_a_database_error_hides_the_internal_table_name(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?nope__exact=1",
-            status_code=400,
-            json=self.database_error(
-                "42703", "column 70f4c60b4f9828beb7922b1fe0dae8da.nope does not exist"
-            ),
-        )
-        with pytest.raises(TabularRequestRefused) as excinfo:
-            TabularClient().get_data(RESOURCE_ID, "nope__exact=1")
-        assert excinfo.value.detail == "column resource.nope does not exist"
+    def test_an_error_relays_the_message_of_a_database_error(self, requests_mock):
+        # api-tabular relays PostgREST's error object as is, internal table name included.
+        message = 'relation "csvapi.0123456789abcdef0123456789abcdef" does not exist'
+        detail = {"code": "42P01", "details": None, "hint": None, "message": message}
+        refusal = self.refused(requests_mock, 404, **self.error(detail, "Database error"))
+        assert (refusal.status, refusal.detail) == (404, message)
 
-    @pytest.mark.parametrize(
-        "message,hidden",
-        [
-            (
-                'column "70f4c60b4f9828beb7922b1fe0dae8da.votants" must appear in the GROUP BY',
-                'column "resource.votants" must appear in the GROUP BY',
-            ),
-            ('column "70f4c60b4f9828beb7922b1fe0dae8da"."a b" x', 'column "resource"."a b" x'),
-            (
-                'relation "csvapi.70f4c60b4f9828beb7922b1fe0dae8da" is locked',
-                'relation "resource" is locked',
-            ),
-            ("table '70f4c60b4f9828beb7922b1fe0dae8da' x", "table 'resource' x"),
-            ("on 70f4c60b4f9828beb7922b1fe0dae8da for x", "on resource for x"),
-            ("70f4c60b4f9828beb7922b1fe0dae8da", "resource"),
-            ("value 170f4c60b4f9828beb7922b1fe0dae8da", "value 170f4c60b4f9828beb7922b1fe0dae8da"),
-        ],
-    )
-    def test_a_database_error_hides_every_form_of_the_table_name(
-        self, requests_mock, message, hidden
-    ):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby",
-            status_code=400,
-            json=self.database_error("42803", message),
+    def test_an_unauthorized_parameter_is_relayed_as_is(self, requests_mock):
+        detail = "score is not among the allowed columns: {'birth', 'id'}"
+        refusal = self.refused(
+            requests_mock, 403, **self.error(detail, title="Unauthorized parameters")
         )
-        with pytest.raises(TabularRequestRefused) as excinfo:
-            TabularClient().get_data(RESOURCE_ID, "a__groupby")
-        assert excinfo.value.detail == hidden
+        assert (refusal.status, refusal.detail) == (403, detail)
 
-    def test_a_long_database_error_is_bounded_after_hiding_the_table_name(self, requests_mock):
-        message = "column 70f4c60b4f9828beb7922b1fe0dae8da." + "x" * 400 + " does not exist"
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby",
-            status_code=400,
-            json=self.database_error("42703", message),
-        )
-        with pytest.raises(TabularRequestRefused) as excinfo:
-            TabularClient().get_data(RESOURCE_ID, "a__groupby")
-        assert excinfo.value.detail == ("column resource." + "x" * 400)[:MAX_DETAIL_LENGTH]
+    def test_an_error_without_detail_gives_its_title(self, requests_mock):
+        refusal = self.refused(requests_mock, 400, **self.error(None, title="Invalid query"))
+        assert refusal.detail == "Invalid query"
 
-    def test_a_database_error_404_is_a_refusal(self, requests_mock):
-        # PostgREST answers 404 to an aggregate PostgreSQL has no function for
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?label__sum",
-            status_code=404,
-            json=self.database_error(
-                "42883",
-                "function sum(character varying) does not exist",
-                hint="No function matches the given name and argument types.",
-            ),
-        )
-        with pytest.raises(TabularRequestRefused) as excinfo:
-            TabularClient().get_data(RESOURCE_ID, "label__sum")
-        assert excinfo.value.detail == "function sum(character varying) does not exist"
+    def test_a_plain_text_error_gives_its_body(self, requests_mock):
+        # api-tabular's own 404, in plain text, for a resource it does not know
+        refusal = self.refused(requests_mock, 404, text="404: Not Found")
+        assert (refusal.status, refusal.detail) == (404, "404: Not Found")
 
-    @pytest.mark.parametrize("status", [400, 404])
-    @pytest.mark.parametrize("code", ["42P01", "PGRST205"])
-    def test_a_missing_table_is_not_available(self, requests_mock, status, code):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby",
-            status_code=status,
-            json=self.database_error(
-                code, 'relation "csvapi.70f4c60b4f9828beb7922b1fe0dae8da" does not exist'
-            ),
-        )
-        with pytest.raises(TabularResourceUnavailable):
-            TabularClient().get_data(RESOURCE_ID, "a__groupby")
+    def test_the_detail_is_bounded(self, requests_mock):
+        refusal = self.refused(requests_mock, 400, **self.error("x" * 1000))
+        assert len(refusal.detail) == MAX_DETAIL_LENGTH
 
-    def test_a_forbidden_aggregation_is_a_refusal(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby&b__sum",
-            status_code=403,
-            json={
-                "errors": [
-                    {
-                        "code": None,
-                        "title": "Unauthorized parameters",
-                        "detail": "Aggregation parameters `groupby`, `sum` are not allowed "
-                        f"for resource '{RESOURCE_ID}'",
-                    }
-                ]
-            },
-        )
-        with pytest.raises(TabularRequestRefused) as excinfo:
-            TabularClient().get_data(RESOURCE_ID, "a__groupby&b__sum")
-        assert excinfo.value.detail == "aggregation not allowed on this resource"
-
-    def test_a_column_without_index_is_a_refusal_listing_the_indexed_columns(self, requests_mock):
-        # api-tabular's raise_if_not_index, on a resource with table_indexes
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?score__groupby",
-            status_code=403,
-            json={
-                "errors": [
-                    {
-                        "code": None,
-                        "title": "Unauthorized parameters",
-                        "detail": "score is not among the allowed columns: {'birth', 'id'}",
-                    }
-                ]
-            },
-        )
-        with pytest.raises(TabularRequestRefused) as excinfo:
-            TabularClient().get_data(RESOURCE_ID, "score__groupby")
-        assert excinfo.value.detail == (
-            "column score is not indexed: only the columns birth, id can be grouped or aggregated"
-        )
-
-    def test_an_unknown_unauthorized_detail_is_a_generic_error(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby",
-            status_code=403,
-            json={"errors": [{"title": "Unauthorized parameters", "detail": "something else"}]},
-        )
-        with pytest.raises(TabularError) as excinfo:
-            TabularClient().get_data(RESOURCE_ID, "a__groupby")
-        assert not isinstance(excinfo.value, TabularRequestRefused)
-
-    def test_another_403_is_a_generic_error(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby",
-            status_code=403,
-            text="Forbidden",
-        )
-        with pytest.raises(TabularError) as excinfo:
-            TabularClient().get_data(RESOURCE_ID, "a__groupby")
-        assert not isinstance(excinfo.value, TabularRequestRefused)
-
-    def test_a_database_error_on_a_server_error_stays_generic(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby",
-            status_code=500,
-            json=self.database_error("XX000", "internal error"),
-        )
-        with pytest.raises(TabularError) as excinfo:
-            TabularClient().get_data(RESOURCE_ID, "a__groupby")
-        assert not isinstance(excinfo.value, TabularRequestRefused)
+    def test_the_url_stays_in_the_logs(self, requests_mock, caplog):
+        with caplog.at_level("WARNING", logger="udata.core.assistant.tabular"):
+            refusal = self.refused(requests_mock, 500, json={"error": "boom"})
+        assert BASE_URL not in str(refusal)
+        assert any(BASE_URL in record.getMessage() for record in caplog.records)
 
     def test_timeout_raises_sanitized_tabular_error(self, requests_mock, caplog):
         requests_mock.get(

@@ -4,16 +4,11 @@ Adapted from the ``datagouv-agents-prototype`` prompt sections
 (``server/agents/prompts/``), in spirit rather than literally: charts are
 built declaratively through tools. The answer language is the request's,
 given per request by :func:`language_instructions`.
-
-Bump ``PROMPT_VERSION`` on any significant prompt change so conversations
-can be traced back to a prompt version.
 """
 
 from babel import Locale
 
 from udata.core.assistant.data_query import MAX_QUERIES_PER_QUESTION, PAGE_SIZE
-
-PROMPT_VERSION = "2026-11-17.1"
 
 IDENTITY_PROMPT = """\
 You are the conversational assistant of data.gouv.fr, the French open data \
@@ -96,8 +91,9 @@ without creating the chart again;
 - when the columns, aggregates, filters or X axis (column, sort, number of \
 values) change, call query_data to check the result, then create_chart, \
 which replaces the structure of the chart;
-- only call request_clarification, with 2 to 4 choices, when the ambiguity \
-changes the result; otherwise pick the most reasonable option and say so;
+- only ask the user a short question, offering 2 to 4 options, when the \
+ambiguity changes the result; otherwise pick the most reasonable option and say \
+so;
 - the chart is offered to the user in the interface: never claim it is saved \
 or published."""
 
@@ -122,7 +118,6 @@ truncated result, a top-N, excluded values or possible ties;
 SYSTEM_INSTRUCTIONS = "\n\n".join(
     [
         IDENTITY_PROMPT,
-        f"Prompt version: {PROMPT_VERSION}. Only mention it if the user asks for it.",
         SCOPE_PROMPT,
         UNTRUSTED_DATA_PROMPT,
         EVIDENCE_PROMPT,

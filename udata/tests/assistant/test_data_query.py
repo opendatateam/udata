@@ -2,10 +2,12 @@ import pytest
 from pydantic import TypeAdapter
 
 from udata.core.assistant.data_query import (
+    Aggregation,
     AndFilters,
     Filter,
     GenericFilter,
     OrFilters,
+    Sort,
     build_data_query,
     filter_columns,
     filter_errors,
@@ -14,12 +16,14 @@ from udata.core.assistant.data_query import (
 
 
 def test_grouped_aggregate_sorted_on_x():
-    q = build_data_query(groupby="dep", aggregate=("n_cum_dose1", "max"), sort=("dep", "asc"))
+    q = build_data_query(
+        groupby="dep", aggregate=Aggregation("n_cum_dose1", "max"), sort=Sort("dep", "asc")
+    )
     assert q == "dep__groupby&n_cum_dose1__max&dep__sort=asc"
 
 
 def test_aggregate_without_groupby_is_a_global_total():
-    assert build_data_query(aggregate=("n_cum_dose1", "sum")) == "n_cum_dose1__sum"
+    assert build_data_query(aggregate=Aggregation("n_cum_dose1", "sum")) == "n_cum_dose1__sum"
 
 
 def test_with_page():
@@ -208,8 +212,8 @@ def test_column_names_of_top_level_parameters_are_double_encoded(column, key):
         build_data_query(
             columns=[column, "x"],
             groupby=column,
-            aggregate=(column, "max"),
-            sort=(column, "asc"),
+            aggregate=Aggregation(column, "max"),
+            sort=Sort(column, "asc"),
             filters=Filter(column=column, condition="exact", value="1"),
         )
         == f"columns={key},x&{key}__groupby&{key}__max&{key}__sort=asc&{key}__exact=1"

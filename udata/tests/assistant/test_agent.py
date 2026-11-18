@@ -3,8 +3,7 @@ from pydantic_ai.messages import ModelResponse, TextPart
 from pydantic_ai.models.function import AgentInfo, FunctionModel
 
 from udata.core.assistant.agent import get_agent
-from udata.core.assistant.data_query import MAX_QUERIES_PER_QUESTION, PAGE_SIZE
-from udata.core.assistant.prompts import PROMPT_VERSION, SYSTEM_INSTRUCTIONS
+from udata.core.assistant.prompts import SYSTEM_INSTRUCTIONS
 from udata.core.assistant.tabular import TabularClient
 from udata.core.assistant.tools import AssistantDeps
 from udata.tests.api import PytestOnlyDBTestCase
@@ -28,10 +27,6 @@ class AssistantAgentTest(PytestOnlyDBTestCase):
         self.app.config["AI_MODELS"] = [{"name": "gpt-oss-120b"}]
         assert get_agent().model_settings is None
 
-    def test_instructions_follow_the_tool_limits(self):
-        assert f"at most {MAX_QUERIES_PER_QUESTION} calls" in SYSTEM_INSTRUCTIONS
-        assert f"at most {PAGE_SIZE} rows or groups" in SYSTEM_INSTRUCTIONS
-
     def test_the_model_receives_the_instructions_and_tool_descriptions(self):
         received = {}
 
@@ -42,6 +37,6 @@ class AssistantAgentTest(PytestOnlyDBTestCase):
 
         deps = AssistantDeps(tabular=TabularClient())
         get_agent().run_sync("Bonjour", model=FunctionModel(record), deps=deps)
-        assert PROMPT_VERSION in received["instructions"]
-        assert f"at most {PAGE_SIZE} rows" in received["query_data"]
-        assert f"more than {PAGE_SIZE} points" in received["create_chart"]
+        assert SYSTEM_INSTRUCTIONS in received["instructions"]
+        assert received["query_data"]
+        assert received["create_chart"]

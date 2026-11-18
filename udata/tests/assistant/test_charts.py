@@ -103,7 +103,7 @@ def test_output_applies_the_type_and_filters_to_every_series():
             {"column_y": "dep", "aggregate_y": "count"},
         ],
     )
-    out = to_chart_output(config, "rid")
+    out = to_chart_output(config, "rid").model_dump()
     assert [s["type"] for s in out["series"]] == ["histogram", "histogram"]
     expected = {"_cls": "Filter", "column": "dep", "condition": "exact", "value": "01"}
     assert [s["filters"] for s in out["series"]] == [expected, expected]
@@ -127,7 +127,7 @@ def test_output_count_series_targets_the_x_column():
             {"column_y": "n_cum_dose1"},
         ]
     )
-    out = to_chart_output(config, "rid")
+    out = to_chart_output(config, "rid").model_dump()
     assert [(s["column_y"], s["aggregate_y"]) for s in out["series"]] == [
         ("dep", "count"),
         ("n_cum_dose1", "max"),
@@ -145,7 +145,7 @@ def test_output_keeps_one_count_series_in_order():
             {"column_y": "jour", "aggregate_y": "count"},
         ]
     )
-    out = to_chart_output(config, "rid")
+    out = to_chart_output(config, "rid").model_dump()
     assert [(s["column_y"], s["aggregate_y"]) for s in out["series"]] == [
         ("n_cum_dose1", "max"),
         ("dep", "count"),
@@ -161,7 +161,7 @@ def test_unknown_column_errors_are_deduplicated_in_order_and_skip_empty_names():
 
 
 def test_output_without_filters_has_none():
-    assert to_chart_output(make(), "rid")["series"][0]["filters"] is None
+    assert to_chart_output(make(), "rid").model_dump()["series"][0]["filters"] is None
 
 
 def test_update_needs_one_field():
@@ -173,6 +173,12 @@ def test_update_needs_one_field():
 def test_update_output_only_has_provided_fields():
     patch = UpdateChartInput(y_axis={"unit": "doses"})
     assert to_update_output(patch) == {"y_axis": {"unit": "doses"}}
+
+
+def test_unit_is_not_bounded_beyond_the_chart_model():
+    # Like YAxis.unit and the chart form: a long unit is accepted.
+    patch = UpdateChartInput(y_axis={"unit": "tonnes équivalent CO2"})
+    assert to_update_output(patch) == {"y_axis": {"unit": "tonnes équivalent CO2"}}
 
 
 def test_profile_columns_follows_the_header_order():
@@ -210,7 +216,7 @@ def test_output_series_do_not_share_filters():
         filters=filters,
         series=[{"column_y": "n_cum_dose1"}, {"column_y": "n_cum_dose1", "aggregate_y": "max"}],
     )
-    out = to_chart_output(config, "rid")
+    out = to_chart_output(config, "rid").model_dump()
     out["series"][0]["filters"]["value"] = "changed"
     assert out["series"][1]["filters"]["value"] == "01"
 
@@ -240,7 +246,9 @@ def test_blank_title_or_description_is_refused(field):
 
 
 def test_output_strips_title_and_description():
-    out = to_chart_output(make(title="  Doses ", description=" Par département "), "rid")
+    out = to_chart_output(
+        make(title="  Doses ", description=" Par département "), "rid"
+    ).model_dump()
     assert (out["title"], out["description"]) == ("Doses", "Par département")
 
 
@@ -294,7 +302,7 @@ class ChartOutputMatchesTheChartModelTest(PytestOnlyAPITestCase):
     )
     def test_the_chart_api_accepts_the_chart_output(self, overrides):
         self.login()
-        chart = to_chart_output(make(**overrides), str(uuid4()))
+        chart = to_chart_output(make(**overrides), str(uuid4())).model_dump()
 
         response = self.post(url_for("api.visualizations"), chart)
 
