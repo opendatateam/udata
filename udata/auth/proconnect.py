@@ -2,6 +2,7 @@ import json
 import time
 from dataclasses import asdict, dataclass, replace
 from datetime import UTC, datetime
+from urllib.parse import urljoin, urlsplit
 
 from authlib.common.urls import add_params_to_uri
 from authlib.integrations.base_client import OAuthError
@@ -37,6 +38,8 @@ PENDING_LOGIN_KEY = "proconnect_pending_login"
 LOGIN_KEY = "proconnect_login"
 # Set when a login is sent back to ProConnect for the second factor the account relies on.
 SECOND_FACTOR_ASKED_KEY = "proconnect_second_factor_asked"
+# The page the agent signed in from (an OAuth authorization, say), to land back on.
+NEXT_KEY = "proconnect_next"
 
 
 def init_app(app):
@@ -158,6 +161,17 @@ def login_page_url() -> str:
     return cdata_url("/login") or homepage_url()
 
 
+def logged_in_url(flash: str) -> str:
+    """Where a ProConnect login lands: the cdata page it started from, or the homepage."""
+    next_url = session.pop(NEXT_KEY, None)
+    base_url = current_app.config["CDATA_BASE_URL"]
+    url = urljoin(base_url, next_url) if base_url and next_url else None
+    # `next` comes from the browser: a page of another site isn't followed.
+    if not url or urlsplit(url)[:2] != urlsplit(base_url)[:2]:
+        return homepage_url(flash=flash)
+    return add_params_to_uri(url, [("flash", flash)])
+
+
 @ns.route("/login/", endpoint="proconnect_login")
 class ProconnectLoginAPI(API):
     def get(self):
@@ -167,6 +181,7 @@ class ProconnectLoginAPI(API):
             tf_clean_session()
         session.pop(PENDING_LOGIN_KEY, None)
         session.pop(SECOND_FACTOR_ASKED_KEY, None)
+        session[NEXT_KEY] = request.args.get("next")
 
         return authorize_redirect()
 
@@ -280,8 +295,8 @@ class ProconnectAuthAPI(API):
         if user.password and can_switch_to_proconnect_only(user):
             # The password is a way in without the ProConnect second factor: cdata invites
             # the agent to drop it.
-            return redirect(homepage_url(flash="proconnect_only_available"))
-        return redirect(homepage_url(flash="connected"))
+            return redirect(logged_in_url("proconnect_only_available"))
+        return redirect(logged_in_url("connected"))
 
 
 def can_switch_to_proconnect_only(user: User) -> bool:

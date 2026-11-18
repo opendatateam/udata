@@ -1,4 +1,5 @@
 from datetime import datetime
+from urllib.parse import urlsplit
 
 import pytest
 from flask import current_app, url_for
@@ -10,6 +11,7 @@ from udata.core.user.models import User
 from udata.i18n import gettext as _
 from udata.tests.api import PytestOnlyAPITestCase, SessionCookieMixin
 from udata.tests.helpers import capture_mails
+from udata.uris import homepage_url
 
 CDATA = "http://cdata.test"
 
@@ -27,10 +29,11 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
         sub=None,
         amr=None,
         require_second_factor: bool | None = None,
+        next: str | None = None,
     ):
         """`require_second_factor` is what the agent's browser makes of the redirection."""
         proconnect.agent_has_session(email, second_factor=second_factor, sub=sub, amr=amr)
-        authorize_url = self.get(url_for("api.proconnect_login")).location
+        authorize_url = self.get(url_for("api.proconnect_login", next=next)).location
         if require_second_factor is not None:
             authorize_url = proconnect.tamper(
                 authorize_url, require_second_factor=require_second_factor
@@ -106,6 +109,73 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
         self.assert_logged_in_as(user)
         assert proconnect.authentications == 0
         assert not self.is_fresh()
+
+    def test_login_lands_back_on_the_page_it_started_from(self, proconnect):
+        UserFactory(email="jane@example.org")
+
+        response = self.sign_in(
+            proconnect, "jane@example.org", next="/oauth/authorize?client_id=abc&state=xyz"
+        )
+
+        assert (
+            response.location == f"{CDATA}/oauth/authorize?client_id=abc&state=xyz&flash=connected"
+        )
+
+    @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
+    def test_login_sent_back_for_the_second_factor_lands_back_on_the_page_it_started_from(
+        self, proconnect
+    ):
+        UserFactory(email="jane@example.org")
+        self.sign_in(proconnect, "jane@example.org")
+        self.get(url_for("security.logout"))
+        response = self.sign_in(
+            proconnect,
+            "jane@example.org",
+            second_factor=False,
+            require_second_factor=False,
+            next="/datasets/",
+        )
+        callback = proconnect.authorize(response.location)
+
+        response = self.get(url_for("api.proconnect_auth", **callback))
+
+        assert response.location == f"{CDATA}/datasets/?flash=connected"
+
+    @pytest.mark.parametrize(
+        "next",
+        [
+            "https://evil.example/",
+            "//evil.example/",
+            "/\\evil.example/",
+            "/\t/evil.example/",
+            "javascript://cdata.test/%0aalert(1)",
+        ],
+    )
+    def test_login_does_not_land_off_the_site(self, proconnect, next):
+        UserFactory(email="jane@example.org")
+
+        response = self.sign_in(proconnect, "jane@example.org", next=next)
+
+        assert urlsplit(response.location)[:2] == urlsplit(CDATA)[:2]
+
+    def test_login_without_cdata_lands_on_the_homepage(self, proconnect, app):
+        # Not a method `options` mark: pytest-flask applies the class one last, it would win.
+        app.config["CDATA_BASE_URL"] = None
+        UserFactory(email="jane@example.org")
+
+        response = self.sign_in(proconnect, "jane@example.org", next="/datasets/")
+
+        assert response.location == homepage_url(flash="connected")
+
+    def test_login_without_a_page_does_not_land_on_the_one_of_an_earlier_login(self, proconnect):
+        UserFactory(email="jane@example.org")
+        # Jane leaves for ProConnect from the OAuth authorization, and closes the tab there.
+        proconnect.agent_has_session("jane@example.org")
+        self.get(url_for("api.proconnect_login", next="/oauth/authorize?client_id=abc"))
+
+        response = self.sign_in(proconnect, "jane@example.org")
+
+        assert response.location == homepage_url(flash="connected")
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_login_requires_a_second_factor_at_proconnect(self, proconnect):
