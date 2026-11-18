@@ -274,6 +274,82 @@ class TopicsListAPITest(APITestCase):
             for elt in TopicElement.objects(topic=topic)
         )
 
+    def test_topic_elements_filter_by_element(self):
+        """It should filter a topic's elements by element class and id"""
+        topic = TopicFactory()
+        dataset = DatasetFactory()
+        reuse = ReuseFactory()
+        TopicElementDatasetFactory(topic=topic, element=dataset)
+        TopicElementDatasetFactory(topic=topic)
+        TopicElementReuseFactory(topic=topic, element=reuse)
+        TopicElementDatasetFactory(element=dataset)  # same dataset, other topic
+
+        response = self.get(
+            url_for(
+                "apiv2.topic_elements",
+                topic=topic,
+                **{"class": "Dataset", "element": str(dataset.id)},
+            )
+        )
+        assert response.status_code == 200
+        assert response.json["total"] == 1
+        assert response.json["data"][0]["element"]["id"] == str(dataset.id)
+
+        response = self.get(
+            url_for(
+                "apiv2.topic_elements", topic=topic, **{"class": "Reuse", "element": str(reuse.id)}
+            )
+        )
+        assert response.json["total"] == 1
+
+        # right id, wrong class: no such reuse
+        response = self.get(
+            url_for(
+                "apiv2.topic_elements",
+                topic=topic,
+                **{"class": "Reuse", "element": str(dataset.id)},
+            )
+        )
+        assert response.json["total"] == 0
+
+        # unknown element
+        response = self.get(
+            url_for(
+                "apiv2.topic_elements",
+                topic=topic,
+                **{"class": "Dataset", "element": str(ObjectId())},
+            )
+        )
+        assert response.json["total"] == 0
+
+    def test_topic_elements_filter_by_element_bad_args(self):
+        """It should reject an element filter without a valid class or id"""
+        topic = TopicFactory()
+        assert (
+            self.get(
+                url_for("apiv2.topic_elements", topic=topic, **{"element": str(ObjectId())})
+            ).status_code
+            == 400
+        )
+        assert (
+            self.get(
+                url_for(
+                    "apiv2.topic_elements",
+                    topic=topic,
+                    **{"class": "Nope", "element": str(ObjectId())},
+                )
+            ).status_code
+            == 400
+        )
+        assert (
+            self.get(
+                url_for(
+                    "apiv2.topic_elements", topic=topic, **{"class": "Dataset", "element": "nope"}
+                )
+            ).status_code
+            == 400
+        )
+
     def test_topic_api_create(self):
         """It should create a topic from the API"""
         data = TopicWithElementsFactory.as_payload()

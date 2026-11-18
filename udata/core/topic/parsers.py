@@ -9,7 +9,7 @@ from udata.api.parsers import ModelApiParser
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.reuse.models import Reuse
-from udata.core.topic import DEFAULT_PAGE_SIZE
+from udata.core.topic import DEFAULT_PAGE_SIZE, TOPIC_ELEMENT_CLASSES
 from udata.core.topic.models import TopicElement
 
 
@@ -26,9 +26,18 @@ class TopicElementsParser(ModelApiParser):
             "q", type=str, location="args", help="query string to search through elements"
         )
         self.parser.add_argument("tag", type=str, location="args", action="append")
+        self.parser.add_argument(
+            "element",
+            type=str,
+            location="args",
+            help="An element id to look for, requires `class` (eg. Dataset)",
+        )
 
     @staticmethod
     def parse_filters(elements, args):
+        if args.get("element"):
+            elements = TopicElementsParser._filter_element(elements, args)
+            args = {**args, "class": None}
         if args.get("q"):
             phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
             elements = elements.search_text(phrase_query)
@@ -40,6 +49,12 @@ class TopicElementsParser(ModelApiParser):
             else:
                 elements = elements.filter(__raw__={"element._cls": element_class})
         return elements
+
+    @staticmethod
+    def _filter_element(elements, args):
+        reference = {"class": args.get("class"), "id": args["element"]}
+        obj = api.resolve_reference(reference, "element", TOPIC_ELEMENT_CLASSES, missing_ok=True)
+        return elements.filter(element=obj) if obj else elements.none()
 
 
 class TopicApiParser(ModelApiParser):
