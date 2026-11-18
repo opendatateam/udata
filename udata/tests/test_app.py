@@ -2,26 +2,7 @@ import pytest
 from flask import request
 from werkzeug.exceptions import BadRequest
 
-from udata.core.assistant.api import AssistantChatAPI
 from udata.tests.api import PytestOnlyAPITestCase
-
-CHAT_URL = "/api/1/assistant/chat/"
-
-
-class UDataRequestTest(PytestOnlyAPITestCase):
-    def test_max_content_length_follows_the_routed_view_class(self):
-        with self.app.test_request_context(CHAT_URL, method="POST"):
-            assert request.max_content_length == AssistantChatAPI.max_content_length
-
-    @pytest.mark.options(MAX_CONTENT_LENGTH=1234)
-    def test_max_content_length_defaults_to_the_config_on_other_views(self):
-        with self.app.test_request_context("/api/1/datasets/", method="POST"):
-            assert request.max_content_length == 1234
-
-    def test_an_explicit_value_overrides_the_view_class_limit(self):
-        with self.app.test_request_context(CHAT_URL, method="POST"):
-            request.max_content_length = 10
-            assert request.max_content_length == 10
 
 
 class UdataJsonProviderTest(PytestOnlyAPITestCase):

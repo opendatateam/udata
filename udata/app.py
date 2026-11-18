@@ -10,9 +10,7 @@ from bson import json_util
 from flask import Blueprint as BaseBlueprint
 from flask import (
     Flask,
-    Request,
     abort,
-    current_app,
     g,
     jsonify,
     make_response,
@@ -47,30 +45,7 @@ def send_static(directory, filename, cache_timeout):
     return response
 
 
-class UDataRequest(Request):
-    """Request honoring a ``max_content_length`` declared on the matched view class.
-
-    Extensions read the body before the view runs (Flask-Security parses the JSON
-    of sessionless requests in a ``before_request`` hook), so a limit set inside
-    the view would come too late. A value set on the request still wins.
-    """
-
-    @property
-    def max_content_length(self) -> int | None:
-        if self._max_content_length is None and self.url_rule is not None:
-            view = current_app.view_functions.get(self.url_rule.endpoint)
-            limit = getattr(getattr(view, "view_class", None), "max_content_length", None)
-            if limit is not None:
-                return limit
-        return super().max_content_length
-
-    @max_content_length.setter
-    def max_content_length(self, value: int | None) -> None:
-        self._max_content_length = value
-
-
 class UDataApp(Flask):
-    request_class = UDataRequest
     debug_log_format = "[%(levelname)s][%(name)s:%(lineno)d] %(message)s"
 
     # Keep track of static dirs given as register_blueprint argument
