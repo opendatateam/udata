@@ -535,7 +535,7 @@ class DataserviceAPITest(APITestCase):
         )
 
     def test_dataservice_api_index_with_wrong_dataset_id(self):
-        response = self.get(url_for("api.dataservices", sort="title", dataset=str("xxx")))
+        response = self.get(url_for("api.dataservices", sort="title", dataset="xxx"))
         self.assert400(response)
 
     def test_dataservice_api_create_with_validation_error(self):

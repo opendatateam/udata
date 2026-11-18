@@ -58,12 +58,12 @@ class FakeAPI(API):
 def oauth(app, request):
     marker = request.node.get_closest_marker("oauth")
     custom_kwargs = marker.kwargs if marker else {}
-    kwargs = dict(
-        name="test-client",
-        owner=UserFactory(),
-        redirect_uris=["https://test.org/callback"],
-        secret=hash_token(CLIENT_SECRET),
-    )
+    kwargs = {
+        "name": "test-client",
+        "owner": UserFactory(),
+        "redirect_uris": ["https://test.org/callback"],
+        "secret": hash_token(CLIENT_SECRET),
+    }
     kwargs.update(custom_kwargs)
     return OAuth2Client.objects.create(**kwargs)
 
@@ -137,9 +137,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         """Should handle wrong OAuth header authentication"""
         OAuth2TokenFactory(client=oauth, access="access-token", refresh="refresh-token")
 
-        response = self.post(
-            url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", "not-my-token"])}
-        )
+        response = self.post(url_for("api.fake"), headers={"Authorization": "Bearer not-my-token"})
 
         assert401(response)
         assert response.content_type == "application/json"
@@ -175,7 +173,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         from udata.core.api_token.models import ApiToken
 
         user = UserFactory()
-        token, plaintext = ApiToken.generate(user)
+        _token, plaintext = ApiToken.generate(user)
         user.mark_as_deleted()
         response = self.post(url_for("api.fake"), headers={"X-API-KEY": plaintext})
 
@@ -245,7 +243,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         )
 
         assert_status(response, 302)
-        uri, params = response.location.split("?")
+        uri, _params = response.location.split("?")
         assert uri == oauth.default_redirect_uri
 
     def test_authorization_accept(self, oauth):
@@ -267,7 +265,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         )
 
         assert_status(response, 302)
-        uri, params = response.location.split("?")
+        uri, _params = response.location.split("?")
 
         assert uri == oauth.default_redirect_uri
 
@@ -413,7 +411,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
             json=False,
         )
 
-        uri, params = response.location.split("?")
+        _uri, params = response.location.split("?")
         code = parse_qs(params)["code"][0]
 
         self.logout()
@@ -474,9 +472,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
         token = response.json["access_token"]
 
-        response = self.post(
-            url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", token])}
-        )
+        response = self.post(url_for("api.fake"), headers={"Authorization": f"Bearer {token}"})
 
         assert200(response)
         assert response.content_type == "application/json"
@@ -525,9 +521,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
         token = response.json["access_token"]
 
-        response = self.post(
-            url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", token])}
-        )
+        response = self.post(url_for("api.fake"), headers={"Authorization": f"Bearer {token}"})
 
         assert200(response)
         assert response.content_type == "application/json"
@@ -577,9 +571,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
         token = response.json["access_token"]
 
-        response = self.post(
-            url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", token])}
-        )
+        response = self.post(url_for("api.fake"), headers={"Authorization": f"Bearer {token}"})
 
         assert200(response)
         assert response.content_type == "application/json"
@@ -640,7 +632,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
                 json=False,
             )
 
-            uri, params = response.location.split("?")
+            _uri, params = response.location.split("?")
             code = parse_qs(params)["code"][0]
 
             self.logout()
@@ -674,7 +666,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
             json=False,
         )
 
-        uri, params = response.location.split("?")
+        _uri, params = response.location.split("?")
         code = parse_qs(params)["code"][0]
 
         self.logout()

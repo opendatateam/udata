@@ -32,6 +32,6 @@ def migrate(db):
             try:
                 d.save()
             except ValidationError as e:
-                log.warning(f"Error while saving dataset {d.id}: {str(e)}")
+                log.warning(f"Error while saving dataset {d.id}: {e!s}")
 
     log.info(f"Completed, {count} resources migrated.")

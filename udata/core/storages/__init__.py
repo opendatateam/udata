@@ -6,7 +6,7 @@ from flask import current_app
 AUTHORIZED_TYPES = fs.AllExcept(fs.SCRIPTS + fs.EXECUTABLES)
 
 
-class ConfigurableAuthorizedTypes(object):
+class ConfigurableAuthorizedTypes:
     def __contains__(self, value):
         return value in current_app.config["ALLOWED_RESOURCES_EXTENSIONS"]
 

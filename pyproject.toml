@@ -178,10 +178,54 @@ markers = [
 ]
 
 [tool.ruff]
-lint = { extend-select = [
-    "I",
-] } # ["I"] is to also sort imports with an isort rule
 line-length = 100
+
+[tool.ruff.lint]
+# ["I"] is to also sort imports with an isort rule
+extend-select = ["I"]
+ignore = [
+    # Flask config classes, mongoengine `meta`, factories and API field declarations
+    # are class attributes by design.
+    "RUF012",
+    # A join over literals keeps one item per line (field masks, expected HTML in
+    # tests): collapsing it into a single string makes it unreadable and every change
+    # a diff on one long line.
+    "FLY002",
+    # The log message is what users read in harvest reports (`HarvestLog` keeps
+    # `record.getMessage()`, not the traceback) and what titles Sentry events: it must
+    # carry the exception.
+    "TRY401",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Migrations are one-shot batch scripts: they must not stop on one broken document, and
+# touching a reference is how they check it still exists (mongoengine dereferences on
+# attribute access and raises `DoesNotExist`).
+"udata/migrations/*.py" = ["BLE001", "B018"]
+# Commands run over whole collections: one failing object must not stop the batch.
+"udata/commands/*.py" = ["BLE001"]
+"udata/**/commands.py" = ["BLE001"]
+# A notification handler must never fail the action that triggered it.
+"udata/**/notifications.py" = ["BLE001"]
+# `from x import Y as Y` is the PEP 484 explicit re-export of the flask-restx fields.
+"udata/api/fields.py" = ["PLC0414"]
+# These files hold import blocks where each line carries its own `# noqa`, though ruff
+# only needs one per block: F401 is reported on the last `import udata.…` of a block
+# (they all bind the same name `udata`) and I001 on the first line. RUF100 would strip
+# the other ones, and adding or removing an import at either end of a block would then
+# make `ruff check --fix` delete the side-effect imports above it, or reorder a block
+# whose order is the loading order. Each line keeps its own `# noqa`.
+"udata/api/__init__.py" = ["RUF100"]
+"udata/tasks.py" = ["RUF100"]
+"udata/search/__init__.py" = ["RUF100"]
+"udata/models/__init__.py" = ["RUF100"]
+"udata/forms/__init__.py" = ["RUF100"]
+"udata/forms/validators.py" = ["RUF100"]
+"udata/core/metrics/__init__.py" = ["RUF100"]
+"udata/core/activity/__init__.py" = ["RUF100"]
+"udata/core/user/api.py" = ["RUF100"]
+"udata/features/notifications/__init__.py" = ["RUF100"]
+"udata/tests/organization/test_organization_model.py" = ["RUF100"]
 
 [tool.setuptools]
 packages = ["udata", "udata_search_service"]

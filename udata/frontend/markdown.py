@@ -80,7 +80,7 @@ class UdataCleaner(bleach.Cleaner):
         )
 
 
-class UDataMarkdown(object):
+class UDataMarkdown:
     """Consistent with Flask's extensions signature."""
 
     def __init__(self, app):
@@ -102,7 +102,7 @@ class UDataMarkdown(object):
         html = cleaner.clean(html)
 
         if wrap:
-            html = '<div class="markdown">{0}</div>'.format(html.strip())
+            html = f'<div class="markdown">{html.strip()}</div>'
         # Return a `Markup` element considered as safe by Jinja.
         return Markup(html)
 

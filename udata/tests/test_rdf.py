@@ -82,10 +82,10 @@ class ContentNegociationTest(TestCase):
             self.assertFalse(want_rdf())
 
 
-class GuessFormatTest(object):
+class GuessFormatTest:
     @pytest.mark.parametrize("suffix,expected", FORMAT_MAP.items())
     def test_guess_from_extension(self, suffix, expected):
-        assert guess_format("resource.{0}".format(suffix)) == expected
+        assert guess_format(f"resource.{suffix}") == expected
 
     @pytest.mark.parametrize("mime,expected", ACCEPTED_MIME_TYPES.items())
     def test_guess_from_mime_type(self, mime, expected):

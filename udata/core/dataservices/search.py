@@ -133,7 +133,7 @@ class DataserviceSearch(ModelSearchAdapter):
 
         except requests.RequestException:
             return None
-        except Exception:
+        except Exception:  # noqa: BLE001 (indexing must not fail on an unreadable OpenAPI spec)
             return None
 
     @classmethod
@@ -153,7 +153,7 @@ class DataserviceSearch(ModelSearchAdapter):
         organization = None
 
         topic_ids = list(
-            set(te.topic.id for te in TopicElement.objects(element=dataservice) if te.topic)
+            {te.topic.id for te in TopicElement.objects(element=dataservice) if te.topic}
         )
 
         if dataservice.organization:

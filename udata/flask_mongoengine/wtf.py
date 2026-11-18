@@ -1,6 +1,6 @@
 from mongoengine.base import BaseField
 
-__all__ = "WtfBaseField"
+__all__ = ("WtfBaseField",)
 
 
 class WtfBaseField(BaseField):
@@ -32,7 +32,7 @@ class WtfBaseField(BaseField):
             if callable(field):
                 field = [field]
             else:
-                msg = "Argument '%s' must be a list value" % msg_flag
+                msg = f"Argument '{msg_flag}' must be a list value"
                 if not isinstance(field, list):
                     raise TypeError(msg)
 

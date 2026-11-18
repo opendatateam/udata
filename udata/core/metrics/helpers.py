@@ -1,6 +1,6 @@
 import logging
 from collections import OrderedDict
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from urllib.parse import urlencode
 
 import requests
@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 
 def get_last_13_months() -> list[str]:
-    dstart = datetime.today().replace(day=1) - timedelta(days=365)
+    dstart = datetime.now(UTC).replace(day=1) - timedelta(days=365)
     months = rrule(freq=MONTHLY, count=13, dtstart=dstart)
     return [month.strftime("%Y-%m") for month in months]
 

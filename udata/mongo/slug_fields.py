@@ -38,7 +38,7 @@ class SlugField(StringField):
         self.separator = separator
         self.follow = follow
         self.instance = None
-        super(SlugField, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def register_signals(self, owner):
         # We register signals handlers here to have a owner reference
@@ -51,12 +51,12 @@ class SlugField(StringField):
     def __get__(self, instance, owner):
         # mongoengine calls this after document initialization
         self.register_signals(owner)
-        return super(SlugField, self).__get__(instance, owner)
+        return super().__get__(instance, owner)
 
     def __set__(self, instance, value):
         # mongoengine calls this on document update
         self.register_signals(instance.__class__)
-        return super(SlugField, self).__set__(instance, value)
+        return super().__set__(instance, value)
 
     def __deepcopy__(self, memo):
         # Fixes no_dereference by avoiding deep copying instance attribute
@@ -168,7 +168,7 @@ def populate_slug(instance, field):
 
     try:
         previous = instance.__class__.objects.get(id=instance.id)
-    except Exception:
+    except Exception:  # noqa: BLE001 (no stored version to compare the slug with)
         previous = None
 
     # Field value has changed
@@ -218,7 +218,7 @@ def populate_slug(instance, field):
             return [getattr(obj, field.db_field) for obj in qs_suffix]
 
         def trim_base_slug(base_slug, index):
-            slug_overflow = len("{0}-{1}".format(base_slug, index)) - field.max_length
+            slug_overflow = len(f"{base_slug}-{index}") - field.max_length
             if slug_overflow >= 1:
                 base_slug = base_slug[:-slug_overflow]
             return base_slug
@@ -233,14 +233,14 @@ def populate_slug(instance, field):
                 # Find all existing slugs with suffixes
                 if existing_slugs is None or trimmed_slug != base_slug:
                     base_slug = trimmed_slug
-                    existing_slugs = set(sorted(get_existing_slug_suffixes(base_slug)))
-                slug = "{0}-{1}".format(base_slug, index)
+                    existing_slugs = set(get_existing_slug_suffixes(base_slug))
+                slug = f"{base_slug}-{index}"
                 if slug not in existing_slugs:
                     break
                 index += 1
 
         if is_uuid(slug):
-            slug = "{0}-uuid".format(slug)
+            slug = f"{slug}-uuid"
 
     # Track old slugs for this class
     if field.follow and old_slug != slug:

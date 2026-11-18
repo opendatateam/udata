@@ -52,12 +52,12 @@ def header(msg):
 
 def success(msg):
     """Display a success message"""
-    echo("{0} {1}".format(green(OK), white(safe_unicode(msg))))
+    echo(f"{green(OK)} {white(safe_unicode(msg))}")
 
 
 def error(msg, details=None):
     """Display an error message with optional details"""
-    msg = "{0} {1}".format(red(KO), white(safe_unicode(msg)))
+    msg = f"{red(KO)} {white(safe_unicode(msg))}"
     msg = safe_unicode(msg)
     if details:
         msg = "\n".join((msg, safe_unicode(details)))
@@ -104,15 +104,15 @@ class CliFormatter(logging.Formatter):
 
     def format(self, record):
         if not IS_TTY:
-            return super(CliFormatter, self).format(record)
+            return super().format(record)
         record.msg = format_multiline(record.msg)
         record.msg = " ".join((self._prefix(record), record.msg))
         record.args = tuple(a if isinstance(a, NO_CAST) else safe_unicode(a) for a in record.args)
-        return super(CliFormatter, self).format(record)
+        return super().format(record)
 
     def formatException(self, ei):
         """Indent traceback info for better readability"""
-        out = super(CliFormatter, self).formatException(ei)
+        out = super().formatException(ei)
         return "│" + format_multiline(out)
 
     def _prefix(self, record):
@@ -120,7 +120,7 @@ class CliFormatter(logging.Formatter):
             return safe_unicode(LEVELS_PREFIX[record.levelno])
         else:
             color = LEVEL_COLORS.get(record.levelno, white)
-            return safe_unicode("{0}:".format(color(record.levelname.upper())))
+            return safe_unicode(f"{color(record.levelname.upper())}:")
 
 
 class CliHandler(logging.Handler):
@@ -187,15 +187,15 @@ MODULES_WITH_COMMANDS = [
 class UdataGroup(FlaskGroup):
     def __init__(self, *args, **kwargs):
         self._udata_commands_loaded = False
-        super(UdataGroup, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def get_command(self, ctx, name):
         self.load_udata_commands(ctx)
-        return super(UdataGroup, self).get_command(ctx, name)
+        return super().get_command(ctx, name)
 
     def list_commands(self, ctx):
         self.load_udata_commands(ctx)
-        return super(UdataGroup, self).list_commands(ctx)
+        return super().list_commands(ctx)
 
     def load_udata_commands(self, ctx):
         """
@@ -211,16 +211,16 @@ class UdataGroup(FlaskGroup):
         for filename in iglob(pattern):
             module = os.path.splitext(os.path.basename(filename))[0]
             try:
-                __import__("udata.commands.{0}".format(module))
+                __import__(f"udata.commands.{module}")
             except Exception as e:
-                error("Unable to import {0}".format(module), e)
+                error(f"Unable to import {module}", e)
 
         # Load all core modules commands
         for module in MODULES_WITH_COMMANDS:
             try:
-                __import__("udata.{0}.commands".format(module))
+                __import__(f"udata.{module}.commands")
             except Exception as e:
-                error("Unable to import {0}".format(module), e)
+                error(f"Unable to import {module}", e)
 
         # Ensure loading happens once
         self._udata_commands_loaded = False
@@ -236,7 +236,7 @@ class UdataGroup(FlaskGroup):
         # This is the import line: allows create_app to access the settings
         obj.settings = kwargs.pop("settings", DEFAULT_INFO_SETTINGS)
         kwargs["obj"] = obj
-        return super(UdataGroup, self).main(*args, **kwargs)
+        return super().main(*args, **kwargs)
 
 
 def print_version(ctx, param, value):

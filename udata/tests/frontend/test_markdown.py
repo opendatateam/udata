@@ -11,7 +11,7 @@ parser = html5lib.HTMLParser(tree=html5lib.getTreeBuilder("dom"))
 
 def assert_md_equal(value, expected):
     __tracebackhide__ = True
-    expected = '<div class="markdown">{0}</div>'.format(expected)
+    expected = f'<div class="markdown">{expected}</div>'
     assert value.strip() == expected
 
 
@@ -361,7 +361,7 @@ class HtmlToMarkdownTest:
 
     def test_parse_basic_html(self):
         text = faker.paragraph()
-        html = "<div>{0}</div>".format(text)
+        html = f"<div>{text}</div>"
 
         assert parse_html(html) == text
 
@@ -376,8 +376,8 @@ class HtmlToMarkdownTest:
 
     def test_parse_html_anchors_with_link_title(self):
         url = "http://somewhere.com/some/path"
-        html = '<a href="{0}">{0}</a>'.format(url)
-        assert parse_html(html) == "<{0}>".format(url)
+        html = f'<a href="{url}">{url}</a>'
+        assert parse_html(html) == f"<{url}>"
 
     def test_parse_html_anchors_with_attribute(self):
         url = "http://somewhere.com/some/path"

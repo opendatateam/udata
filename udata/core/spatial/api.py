@@ -92,7 +92,7 @@ class ZonesAPI(API):
         zones = GeoZone.objects.in_bulk(ids_list)
         unknown_ids = [id for id in ids_list if id not in zones]
         if unknown_ids:
-            api.abort(404, "Unknown zone identifiers: {0}".format(", ".join(unknown_ids)))
+            api.abort(404, "Unknown zone identifiers: {}".format(", ".join(unknown_ids)))
         return {
             "type": "FeatureCollection",
             "features": [zones[id].toGeoJSON() for id in ids_list],

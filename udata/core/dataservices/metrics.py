@@ -9,11 +9,11 @@ from .models import Dataservice
 def update_dataservice_reuses_metric(reuse, **kwargs):
     previous = kwargs.get("previous")
     if previous and previous.get("dataservices"):
-        dataservices_delta = set(ds.id for ds in reuse.dataservices).symmetric_difference(
-            set(ds.id for ds in previous["dataservices"])
+        dataservices_delta = {ds.id for ds in reuse.dataservices}.symmetric_difference(
+            {ds.id for ds in previous["dataservices"]}
         )
     else:
-        dataservices_delta = set(ds.id for ds in reuse.dataservices)
+        dataservices_delta = {ds.id for ds in reuse.dataservices}
     for dataservice_id in dataservices_delta:
         dataservice = Dataservice.objects(id=dataservice_id).first()
         if dataservice:
