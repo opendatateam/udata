@@ -1,7 +1,14 @@
 import geojson
 from mongoengine import EmbeddedDocument
 from mongoengine.errors import ValidationError
-from mongoengine.fields import IntField, ListField, MultiPolygonField, ReferenceField, StringField
+from mongoengine.fields import (
+    FloatField,
+    IntField,
+    ListField,
+    MultiPolygonField,
+    ReferenceField,
+    StringField,
+)
 from werkzeug.local import LocalProxy
 from werkzeug.utils import cached_property
 
@@ -58,6 +65,7 @@ class GeoZone(WithMetrics, Document[GeoZoneQuerySet]):
     level = field(StringField(required=True), show_as_ref=True, description="The zone level")
     uri = field(StringField(), show_as_ref=True, description="The zone uri")
     ancestors = ListField(StringField())
+    bbox = ListField(FloatField())
 
     meta = {
         "indexes": [
@@ -72,7 +80,7 @@ class GeoZone(WithMetrics, Document[GeoZoneQuerySet]):
 
     def __html__(self):
         """In use within the admin."""
-        return "{name} <i>({code})</i>".format(name=_(self.name), code=self.code)
+        return f"{_(self.name)} <i>({self.code})</i>"
 
     @cached_property
     def level_code(self):
@@ -138,10 +146,23 @@ spatial_granularities = LocalProxy(lambda: get_spatial_granularities(get_locale(
 
 @cache.cached(timeout=50, key_prefix="admin_levels")
 def get_spatial_admin_levels():
-    return dict((geolevel.id, geolevel.admin_level) for geolevel in GeoLevel.objects)
+    return {geolevel.id: geolevel.admin_level for geolevel in GeoLevel.objects}
 
 
 admin_levels = LocalProxy(get_spatial_admin_levels)
+
+
+GEOZONE_BBOXES_CACHE_KEY = "geozone-bboxes"
+
+
+# cache is invalidated explicitly by `spatial load` cmd, this never expires
+@cache.cached(timeout=0, key_prefix=GEOZONE_BBOXES_CACHE_KEY)
+def get_zone_bboxes():
+    # `bbox` defaults to `[]` when never set, hence the `bbox__size=4` filter
+    return {
+        zone.id: zone.bbox
+        for zone in GeoZone.objects(bbox__exists=True, bbox__size=4).only("id", "bbox")
+    }
 
 
 @generate_fields()

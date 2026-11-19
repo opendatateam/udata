@@ -31,7 +31,6 @@ def migrate(db):
                 dataset.save()
             except Exception as e:
                 log.warning(e)
-                pass
 
     log.info("Processing community resources.")
 
@@ -51,6 +50,5 @@ def migrate(db):
                 community_resource.save()
             except Exception as e:
                 log.warning(e)
-                pass
 
     log.info("Completed.")

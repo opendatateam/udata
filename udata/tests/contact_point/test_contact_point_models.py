@@ -2,6 +2,7 @@ import pytest
 from mongoengine.errors import ValidationError
 
 from udata.core.contact_point.factories import ContactPointFactory
+from udata.core.contact_point.models import ContactPoint
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
@@ -70,9 +71,14 @@ class ContactPointOwnershipTest(PytestOnlyDBTestCase):
         assert contact_point.for_owner(org) == existing
 
     def test_for_owner_skips_a_contact_point_owned_by_both(self):
-        """Nothing forbids a contact point carrying both fields, but it belongs to neither."""
+        """A contact point carrying both fields belongs to neither."""
         org = OrganizationFactory()
-        both = ContactPointFactory(organization=org, owner=UserFactory())
+        both = ContactPointFactory(organization=org)
+        # Refused on save, but contact points written before that may still carry both.
+        ContactPoint._get_collection().update_one(
+            {"_id": both.id}, {"$set": {"owner": UserFactory().id}}
+        )
+        both.reload()
 
         contact_point = both.for_owner(org)
 

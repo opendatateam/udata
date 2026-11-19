@@ -97,6 +97,7 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "self_api_url",
         "self_web_url",
         "permissions",
+        "quality",
     ],
     "post": [
         "uri",
@@ -123,8 +124,7 @@ def remove_unwanted_keys(obj: dict, filter_type: str) -> dict:
     if filter_type not in UNWANTED_KEYS:
         return obj
     for unwanted_key in UNWANTED_KEYS[filter_type]:
-        if unwanted_key in obj:
-            del obj[unwanted_key]
+        obj.pop(unwanted_key, None)
     fix_dates(obj)
     return obj
 

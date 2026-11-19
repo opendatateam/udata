@@ -1,5 +1,86 @@
 # Changelog
 
+## 17.27.0 (2026-11-18)
+
+- chore(deps): update dependency dnspython to v2.9.2 [security] ([#4104](https://github.com/opendatateam/udata/pull/4104))
+- chore(deps): update rustfs/rustfs docker tag to v1.0.6 ([#4105](https://github.com/opendatateam/udata/pull/4105))
+- feat: add a setting to require the 2FA from members of certified organizations ([#4102](https://github.com/opendatateam/udata/pull/4102))
+- feat: detect geozone from spatial.geom ([#3857](https://github.com/opendatateam/udata/pull/3857))
+- feat: require a fresh session to create an API token and mail its creation ([#4090](https://github.com/opendatateam/udata/pull/4090))
+- fix(api): restore the list masks of reuses and contact points ([#4042](https://github.com/opendatateam/udata/pull/4042))
+- fix(edito): expose the status and access type fields the front cards read in the bloc card masks ([#4108](https://github.com/opendatateam/udata/pull/4108))
+- fix: issue a working token on an OAuth2 refresh ([#4100](https://github.com/opendatateam/udata/pull/4100))
+- fix: remove the OAuth2 password grant ([#4099](https://github.com/opendatateam/udata/pull/4099))
+- fix: store OAuth2 client secrets and tokens hashed ([#4101](https://github.com/opendatateam/udata/pull/4101))
+
+
+## 17.26.0 (2026-11-13)
+
+- chore(deps): update dependency faker to >=40.54, <40.55 ([#4085](https://github.com/opendatateam/udata/pull/4085))
+- chore(deps): update redis:alpine docker digest to 7958cfb ([#4098](https://github.com/opendatateam/udata/pull/4098))
+- chore(deps): update rustfs/rustfs docker tag to v1.0.5 ([#4097](https://github.com/opendatateam/udata/pull/4097))
+- chore: upgrade mongo patch ([#4103](https://github.com/opendatateam/udata/pull/4103))
+- chore: upgrade pillow to 13 ([#4040](https://github.com/opendatateam/udata/pull/4040))
+- feat: attribute harvesting to the harvest source and filter the activities on the kind of their actor ([#4092](https://github.com/opendatateam/udata/pull/4092))
+- feat: attribute the activities done through an API token to the token ([#4088](https://github.com/opendatateam/udata/pull/4088))
+- feat: attribute the activities done through an OAuth2 token to the token, on behalf of its user ([#4094](https://github.com/opendatateam/udata/pull/4094))
+- feat: require a fresh session to change the account email and notify the previous address ([#4089](https://github.com/opendatateam/udata/pull/4089))
+- fix: don't open a session for requests authenticated by an API key or an OAuth2 token ([#4091](https://github.com/opendatateam/udata/pull/4091))
+- fix: escape what translated strings interpolate in mail paragraphs and labels ([#4093](https://github.com/opendatateam/udata/pull/4093))
+- fix: send no new link when an expired email change link is opened ([#4095](https://github.com/opendatateam/udata/pull/4095))
+
+
+## 17.25.0 (2026-11-10)
+
+- chore: update translations ([#4086](https://github.com/opendatateam/udata/pull/4086))
+- feat(ecologie): add ecologie:universe extra job ([#4084](https://github.com/opendatateam/udata/pull/4084))
+- feat(harvest): add support for record_id and adhoc ISO-19139 parent identifier ([#4068](https://github.com/opendatateam/udata/pull/4068))
+
+
+## 17.24.0 (2026-11-09)
+
+- chore(deps): update dependency certifi to v2026.10.18 [security] ([#4078](https://github.com/opendatateam/udata/pull/4078))
+- chore(deps): update dependency dnspython to v2.9.0 [security] ([#4079](https://github.com/opendatateam/udata/pull/4079))
+- chore(deps): update dependency filelock to v4 [security] ([#4082](https://github.com/opendatateam/udata/pull/4082))
+- chore(deps): update dependency joserfc to v1.7.6 [security] ([#4077](https://github.com/opendatateam/udata/pull/4077))
+- chore(deps): update dependency pip to v26.2 [security] ([#4080](https://github.com/opendatateam/udata/pull/4080))
+- chore(deps): update dependency setuptools to v84 [security] ([#4083](https://github.com/opendatateam/udata/pull/4083))
+- chore(deps): update redis:alpine docker digest to 71885d8 ([#4074](https://github.com/opendatateam/udata/pull/4074))
+- feat(auth): let an account drop its password and udata 2FA to sign in with ProConnect only ([#4072](https://github.com/opendatateam/udata/pull/4072))
+- feat(auth): skip the udata 2FA only for a ProConnect identity verified as the account holder's ([#4071](https://github.com/opendatateam/udata/pull/4071))
+- perf: index the public dataset listing sorted by title ([#4075](https://github.com/opendatateam/udata/pull/4075))
+
+
+## 17.23.0 (2026-11-05)
+
+- chore: update flask-storage ([#4070](https://github.com/opendatateam/udata/pull/4070))
+- feat: allow markdown files as resources ([#4067](https://github.com/opendatateam/udata/pull/4067))
+- feat(auth): let ProConnect require a second factor instead of the udata 2FA ([#4065](https://github.com/opendatateam/udata/pull/4065))
+- fix: keep the previous owner through a nested save, whatever the change of owner ([#4058](https://github.com/opendatateam/udata/pull/4058))
+- fix: refuse an object owned by both a user and an organization ([#4060](https://github.com/opendatateam/udata/pull/4060))
+
+
+## 17.22.0 (2026-11-03)
+
+- feat(auth): let accounts without password reauthenticate through ProConnect ([#4062](https://github.com/opendatateam/udata/pull/4062))
+- feat(dataservices): metadata quality score ([#3819](https://github.com/opendatateam/udata/pull/3819))
+- fix(auth): send a ProConnect login that needs the 2FA to the cdata pages ([#4063](https://github.com/opendatateam/udata/pull/4063))
+- fix: drop pending transfers when their subject changes owner ([#4057](https://github.com/opendatateam/udata/pull/4057))
+
+
+## 17.21.0 (2026-11-02)
+
+- chore(deps): update astral-sh/setup-uv action to v10.3.3 ([#4049](https://github.com/opendatateam/udata/pull/4049))
+- chore(deps): update dependency authlib to v1.9.1 [security] ([#4054](https://github.com/opendatateam/udata/pull/4054))
+- chore(deps): update dependency faker to >=40.44, <40.45 ([#4050](https://github.com/opendatateam/udata/pull/4050))
+- chore(deps): update dependency pymongo to v4.18.3 [security] ([#4053](https://github.com/opendatateam/udata/pull/4053))
+- chore(deps): update redis:alpine docker digest to 21090af ([#4051](https://github.com/opendatateam/udata/pull/4051))
+- chore: upgrade the Elasticsearch client to 8.19 and test against ES 8 and 9 ([#4045](https://github.com/opendatateam/udata/pull/4045))
+- fix(avatars): cap the avatar size to avoid exhausting the worker memory ([#4041](https://github.com/opendatateam/udata/pull/4041))
+- fix: forbid non-admins to move an organization dataset to themselves ([#4056](https://github.com/opendatateam/udata/pull/4056))
+- fix(perfs): fetch a single resource MongoDB side in `/api/2/datasets/resources/<rid>/` ([#4018](https://github.com/opendatateam/udata/pull/4018))
+
+
 ## 17.20.0 (2026-10-29)
 
 - chore: add CODEOWNERS ([#4047](https://github.com/opendatateam/udata/pull/4047))

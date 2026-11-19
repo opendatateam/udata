@@ -47,6 +47,7 @@ from udata.core.dataset.rdf import (
     spatial_from_rdf,
     spatial_resolution_from_rdf,
     temporal_from_rdf,
+    unset_dcat_extra,
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.i18n import gettext as _
@@ -71,7 +72,7 @@ from udata.rdf import (
     TAG_TO_EU_HVD_CATEGORIES,
     VCARD,
     default_lang_value,
-    primary_topic_identifier_from_rdf,
+    record_id_from_rdf,
     remote_url_from_rdf,
     slugify_tag,
 )
@@ -105,7 +106,7 @@ XML_RDF_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 
 
 def _to_geojson(coords):
-    return f"""{{"type": "Polygon", "coordinates": [{str(coords)}]}}"""
+    return f"""{{"type": "Polygon", "coordinates": [{coords!s}]}}"""
 
 
 def _to_wkt(coords):
@@ -182,7 +183,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         assert d.value(DCT.modified) == Literal(dataset.harvest.modified_at)
         assert d.value(DCT.accrualPeriodicity).identifier == FREQ.daily
         assert d.value(DCAT.landingPage).identifier == URIRef(remote_url)
-        expected_tags = set(Literal(t) for t in dataset.tags)
+        expected_tags = {Literal(t) for t in dataset.tags}
         assert set(d.objects(DCAT.keyword)) == expected_tags
         assert len(list(d.objects(DCAT.distribution))) == len(resources)
         org = d.value(DCT.publisher)
@@ -409,8 +410,8 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         d = dataset_to_rdf(dataset)
         g = d.graph
 
-        len(list(g.subjects(RDF.type, DCAT.Distribution))) == 4
-        len(list(g.subjects(RDF.type, DCAT.DataService))) == 1
+        assert len(list(g.subjects(RDF.type, DCAT.Distribution))) == 4
+        assert len(list(g.subjects(RDF.type, DCAT.DataService))) == 1
         dataservice_as_distribution = g.resource(next(g.subjects(DCAT.accessService)))
         dataservice_uri = URIRef(dataservice.url_for(_useId=True))
         assert dataservice_as_distribution.value(DCAT.accessURL).identifier == URIRef(
@@ -536,6 +537,11 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         g.add((publisher, VCARD.hasEmail, Literal(publisher_email)))
         g.add((node, DCT.publisher, publisher))
 
+        record_id = faker.uuid4()
+        record = BNode()
+        g.add((record, DCT.identifier, Literal(record_id)))
+        g.add((record, FOAF.primaryTopic, node))
+
         # Dataset needs an owner/organization for contact_points_from_rdf() to work
         d = DatasetFactory.build()
         d.organization = OrganizationFactory(name="organization")
@@ -559,6 +565,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert contacts["contact"] == (contact_name, contact_email)
         assert contacts["publisher"] == (publisher_name, publisher_email)
 
+        assert dataset.harvest.record_id == record_id
         assert dataset.harvest.dct_identifier == id
         assert dataset.harvest.uri == uri
 
@@ -927,7 +934,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         g = Graph()
 
         description = faker.paragraph()
-        html_description = "<div>{0}</div>".format(description)
+        html_description = f"<div>{description}</div>"
         g.add((node, RDF.type, DCAT.Distribution))
         g.add((node, DCT.title, Literal(faker.sentence())))
         g.add((node, DCT.description, Literal(html_description)))
@@ -1312,7 +1319,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         start = faker.past_date(start_date="-30d")
         end = faker.future_date(end_date="+30d")
 
-        pot = Literal("{0}/{1}".format(start.isoformat(), end.isoformat()))
+        pot = Literal(f"{start.isoformat()}/{end.isoformat()}")
 
         daterange = temporal_from_rdf(pot)
 
@@ -1718,7 +1725,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert resource.title == title
         assert resource.description == description
 
-    def test_primary_topic_identifier_from_rdf_outer(self):
+    def test_record_id_from_rdf_outer(self):
         """Check that a CatalogRecord node that is primaryTopic of a dataset is found and parsed"""
         node = BNode()
         g = Graph()
@@ -1731,10 +1738,9 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         g.add((primary_topic_node, DCT.identifier, Literal("primary-topic-identifier")))
         g.add((primary_topic_node, FOAF.primaryTopic, node))
 
-        pti = primary_topic_identifier_from_rdf(g, g.resource(node))
-        assert pti == Literal("primary-topic-identifier")
+        assert record_id_from_rdf(g.resource(node)) == "primary-topic-identifier"
 
-    def test_primary_topic_identifier_from_rdf_inner(self):
+    def test_record_id_from_rdf_inner(self):
         """Check that a nested isPrimaryTopicOf of a dataset is found and parsed"""
         node = BNode()
         g = Graph()
@@ -1748,8 +1754,73 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         g.add((node, FOAF.isPrimaryTopicOf, primary_topic_node))
 
-        pti = primary_topic_identifier_from_rdf(g, g.resource(node))
-        assert pti == Literal("primary-topic-identifier")
+        assert record_id_from_rdf(g.resource(node)) == "primary-topic-identifier"
+
+    def test_record_id_from_rdf_none(self):
+        """A resource without any `CatalogRecord` primary topic has no record id."""
+        g = Graph()
+
+        node = BNode()
+        g.add((node, RDF.type, DCAT.Dataset))
+
+        assert record_id_from_rdf(g.resource(node)) is None
+
+    def test_record_id_from_rdf_uriref(self):
+        """A `URIRef`-valued `dct:identifier` is returned as-is."""
+        g = Graph()
+
+        node = BNode()
+        g.add((node, RDF.type, DCAT.Dataset))
+
+        primary_topic_node = BNode()
+        g.add((primary_topic_node, DCT.identifier, URIRef("http://example.org/record")))
+        g.add((primary_topic_node, FOAF.primaryTopic, node))
+
+        assert record_id_from_rdf(g.resource(node)) == "http://example.org/record"
+
+    def test_record_id_from_rdf_strip(self):
+        """A string record id is stripped."""
+        g = Graph()
+
+        node = BNode()
+
+        primary_topic_node = BNode()
+        g.add((primary_topic_node, DCT.identifier, Literal(" abc-1234\n")))
+        g.add((primary_topic_node, FOAF.primaryTopic, node))
+
+        assert record_id_from_rdf(g.resource(node)) == "abc-1234"
+
+    def test_record_id_from_rdf_urnuuid(self):
+        """An `anyURI` record id with a `urn:uuid:` prefix returns the id stripped of its prefix."""
+        g = Graph()
+
+        node = BNode()
+
+        primary_topic_node = BNode()
+        g.add(
+            (primary_topic_node, DCT.identifier, Literal("urn:uuid:abc-1234", datatype=XSD.anyURI))
+        )
+        g.add((primary_topic_node, FOAF.primaryTopic, node))
+
+        assert record_id_from_rdf(g.resource(node)) == "abc-1234"
+
+    def test_record_id_from_rdf_urnuuid_strip(self):
+        """An `anyURI` record id with a `urn:uuid:` prefix is stripped before the prefix check."""
+        g = Graph()
+
+        node = BNode()
+
+        primary_topic_node = BNode()
+        g.add(
+            (
+                primary_topic_node,
+                DCT.identifier,
+                Literal(" urn:uuid:abc-1234\n", datatype=XSD.anyURI),
+            )
+        )
+        g.add((primary_topic_node, FOAF.primaryTopic, node))
+
+        assert record_id_from_rdf(g.resource(node)) == "abc-1234"
 
     def test_remote_url_from_rdf_urnuuid_iso191153(self):
         """
@@ -1773,7 +1844,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         )
         g.add((primary_topic_node, FOAF.primaryTopic, node))
 
-        remote_url = remote_url_from_rdf(g.resource(node), g, "http://example.com/dataset")
+        remote_url = remote_url_from_rdf(g.resource(node), "http://example.com/dataset")
         assert remote_url == "http://example.com/dataset/ff685ba4-587e-4bb3-bc87-eae919b56857"
 
     def test_remote_url_from_rdf_urnuuid_iso19139(self):
@@ -1798,10 +1869,44 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         )
         g.add((primary_topic_node, FOAF.primaryTopic, node))
 
-        remote_url = remote_url_from_rdf(g.resource(node), g, "http://example.com/dataset")
+        remote_url = remote_url_from_rdf(g.resource(node), "http://example.com/dataset")
         assert (
             remote_url == "http://example.com/dataset/urn:uuid:ff685ba4-587e-4bb3-bc87-eae919b56857"
         )
+
+    def test_remote_url_from_rdf_falls_back_to_landing_page(self):
+        """A resource without any `CatalogRecord` returns the landing page when available,
+        independent of prefix."""
+        g = Graph()
+
+        landing = "https://example.com/landing"
+        node = URIRef("https://id.example.com/ds-1")
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCAT.landingPage, URIRef(landing)))
+
+        assert remote_url_from_rdf(g.resource(node)) == landing
+        assert remote_url_from_rdf(g.resource(node), "http://prefix.example.com/") == landing
+
+    def test_remote_url_from_rdf_falls_back_to_identifier(self):
+        """A resource with no record and no landing page returns the resource id, independent of
+        prefix."""
+        g = Graph()
+
+        uriref = "https://id.example.com/ds-1"
+        node = URIRef(uriref)
+        g.add((node, RDF.type, DCAT.Dataset))
+
+        assert remote_url_from_rdf(g.resource(node)) == uriref
+        assert remote_url_from_rdf(g.resource(node), "http://prefix.example.com/dataset") == uriref
+
+    def test_remote_url_from_rdf_nothing_valid(self):
+        """A resource with nothing at all returns None."""
+        g = Graph()
+
+        node = BNode()
+        g.add((node, RDF.type, DCAT.Dataset))
+
+        assert remote_url_from_rdf(g.resource(node)) is None
 
     def test_rdf_value_with_preferred_language(self, app):
         """Check that rdf_value gets the Literal with preferred language if multiple exists"""
@@ -2524,6 +2629,25 @@ class DcatHelpersTest:
         assert get_dcat_extra(dataset, "foo") == ""
         set_dcat_extra(dataset, "foo", [])
         assert get_dcat_extra(dataset, "foo") == []
+
+    def test_unset_dcat_extra_removes_empty_dict(self):
+        dataset = Dataset()
+
+        set_dcat_extra(dataset, "foo", "aa")
+        set_dcat_extra(dataset, "bar", "bb")
+
+        # Unsetting one key keeps the remaining dcat extras.
+        unset_dcat_extra(dataset, "foo")
+        assert dataset.extras["dcat"]["bar"] == "bb"
+        assert "foo" not in dataset.extras["dcat"]
+
+        # Unsetting the last key removes the whole `dcat` dict.
+        unset_dcat_extra(dataset, "bar")
+        assert "dcat" not in dataset.extras
+
+        # Unsetting a missing key on a dict without dcat extras is a no-op.
+        unset_dcat_extra(dataset, "missing")
+        assert "dcat" not in dataset.extras
 
     def test_get_unanimous_dcat_extra(self):
         r1 = Resource(extras={"dcat": {"accessRights": "aa"}})

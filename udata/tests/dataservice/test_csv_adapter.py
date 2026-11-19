@@ -28,6 +28,7 @@ class DataserviceCSVAdapterTest(PytestOnlyDBTestCase):
             harvest={
                 "backend": "dummy_backend",
                 "domain": "example.com",
+                "record_id": "record-id",
                 "remote_id": "remote-id",
                 "remote_url": "https://www.example.com/",
                 "uri": "https://www.example.com/remote-id",
@@ -61,6 +62,7 @@ class DataserviceCSVAdapterTest(PytestOnlyDBTestCase):
         harvest_dataservice_values = csv[str(harvest_dataservice.id)]
         assert harvest_dataservice_values["harvest.backend"] == "dummy_backend"
         assert harvest_dataservice_values["harvest.domain"] == "example.com"
+        assert harvest_dataservice_values["harvest.record_id"] == "record-id"
         assert harvest_dataservice_values["harvest.remote_id"] == "remote-id"
         assert harvest_dataservice_values["harvest.remote_url"] == "https://www.example.com/"
         assert harvest_dataservice_values["harvest.uri"] == "https://www.example.com/remote-id"

@@ -16,7 +16,6 @@ log = logging.getLogger(__name__)
 @cli.group("user")
 def grp():
     """User related operations"""
-    pass
 
 
 @grp.command()
@@ -45,7 +44,7 @@ def create(first_name, last_name, email, password, admin):
         if admin:
             role = datastore.find_or_create_role("admin")
             datastore.add_role_to_user(user, role)
-        success("User(id={u.id} email={u.email}) created".format(u=user))
+        success(f"User(id={user.id} email={user.email}) created")
         return user
     errors = "\n".join("\n".join([str(m) for m in e]) for e in form.errors.values())
     exit_with_error("Error creating user", errors)
@@ -125,3 +124,19 @@ def unset_two_factor(email):
     user.tf_totp_secret = None
     user.save()
     success(f"2FA has been unset for user {email}")
+
+
+@grp.command()
+@click.argument("email")
+def unset_proconnect(email):
+    """
+    Forget the ProConnect identity trusted as the user's, for an agent whose identity changed
+    (another identity provider): the next ProConnect login is trusted as for an account that
+    never signed in with ProConnect.
+    """
+    user: User = datastore.find_user(email=email)
+    if not user:
+        exit_with_error(f"User {email} does not exist")
+    user.proconnect = None
+    user.save()
+    success(f"ProConnect identity has been unset for user {email}")

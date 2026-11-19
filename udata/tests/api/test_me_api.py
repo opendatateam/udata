@@ -1,12 +1,13 @@
 import struct
 import zlib
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from io import BytesIO
 
 import pytest
 from flask import url_for
 
 from udata.core import storages
+from udata.core.api_token.models import ApiToken
 from udata.core.dataset.activities import UserCreatedDataset
 from udata.core.dataset.factories import CommunityResourceFactory, DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
@@ -19,7 +20,7 @@ from udata.models import Discussion, Follow, Member, User
 from udata.tests.helpers import capture_mails, create_test_image
 from udata.utils import faker
 
-from . import APITestCase
+from . import APITestCase, PytestOnlyAPITestCase, SessionCookieMixin
 
 
 class MeAPITest(APITestCase):
@@ -248,6 +249,7 @@ class MeAPITest(APITestCase):
         self.assert400(response)
         assert "email" in response.json["errors"]
 
+    @pytest.mark.options(DEFAULT_LANGUAGE="en")
     def test_update_profile_cannot_change_email(self):
         """A new address is only granted by the `/change-email` confirmation flow"""
         self.login()
@@ -256,7 +258,7 @@ class MeAPITest(APITestCase):
         data["email"] = "someone.else@example.org"
         response = self.put(url_for("api.me"), data)
         self.assert400(response)
-        assert "email" in response.json["errors"]
+        assert response.json["errors"]["email"] == "Cannot modify email after creation"
         self.user.reload()
         self.assertEqual(self.user.email, previous_email)
 
@@ -596,7 +598,7 @@ class MeAPITest(APITestCase):
         with capture_mails() as mails:
             response = self.delete(url_for("api.me"))
         self.assertEqual(len(mails), 1)
-        self.assertEqual(mails[0].send_to, set([user_email]))
+        self.assertEqual(mails[0].send_to, {user_email})
         self.assertEqual(mails[0].subject, _("Account deletion"))
         self.assert204(response)
 
@@ -616,7 +618,7 @@ class MeAPITest(APITestCase):
             followed.reload()
 
         # The personal data of the user are anonymized
-        self.assertEqual(user.email, "{}@deleted".format(user.id))
+        self.assertEqual(user.email, f"{user.id}@deleted")
         self.assertEqual(user.password, None)
         self.assertEqual(user.active, False)
         self.assertEqual(user.first_name, "DELETED")
@@ -655,8 +657,8 @@ class MeAPITest(APITestCase):
         from udata.core.api_token.models import ApiToken
 
         user = UserFactory()
-        expired = datetime.now(timezone.utc) - timedelta(hours=1)
-        token, plaintext = ApiToken.generate(user, expires_at=expired)
+        expired = datetime.now(UTC) - timedelta(hours=1)
+        _token, plaintext = ApiToken.generate(user, expires_at=expired)
 
         response = self.get(url_for("api.me"), headers={"X-API-KEY": plaintext})
         self.assert401(response)
@@ -671,7 +673,7 @@ class MeAPITest(APITestCase):
         # Without the timezone fix, this would raise:
         # TypeError: can't compare offset-naive and offset-aware datetimes
         future_naive = datetime.now(UTC).replace(tzinfo=None) + timedelta(days=30)
-        token, plaintext = ApiToken.generate(user, expires_at=future_naive)
+        _token, plaintext = ApiToken.generate(user, expires_at=future_naive)
 
         result, error = ApiToken.authenticate(plaintext)
         self.assertIsNotNone(result)
@@ -679,7 +681,7 @@ class MeAPITest(APITestCase):
 
         # Also verify the expired naive case
         past_naive = datetime.now(UTC).replace(tzinfo=None) - timedelta(hours=1)
-        token2, plaintext2 = ApiToken.generate(user, expires_at=past_naive)
+        _token2, plaintext2 = ApiToken.generate(user, expires_at=past_naive)
 
         result2, error2 = ApiToken.authenticate(plaintext2)
         self.assertIsNone(result2)
@@ -711,3 +713,94 @@ class MeAPITest(APITestCase):
         # Second revocation returns 410
         response = self.delete(url_for("api.my_api_token", api_token=token_id))
         self.assert410(response)
+
+
+@pytest.mark.options(
+    CAPTCHETAT_BASE_URL=None,
+    SESSION_COOKIE_SECURE=False,
+    SESSION_COOKIE_DOMAIN=None,
+    CDATA_BASE_URL="http://cdata.test",
+    SECURITY_FRESHNESS=timedelta(hours=24),
+)
+class ApiTokenCreationTest(SessionCookieMixin, PytestOnlyAPITestCase):
+    def test_a_fresh_session_passes_the_freshness_check(self):
+        self.sign_in_with_password()
+
+        self.assertStatus(self.get(url_for("api.my_session_freshness")), 204)
+
+    def test_a_stale_session_fails_the_freshness_check(self):
+        self.sign_in_with_password(signed_in_ago=timedelta(days=2))
+
+        # As cdata asks: without it, flask-security redirects to its verify view.
+        response = self.get(
+            url_for("api.my_session_freshness"), headers={"Accept": "application/json"}
+        )
+
+        self.assert401(response)
+        assert response.json["response"]["reauth_required"]
+
+    def test_creating_a_token_mails_the_account_holder(self):
+        user = self.sign_in_with_password()
+
+        with capture_mails() as mails:
+            response = self.post(url_for("api.my_api_tokens"), {"name": "My CI token"})
+
+        self.assert201(response)
+        assert [mail.recipients for mail in mails] == [["jane@example.org"]]
+        assert "My CI token" in mails[0].body
+        # The mail leads to the revocation, should the key not be the account holder's.
+        assert "http://cdata.test/admin/me/profile" in mails[0].body
+        assert ApiToken.objects(user=user).count() == 1
+
+    def test_the_mail_names_an_unnamed_token_by_its_prefix(self):
+        self.sign_in_with_password()
+
+        with capture_mails() as mails:
+            response = self.post(url_for("api.my_api_tokens"), {})
+
+        self.assert201(response)
+        assert response.json["token_prefix"] in mails[0].body
+
+    def test_creating_a_token_requires_a_fresh_session(self):
+        user = self.sign_in_with_password(signed_in_ago=timedelta(days=2))
+
+        with capture_mails() as mails:
+            response = self.post(url_for("api.my_api_tokens"), {"name": "My CI token"})
+
+        self.assert401(response)
+        assert response.json["response"]["reauth_required"]
+        assert mails == []
+        assert ApiToken.objects(user=user).count() == 0
+
+    def test_creating_a_token_after_reauthentication(self):
+        user = self.sign_in_with_password(signed_in_ago=timedelta(days=2))
+        self.assert200(self.post(url_for("security.verify"), {"password": "password"}))
+
+        self.assert201(self.post(url_for("api.my_api_tokens"), {"name": "My CI token"}))
+
+        assert ApiToken.objects(user=user).count() == 1
+
+    def test_an_api_key_cannot_create_another_one(self):
+        user = UserFactory()
+        plaintext = ApiToken.generate(user)[1]
+
+        with capture_mails() as mails:
+            response = self.post(
+                url_for("api.my_api_tokens"),
+                {"name": "Another key"},
+                headers={"X-API-KEY": plaintext},
+            )
+            self.assert401(response)
+            assert response.json["response"]["reauth_required"]
+
+            # The client keeps the cookies of the first request: none must make the second pass.
+            response = self.post(
+                url_for("api.my_api_tokens"),
+                {"name": "Another key"},
+                headers={"X-API-KEY": plaintext},
+            )
+            self.assert401(response)
+            assert response.json["response"]["reauth_required"]
+
+        assert mails == []
+        assert ApiToken.objects(user=user).count() == 1

@@ -120,7 +120,7 @@ def purge_sources():
 
         try:
             Notification.objects(details__source=source).delete()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 (the purge must go on)
             log.error(f"Error cleaning up notifications for purged harvest source {source.id}: {e}")
 
         source.delete()
@@ -212,7 +212,7 @@ def schedule(
 def unschedule(source: HarvestSource):
     """Unschedule an harvesting on a source"""
     if not source.periodic_task:
-        msg = "Harvesting on source {0} is not scheduled".format(source.name)
+        msg = f"Harvesting on source {source.name} is not scheduled"
         raise ValueError(msg)
 
     source.periodic_task.delete()
@@ -247,9 +247,9 @@ def attach(domain, filename):
                 continue
 
             # Detach previously attached dataset
-            Dataset.objects(
-                **{"harvest__domain": domain, "harvest__remote_id": row["remote"]}
-            ).update(**{"unset__harvest__domain": True, "unset__harvest__remote_id": True})
+            Dataset.objects(harvest__domain=domain, harvest__remote_id=row["remote"]).update(
+                unset__harvest__domain=True, unset__harvest__remote_id=True
+            )
 
             dataset.set_harvested()
             dataset.harvest.domain = domain

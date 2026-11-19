@@ -5,6 +5,7 @@ from blinker import Signal
 from mongoengine.fields import DateTimeField, GenericReferenceField, ReferenceField, StringField
 from mongoengine.signals import post_save
 
+from udata.core.owned import Owned
 from udata.i18n import lazy_gettext as _
 from udata.mongo.document import UDataDocument as Document
 
@@ -63,3 +64,10 @@ class Transfer(Document):
 
 # Connect the post_save signal
 post_save.connect(Transfer.post_save, sender=Transfer)
+
+
+@Owned.on_owner_change.connect
+def drop_pending_transfers_on_owner_change(document, previous, **kwargs):
+    """A transfer is offered by the owner at the time of the request: once the subject has
+    changed hands, accepting it would take the subject from its new owner without consent."""
+    Transfer.objects(subject=document, status="pending").delete()

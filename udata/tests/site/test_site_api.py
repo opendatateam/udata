@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import g, url_for
 from mongoengine.context_managers import query_counter
 
@@ -127,6 +129,36 @@ class SiteAPITest(APITestCase):
             f"the query count grows with the number of cards ({many} for 20 cards, "
             f"{few} for 2): the references are dereferenced one by one"
         )
+
+    def test_get_site_blocs_cards_expose_their_status(self):
+        """The front cards show a status badge (draft, archived, deleted, access type):
+        the card masks must carry every field that badge is computed from."""
+        archived_at = datetime(2026, 1, 1)
+        dataset = DatasetFactory(archived=archived_at, access_type="open_with_account")
+        reuse = ReuseFactory(archived=archived_at)
+        dataservice = DataserviceFactory(archived_at=archived_at, access_type="restricted")
+        self._set_site_blocs(
+            datasets_blocs=[SectionBloc(blocs=[DatasetBloc(dataset=dataset)])],
+            reuses_blocs=[SectionBloc(blocs=[ReuseBloc(reuse=reuse)])],
+            dataservices_blocs=[SectionBloc(blocs=[DataserviceBloc(dataservice=dataservice)])],
+        )
+
+        response = self.get(url_for("api.site"), headers={"X-Fields": "{*}"})
+        self.assert200(response)
+
+        dataset_card = response.json["datasets_blocs"][0]["blocs"][0]["dataset"]
+        assert {"private", "archived", "deleted", "access_type"} <= dataset_card.keys()
+        assert dataset_card["archived"] is not None
+        assert dataset_card["access_type"] == "open_with_account"
+
+        reuse_card = response.json["reuses_blocs"][0]["blocs"][0]["reuse"]
+        assert {"private", "archived", "deleted"} <= reuse_card.keys()
+        assert reuse_card["archived"] is not None
+
+        dataservice_card = response.json["dataservices_blocs"][0]["blocs"][0]["dataservice"]
+        assert {"private", "archived_at", "deleted_at", "access_type"} <= dataservice_card.keys()
+        assert dataservice_card["archived_at"] is not None
+        assert dataservice_card["access_type"] == "restricted"
 
     def test_set_site_blocs(self):
         dataset = DatasetFactory()

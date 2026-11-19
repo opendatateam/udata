@@ -56,6 +56,7 @@ from udata.mongo.datetime_fields import DateRange
 from udata.mongo.document import UDataDocument as Document
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.extras_fields import ExtrasField
+from udata.mongo.queryset import paginate_embedded_list
 from udata.mongo.slug_fields import SlugField
 from udata.mongo.taglist_field import TagListField
 from udata.mongo.url_field import URLField
@@ -63,11 +64,12 @@ from udata.mongo.uuid_fields import AutoUUIDField
 from udata.search import reindex_model_on_save
 from udata.uris import ValidationError, cdata_url
 from udata.uris import validate as validate_url
-from udata.utils import get_by, hash_url, to_naive_datetime
+from udata.utils import hash_url, to_naive_datetime
 
 from .constants import (
     CHECKSUM_TYPES,
     CLOSED_FORMATS,
+    DCAT_EXTRAS_KEY,
     DEFAULT_LICENSE,
     DESCRIPTION_SHORT_SIZE_LIMIT,
     INSPIRE,
@@ -87,13 +89,13 @@ from .exceptions import (
 )
 
 __all__ = (
-    "License",
-    "Resource",
-    "Schema",
-    "Dataset",
     "Checksum",
     "CommunityResource",
+    "Dataset",
+    "License",
+    "Resource",
     "ResourceSchema",
+    "Schema",
 )
 
 BADGES: dict[str, LazyString] = {
@@ -218,7 +220,7 @@ class Schema(EmbeddedDocument):
                 'Schema name "{schema}" is not an allowed value. Allowed values: {values}'
             ).format(
                 schema=self.name,
-                values=", ".join(map(lambda schema: schema["name"], catalog_schemas)),
+                values=", ".join(schema["name"] for schema in catalog_schemas),
             )
             if check_schema_in_catalog:
                 raise FieldValidationError(message, field="name")
@@ -227,9 +229,7 @@ class Schema(EmbeddedDocument):
                 return
 
         if self.version:
-            allowed_versions = list(
-                map(lambda version: version["version_name"], existing_schema["versions"])
-            )
+            allowed_versions = [version["version_name"] for version in existing_schema["versions"]]
             allowed_versions.append("latest")
 
             if self.version not in allowed_versions:
@@ -267,7 +267,7 @@ class License(Document):
         Extracts the first URL from a given text string and returns the URL and the remaining text.
         """
         if text is None:
-            return tuple()
+            return ()
         url_pattern = r"(https?://\S+)"
         match = re.search(url_pattern, text.rstrip("."))
         if match:
@@ -367,7 +367,7 @@ class License(Document):
 
 class DatasetQuerySet(OwnedQuerySet):
     def visible(self):
-        return self(private__ne=True, deleted=None, archived=None)
+        return self(private=False, deleted=None, archived=None)
 
     def hidden(self):
         return self(Q(private=True) | Q(deleted__ne=None) | Q(archived__ne=None))
@@ -382,7 +382,7 @@ class Checksum(EmbeddedDocument):
 
     def to_mongo(self, *args, **kwargs):
         if bool(self.value):
-            return super(Checksum, self).to_mongo()
+            return super().to_mongo()
 
 
 # Resource fields the platform maintains on its own: they say nothing about what the
@@ -393,7 +393,7 @@ class Checksum(EmbeddedDocument):
 RESOURCE_NON_AUDITABLE_FIELDS = ("last_modified_internal", "urlhash", "fs_filename")
 
 
-class ResourceMixin(object):
+class ResourceMixin:
     id = AutoUUIDField(primary_key=True)
     title = StringField(verbose_name="Title", required=True)
     description = StringField()
@@ -430,7 +430,7 @@ class ResourceMixin(object):
         # rendered but resolves which resource the export job overwrites, so a forged
         # one redirects that write. `apidocUrl` and `datafairOrigin` stay user
         # writable, hence their URL type above.
-        reserved=("analysis:*", "check:*", "csv-export:*", "validation-report:*", "dcat"),
+        reserved=("analysis:*", "check:*", "csv-export:*", "validation-report:*", DCAT_EXTRAS_KEY),
     )
     harvest = EmbeddedDocumentField(HarvestResourceMetadata)
     geopf = EmbeddedDocumentField(GeopfResourceMetadata)
@@ -466,7 +466,7 @@ class ResourceMixin(object):
         return to_naive_datetime(self.last_modified_internal)
 
     def clean(self):
-        super(ResourceMixin, self).clean()
+        super().clean()
         if not self.urlhash or "url" in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
 
@@ -560,7 +560,7 @@ class Resource(ResourceMixin, WithMetrics, EmbeddedDocument):
     @property
     def dataset(self):
         try:
-            self._instance.id  # try to access attr from parent instance
+            self._instance.id  # noqa: B018 (try to access attr from parent instance)
             return self._instance
         except ReferenceError:  # weakly-referenced object no longer exists
             log.warning(
@@ -580,7 +580,7 @@ class Resource(ResourceMixin, WithMetrics, EmbeddedDocument):
 # Uses a standalone function (not a model method) because DatasetBadge is
 # defined before Dataset in the file — Dataset is resolved lazily at call time.
 def validate_badge(value):
-    if value not in Dataset.__badges__.keys():
+    if value not in Dataset.__badges__:
         raise MongoEngineValidationError("Unknown badge type")
 
 
@@ -640,13 +640,19 @@ class Dataset(
     # anchor by the frontend just like the analysis URLs, so it gets the same
     # model-level scheme check rather than relying on its producer.
     # See Resource.extras for the rationale.
-    # The reserved patterns differ from the resource ones: transport, the
-    # recommendations job and the DCAT harvester write on the dataset, while hydra
-    # and validata write on its resources.
+    # The reserved patterns differ from the resource ones: transport, ecologie, the
+    # recommendations job, the zone detection (`analysis:spatial:*`) and the DCAT
+    # harvester write on the dataset, while hydra and validata write on its resources.
     extras = field(
         ExtrasField(
             {"datafairOrigin": URLField, "transport:url": URLField},
-            reserved=("transport:*", "recommendations*", "dcat"),
+            reserved=(
+                "analysis:spatial:*",
+                "transport:*",
+                "ecologie:*",
+                "recommendations*",
+                DCAT_EXTRAS_KEY,
+            ),
         ),
         auditable=False,
     )
@@ -725,6 +731,10 @@ class Dataset(
             "slug",
             "resources.id",
             "resources.urlhash",
+            # Serves the public listing sorted by title, and its count, without scanning
+            # the collection. Only works with `private=False`: `private__ne=True` is a
+            # range, and a range before the sort key prevents using the index to sort.
+            ("deleted", "archived", "private", "title"),
         ]
         + Owned.meta["indexes"],
         "ordering": ["-created_at_internal"],
@@ -796,9 +806,9 @@ class Dataset(
         validate_contact_points_ownership(self)
 
     def clean(self):
-        super(Dataset, self).clean()
+        super().clean()
 
-        if len(set(res.id for res in self.resources)) != len(self.resources):
+        if len({res.id for res in self.resources}) != len(self.resources):
             raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
 
         if self.doi:
@@ -999,9 +1009,9 @@ class Dataset(
         """
         result = {}
 
-        result["license"] = True if self.license else False
-        result["temporal_coverage"] = True if self.temporal_coverage else False
-        result["spatial"] = True if self.spatial else False
+        result["license"] = bool(self.license)
+        result["temporal_coverage"] = bool(self.temporal_coverage)
+        result["spatial"] = bool(self.spatial)
 
         result["update_frequency"] = self.has_frequency
 
@@ -1011,10 +1021,8 @@ class Dataset(
         # See :UpdateFulfilledInTime
         result["next_update_for_update_fulfilled_in_time"] = self.next_update
 
-        result["dataset_description_quality"] = (
-            True
-            if len(self.description) > current_app.config.get("QUALITY_DESCRIPTION_LENGTH")
-            else False
+        result["dataset_description_quality"] = len(self.description) > current_app.config.get(
+            "QUALITY_DESCRIPTION_LENGTH"
         )
 
         if self.resources:
@@ -1060,9 +1068,8 @@ class Dataset(
             score += UNIT
         if quality["update_frequency"]:
             score += UNIT
-        if "update_fulfilled_in_time" in quality:
-            if quality["update_fulfilled_in_time"]:
-                score += UNIT
+        if quality.get("update_fulfilled_in_time"):
+            score += UNIT
         if quality["dataset_description_quality"]:
             score += UNIT
         if "has_resources" in quality:
@@ -1346,7 +1353,7 @@ class CommunityResource(ResourceMixin, WithMetrics, Owned, Document[OwnedQuerySe
         }
 
 
-class ResourceSchema(object):
+class ResourceSchema:
     @staticmethod
     @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
     def all():
@@ -1410,14 +1417,21 @@ class ResourceSchema(object):
         return None
 
 
-def get_dataset_by_resource_id(id):
+def get_dataset_by_resource_id(id, exclude_resources=False):
     """Fetch the dataset holding a resource, given the resource UUID
 
     Resource ids are resolved globally (see the `/datasets/r/<id>` permalink), but nothing
     enforces their uniqueness across datasets. An ambiguous id resolves to nothing rather
     than letting an arbitrary dataset answer for another one's resource.
+
+    With ``exclude_resources``, the dataset comes back without its resources list
+    (`dataset.resources` is empty), so a heavy dataset isn't fetched whole to serve
+    a single resource.
     """
-    datasets = list(Dataset.objects(resources__id=id).limit(2))
+    datasets = Dataset.objects(resources__id=id)
+    if exclude_resources:
+        datasets = datasets.exclude("resources")
+    datasets = list(datasets.limit(2))
     if len(datasets) > 1:
         # Corrupted data that no API path should be able to produce: report it instead of
         # silently answering 404 (`log.error` is what reaches Sentry, HTTP errors are ignored)
@@ -1426,10 +1440,38 @@ def get_dataset_by_resource_id(id):
     return datasets[0] if datasets else None
 
 
+def get_dataset_and_resource_by_id(id):
+    """Fetch the dataset holding a resource, together with the resource, given the resource UUID
+
+    The dataset is loaded without its resources list (`dataset.resources` is empty), so a
+    heavy dataset isn't fetched whole to serve a single resource. The resource isn't
+    attached to the dataset either: `resource.dataset` can't resolve it (raises
+    AttributeError rather than the old weakref fallback).
+    """
+    dataset = get_dataset_by_resource_id(id, exclude_resources=True)
+    if not dataset:
+        return None, None
+    resources, _ = paginate_embedded_list(
+        Dataset,
+        dataset.id,
+        "resources",
+        Resource,
+        page=1,
+        page_size=1,
+        condition={"$eq": ["$$item._id", str(id)]},
+    )
+    return dataset, resources[0] if resources else None
+
+
 def get_resource(id):
-    """Fetch a resource given its UUID"""
-    dataset = get_dataset_by_resource_id(id)
-    if dataset:
-        return get_by(dataset.resources, id=id)
+    """Fetch a resource by UUID.
+
+    Resources returned here are detached from their parent dataset (the internal
+    `_instance` is None), so dataset-dependent methods are unavailable: `resource.dataset`,
+    `url_for()`, `self_web_url()` and `save()` all raise AttributeError.
+    """
+    _, resource = get_dataset_and_resource_by_id(id)
+    if resource:
+        return resource
     else:
         return CommunityResource.objects(id=id).first()

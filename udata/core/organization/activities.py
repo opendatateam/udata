@@ -1,13 +1,12 @@
-from flask_security import current_user
 from mongoengine.fields import ReferenceField
 
 from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Organization
 
-__all__ = ("UserCreatedOrganization", "UserUpdatedOrganization", "OrgRelatedActivity")
+__all__ = ("OrgRelatedActivity", "UserCreatedOrganization", "UserUpdatedOrganization")
 
 
-class OrgRelatedActivity(object):
+class OrgRelatedActivity:
     related_to = ReferenceField("Organization")
     template = "activity/organization.html"
 
@@ -28,12 +27,9 @@ class UserUpdatedOrganization(OrgRelatedActivity, Activity):
 
 @Organization.on_create.connect
 def on_user_created_organization(organization, **kwargs):
-    if current_user and current_user.is_authenticated:
-        UserCreatedOrganization.emit(organization, organization)
+    UserCreatedOrganization.emit(organization, organization)
 
 
 @Organization.on_update.connect
 def on_user_updated_organization(organization, **kwargs):
-    changed_fields = kwargs.get("changed_fields", [])
-    if current_user and current_user.is_authenticated:
-        UserUpdatedOrganization.emit(organization, organization, changed_fields)
+    UserUpdatedOrganization.emit(organization, organization, kwargs.get("changed_fields", []))

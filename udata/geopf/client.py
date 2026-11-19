@@ -46,13 +46,9 @@ class GeopfError(Exception):
 class GeopfTimeoutError(GeopfError):
     """Raised when a polled operation does not complete within the configured timeout."""
 
-    pass
-
 
 class GeopfReauthRequired(GeopfError):
     """Raised when there is no valid (or refreshable) geopf token for the acting user."""
-
-    pass
 
 
 class _GeopfSession(requests.Session):

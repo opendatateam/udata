@@ -452,20 +452,19 @@ class DiscussionsTest(APITestCase):
         self.login()
         dataset = Dataset.objects.create(title="Test dataset")
 
-        with assert_not_emit(on_new_discussion):
-            with assert_emit(on_new_potential_spam):
-                response = self.post(
-                    url_for("api.discussions"),
-                    {
-                        "title": "title and blah",
-                        "comment": "bla bla spam",
-                        "subject": {
-                            "class": "Dataset",
-                            "id": dataset.id,
-                        },
+        with assert_not_emit(on_new_discussion), assert_emit(on_new_potential_spam):
+            response = self.post(
+                url_for("api.discussions"),
+                {
+                    "title": "title and blah",
+                    "comment": "bla bla spam",
+                    "subject": {
+                        "class": "Dataset",
+                        "id": dataset.id,
                     },
-                )
-                self.assertStatus(response, 201)
+                },
+            )
+            self.assertStatus(response, 201)
 
         discussions = Discussion.objects(subject=dataset)
         self.assertEqual(len(discussions), 1)
@@ -619,7 +618,7 @@ class DiscussionsTest(APITestCase):
             discussion = Discussion.objects.create(
                 subject=dataset,
                 user=user,
-                title="test discussion {}".format(i),
+                title=f"test discussion {i}",
                 discussion=[message],
             )
             open_discussions.append(discussion)
@@ -629,7 +628,7 @@ class DiscussionsTest(APITestCase):
             discussion = Discussion.objects.create(
                 subject=dataset,
                 user=user,
-                title="test discussion {}".format(i),
+                title=f"test discussion {i}",
                 discussion=[message],
                 closed=datetime.now(UTC),
                 closed_by=user,
@@ -676,7 +675,7 @@ class DiscussionsTest(APITestCase):
             discussion = Discussion.objects.create(
                 subject=dataset,
                 user=user,
-                title="test discussion {}".format(i),
+                title=f"test discussion {i}",
                 discussion=[message],
             )
             open_discussions.append(discussion)
@@ -686,7 +685,7 @@ class DiscussionsTest(APITestCase):
             discussion = Discussion.objects.create(
                 subject=dataset,
                 user=user,
-                title="test discussion {}".format(i),
+                title=f"test discussion {i}",
                 discussion=[message],
                 closed=datetime.now(UTC),
                 closed_by=user,
@@ -708,7 +707,7 @@ class DiscussionsTest(APITestCase):
             discussion = Discussion.objects.create(
                 subject=dataset,
                 user=user,
-                title="test discussion {}".format(i),
+                title=f"test discussion {i}",
                 discussion=[message],
             )
             discussions.append(discussion)
@@ -717,7 +716,7 @@ class DiscussionsTest(APITestCase):
         Discussion.objects.create(
             subject=DatasetFactory(),
             user=user,
-            title="test discussion {}".format(i),
+            title=f"test discussion {i}",
             discussion=[message],
         )
 
@@ -943,7 +942,7 @@ class DiscussionsTest(APITestCase):
             discussion = Discussion.objects.create(
                 subject=dataset,
                 user=user,
-                title="test discussion {}".format(i),
+                title=f"test discussion {i}",
                 discussion=[message],
             )
             discussions.append(discussion)
@@ -952,7 +951,7 @@ class DiscussionsTest(APITestCase):
         Discussion.objects.create(
             subject=DatasetFactory(),
             user=user,
-            title="test discussion {}".format(i + 1),
+            title=f"test discussion {i + 1}",
             discussion=[message],
         )
 
@@ -975,7 +974,7 @@ class DiscussionsTest(APITestCase):
             subject=dataset, user=user, title="test discussion", discussion=[message]
         )
 
-        response = self.get(url_for("api.discussion", **{"id": discussion.id}))
+        response = self.get(url_for("api.discussion", id=discussion.id))
         self.assert200(response)
 
         data = response.json

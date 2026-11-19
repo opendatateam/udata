@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 from bson import DBRef
 from flask import url_for
@@ -6,6 +8,7 @@ from mongoengine.connection import get_db
 from udata.core.access_type.constants import AccessType
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
+from udata.core.dataset.models import Dataset
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.discussions.models import Discussion
 from udata.core.organization import constants as org_constants
@@ -14,9 +17,12 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.post.factories import PostFactory
 from udata.core.reuse.factories import VisibleReuseFactory
 from udata.core.spatial.factories import GeoZoneFactory, SpatialCoverageFactory
+from udata.core.spatial.models import SpatialCoverage
 from udata.core.topic.factories import TopicElementFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.db.migrations import load_migration
+from udata.search import get_elastic_client
+from udata.search.commands import default_index_suffix_name, finalize_reindex, index_alias
 from udata.tests.api import APITestCase
 from udata.tests.helpers import requires_search_service
 
@@ -28,8 +34,6 @@ class SearchIntegrationTest(APITestCase):
 
     @pytest.fixture(autouse=True)
     def clean_es(self, app):
-        from udata.search import get_elastic_client
-
         es_client = get_elastic_client()
         es_client.es.indices.delete(index="udata-test-*", ignore=[404])
         es_client.init_indices()
@@ -42,9 +46,21 @@ class SearchIntegrationTest(APITestCase):
         missing is the refresh. Forcing it is deterministic, unlike relying on
         ES' ~1s auto-refresh interval (which made these tests flaky).
         """
-        from udata.search import get_elastic_client
-
         get_elastic_client().es.indices.refresh(index="udata-test-*")
+
+    def test_finalize_reindex_aliases_the_new_index_when_no_alias_exists(self):
+        """`udata search index -r` without `init-es` first, or after `clean-es`: the alias
+        lookup finds nothing, and the new index must still get the alias."""
+        es = get_elastic_client().es
+        start = datetime(2022, 2, 20, 20, 2)
+        alias = index_alias("dataset")
+        new_index = f"{alias}-{default_index_suffix_name(start)}"
+        es.indices.delete(index=f"{alias}*", ignore=[404])
+        es.indices.create(index=new_index)
+
+        finalize_reindex(["dataset"], start)
+
+        assert list(es.indices.get_alias(name=alias)) == [new_index]
 
     def test_dataset_fuzzy_search(self):
         """
@@ -333,8 +349,6 @@ class SearchIntegrationTest(APITestCase):
         assert names[1] == "aaa topic"
 
     def test_topic_sort_by_created(self):
-        from datetime import datetime
-
         TopicFactory(name="old topic", private=False, created_at=datetime(2020, 1, 1))
         TopicFactory(name="new topic", private=False, created_at=datetime(2024, 1, 1))
 
@@ -665,17 +679,15 @@ class SearchIntegrationTest(APITestCase):
         self.assert200(response)
         assert response.json["total"] == 1
         ids = [o["id"] for o in response.json["data"]]
-        assert set([str(restricted_dataservice.id)]) == set(ids)
+        assert {str(restricted_dataservice.id)} == set(ids)
 
         response = self.get("/api/2/dataservices/search/?is_restricted=false")
         self.assert200(response)
         assert response.json["total"] == 2
         ids = [o["id"] for o in response.json["data"]]
-        assert set([str(open_dataservice.id), str(open_with_account_dataservice.id)]) == set(ids)
+        assert {str(open_dataservice.id), str(open_with_account_dataservice.id)} == set(ids)
 
     def test_dataset_sort_by_created(self):
-        from datetime import datetime
-
         DatasetFactory(title="Ancien", created_at_internal=datetime(2020, 1, 1))
         DatasetFactory(title="Récent", created_at_internal=datetime(2024, 1, 1))
 
@@ -842,6 +854,55 @@ class SearchIntegrationTest(APITestCase):
         titles = [d["title"] for d in response.json["data"]]
         assert "DS org" in titles
         assert "DS autre" not in titles
+
+    def test_dataset_geozone_filters_include_detected_zones_only_on_demand(self):
+        """Detected zones are matched in addition to declared ones, only with the flag."""
+        parent = GeoZoneFactory(id="fr:departement:05")
+        child = GeoZoneFactory(id="fr:commune:05061", ancestors=[parent.id])
+        declared = DatasetFactory(
+            title="Declared on the departement", spatial=SpatialCoverageFactory(zones=[parent])
+        )
+        detected = DatasetFactory(
+            title="Detected on the departement", extras={"analysis:spatial:zones": [parent.id]}
+        )
+
+        self.refresh_index()
+
+        for params in (
+            f"geozone={parent.id}",
+            f"geozone={child.id}&include_geozone_ancestors=true",
+        ):
+            off = self.get(f"/api/2/datasets/search/?{params}")
+            self.assert200(off)
+            assert {d["id"] for d in off.json["data"]} == {str(declared.id)}
+
+            on = self.get(f"/api/2/datasets/search/?{params}&include_detected_geozones=true")
+            self.assert200(on)
+            assert {d["id"] for d in on.json["data"]} == {str(declared.id), str(detected.id)}
+
+    def test_detect_zones_command_makes_datasets_searchable_by_detected_zone(self):
+        zone = GeoZoneFactory(id="fr:departement:05", bbox=[0.0, 0.0, 10.0, 10.0])
+        dataset = DatasetFactory()
+        # bypass signals to mimic a dataset created before detection existed
+        Dataset.objects(id=dataset.id).update(
+            set__spatial=SpatialCoverage(
+                geom={
+                    "type": "MultiPolygon",
+                    "coordinates": [
+                        [[[0.0, 0.0], [10.0, 0.0], [10.0, 10.0], [0.0, 10.0], [0.0, 0.0]]]
+                    ],
+                }
+            )
+        )
+
+        self.cli("spatial detect-zones")
+        self.refresh_index()
+
+        response = self.get(
+            f"/api/2/datasets/search/?geozone={zone.id}&include_detected_geozones=true"
+        )
+        self.assert200(response)
+        assert [d["id"] for d in response.json["data"]] == [str(dataset.id)]
 
     def test_dataservice_filter_by_tags(self):
         DataserviceFactory(title="DS tagged", tags=["transport"])

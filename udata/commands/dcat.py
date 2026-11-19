@@ -23,7 +23,6 @@ log = logging.getLogger(__name__)
 @cli.group("dcat")
 def grp():
     """DCAT diagnosis operations"""
-    pass
 
 
 @grp.command()
@@ -52,7 +51,7 @@ def parse_url(url, csw, iso, quiet=False, rid=""):
             instance = model_class(*args, **kwargs)
             return instance
 
-    echo(cyan("Parsing url {}".format(url)))
+    echo(cyan(f"Parsing url {url}"))
     source = MockSource()
     source.url = url
     if csw:
@@ -62,7 +61,7 @@ def parse_url(url, csw, iso, quiet=False, rid=""):
     else:
         backend = DcatBackend(source, dryrun=True)
     backend.job = MockJob()
-    echo(yellow("Detected format: {}".format(backend.format)))
+    echo(yellow(f"Detected format: {backend.format}"))
     graphs = backend.walk_paginated_graph(url)
 
     # serialize/unserialize graph like in the job mechanism
@@ -82,27 +81,23 @@ def parse_url(url, csw, iso, quiet=False, rid=""):
 
     for item in backend.job.items:
         if not rid or rid in item.remote_id:
-            echo(magenta("Processing item {}".format(item.remote_id)))
-            echo("Item kwargs: {}".format(yellow(item.kwargs)))
+            echo(magenta(f"Processing item {item.remote_id}"))
+            echo(f"Item kwargs: {yellow(item.kwargs)}")
             node = backend.get_node_from_item(full_graph, item)
             dataset = MockDatasetFactory()
             dataset = dataset_from_rdf(full_graph, dataset, node=node, dryrun=True)
             echo("")
             echo(green("Dataset found!"))
-            echo("Title: {}".format(yellow(dataset)))
-            echo("License: {}".format(yellow(dataset.license)))
-            echo("Description: {}".format(yellow(dataset.description)))
-            echo("Tags: {}".format(yellow(dataset.tags)))
-            echo(
-                "Resources: {}".format(
-                    yellow([(r.title, r.format, r.url) for r in dataset.resources])
-                )
-            )
+            echo(f"Title: {yellow(dataset)}")
+            echo(f"License: {yellow(dataset.license)}")
+            echo(f"Description: {yellow(dataset.description)}")
+            echo(f"Tags: {yellow(dataset.tags)}")
+            echo(f"Resources: {yellow([(r.title, r.format, r.url) for r in dataset.resources])}")
 
             try:
                 dataset.validate()
             except mongoengine.errors.ValidationError as e:
-                log.error(e, exc_info=True)
+                log.exception(e)
             else:
                 echo(green("Dataset is valid ✅"))
             echo("")

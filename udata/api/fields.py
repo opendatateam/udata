@@ -65,7 +65,7 @@ class Markdown(String):
 
 class Permission(Boolean):
     def __init__(self, mapper=None, **kwargs):
-        super(Permission, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def format(self, field):
         return field.can()
@@ -97,7 +97,7 @@ class PreviousPageUrl(String):
 
 class ImageField(String):
     def __init__(self, size=None, original=False, **kwargs):
-        super(ImageField, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.original = original
         self.size = size
 

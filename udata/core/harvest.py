@@ -17,6 +17,7 @@ class HarvestMetadata(EmbeddedDocument):
 
     # TODO: move `uri` field here (need to converge on type)
 
+    record_id = field(StringField())
     remote_id = field(StringField())
     remote_url = field(URLField())
 

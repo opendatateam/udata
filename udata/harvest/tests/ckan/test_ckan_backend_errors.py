@@ -5,7 +5,7 @@ from udata.harvest.tests.factories import HarvestSourceFactory
 from udata.tests.api import PytestOnlyDBTestCase
 
 CKAN_URL = "https://harvest.me/"
-API_URL = "{}api/3/action/package_list".format(CKAN_URL)
+API_URL = f"{CKAN_URL}api/3/action/package_list"
 
 # We test against success and error status code
 # because CKAN API always return 200

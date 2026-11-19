@@ -20,4 +20,4 @@ def normalize(value: str) -> str:
 
 
 def tags_list(value: str) -> list:
-    return list(set(slug(tag) for tag in value.split(",") if tag.strip()))
+    return list({slug(tag) for tag in value.split(",") if tag.strip()})

@@ -438,6 +438,8 @@ class TimeoutSessionTest(PytestOnlyTestCase):
 
     def test_network_failure_raises_geopf_error(self):
         session = _GeopfSession(timeout=42)
-        with patch("requests.Session.request", side_effect=requests.exceptions.ConnectionError()):
-            with pytest.raises(GeopfError):
-                session.get("https://example.com")
+        with (
+            patch("requests.Session.request", side_effect=requests.exceptions.ConnectionError()),
+            pytest.raises(GeopfError),
+        ):
+            session.get("https://example.com")

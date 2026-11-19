@@ -3,14 +3,19 @@ from datetime import UTC, datetime
 from bson import ObjectId
 from flask import url_for
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory
-from udata.core.dataset.models import Dataset
 from udata.core.dataset.tasks import purge_datasets
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.tasks import purge_organizations
+from udata.core.owned import Owned
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.topic.factories import TopicFactory
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
+from udata.features.notifications.models import Notification
+from udata.features.transfer.factories import TransferFactory
+from udata.features.transfer.models import TRANSFERABLE_SUBJECTS, Transfer
 from udata.utils import faker
 
 from . import APITestCase
@@ -22,11 +27,8 @@ class TransferAPITest(APITestCase):
         recipient_user = UserFactory()
         recipient_org = OrganizationFactory()
         dataset = DatasetFactory(owner=user)
+        other_dataset = DatasetFactory(owner=user)
         comment = faker.sentence()
-
-        # It's a little bit weird to create two transfer for the same dataset
-        # but it's currently allowed. If we change this, we can create a second
-        # dataset for this test.
 
         response = self.post(
             url_for("api.transfers"),
@@ -49,7 +51,7 @@ class TransferAPITest(APITestCase):
             {
                 "subject": {
                     "class": "Dataset",
-                    "id": str(dataset.id),
+                    "id": str(other_dataset.id),
                 },
                 "recipient": {
                     "class": "User",
@@ -68,7 +70,7 @@ class TransferAPITest(APITestCase):
         self.assertEqual(data["recipient"]["id"], str(recipient_user.id))
         self.assertEqual(data["recipient"]["class"], "User")
 
-        self.assertEqual(data["subject"]["id"], str(dataset.id))
+        self.assertEqual(data["subject"]["id"], str(other_dataset.id))
         self.assertEqual(data["subject"]["class"], "Dataset")
 
         self.assertEqual(data["owner"]["id"], str(user.id))
@@ -86,7 +88,7 @@ class TransferAPITest(APITestCase):
         self.assert200(response)
 
         data = response.json
-        self.assertEqual(len(data), 2)
+        self.assertEqual(len(data), 1)
 
         self.assertEqual(data[0]["recipient"]["id"], str(recipient_org.id))
         self.assertEqual(data[0]["recipient"]["class"], "Organization")
@@ -99,18 +101,6 @@ class TransferAPITest(APITestCase):
 
         self.assertEqual(data[0]["comment"], comment)
         self.assertEqual(data[0]["status"], "pending")
-
-        self.assertEqual(data[1]["recipient"]["id"], str(recipient_user.id))
-        self.assertEqual(data[1]["recipient"]["class"], "User")
-
-        self.assertEqual(data[1]["subject"]["id"], str(dataset.id))
-        self.assertEqual(data[1]["subject"]["class"], "Dataset")
-
-        self.assertEqual(data[1]["owner"]["id"], str(user.id))
-        self.assertEqual(data[1]["owner"]["class"], "User")
-
-        self.assertEqual(data[1]["comment"], comment)
-        self.assertEqual(data[1]["status"], "pending")
 
         response = self.get(
             url_for(
@@ -463,6 +453,77 @@ class TransferAPITest(APITestCase):
         response = self.post(url_for("api.transfer", id=transfer["id"]), {"response": "refuse"})
         self.assert400(response)
 
+    def test_cannot_accept_a_transfer_requested_by_a_former_owner(self):
+        attacker = UserFactory()
+        attacker_org = OrganizationFactory(admins=[attacker])
+        factories = {
+            "Dataset": DatasetFactory,
+            "Reuse": ReuseFactory,
+            "Dataservice": DataserviceFactory,
+            "Topic": TopicFactory,
+        }
+        self.assertEqual(sorted(factories), sorted(TRANSFERABLE_SUBJECTS))
+
+        for class_name, factory in factories.items():
+            accomplice = UserFactory()
+            victim = UserFactory()
+            subject = factory(organization=attacker_org)
+
+            self.login(attacker)
+            to_victim = self._create_transfer(subject, victim).json
+            self.assert400(self._create_transfer(subject, accomplice))
+            # As the API used to allow: a second pending transfer of the same object.
+            stale = TransferFactory(owner=attacker_org, recipient=accomplice, subject=subject)
+
+            self.login(victim)
+            self.assert200(
+                self.post(url_for("api.transfer", id=to_victim["id"]), {"response": "accept"})
+            )
+
+            self.login(accomplice)
+            response = self.post(url_for("api.transfer", id=stale.id), {"response": "accept"})
+
+            self.assertEqual(response.status_code, 404, f"stale {class_name} transfer accepted")
+            subject.reload()
+            self.assertEqual(subject.owner, victim, class_name)
+            self.assertIsNone(subject.organization, class_name)
+
+    def test_moving_a_subject_drops_its_pending_transfers(self):
+        owner = UserFactory()
+        recipient_admin = UserFactory()
+        dataset = DatasetFactory(owner=owner)
+        transfer = TransferFactory(
+            owner=owner,
+            recipient=OrganizationFactory(admins=[recipient_admin]),
+            subject=dataset,
+        )
+        unmoved_transfer = TransferFactory(
+            owner=owner, recipient=UserFactory(), subject=DatasetFactory(owner=owner)
+        )
+        self.assertEqual(Notification.objects(user=recipient_admin).count(), 1)
+
+        self.login(AdminFactory())
+        data = dataset.to_dict()
+        data["organization"] = {"id": OrganizationFactory().id}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+
+        self.assert200(response)
+        self.assertEqual(Transfer.objects(id=transfer.id).count(), 0)
+        self.assertEqual(Notification.objects(user=recipient_admin).count(), 0)
+        self.assertEqual(Transfer.objects(id=unmoved_transfer.id).count(), 1)
+
+    def test_editing_a_subject_keeps_its_pending_transfers(self):
+        owner = self.login()
+        dataset = DatasetFactory(owner=owner)
+        transfer = TransferFactory(owner=owner, recipient=UserFactory(), subject=dataset)
+
+        data = dataset.to_dict()
+        data["title"] = "New title"
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+
+        self.assert200(response)
+        self.assertEqual(Transfer.objects(id=transfer.id).count(), 1)
+
     def test_request_and_respond_to_transfer_with_non_object_body(self):
         user = self.login()
         new_user = UserFactory()
@@ -486,12 +547,12 @@ class TransferAPITest(APITestCase):
         response = self.get(url_for("api.transfer", id=transfer["id"]))
         self.assertEqual(response.json["status"], "pending")
 
-    def _create_transfer(self, source: Dataset, destination: User):
+    def _create_transfer(self, source: Owned, destination: User):
         return self.post(
             url_for("api.transfers"),
             {
                 "subject": {
-                    "class": "Dataset",
+                    "class": source.__class__.__name__,
                     "id": str(source.id),
                 },
                 "recipient": {

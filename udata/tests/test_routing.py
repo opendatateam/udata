@@ -25,21 +25,21 @@ class UUIDConverterTest(PytestOnlyTestCase):
     def test_serialize_uuid_to_url(self):
         uuid = uuid4()
         url = url_for("uuid_tester", uuid=uuid)
-        assert url == "/uuid/{0}".format(str(uuid))
+        assert url == f"/uuid/{uuid!s}"
 
     def test_serialize_string_uuid_to_url(self):
         uuid = uuid4()
         url = url_for("uuid_tester", uuid=str(uuid))
-        assert url == "/uuid/{0}".format(str(uuid))
+        assert url == f"/uuid/{uuid!s}"
 
     def test_resolve_uuid(self, client):
         uuid = uuid4()
-        url = "/uuid/{0}".format(str(uuid))
+        url = f"/uuid/{uuid!s}"
         assert200(client.get(url))
 
     def test_resolve_uuid_with_spaces(self, client):
         uuid = uuid4()
-        url = "/uuid/{0} ".format(str(uuid))
+        url = f"/uuid/{uuid!s} "
         assert200(client.get(url))
 
     def test_bad_uuid_is_404(self, client):
@@ -83,7 +83,7 @@ class ModelConverterMixin(PytestOnlyDBTestCase):
     def test_serialize_model_id_to_url(self):
         tester = self.model.objects.create()
         url = url_for("model_tester", model=tester)
-        assert url == "/model/{0}".format(str(tester.id))
+        assert url == f"/model/{tester.id!s}"
 
     def test_serialize_model_slug_to_url(self):
         tester = self.model.objects.create(slug="slug")
@@ -93,7 +93,7 @@ class ModelConverterMixin(PytestOnlyDBTestCase):
     def test_serialize_object_id_to_url(self):
         id = ObjectId()
         url = url_for("model_tester", model=id)
-        assert url == "/model/{0}".format(str(id))
+        assert url == f"/model/{id!s}"
 
     def test_serialize_string_to_url(self):
         slug = "slug"
@@ -107,7 +107,7 @@ class ModelConverterMixin(PytestOnlyDBTestCase):
 
     def test_resolve_model_from_id(self, client):
         tester = self.model.objects.create(slug="slug")
-        url = "/model/{0}".format(str(tester.id))
+        url = f"/model/{tester.id!s}"
         assert200(client.get(url))
 
     def test_resolve_model_from_slug(self, client):
