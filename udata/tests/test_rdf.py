@@ -1,3 +1,6 @@
+import ast
+import hashlib
+import inspect
 import json
 
 import pytest
@@ -8,6 +11,7 @@ from rdflib import (
     Literal,
     URIRef,
 )
+from rdflib import parser as rdflib_parser
 from rdflib.resource import Resource as RdfResource
 
 from udata.core.organization.factories import OrganizationFactory
@@ -88,6 +92,28 @@ class ContentNegociationTest(TestCase):
 
 @pytest.mark.usefixtures("no_ambient_proxy")
 class RdflibLocationTest(PytestOnlyTestCase):
+    def test_replaced_loader_is_the_reviewed_one(self):
+        # udata.rdf guards rdflib by replacing this private function: an rdflib upgrade that
+        # changes it, or stops calling it, could reopen the SSRF without any test noticing.
+        # The attribute is already replaced here: read the original from the module source.
+        module_source = inspect.getsource(rdflib_parser)
+        original = next(
+            node
+            for node in ast.parse(module_source).body
+            if isinstance(node, ast.FunctionDef)
+            and node.name == "_create_input_source_from_location"
+        )
+        source = ast.get_source_segment(module_source, original)
+
+        assert (
+            "_create_input_source_from_location"
+            in rdflib_parser.create_input_source.__code__.co_names
+        )
+        assert (
+            hashlib.sha256(source.encode()).hexdigest()
+            == "51aba9c10f00e1f48391b1dc0c820abb9435fb3de836430e0c1184076b2583c3"
+        ), "rdflib changed the function udata.rdf replaces: review its diff, then update this hash"
+
     def test_parsed_url_is_fetched(self, rmock):
         rmock.get(
             "http://data.test.org/catalog.ttl",
