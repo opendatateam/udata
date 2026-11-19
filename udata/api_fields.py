@@ -1463,6 +1463,16 @@ def compute_filter(column: str, field, info, filterable) -> dict:
     if hasattr(field, "choices") and field.choices:
         filterable["choices"] = field.choices
 
+    # A generic reference is stored as `{_cls, _ref}`, which MongoEngine cannot match on an id
+    # alone. Its `choices` are the referenceable document classes, not values of the parameter.
+    if isinstance(
+        field, mongo_fields.GenericReferenceField | mongo_fields.GenericLazyReferenceField
+    ):
+        filterable["constraints"].append("objectid")
+        filterable["choices"] = None
+        if "query" not in filterable:
+            filterable["query"] = lambda query, value: query.generic_in(**{column: value})
+
     return filterable
 
 

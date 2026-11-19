@@ -384,6 +384,23 @@ class FakeWithGenericReference(Document):
 
 
 @generate_fields()
+class FakeWithFilterableGenericReferences(Document):
+    """Exercises `filterable` on both kinds of generic reference, declared with `choices`."""
+
+    reference = field(
+        mongoengine.fields.GenericReferenceField(choices=["Organization", "User"]),
+        nested_fields=api.model_reference,
+        filterable={},
+    )
+    lazy_reference = field(
+        mongoengine.fields.GenericLazyReferenceField(choices=["Organization", "User"]),
+        filterable={},
+    )
+
+    meta = {"collection": "fake_with_filterable_generic_references_api_fields"}
+
+
+@generate_fields()
 class FakeWithFilteredList(Document):
     """Exercises `attribute` on a list of embedded documents: the list is read through a
     property of the document that filters it."""
@@ -803,6 +820,30 @@ class GenericReferenceFieldTest(PytestOnlyDBTestCase):
 
         with pytest.raises(FieldValidationError):
             patch(FakeWithGenericReference(), {"subject": {"class": "License", "id": operators}})
+
+    @pytest.mark.parametrize("param", ["reference", "lazy_reference"])
+    def test_filters_on_the_referenced_id(self, app, param: str) -> None:
+        """A generic reference is stored as `{_cls, _ref}`: the filter matches the id of
+        `_ref`, and the `choices` (classes) are not taken as the parameter's values."""
+        organization = OrganizationFactory()
+        matching = FakeWithFilterableGenericReferences(**{param: organization}).save()
+        FakeWithFilterableGenericReferences(**{param: UserFactory()}).save()
+
+        with app.test_request_context("/foobar", query_string={param: str(organization.id)}):
+            results = FakeWithFilterableGenericReferences.apply_sort_filters(
+                FakeWithFilterableGenericReferences.objects
+            )
+            assert list(results) == [matching]
+
+    @pytest.mark.parametrize("param", ["reference", "lazy_reference"])
+    def test_filter_rejects_a_malformed_id(self, app, param: str) -> None:
+        with (
+            app.test_request_context("/foobar", query_string={param: "organization:42"}),
+            pytest.raises(BadRequest),
+        ):
+            FakeWithFilterableGenericReferences.apply_sort_filters(
+                FakeWithFilterableGenericReferences.objects
+            )
 
 
 class RenameFieldTest(PytestOnlyDBTestCase):

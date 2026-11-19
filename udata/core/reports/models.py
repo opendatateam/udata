@@ -71,7 +71,10 @@ class Report(Document[ReportQuerySet]):
 
     # Here we use the lazy version of `GenericReferenceField` because we could point to a
     # non existant model (if it was deleted we want to keep the report data).
-    subject = field(GenericLazyReferenceField(choices=REPORTABLE_MODELS, required=True))
+    subject = field(
+        GenericLazyReferenceField(choices=REPORTABLE_MODELS, required=True),
+        filterable={},
+    )
 
     subject_deleted_at = field(
         DateTimeField(),
