@@ -21,7 +21,7 @@ from udata.harvest.backends import get_backend
 from udata.harvest.models import HarvestItem, HarvestJob
 from udata.http import USER_AGENT
 from udata.models import Dataset
-from udata.rdf import DCAT
+from udata.rdf import DCAT, DCT
 from udata.storage.s3 import get_from_json
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import argvalues, assert200
@@ -335,6 +335,12 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert len(dataservices) == 0
 
     def test_harvest_literal_spatial(self, rmock):
+        # evian.json is a Project Open Data catalog, whose remote @context is replaced by a gist
+        pod_context = URIS_TO_REPLACE[
+            "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld"
+        ]
+        with open(os.path.join(DCAT_FILES_DIR, "pod-catalog-context.jsonld")) as f:
+            rmock.get(pod_context, text=f.read())
         url = mock_dcat(rmock, "evian.json")
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
@@ -1005,37 +1011,34 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert not [r for r in caplog.records if r.levelno >= logging.ERROR]
 
     def test_use_replaced_uris(self, rmock, mocker):
-        # Create a mock URL that will be replaced, but use an embedded context to avoid external requests
+        broken_context = "http://broken.test.org/context.jsonld"
+        replacement_context = TEST_URL_PATTERN.format(path="context.jsonld", domain=TEST_DOMAIN)
+        mocker.patch.dict(URIS_TO_REPLACE, {broken_context: replacement_context})
+        rmock.get(
+            replacement_context,
+            json={"@context": {"@vocab": "http://www.w3.org/ns/dcat#", "dct": str(DCT)}},
+        )
         url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
         rmock.get(
             url,
             json={
-                "@context": {
-                    "@vocab": "http://www.w3.org/ns/dcat#",
-                    "dcat": "http://www.w3.org/ns/dcat#",
-                },
-                "@type": "dcat:Catalog",
-                "dataset": [],
+                "@context": broken_context,
+                "@type": "Catalog",
+                "dataset": [
+                    {"@type": "Dataset", "dct:identifier": "1", "dct:title": "Dataset 1"},
+                ],
             },
         )
         rmock.head(url, headers={"Content-Type": "application/json"})
 
-        org = OrganizationFactory()
-        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
-
-        # The test just checks that the replacement mechanism exists and can be patched
-        # We don't actually test URL replacement here since it would require mocking urllib
-        mocker.patch.dict(
-            URIS_TO_REPLACE,
-            {},  # Empty dict to test the mechanism exists
-        )
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
         actions.run(source)
 
         source.reload()
 
         job = source.get_last_job()
-        assert len(job.items) == 0
         assert job.status == "done"
+        assert Dataset.objects.get(harvest__dct_identifier="1").title == "Dataset 1"
 
     def test_target_404(self, rmock):
         filename = "obvious-format.jsonld"
