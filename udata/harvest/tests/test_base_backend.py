@@ -35,6 +35,7 @@ from ..backends import (
     HarvestFilter,
     get_all_backends,
 )
+from ..backends.ckan.harvesters import CkanBackend
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
 from .factories import HarvestSourceFactory
 
@@ -324,7 +325,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         job = backend.harvest()
 
         assert len(job.items) == 2 * n
-        assert all([item.remote_url for item in job.items])
+        assert all(item.remote_url for item in job.items)
 
     def test_harvest_source_id(self):
         nb_datasets = 3
@@ -465,15 +466,13 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert "archived_reason" not in dataservice_no_arch.harvest
 
         # test unarchive: archive manually then relaunch harvest
-        dataset = Dataset.objects.get(**{"harvest__remote_id": mock_datasets[0].remote_id})
+        dataset = Dataset.objects.get(harvest__remote_id=mock_datasets[0].remote_id)
         dataset.archived = datetime.now(UTC)
         dataset.harvest.archived_at = datetime.now(UTC)
         dataset.harvest.archived_reason = "not-on-remote"
         dataset.save()
 
-        dataservice = Dataservice.objects.get(
-            **{"harvest__remote_id": mock_dataservices[0].remote_id}
-        )
+        dataservice = Dataservice.objects.get(harvest__remote_id=mock_dataservices[0].remote_id)
         dataservice.archived_at = datetime.now(UTC)
         dataservice.harvest.archived_at = datetime.now(UTC)
         dataservice.harvest.archived_reason = "not-on-remote"
@@ -641,13 +640,13 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert Dataset.objects.count() == len({d.remote_id for d in dataset_records})
         assert Dataservice.objects.count() == len({d.remote_id for d in dataservice_records})
         seen = set()
-        for job in job.items:
-            if job.remote_id not in seen:
-                assert job.status == "done"
-                seen.add(job.remote_id)
+        for item in job.items:
+            if item.remote_id not in seen:
+                assert item.status == "done"
+                seen.add(item.remote_id)
             else:
-                assert job.status == "failed"
-                assert job.remote_id in job.errors[0].message
+                assert item.status == "failed"
+                assert item.remote_id in item.errors[0].message
 
     @pytest.mark.options(CDATA_BASE_URL="http://localhost")
     @pytest.mark.parametrize(
@@ -820,7 +819,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
             # gated metrics (behind Organization.compute_aggregate_metrics)
             for metric in ["datasets_by_months", "dataservices_by_months"]:
-                assert (metric in org.metrics) is (True if liverun else False)
+                assert (metric in org.metrics) is bool(liverun)
 
             # signals
             signals[before_harvest_job].assert_called_with(backend)
@@ -1040,7 +1039,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             harvest={
                 "remote_id": "dataset",
                 "last_update": last_update,
-                **{match_field: match_value(source)},
+                match_field: match_value(source),
             }
         )
         backend = MockBackend(source)
@@ -1103,6 +1102,25 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         finally:
             for signal, receiver in signals.items():
                 signal.disconnect(receiver)
+
+
+class BaseBackendHeadersTest(PytestOnlyDBTestCase):
+    @pytest.mark.parametrize("method", ["head", "get", "post"])
+    def test_api_key_of_a_source_is_not_sent_to_another_source(self, rmock, method):
+        # CKAN sends the API key of its source as an `Authorization` header.
+        key_url = "https://with-key.example.com/api/3/action/package_list"
+        other_url = "https://without-key.example.com/api/3/action/package_list"
+        getattr(rmock, method)(key_url)
+        getattr(rmock, method)(other_url)
+        args = {"data": {}} if method == "post" else {}
+
+        with_key = CkanBackend(HarvestSourceFactory(config={"apikey": "secret-key"}))
+        getattr(with_key, method)(key_url, **args)
+        without_key = CkanBackend(HarvestSourceFactory(config={}))
+        getattr(without_key, method)(other_url, **args)
+
+        assert rmock.request_history[0].headers["Authorization"] == "secret-key"
+        assert "Authorization" not in rmock.request_history[1].headers
 
 
 class HarvestItemLogsTest(PytestOnlyDBTestCase):

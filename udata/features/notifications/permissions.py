@@ -6,4 +6,4 @@ class EditNotificationPermission(Permission):
 
     def __init__(self, subject):
         need = UserNeed(subject.user.fs_uniquifier)
-        super(EditNotificationPermission, self).__init__(need)
+        super().__init__(need)

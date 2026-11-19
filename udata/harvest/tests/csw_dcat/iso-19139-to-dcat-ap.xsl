@@ -1297,6 +1297,24 @@
 -->
 <!-- Unique Resource Identifier -->
       <xsl:apply-templates select="gmd:identificationInfo/*/gmd:citation/*/gmd:identifier/*"/>
+
+<!-- Parent reference -->
+<!--
+     https://github.com/ecolabdata/ecospheres/issues/1066
+     Support for parentIdentifier is CUSTOM until:
+       1. ISO*-to-DCAT* specs stabilize on:
+          - which property (dct:isPartOf, dcat:inSeries, ...) should be used,
+          - what domain and range (Dataset, DataSeries, ...) apply;
+       2. SEMIC XSLT can resolve another record's Resource URI (dct:identifier) from its record UUID
+          (parentIdentifier). Current solution for similar requirement is CoupledResourceLookUp, but
+          is being revisited in https://github.com/SEMICeu/GeoDCAT-AP/issues/140.
+-->
+      <xsl:if test="$profile = $extended">  <!-- same $profile as fileIdentifier -->
+        <xsl:for-each select="gmd:parentIdentifier/gco:CharacterString">
+          <dcat:inSeries rdf:resource="urn:iso19139:parent:{normalize-space(.)}"></dcat:inSeries>
+        </xsl:for-each>
+      </xsl:if>
+
 <!-- Coupled resources -->
       <xsl:apply-templates select="gmd:identificationInfo[1]/*/srv:operatesOn">
         <xsl:with-param name="ResourceType" select="$ResourceType"/>

@@ -28,7 +28,7 @@ from udata.api_fields import field, generate_fields, required_if
 from udata.core.auditable import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.checks import check_is_email
-from udata.core.edito_blocs.base import Bloc
+from udata.core.edito_blocs.base import Bloc, check_blocs_layout, check_no_colored_sections
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
@@ -64,7 +64,7 @@ from .constants import (
     REQUEST_TYPES,
 )
 
-__all__ = ("Organization", "Team", "Member", "MembershipRequest")
+__all__ = ("Member", "MembershipRequest", "Organization", "Team")
 
 
 def check_siret(value, field, **_kwargs):
@@ -195,7 +195,7 @@ class OrganizationQuerySet(UDataQuerySet):
 # Uses a standalone function (not a model method) because OrganizationBadge is
 # defined before Organization in the file — Organization is resolved lazily at call time.
 def validate_badge(value):
-    if value not in Organization.__badges__.keys():
+    if value not in Organization.__badges__:
         raise ValidationError("Unknown badge type")
 
 
@@ -325,6 +325,7 @@ class Organization(
     presentation_blocs = field(
         EmbeddedDocumentListField(Bloc),
         generic=True,
+        checks=[check_blocs_layout, check_no_colored_sections],
         # Read through `public_presentation_blocs` so the API hides unpublished blocs from
         # the public. Writes still target the real `presentation_blocs` attribute (patch()
         # addresses fields by key).

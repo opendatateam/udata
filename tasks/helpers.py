@@ -1,5 +1,5 @@
+from collections.abc import Callable
 from os.path import abspath, dirname, join
-from typing import Callable
 
 #: Project absolute root path
 ROOT = abspath(join(dirname(__file__), ".."))
@@ -7,7 +7,7 @@ ROOT = abspath(join(dirname(__file__), ".."))
 
 def color(code: str) -> Callable:
     """A simple ANSI color wrapper factory"""
-    return lambda t: "\033[{0}{1}\033[0;m".format(code, t)
+    return lambda t: f"\033[{code}{t}\033[0;m"
 
 
 green = color("1;32m")
@@ -39,4 +39,4 @@ def success(text: str, *args, **kwargs) -> None:
 def error(text: str, *args, **kwargs) -> None:
     """Display an error message"""
     text = text.format(*args, **kwargs)
-    print(red("✘ {0}".format(text)))
+    print(red(f"✘ {text}"))

@@ -1,5 +1,4 @@
 from udata.core import storages
-from udata.core.edito_blocs.models import purge_blocs_references
 from udata.core.organization.assignment import Assignment
 from udata.core.topic.models import TopicElement
 from udata.models import Activity, Discussion, Follow, Transfer
@@ -27,13 +26,12 @@ def purge_reuses(self) -> None:
         Assignment.objects(subject=reuse).delete()
         # Remove reuses references in Topics
         TopicElement.objects(element=reuse).update(element=None)
-        purge_blocs_references("reuses", reuse.id)
         # Remove reuse's logo in all sizes
         if reuse.image.filename is not None:
             storage = storages.images
             storage.delete(reuse.image.filename)
             storage.delete(reuse.image.original)
-            for key, value in reuse.image.thumbnails.items():
+            for value in reuse.image.thumbnails.values():
                 storage.delete(value)
         reuse.delete()
 

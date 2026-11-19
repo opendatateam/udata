@@ -5,7 +5,6 @@ from udata.core.activity.models import Activity
 from udata.core.badges import tasks as badge_tasks
 from udata.core.constants import HVD
 from udata.core.dataservices.models import Dataservice
-from udata.core.edito_blocs.models import purge_blocs_references
 from udata.core.organization.assignment import Assignment
 from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.models import Organization
@@ -39,7 +38,6 @@ def purge_dataservices(self):
         Assignment.objects(subject=dataservice).delete()
         # Remove dataservices references in Topics
         TopicElement.objects(element=dataservice).update(element=None)
-        purge_blocs_references("dataservices", dataservice.id)
         # Remove dataservice
         dataservice.delete()
 

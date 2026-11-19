@@ -58,7 +58,7 @@ def purge_organizations(self):
             storage = storages.avatars
             storage.delete(organization.logo.filename)
             storage.delete(organization.logo.original)
-            for key, value in organization.logo.thumbnails.items():
+            for value in organization.logo.thumbnails.values():
                 storage.delete(value)
         if organization.banner_image and organization.banner_image.filename is not None:
             # `original` may equal `filename` (unresized upload): dedupe

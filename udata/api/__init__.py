@@ -15,12 +15,12 @@ from flask import (
     url_for,
 )
 from flask_restx import Api, Resource
-from flask_restx.inputs import positive
+from flask_restx.inputs import int_range, positive
 from flask_restx.reqparse import RequestParser
 from flask_storage import UnauthorizedFileType
 
 from udata.app import csrf
-from udata.auth import Permission, PermissionDenied, RoleNeed, current_user, login_user
+from udata.auth import Permission, PermissionDenied, RoleNeed, authenticate_request, current_user
 from udata.i18n import get_locale
 from udata.mongo import db
 
@@ -35,17 +35,21 @@ DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = "X-API-KEY"
 
 
-def add_pagination_arguments(parser: RequestParser, *, page_size: int = 20) -> RequestParser:
+def add_pagination_arguments(
+    parser: RequestParser, *, page_size: int = 20, max_page_size: int | None = None
+) -> RequestParser:
     """Add the standard ``page``/``page_size`` query arguments to ``parser``.
 
     Both are validated as strictly positive integers, so an out-of-range value
     (``0`` or negative) yields a clean 400 instead of failing deeper down — e.g.
     a negative length reaching a Mongo ``$slice`` aggregation, which is a 500.
+    ``max_page_size`` bounds ``page_size`` the same way, for endpoints whose
+    response cost grows too much with the page size.
     """
     parser.add_argument("page", type=positive, default=1, location="args", help="The page to fetch")
     parser.add_argument(
         "page_size",
-        type=positive,
+        type=positive if max_page_size is None else int_range(1, max_page_size),
         default=page_size,
         location="args",
         help="The page size to fetch",
@@ -57,7 +61,7 @@ class UDataApi(Api):
     def __init__(self, app=None, **kwargs):
         decorators = kwargs.pop("decorators", []) or []
         kwargs["decorators"] = [self.authentify] + decorators
-        super(UDataApi, self).__init__(app, **kwargs)
+        super().__init__(app, **kwargs)
         self.authorizations = {"apikey": {"type": "apiKey", "in": "header", "name": HEADER_API_KEY}}
 
     def secure(self, func):
@@ -130,8 +134,11 @@ class UDataApi(Api):
                         self.abort(401, "Expired API token")
                     self.abort(401, "Invalid API token")
 
-                if not login_user(api_token.user, False):
+                if not authenticate_request(api_token.user):
                     self.abort(401, "Inactive user")
+                # Authenticating the owner is what grants the token their rights; the
+                # token itself is kept so that what it does is attributed to it.
+                g.api_credential = api_token
                 api_token.update_usage(request.headers.get("User-Agent"))
             else:
                 check_credentials()
@@ -171,7 +178,7 @@ class UDataApi(Api):
         class_name = reference.get("class")
         if class_name not in allowed_classes:
             expected = ", ".join(allowed_classes)
-            self.abort(400, errors={field_name: "`class` must be one of: {0}".format(expected)})
+            self.abort(400, errors={field_name: f"`class` must be one of: {expected}"})
 
         object_id = reference.get("id")
         if not ObjectId.is_valid(object_id):
@@ -181,9 +188,7 @@ class UDataApi(Api):
         try:
             return model.objects.get(id=object_id)
         except model.DoesNotExist:
-            self.abort(
-                400, errors={field_name: 'Unknown {0} id "{1}"'.format(field_name, object_id)}
-            )
+            self.abort(400, errors={field_name: f'Unknown {field_name} id "{object_id}"'})
 
     def validate(self, form_cls, obj=None):
         """Validate a form from the request and handle errors"""
@@ -203,7 +208,7 @@ class UDataApi(Api):
     def unauthorized(self, response):
         """Override to change the WWW-Authenticate challenge"""
         realm = current_app.config.get("HTTP_OAUTH_REALM", "uData")
-        challenge = 'Bearer realm="{0}"'.format(realm)
+        challenge = f'Bearer realm="{realm}"'
 
         response.headers["WWW-Authenticate"] = challenge
         return response
@@ -302,9 +307,7 @@ def handle_value_error(error):
 def handle_unauthorized_file_type(error):
     """Error occuring when the user try to upload a non-allowed file type"""
     url = url_for("api.allowed_extensions", _external=True)
-    msg = ("This file type is not allowed.The allowed file type list is available at {url}").format(
-        url=url
-    )
+    msg = f"This file type is not allowed.The allowed file type list is available at {url}"
     return {"message": msg}, 400
 
 
@@ -426,6 +429,7 @@ def init_app(app):
     import udata.core.topic.apiv2  # noqa
     import udata.core.post.api  # noqa
     import udata.core.post.apiv2  # noqa
+    import udata.core.storages.api  # noqa
     import udata.core.contact_point.api  # noqa
     import udata.features.transfer.api  # noqa
     import udata.features.notifications.api  # noqa

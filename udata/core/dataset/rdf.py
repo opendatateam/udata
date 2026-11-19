@@ -56,6 +56,7 @@ from udata.rdf import (
     namespace_manager,
     rdf_unique_values,
     rdf_value,
+    record_id_from_rdf,
     remote_url_from_rdf,
     sanitize_html,
     schema_from_rdf,
@@ -66,7 +67,7 @@ from udata.rdf import (
 )
 from udata.utils import get_by, safe_harvest_datetime, safe_unicode, uniquify
 
-from .constants import OGC_SERVICE_FORMATS, DistanceUom, UpdateFrequency
+from .constants import DCAT_EXTRAS_KEY, OGC_SERVICE_FORMATS, DistanceUom, UpdateFrequency
 from .models import Checksum, Dataset, License, Resource
 
 log = logging.getLogger(__name__)
@@ -151,7 +152,7 @@ QUDT_TO_UDATA = {
 
 # A DOI as sources write it: bare, as a `doi:` or `info:doi/` URI, or as a resolver URL.
 DOI_IDENTIFIER_RE = re.compile(
-    r"^(?:doi:|info:doi/|https?://(?:dx\.)?doi\.org/)?(10\.\d{4,9}/\S+)$", re.I
+    r"^(?:doi:|info:doi/|https?://(?:dx\.)?doi\.org/)?(10\.\d{4,9}/\S+)$", re.IGNORECASE
 )
 
 
@@ -327,7 +328,7 @@ def resource_to_rdf(
     if resource.checksum:
         checksum = graph.resource(BNode())
         checksum.set(RDF.type, SPDX.Checksum)
-        algorithm = "checksumAlgorithm_{0}".format(resource.checksum.type)
+        algorithm = f"checksumAlgorithm_{resource.checksum.type}"
         checksum.add(SPDX.algorithm, getattr(SPDX, algorithm))
         checksum.add(SPDX.checksumValue, Literal(resource.checksum.value))
         r.add(SPDX.checksum, checksum)
@@ -501,12 +502,11 @@ def temporal_from_resource(resource):
     Only the triples present in the harvested graph are read: the resource URI is never
     dereferenced, as it is attacker-controlled and would make the server fetch it.
     """
-    if range := maybe_date_range(resource.value(SCHEMA.startDate), resource.value(SCHEMA.endDate)):
-        return range
-    elif range := maybe_date_range(resource.value(DCAT.startDate), resource.value(DCAT.endDate)):
-        return range
-    elif range := maybe_date_range(resource.value(SCV.min), resource.value(SCV.max)):
-        return range
+    return (
+        maybe_date_range(resource.value(SCHEMA.startDate), resource.value(SCHEMA.endDate))
+        or maybe_date_range(resource.value(DCAT.startDate), resource.value(DCAT.endDate))
+        or maybe_date_range(resource.value(SCV.min), resource.value(SCV.max))
+    )
 
 
 def temporal_from_rdf(period_of_time):
@@ -806,20 +806,32 @@ def inspire_category_from_rights(rights: Collection[str]) -> InspireLimitationCa
     return None
 
 
-def set_dcat_extra(obj: Dataset | Resource, property: URIRef | str, value: str | Collection):
+def set_dcat_extra(
+    obj: Dataset | Resource, property: URIRef | str, value: str | Collection
+) -> None:
     key = localname(property) if isinstance(property, URIRef) else property
     if not isinstance(value, str):
         value = list(value)
-    obj.extras["dcat"] = {
-        **obj.extras.get("dcat", {}),
+    obj.extras[DCAT_EXTRAS_KEY] = {
+        **obj.extras.get(DCAT_EXTRAS_KEY, {}),
         key: value,
     }
 
 
 def get_dcat_extra(obj: Dataset | Resource, property: URIRef | str) -> str | list | None:
     key = localname(property) if isinstance(property, URIRef) else property
-    if dcat := obj.extras.get("dcat"):
+    if dcat := obj.extras.get(DCAT_EXTRAS_KEY):
         return dcat.get(key)
+
+
+def unset_dcat_extra(obj: Dataset | Resource, property: URIRef | str) -> None:
+    key = localname(property) if isinstance(property, URIRef) else property
+    if dcat := obj.extras.get(DCAT_EXTRAS_KEY):
+        remaining = {k: v for k, v in dcat.items() if k != key}
+        if remaining:
+            obj.extras[DCAT_EXTRAS_KEY] = remaining
+        else:
+            del obj.extras[DCAT_EXTRAS_KEY]
 
 
 def get_unanimous_dcat_extra(
@@ -1079,17 +1091,19 @@ def dataset_from_rdf(
         *(licenses + rights + resources_licenses), default=default_license
     )
 
-    identifier = rdf_value(d, DCT.identifier)
+    record_id = record_id_from_rdf(d)
+    dct_identifier = rdf_value(d, DCT.identifier)
     uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
 
-    remote_url = remote_url_from_rdf(d, graph, remote_url_prefix=remote_url_prefix)
+    remote_url = remote_url_from_rdf(d, remote_url_prefix=remote_url_prefix)
 
     created_at = rdf_value(d, DCT.created)
     issued_at = rdf_value(d, DCT.issued)
     modified_at = rdf_value(d, DCT.modified)
 
     dataset.set_harvested()
-    dataset.harvest.dct_identifier = identifier
+    dataset.harvest.record_id = record_id
+    dataset.harvest.dct_identifier = dct_identifier
     dataset.harvest.doi = doi_from_rdf(d)
     dataset.harvest.uri = uri
     dataset.harvest.remote_url = remote_url

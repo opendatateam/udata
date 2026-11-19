@@ -1,7 +1,7 @@
 from flask import url_for
 
 from udata.tests.api import PytestOnlyAPITestCase
-from udata.tests.helpers import assert200
+from udata.tests.helpers import assert200, assert400
 from udata.utils import faker
 
 
@@ -19,7 +19,7 @@ class InternalBackendTest(PytestOnlyAPITestCase):
         assert200(response)
         assert response.mimetype == "image/png"
         assert response.is_streamed
-        etag, weak = response.get_etag()
+        etag, _weak = response.get_etag()
         assert etag is not None
 
     def test_render_twice_the_same(self):
@@ -28,3 +28,18 @@ class InternalBackendTest(PytestOnlyAPITestCase):
         stream_b = self.get(url_for("api.avatar", identifier=identifier, size=32))
 
         assert_stream_equal(stream_a, stream_b)
+
+    def test_render_smallest_size_used_by_the_frontend(self):
+        response = self.get(url_for("api.avatar", identifier=faker.word(), size=12))
+
+        assert200(response)
+
+    def test_reject_size_too_large(self):
+        response = self.get(url_for("api.avatar", identifier=faker.word(), size=9999))
+
+        assert400(response)
+
+    def test_reject_size_too_small_to_draw_the_blocks(self):
+        response = self.get(url_for("api.avatar", identifier=faker.word(), size=1))
+
+        assert400(response)

@@ -8,6 +8,7 @@ from flask_restx.reqparse import Argument, RequestParser
 from flask_storage.mongo import ImageField
 from mongoengine import PULL, EmbeddedDocument
 from mongoengine.fields import (
+    BooleanField,
     DateTimeField,
     DictField,
     EmbeddedDocumentField,
@@ -28,6 +29,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
 from udata.core.owned import Owned
 from udata.core.storages import default_image_basename, images
+from udata.core.user.factories import UserFactory
 from udata.factories import ModelFactory
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics
 from udata.mongo.document import UDataDocument as Document
@@ -55,7 +57,6 @@ FORBIDDEN_MESSAGE: str = "Forbidden value"
 def check_url(url: str = "", **_kwargs) -> None:
     if url == URL_RAISE_ERROR:
         raise ValueError(URL_EXISTS_ERROR_MESSAGE)
-    return
 
 
 def check_not_forbidden(value: str = "", field: str = "", **_kwargs) -> None:
@@ -234,13 +235,25 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, Document):
     }
 
 
+@generate_fields(
+    nested_filters={
+        "owner_first_name": "owner.first_name",
+        "organization_badge": "organization.badges",
+    },
+)
+class FakeWithTwoNestedFilters(Owned, Document):
+    """Two nested filters on references to two different models."""
+
+    meta = {"collection": "fake_with_two_nested_filters_api_fields"}
+
+
 class FakeFactory(ModelFactory):
     class Meta:
         model = Fake
 
     title = factory.Faker("sentence")
     description = factory.Faker("text")
-    url = factory.LazyAttribute(lambda o: "/".join([faker.url(), faker.unique_string()]))
+    url = factory.LazyAttribute(lambda o: f"{faker.url()}/{faker.unique_string()}")
     archived = None
     score = factory.Faker("pyfloat", left_digits=1, right_digits=1)
 
@@ -312,6 +325,24 @@ class FakeWithRename(Document):
 
 
 @generate_fields()
+class FakeWithVisibleIf(Document):
+    """A predicate on the document itself stands for "may the reader see it?"."""
+
+    shown = BooleanField(default=False)
+    secret = field(StringField(), visible_if=lambda o: o.shown)
+    renamed_secret = field(StringField(), rename="alias", visible_if=lambda o: o.shown)
+
+    meta = {"collection": "fake_with_visible_if_api_fields"}
+
+    computed_calls = 0
+
+    @field(visible_if=lambda o: o.shown)
+    def computed(self) -> str:
+        type(self).computed_calls += 1
+        return "computed"
+
+
+@generate_fields()
 class FakeWithUntypedList(Document):
     """An untyped `ListField()` has no inner field to convert (e.g. a Celery task's
     positional arguments, which may hold anything)."""
@@ -373,7 +404,7 @@ class FakeWithFilteredList(Document):
 class IndexParserTest(PytestOnlyDBTestCase):
     index_parser: RequestParser = Fake.__index_parser__
     index_parser_args: list[Argument] = Fake.__index_parser__.args
-    index_parser_args_names: set[str] = set([field.name for field in Fake.__index_parser__.args])
+    index_parser_args_names: set[str] = {field.name for field in Fake.__index_parser__.args}
 
     def test_index_parser(self) -> None:
         assert type(self.index_parser) is RequestParser
@@ -386,12 +417,10 @@ class IndexParserTest(PytestOnlyDBTestCase):
         - tag instead of tags
 
         """
-        assert set(
-            [
-                "dataset",
-                "tag",
-            ]
-        ).issubset(self.index_parser_args_names)
+        assert {
+            "dataset",
+            "tag",
+        }.issubset(self.index_parser_args_names)
 
     def test_readonly_and_non_wrapped_fields_not_in_parser(self) -> None:
         """Readonly fields() and non wrapped fields should not have a parser arg."""
@@ -400,7 +429,7 @@ class IndexParserTest(PytestOnlyDBTestCase):
 
     def test_filterable_fields_from_mixins_in_parser(self) -> None:
         """Filterable fields from mixins should have a parser arg."""
-        assert set(["owner", "organization"]).issubset(self.index_parser_args_names)
+        assert {"owner", "organization"}.issubset(self.index_parser_args_names)
 
     def test_nested_filters_in_parser(self) -> None:
         """Filterable fields from the `nested_filters` decorater parameter should have a parser arg."""
@@ -514,6 +543,26 @@ class ApplySortAndFiltersTest(PytestOnlyDBTestCase):
             assert fake1 in results
             assert fake2 not in results
 
+    def test_nested_filters_on_two_references(self, app) -> None:
+        """Each nested filter queries the model of its own reference, not the last one declared."""
+        alice = FakeWithTwoNestedFilters(owner=UserFactory(first_name="Alice")).save()
+        bob = FakeWithTwoNestedFilters(owner=UserFactory(first_name="Bob")).save()
+        org_public_service: Organization = OrganizationFactory()
+        org_public_service.add_badge(org_constants.PUBLIC_SERVICE)
+        public_service = FakeWithTwoNestedFilters(organization=org_public_service).save()
+        company = FakeWithTwoNestedFilters(organization=OrganizationFactory()).save()
+
+        with app.test_request_context("/foobar", query_string={"owner_first_name": "Alice"}):
+            results = FakeWithTwoNestedFilters.apply_sort_filters(FakeWithTwoNestedFilters.objects)
+            assert list(results) == [alice]
+            assert bob not in results
+        with app.test_request_context(
+            "/foobar", query_string={"organization_badge": org_constants.PUBLIC_SERVICE}
+        ):
+            results = FakeWithTwoNestedFilters.apply_sort_filters(FakeWithTwoNestedFilters.objects)
+            assert list(results) == [public_service]
+            assert company not in results
+
     def test_searchable(self, app) -> None:
         """If `@generate_fields(searchable=True)`, then the document can be full-text searched."""
         fake1: Fake = FakeFactory(title="foobar crux")
@@ -591,9 +640,11 @@ class ApplyPaginationTest(PytestOnlyDBTestCase):
             {"page": 1, "page_size": 0},
             {"page": 0, "page_size": 5},
         ):
-            with app.test_request_context("/foobar", query_string=query):
-                with pytest.raises(BadRequest):
-                    Fake.apply_pagination(Fake.apply_sort_filters(Fake.objects))
+            with (
+                app.test_request_context("/foobar", query_string=query),
+                pytest.raises(BadRequest),
+            ):
+                Fake.apply_pagination(Fake.apply_sort_filters(Fake.objects))
 
 
 class PatchChoicesValidationTest(PytestOnlyDBTestCase):
@@ -759,7 +810,7 @@ class RenameFieldTest(PytestOnlyDBTestCase):
         """Renamed fields are exposed under their API key, and their Python attribute
         name disappears from the read model."""
         read_fields = FakeWithRename.__read_fields__
-        assert set(["name", "since", "picture", "api_url"]).issubset(read_fields.keys())
+        assert {"name", "since", "picture", "api_url"}.issubset(read_fields.keys())
         for attribute in ["label", "created_at", "image", "uri"]:
             assert attribute not in read_fields
 
@@ -822,6 +873,41 @@ class RenameFieldTest(PytestOnlyDBTestCase):
         """`patch()` reads the mapping after finding the key in `__write_fields__`, so
         an entry for anything else could never be reached."""
         assert FakeWithRename.__api_key_to_attribute__ == {"name": "label"}
+
+
+class VisibleIfFieldTest(PytestOnlyDBTestCase):
+    def test_fields_are_read_when_visible(self, app) -> None:
+        obj = FakeWithVisibleIf(shown=True, secret="a secret", renamed_secret="another")
+        with app.test_request_context("/"):
+            data = marshal(obj, FakeWithVisibleIf.__read_fields__)
+        assert (data["secret"], data["alias"], data["computed"]) == (
+            "a secret",
+            "another",
+            "computed",
+        )
+
+    def test_fields_read_none_when_hidden(self, app) -> None:
+        """The keys stay, so the shape of the payload does not depend on the reader."""
+        obj = FakeWithVisibleIf(shown=False, secret="a secret", renamed_secret="another")
+        with app.test_request_context("/"):
+            data = marshal(obj, FakeWithVisibleIf.__read_fields__)
+        assert (data["secret"], data["alias"], data["computed"]) == (None, None, None)
+
+    def test_it_is_refused_with_full_object(self) -> None:
+        """The full object would be read past the predicate."""
+        with pytest.raises(ValueError, match="visible_if"):
+
+            @generate_fields()
+            class FakeWithHiddenFullObject(Document):
+                license = field(
+                    ReferenceField(License), full_object=True, visible_if=lambda o: False
+                )
+
+    def test_a_hidden_getter_is_not_called(self, app) -> None:
+        FakeWithVisibleIf.computed_calls = 0
+        with app.test_request_context("/"):
+            marshal(FakeWithVisibleIf(shown=False), FakeWithVisibleIf.__read_fields__)
+        assert FakeWithVisibleIf.computed_calls == 0
 
 
 class ListAttributeFieldTest(PytestOnlyDBTestCase):

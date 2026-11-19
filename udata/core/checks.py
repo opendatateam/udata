@@ -21,7 +21,9 @@ def only_creation(_value, is_update, field, **_kwargs):
         return
 
     if is_update:
-        raise FieldValidationError(_(f"Cannot modify {field} after creation"), field=field)
+        raise FieldValidationError(
+            _("Cannot modify %(field)s after creation", field=field), field=field
+        )
 
 
 def check_is_email(value, field, **_kwargs):

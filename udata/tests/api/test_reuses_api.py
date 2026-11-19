@@ -44,6 +44,22 @@ class ReuseAPITest(PytestOnlyAPITestCase):
         assert200(response)
         assert len(response.json["data"]) == len(reuses)
 
+    def test_reuse_api_list_embeds_lightweight_datasets(self):
+        """A dataset with thousands of resources must not be serialized whole in each reuse"""
+        dataset = DatasetFactory(nb_resources=3)
+        ReuseFactory(datasets=[dataset])
+
+        response = self.get(url_for("api.reuses"))
+        assert200(response)
+
+        [embedded] = response.json["data"][0]["datasets"]
+        assert embedded == {
+            "id": str(dataset.id),
+            "title": dataset.title,
+            "uri": dataset.self_api_url(),
+            "page": dataset.self_web_url(),
+        }
+
     def test_reuse_image_upload(self):
         """The reuse owner should upload an image into the images storage"""
         user = self.login()
@@ -690,7 +706,7 @@ class ReuseAPITest(PytestOnlyAPITestCase):
         """It should suggest reuses"""
         for i in range(3):
             ReuseFactory(
-                title="arealtestprefix-{0}".format(i) if i % 2 else faker.word(),
+                title=f"arealtestprefix-{i}" if i % 2 else faker.word(),
                 visible=True,
                 metrics={"followers": i},
             )
@@ -715,7 +731,7 @@ class ReuseAPITest(PytestOnlyAPITestCase):
     def test_suggest_reuses_api_unicode(self):
         """It should suggest reuses with special characters"""
         for i in range(4):
-            ReuseFactory(title="testé-{0}".format(i) if i % 2 else faker.word(), visible=True)
+            ReuseFactory(title=f"testé-{i}" if i % 2 else faker.word(), visible=True)
 
         response = self.get(url_for("api.suggest_reuses", q="testé", size=5))
         assert200(response)
@@ -787,9 +803,8 @@ class ReusesFeedAPItest(APITestCase):
 
     @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_org(self):
-        owner = UserFactory()
         org = OrganizationFactory()
-        ReuseFactory(owner=owner, organization=org, datasets=[DatasetFactory()])
+        ReuseFactory(organization=org, datasets=[DatasetFactory()])
 
         response = self.get(url_for("api.recent_reuses_atom_feed"))
 

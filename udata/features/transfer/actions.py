@@ -16,6 +16,8 @@ def request_transfer(subject, recipient, comment):
     TransferPermission(subject).test()
     if recipient == (subject.organization or subject.owner):
         raise ValueError("Recipient should be different than the current owner")
+    if Transfer.objects(subject=subject, status="pending").count():
+        raise ValueError("A transfer of this object is already pending")
     transfer = Transfer.objects.create(
         user=current_user._get_current_object(),
         owner=subject.organization or subject.owner,

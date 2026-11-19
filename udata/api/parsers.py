@@ -6,7 +6,7 @@ class ModelApiParser:
 
     sorts = {}
 
-    def __init__(self, paginate=True):
+    def __init__(self, paginate=True, *, page_size: int = 20, max_page_size: int | None = None):
         self.parser = api.parser()
         # q parameter
         self.parser.add_argument("q", type=str, location="args", help="The search query")
@@ -16,7 +16,7 @@ class ModelApiParser:
         help_msg = "The field (and direction) on which sorting apply"
         self.parser.add_argument("sort", type=str, location="args", choices=choices, help=help_msg)
         if paginate:
-            add_pagination_arguments(self.parser)
+            add_pagination_arguments(self.parser, page_size=page_size, max_page_size=max_page_size)
 
     def parse(self):
         args = self.parser.parse_args()

@@ -8,7 +8,7 @@ from udata.i18n import lazy_gettext as _
 HOUR = 60 * 60
 
 
-class Defaults(object):
+class Defaults:
     DEBUG = False
     TESTING = False
     SEND_MAIL = True
@@ -155,6 +155,7 @@ class Defaults(object):
     SECURITY_TWO_FACTOR = False
     SECURITY_TWO_FACTOR_REQUIRED = False  # Not required by default
     SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN = False
+    SECURITY_TWO_FACTOR_REQUIRED_FOR_CERTIFIED_ORGS = False
     SECURITY_TWO_FACTOR_ENABLED_METHODS = ["authenticator"]
     SECURITY_TOTP_SECRETS = {"1": "the udata totp secret"}
     SECURITY_TOTP_ISSUER = "udata"
@@ -164,6 +165,9 @@ class Defaults(object):
     SECURITY_TWO_FACTOR_RESCUE_MAIL = (
         "no-reply@data.gouv.fr"  # Should be a contact email for account rescue
     )
+    # Make ProConnect ask the agent for a second factor. Agents whose identity provider
+    # offers none are then denied access at ProConnect, without coming back.
+    PROCONNECT_REQUIRE_SECOND_FACTOR = False
 
     # Inactive users settings
     YEARS_OF_INACTIVITY_BEFORE_DELETION = None
@@ -222,10 +226,11 @@ class Defaults(object):
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
     OAUTH2_TOKEN_EXPIRES_IN = {
         "authorization_code": 30 * 24 * HOUR,
-        "implicit": 10 * 24 * HOUR,
-        "password": 30 * 24 * HOUR,
+        "refresh_token": 30 * 24 * HOUR,
         "client_credentials": 30 * 24 * HOUR,
     }
+    # Counted from the expiration of the access token the refresh token came with.
+    OAUTH2_REFRESH_TOKEN_EXPIRES_IN = 30 * 24 * HOUR
     OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI = False
 
     MD_ALLOWED_TAGS = [
@@ -348,10 +353,6 @@ class Defaults(object):
 
     HARVEST_ISO19139_XSLT_URL = "https://raw.githubusercontent.com/datagouv/iso-19139-to-dcat-ap/refs/heads/3.x-datagouv/iso-19139-to-dcat-ap.xsl"
 
-    # If set, harvest emit activities associated with this user as actor
-    # It should be a dedicated service account
-    HARVEST_ACTIVITY_USER_ID = None
-
     # S3 connection details
     ###########################################################################
     S3_URL = None
@@ -389,6 +390,7 @@ class Defaults(object):
         # Base
         "csv",
         "txt",
+        "md",
         "json",
         "pdf",
         "xml",
@@ -477,12 +479,13 @@ class Defaults(object):
         "image/webp",
         "text/html",
         "text/calendar",
+        "text/markdown",
         "text/plain",
         "text/xml",
         "text/turtle",
     ]
 
-    # How much time upload chunks are kept before cleanup
+    # How much time upload chunks, and content images nothing shows, are kept before cleanup
     UPLOAD_MAX_RETENTION = 24 * HOUR
 
     # Avatar providers parameters
@@ -581,6 +584,11 @@ class Defaults(object):
     # Transport extras
     ##################
     TRANSPORT_DATASETS_URL = None
+
+    # Ecologie extras
+    #################
+    # Datasets in this topic get the ecologie:universe extra
+    ECOLOGIE_TOPIC_ID = None
 
     # Schemas parameters
     ####################
@@ -721,11 +729,11 @@ class Defaults(object):
     DOCUMENTS_FORMATS = frozenset({"pdf", "doc", "docx", "md", "txt", "html", "htm", "rtf", "odt"})
 
 
-class Testing(object):
+class Testing:
     """Sane values for testing. Should be applied as override"""
 
     TESTING = True
-    # related to https://github.com/noirbizarre/flask-restplus/commit/93e412789f1ef8d1d2eab837f15535cf79bd144d#diff-68876137696247abc8c123622c73a11f  # noqa
+    # related to https://github.com/noirbizarre/flask-restplus/commit/93e412789f1ef8d1d2eab837f15535cf79bd144d#diff-68876137696247abc8c123622c73a11f
     # this keeps our legacy tests from failing, we should probably fix the tests instead someday
     PROPAGATE_EXCEPTIONS = False
     SEND_MAIL = False
@@ -744,7 +752,7 @@ class Testing(object):
     CELERYD_HIJACK_ROOT_LOGGER = False
     URLS_ALLOW_LOCAL = True  # Test server URL is local.test
     URLS_RESOLVE_HOSTNAME = False
-    URLS_ALLOWED_TLDS = tld_set | set(["test"])
+    URLS_ALLOWED_TLDS = tld_set | {"test"}
     URLS_ALLOW_PRIVATE = False
     FS_IMAGES_OPTIMIZE = True
     SECURITY_EMAIL_VALIDATOR_ARGS = {
@@ -752,7 +760,6 @@ class Testing(object):
     }  # Disables deliverability for email domain name
     SECURITY_TWO_FACTOR = True  # should be set before security init_app for views to be loaded
     PUBLISH_ON_RESOURCE_EVENTS = False
-    HARVEST_ACTIVITY_USER_ID = None
     CDATA_BASE_URL = None
     SCHEMA_CATALOG_URL = None
     API_TOKEN_SECRET = "test-secret"

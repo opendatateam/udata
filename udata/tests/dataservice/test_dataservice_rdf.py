@@ -10,6 +10,7 @@ from udata.core.constants import HVD
 from udata.core.dataservices.factories import DataserviceFactory, HarvestMetadataFactory
 from udata.core.dataservices.rdf import dataservice_to_rdf
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.rdf import (
     DCAT,
     DCATAP,
@@ -46,6 +47,20 @@ class DataserviceToRdfTest(PytestOnlyAPITestCase):
         assert d.value(DCT.created) == Literal(dataservice.harvest.created_at)
         assert d.value(DCT.issued) == Literal(dataservice.harvest.issued_at)
         assert d.value(DCT.modified) == Literal(dataservice.metadata_modified_at)
+
+    def test_served_datasets(self):
+        dataset = DatasetFactory()
+        harvested_dataset = DatasetFactory(
+            harvest=HarvestDatasetMetadata(uri="https://remote.example.org/datasets/1")
+        )
+        dataservice = DataserviceFactory(datasets=[dataset, harvested_dataset])
+
+        d = dataservice_to_rdf(dataservice)
+
+        assert {served.identifier for served in d.objects(DCAT.servesDataset)} == {
+            URIRef(dataset.url_for(_useId=True)),
+            URIRef("https://remote.example.org/datasets/1"),
+        }
 
     def test_hvd_dataservice(self):
         """Test that a dataservice tagged hvd has appropriate DCAT-AP HVD properties"""

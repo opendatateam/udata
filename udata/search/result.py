@@ -66,8 +66,7 @@ class SearchResult(Paginable):
         return self.get_objects()
 
     def __iter__(self):
-        for obj in self.get_objects():
-            yield obj
+        yield from self.get_objects()
 
     def __len__(self):
         return self._total

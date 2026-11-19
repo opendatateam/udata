@@ -17,6 +17,7 @@ from udata.rdf import (
     default_lang_value,
     namespace_manager,
     rdf_value,
+    record_id_from_rdf,
     remote_url_from_rdf,
     set_harvested_date,
     themes_from_rdf,
@@ -106,10 +107,9 @@ def dataservice_from_rdf(
         dataservice.license = License.guess(license)
 
     dataservice.set_harvested()
+    dataservice.harvest.record_id = record_id_from_rdf(d)
     dataservice.harvest.uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
-    dataservice.harvest.remote_url = remote_url_from_rdf(
-        d, graph, remote_url_prefix=remote_url_prefix
-    )
+    dataservice.harvest.remote_url = remote_url_from_rdf(d, remote_url_prefix=remote_url_prefix)
     dataservice.harvest.created_at = rdf_value(d, DCT.created)
     dataservice.harvest.issued_at = rdf_value(d, DCT.issued)
     dataservice.harvest.modified_at = rdf_value(d, DCT.modified)
@@ -184,12 +184,13 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
         if is_hvd and tag in TAG_TO_EU_HVD_CATEGORIES:
             hvd_category_tags.add(tag)
 
+    dataset_ids = [dataset.id for dataset in dataservice.datasets]
     if is_hvd:
         # We also want to automatically add any HVD category tags of the dataservice's datasets.
-        dataset_ids = [dat.id for dat in dataservice.datasets]
-        for tag in TAG_TO_EU_HVD_CATEGORIES:
-            if Dataset.objects(id__in=dataset_ids, tags="hvd").filter(tags=tag).first():
-                hvd_category_tags.add(tag)
+        hvd_datasets_tags = Dataset.objects(id__in=dataset_ids, tags="hvd").distinct("tags")
+        hvd_category_tags.update(
+            tag for tag in hvd_datasets_tags if tag in TAG_TO_EU_HVD_CATEGORIES
+        )
     for tag in hvd_category_tags:
         d.add(DCATAP.hvdCategory, URIRef(TAG_TO_EU_HVD_CATEGORIES[tag]))
 
@@ -203,8 +204,12 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
         # It is made to prevent having the graph explode due to too many datasets being served.
         pass
     else:
-        for dataset in dataservice.datasets:
-            d.add(DCAT.servesDataset, dataset_to_graph_id(dataset.fetch()))
+        # Only the fields read by `dataset_to_graph_id` are loaded: a dataservice can
+        # serve thousands of datasets, and full documents (with all their resources)
+        # exhaust the memory when building a catalog page.
+        served_datasets = Dataset.objects(id__in=dataset_ids).only("id", "harvest.uri")
+        for dataset in served_datasets:
+            d.add(DCAT.servesDataset, dataset_to_graph_id(dataset))
 
     for contact_point, predicate in contact_points_to_rdf(dataservice.contact_points, graph):
         d.set(predicate, contact_point)

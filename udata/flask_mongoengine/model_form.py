@@ -10,7 +10,7 @@ class ModelForm(FlaskForm):
         if self.instance and not formdata:
             kwargs["obj"] = self.instance
         self.formdata = formdata
-        super(ModelForm, self).__init__(formdata, **kwargs)
+        super().__init__(formdata, **kwargs)
 
     def save(self, commit=True, **kwargs):
         if self.instance:

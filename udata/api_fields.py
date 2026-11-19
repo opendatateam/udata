@@ -27,8 +27,9 @@ For field-specific metadata, see the `field()` function documentation.
 
 import functools
 import typing
+from collections.abc import Callable, Iterable
 from datetime import datetime
-from typing import Any, Callable, Iterable, Literal, TypedDict, TypeVar, Unpack, overload
+from typing import Any, Literal, TypedDict, TypeVar, Unpack, overload
 
 import flask_restx.fields as restx_fields
 import mongoengine
@@ -78,6 +79,12 @@ def required_if(**conditions):
     return check
 
 
+def visible_only_if(attribute: str | Callable, visible_if: Callable[[Any], bool]) -> Callable:
+    """Read `attribute` like flask-restx does, but only when `visible_if(obj)` holds:
+    `None` otherwise, so the field stays in the schema whoever reads it."""
+    return lambda obj: restx_fields.get_value(attribute, obj) if visible_if(obj) else None
+
+
 lazy_reference = api.model(
     "LazyReference",
     {
@@ -93,7 +100,7 @@ classes_by_parents = {}
 
 class GenericField(restx_fields.Raw):
     def __init__(self, fields_by_type, generic_key=DEFAULT_GENERIC_KEY, **kwargs):
-        super(GenericField, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.default = None
         # Key under which the concrete class name is emitted on output. Comes from
         # the field's kwargs `generic_key`, so it matches whatever the model
@@ -209,7 +216,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         # TODO: this is currently never used. We may remove it if the auto-conversion
         # is always good enough.
         return info.get("convert_to"), info.get("convert_to")
-    elif isinstance(field, mongo_fields.StringField) or isinstance(field, mongo_fields.EnumField):
+    elif isinstance(field, (mongo_fields.StringField, mongo_fields.EnumField)):
         constructor = (
             custom_restx_fields.Markdown if info.get("markdown", False) else restx_fields.String
         )
@@ -239,7 +246,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         constructor = custom_restx_fields.ISODateTime
     elif isinstance(field, mongo_fields.DictField):
         constructor = restx_fields.Raw
-    elif isinstance(field, mongo_fields.ImageField) or isinstance(field, FlaskStorageImageField):
+    elif isinstance(field, (mongo_fields.ImageField, FlaskStorageImageField)):
         size: int | None = info.get("size", None)
         if size:
             params["description"] = f"URL of the cropped and squared image ({size}x{size})"
@@ -312,7 +319,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                     cls.__name__: convert_db_to_field(
                         f"{key}.{cls.__name__}",
                         # Instead of having EmbeddedDocumentField(Bloc) we'll create fields for each
-                        # of the subclasses with EmbededdDocumentField(DatasetsListBloc), EmbeddedDocumentFied(DataservicesListBloc)…
+                        # of the subclasses with EmbeddedDocumentField(DatasetBloc), EmbeddedDocumentField(DataserviceBloc)…
                         mongoengine.fields.EmbeddedDocumentField(cls),
                         nested_info,
                     )
@@ -510,7 +517,7 @@ def get_fields(cls) -> Iterable[tuple[str, Callable, dict]]:
 
         yield key, field, info
 
-        if isinstance(field, mongo_fields.ImageField) or isinstance(field, FlaskStorageImageField):
+        if isinstance(field, (mongo_fields.ImageField, FlaskStorageImageField)):
             if not getattr(field, "thumbnail_sizes", None) and not info.get("thumbnail_info"):
                 # The model generates no thumbnail files and no thumbnail is
                 # configured for the API: don't expose a `<key>_thumbnail` key
@@ -537,10 +544,7 @@ def save_class_by_parents(cls):
         if parent == UDataDocument:
             return
 
-        classes_by_parents[parent] = (
-            classes_by_parents[parent] if parent in classes_by_parents else set()
-        )
-        classes_by_parents[parent].add(cls)
+        classes_by_parents.setdefault(parent, set()).add(cls)
 
 
 def generate_fields(**kwargs) -> Callable:
@@ -592,7 +596,7 @@ def generate_fields(**kwargs) -> Callable:
                 if not isinstance(
                     field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField
                 ):
-                    raise Exception("Cannot use nested_filters on a field that is not a ref.")
+                    raise TypeError("Cannot use nested_filters on a field that is not a ref.")
 
                 ref_model: mongoengine.Document = field.document_type
 
@@ -606,7 +610,7 @@ def generate_fields(**kwargs) -> Callable:
                     # Since MongoDB is not capable of doing joins with a column like `organization__slug` we need to
                     # do a custom filter by splitting the query in two.
 
-                    def query(filterable, query, value) -> UDataQuerySet:
+                    def query(filterable, ref_model, query, value) -> UDataQuerySet:
                         # We use the computed `filterable["column"]` here because the `compute_filter` function
                         # could have added a default filter at the end (for example `organization__badges` converted
                         # in `organization__badges__kind`)
@@ -617,7 +621,7 @@ def generate_fields(**kwargs) -> Callable:
                         return query.filter(**{f"{parts[0]}__in": models})
 
                     # do a query-based filter instead of a column based one
-                    filterable["query"] = functools.partial(query, filterable)
+                    filterable["query"] = functools.partial(query, filterable, ref_model)
                     filterables.append(filterable)
 
             read, write = convert_db_to_field(key, field, info)
@@ -636,6 +640,12 @@ def generate_fields(**kwargs) -> Callable:
                 # when `write` is set. Mapping a readonly field would be unreachable.
                 if write is not None:
                     api_key_to_attribute[api_key] = key
+
+            if read is not None and info.get("visible_if"):
+                # The full object reads its container, which this rewrite does not reach.
+                if info.get("full_object") is not None:
+                    raise ValueError(f"`{key}`: `visible_if` is not supported with `full_object`")
+                read.attribute = visible_only_if(read.attribute or key, info["visible_if"])
 
             if read:
                 read_fields[api_key] = read
@@ -668,29 +678,22 @@ def generate_fields(**kwargs) -> Callable:
             if additional_field_info is None:
                 continue
 
-            def make_lambda(method):
-                """
-                Factory function to create a lambda with the correct scope.
-                If we don't have this factory function, the `method` will be the
-                last method assigned in this loop?
-                """
-                return lambda o: method(o)
-
             nested_fields: dict | None = additional_field_info.get("nested_fields")
             if nested_fields is None:
                 return_type = typing.get_type_hints(method).get("return")
                 field_constructor = PYTHON_TYPE_TO_RESTX_FIELD.get(return_type, restx_fields.String)
             else:
-
-                def field_constructor(**kwargs):
-                    return restx_fields.Nested(nested_fields, **kwargs)
+                field_constructor = functools.partial(restx_fields.Nested, nested_fields)
 
             # Getters are readonly, so they never reach `__write_fields__` and need no
             # entry in `api_key_to_attribute`: the rename only applies on the read side.
             api_method_key = additional_field_info.get("rename") or method_name
 
+            visible_if = additional_field_info.get("visible_if")
+            # flask-restx calls a callable `attribute` with the object being serialized.
+            attribute = visible_only_if(method, visible_if) if visible_if else method
             read_fields[api_method_key] = field_constructor(
-                attribute=make_lambda(method), **{"readonly": True, **additional_field_info}
+                attribute=attribute, **{"readonly": True, **additional_field_info}
             )
             if additional_field_info.get("show_as_ref", False):
                 ref_fields[api_method_key] = read_fields[api_method_key]
@@ -725,13 +728,12 @@ def generate_fields(**kwargs) -> Callable:
         cls.__write_fields__ = api.model(f"{cls.__name__} (write)", write_fields, **kwargs)
         cls.__ref_fields__ = api.inherit(f"{cls.__name__}Reference", base_reference, ref_fields)
 
-        page_mask = None
         if page_mask_exclude:
-            page_mask = "data{{{0}}},*".format(
+            page_mask = "data{{{}}},*".format(
                 ",".join(k for k in read_fields if k not in page_mask_exclude)
             )
         elif page_mask is not None:
-            page_mask = "data{{{0}}},*".format(page_mask)
+            page_mask = f"data{{{page_mask}}},*"
         cls.__page_fields__ = api.model(
             f"{cls.__name__}Page",
             custom_restx_fields.pager(cls.__read_fields__),
@@ -874,6 +876,7 @@ class _FieldKwargs(TypedDict, total=False):
     convert_to: Callable | None
     allow_null: bool | None
     full_object: Literal[True] | restx_fields.Raw | None
+    visible_if: Callable[[Any], bool] | None
 
 
 @overload
@@ -930,6 +933,7 @@ def field(
     convert_to: Callable | None = None,
     allow_null: bool | None = None,
     full_object: Literal[True] | restx_fields.Raw | None = None,
+    visible_if: Callable[[Any], bool] | None = None,
     **kwargs: Any,  # Accept any additional parameters, forward to flask rest x constructor.
 ):
     """Universal field decorator/wrapper for API field metadata.
@@ -981,7 +985,10 @@ def field(
             `ReferenceField` or a `ListField(ReferenceField)`, whose nested reference
             model is the full object, or the RestX field rendering the full object of a
             scalar field (e.g. an `{id, label}` object for a value with a label). Not
-            supported with `rename`, lazy or generic references.
+            supported with `rename`, `visible_if`, lazy or generic references.
+        visible_if: Predicate on the serialized object, e.g. "the reader is a sysadmin or
+            the owner": the field reads `None` when it does not hold. A getter is not even
+            called then. Not supported with `full_object`.
         **kwargs: Any additional parameters not explicitly defined
 
     Returns:
@@ -1012,13 +1019,11 @@ def field(
 def run_check(check, value, key, obj, data):
     check(
         value,
-        **{
-            "is_creation": obj._created,
-            "is_update": not obj._created,
-            "field": key,
-            "obj": obj,
-            "data": data,
-        },
+        is_creation=obj._created,
+        is_update=not obj._created,
+        field=key,
+        obj=obj,
+        data=data,
     )
 
 
@@ -1360,7 +1365,7 @@ def wrap_primary_key(
         # … but it may be important to check before-hand that the reference point to a correct document.
         return foreign_document.to_dbref()
     else:
-        raise ValueError(
+        raise TypeError(
             f"Unknown ID field type {id_field.__class__} for {document_type} (ID field name is {id_field_name}, value was {value})"
         )
 
@@ -1394,7 +1399,7 @@ def get_fields_with_nested_filters(nested_filters: dict[str, str]) -> dict[str, 
                 }
             )
         else:
-            raise Exception(f"Do not support `nested_filters` without two parts: {key}.")
+            raise ValueError(f"Do not support `nested_filters` without two parts: {key}.")
 
     return results
 
@@ -1470,13 +1475,9 @@ def validation_to_type(validation: Callable) -> Callable:
     In mongo, a field's validation function cannot return anything, so this
     helper wraps the mongo field's validation to return the value if it validated.
     """
-    from mongoengine.errors import ValidationError
 
     def wrapper(value: str) -> str:
-        try:
-            validation(value)
-        except ValidationError:
-            raise
+        validation(value)
         return value
 
     wrapper.__schema__ = {"type": "string", "format": "my-custom-format"}

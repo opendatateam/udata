@@ -40,7 +40,7 @@ class DBPaginator(Paginable):
 
 class UDataQuerySet(BaseQuerySet):
     def paginate(self, page, per_page, **kwargs):
-        result = super(UDataQuerySet, self).paginate(page, per_page)
+        result = super().paginate(page, per_page)
         return DBPaginator(result)
 
     def bulk_list(self, ids):
@@ -103,17 +103,17 @@ class UDataQuerySet(BaseQuerySet):
             if isinstance(value, (list, tuple)):
                 if all(isinstance(v, str) for v in value):
                     ids = [ObjectId(v) for v in value]
-                    query["{0}._ref.$id".format(key)] = {"$in": ids}
+                    query[f"{key}._ref.$id"] = {"$in": ids}
                 elif all(isinstance(v, DBRef) for v in value):
-                    query["{0}._ref".format(key)] = {"$in": value}
+                    query[f"{key}._ref"] = {"$in": value}
                 elif all(isinstance(v, ObjectId) for v in value):
-                    query["{0}._ref.$id".format(key)] = {"$in": value}
+                    query[f"{key}._ref.$id"] = {"$in": value}
                 else:
                     raise TypeError(f"`{key}` expects a list of string, ObjectId or DBRef")
             elif isinstance(value, ObjectId):
-                query["{0}._ref.$id".format(key)] = value
+                query[f"{key}._ref.$id"] = value
             elif isinstance(value, str):
-                query["{0}._ref.$id".format(key)] = ObjectId(value)
+                query[f"{key}._ref.$id"] = ObjectId(value)
             else:
                 raise TypeError(f"`{key}` expects a string, ObjectId or DBRef")
         return self(__raw__=query)

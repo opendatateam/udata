@@ -38,7 +38,7 @@ MASK_FIELDS = ("id", "name", "email", "contact_form", "role")
 
 
 @generate_fields(page_mask=",".join(MASK_FIELDS))
-class ContactPoint(Document, Owned):
+class ContactPoint(Owned, Document):
     name = field(StringField(max_length=255), checks=[check_no_urls])
     email = field(StringField(max_length=255), checks=[check_is_email])
     contact_form = field(URLField())

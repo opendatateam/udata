@@ -26,7 +26,7 @@ import requests
 from bson.objectid import ObjectId
 from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import abort, current_app, make_response, redirect, request, url_for
-from flask_restx.inputs import boolean, positive
+from flask_restx.inputs import boolean
 from flask_security import current_user
 from mongoengine.queryset.visitor import Q
 
@@ -109,8 +109,8 @@ class DatasetApiParser(ModelApiParser):
         "views": "metrics.views",
     }
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *, page_size: int = 20, max_page_size: int | None = None):
+        super().__init__(page_size=page_size, max_page_size=max_page_size)
         self.parser.add_argument("tag", type=str, location="args", action="append")
         self.parser.add_argument("license", type=str, location="args")
         self.parser.add_argument(
@@ -315,11 +315,11 @@ community_parser.add_argument(
 
 common_doc = {"params": {"dataset": "The dataset ID or slug"}}
 
-# Build catalog_parser from DatasetApiParser parser with a default page_size of 100
-catalog_parser = DatasetApiParser().parser
-catalog_parser.replace_argument(
-    "page_size", type=positive, location="args", default=100, help="The page size"
-)
+# The whole RDF graph of a catalog page is built in memory: an unbounded page size
+# exhausts the worker memory.
+CATALOG_MAX_PAGE_SIZE = 1000
+
+catalog_parser = DatasetApiParser(page_size=100, max_page_size=CATALOG_MAX_PAGE_SIZE).parser
 
 
 @ns.route("/", endpoint="datasets")
@@ -333,7 +333,7 @@ class DatasetListAPI(API):
         """List or search all datasets"""
         args = dataset_parser.parse()
         datasets = Dataset.objects.visible_by_user(
-            current_user, mongoengine.Q(private__ne=True, archived=None, deleted=None)
+            current_user, mongoengine.Q(private=False, archived=None, deleted=None)
         )
         datasets = dataset_parser.parse_filters(datasets, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
@@ -610,13 +610,9 @@ class ResourcesAPI(API):
             )
         if any(isinstance(r, dict) and "id" not in r for r in resources):
             api.abort(400, "Each resource must have an 'id' field")
-        if set(r["id"] if isinstance(r, dict) else r for r in resources) != set(
-            str(r.id) for r in dataset.resources
-        ):
-            api.abort(
-                400,
-                f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in dataset.resources)}",
-            )
+        existing_ids = {str(r.id) for r in dataset.resources}
+        if {r["id"] if isinstance(r, dict) else r for r in resources} != existing_ids:
+            api.abort(400, f"Resource ids must match existing ones in dataset, ie: {existing_ids}")
         data = {"resources": resources}
         form = ResourcesListForm.from_json(
             data, obj=dataset, instance=dataset, meta={"csrf": False}
@@ -628,7 +624,7 @@ class ResourcesAPI(API):
         return dataset.resources, 200
 
 
-class UploadMixin(object):
+class UploadMixin:
     def handle_upload(self, dataset):
         prefix = "/".join((dataset.slug, datetime.now(UTC).strftime("%Y%m%d-%H%M%S")))
         infos = handle_upload(storages.resources, prefix)
@@ -679,7 +675,7 @@ class UploadNewCommunityResources(UploadMixin, API):
         return community_resource, 201
 
 
-class ResourceMixin(object):
+class ResourceMixin:
     def get_resource_or_404(self, dataset, id):
         resource = get_by(dataset.resources, id=id)
         if not resource:
