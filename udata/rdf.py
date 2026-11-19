@@ -43,7 +43,7 @@ from udata.http import ssrf_session
 from udata.models import Schema
 from udata.mongo.errors import FieldValidationError
 from udata.tags import slug as slugify_tag
-from udata.utils import uniquify
+from udata.utils import get_udata_version, uniquify
 
 log = logging.getLogger(__name__)
 
@@ -99,6 +99,7 @@ def _fetch_rdflib_location(
         else "application/rdf+xml, text/turtle, application/ld+json, */*;q=0.1"
     )
     session = ssrf_session()
+    session.headers["User-Agent"] = f"udata/{get_udata_version()}"
     response = session.get(location, headers={"Accept": accept})
     response.raise_for_status()
     if format == "json-ld":

@@ -41,6 +41,7 @@ from udata.ssrf import BlockedAddressError
 from udata.tests import PytestOnlyTestCase, TestCase
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import argvalues
+from udata.utils import get_udata_version
 
 
 class ContentNegociationTest(TestCase):
@@ -124,6 +125,7 @@ class RdflibLocationTest(PytestOnlyTestCase):
         graph = Graph().parse("http://data.test.org/catalog.ttl")
 
         assert (URIRef("http://data.test.org/catalog"), RDF.type, DCAT.Catalog) in graph
+        assert rmock.last_request.headers["User-Agent"] == f"udata/{get_udata_version()}"
 
     @pytest.mark.options(URLS_ALLOW_LOCAL=False)
     def test_parsed_url_on_a_loopback_address_is_blocked(self):
