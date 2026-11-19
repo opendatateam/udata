@@ -51,6 +51,7 @@ from udata.core.spam.models import SpamMixin
 from udata.core.spatial.models import SpatialCoverage
 from udata.frontend.markdown import mdstrip
 from udata.geopf.models import GeopfDatasetMetadata, GeopfResourceMetadata
+from udata.http import http_session
 from udata.i18n import lazy_gettext as _
 from udata.mongo.datetime_fields import DateRange
 from udata.mongo.document import UDataDocument as Document
@@ -1370,7 +1371,7 @@ class ResourceSchema:
 
         cache_key = "schema-catalog-objects"
         try:
-            response = requests.get(endpoint, timeout=5)
+            response = http_session().get(endpoint, timeout=5)
             # do not cache 404 and forward status code
             if response.status_code == 404:
                 raise SchemasCatalogNotFoundException(

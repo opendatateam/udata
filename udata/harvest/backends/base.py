@@ -18,7 +18,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.harvest import HarvestMetadata
 from udata.core.organization.models import Organization
-from udata.http import ssrf_session
+from udata.http import USER_AGENT, ssrf_session
 from udata.utils import raise_if_redirect, safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
@@ -173,10 +173,7 @@ class BaseBackend(ABC):
         return response
 
     def get_headers(self):
-        return {
-            # TODO: extract site title and version
-            "User-Agent": f"uData/0.1 {self.name}",
-        }
+        return {"User-Agent": f"{USER_AGENT} {self.name}"}
 
     def has_feature(self, key):
         try:

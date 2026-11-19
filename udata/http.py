@@ -9,16 +9,22 @@ Use :func:`ssrf_session` for **any** fetch of a URL that comes, directly or
 indirectly, from user input — harvest sources, dataservice documentation, etc.
 Trusted operator-configured integrations (metrics API, webhooks, OAuth
 providers…) are not an SSRF vector and may legitimately target internal hosts;
-they intentionally do not go through this guard.
+they intentionally do not go through this guard: they use :func:`http_session`.
+
+Both sessions identify udata to the remote end with :data:`USER_AGENT`.
 """
 
 from __future__ import annotations
 
 from collections.abc import Iterable
 
+import requests
 from flask import current_app
 
 from udata.ssrf import SSRFPolicy, SSRFProtectedSession
+from udata.utils import get_udata_version
+
+USER_AGENT = f"udata/{get_udata_version()}"
 
 
 def ssrf_policy_for(local: bool, private: bool, schemes: Iterable[str]) -> SSRFPolicy:
@@ -55,4 +61,13 @@ def ssrf_policy() -> SSRFPolicy:
 
 def ssrf_session() -> SSRFProtectedSession:
     """Return a :class:`SSRFProtectedSession` configured from the app settings."""
-    return SSRFProtectedSession(ssrf_policy())
+    session = SSRFProtectedSession(ssrf_policy())
+    session.headers["User-Agent"] = USER_AGENT
+    return session
+
+
+def http_session() -> requests.Session:
+    """Return a plain session for trusted, operator-configured integrations."""
+    session = requests.Session()
+    session.headers["User-Agent"] = USER_AGENT
+    return session

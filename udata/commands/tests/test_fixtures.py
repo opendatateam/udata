@@ -116,8 +116,10 @@ class FixturesTest(PytestOnlyAPITestCase):
         )
 
         with NamedTemporaryFile(mode="w+", delete=True) as fixtures_fd:
-            # Get the fixtures from the local instance by redirecting requests.get to the test client
-            mocker.patch.object(requests, "get", side_effect=lambda url, **kw: self.get(url, **kw))
+            # Get the fixtures from the local instance by redirecting the session to the test client
+            mocker.patch.object(
+                requests.Session, "get", side_effect=lambda url, **kw: self.get(url, **kw)
+            )
             mocker.patch.object(Response, "json", Response.get_json)
             mocker.patch.object(Response, "ok", True, create=True)
             result = self.cli("generate-fixtures-file", "", fixtures_fd.name)

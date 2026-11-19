@@ -2,10 +2,10 @@ import datetime
 from collections.abc import Callable
 from typing import Any
 
-import requests
 from flask import current_app
 
 from udata.event.values import EventMessageType
+from udata.http import http_session
 from udata.models import Dataset
 from udata.tasks import task
 from udata.utils import get_by, to_iso_datetime
@@ -66,14 +66,15 @@ def analyser_headers() -> dict[str, str]:
 
 @task(route="high.resource")
 def publish(url: str, document: Any, resource_id: str, action: str) -> None:
+    session = http_session()
     method: Callable
     match action:
         case EventMessageType.CREATED:
-            method = requests.post
+            method = session.post
         case EventMessageType.MODIFIED:
-            method = requests.put
+            method = session.put
         case EventMessageType.DELETED:
-            method = requests.delete
+            method = session.delete
     payload: dict | None = payload_for_resource(document, resource_id)
     r = method(url, json=payload, headers=analyser_headers())
     r.raise_for_status()

@@ -1,10 +1,10 @@
 from urllib.parse import quote
 
-import requests
 from flask import current_app
 from markdown import markdown
 
 from udata.core.spam.signals import on_new_potential_spam
+from udata.http import http_session
 from udata.tasks import task
 
 
@@ -48,7 +48,7 @@ def send_message(text: str):
         f"{quote(room_id, safe='')}/send/m.room.message"
     )
 
-    r = requests.post(
+    r = http_session().post(
         url,
         headers={
             "content-type": "application/json",

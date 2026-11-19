@@ -1,8 +1,12 @@
+from importlib.metadata import version
+
 import pytest
 
-from udata.http import ssrf_policy, ssrf_session
+from udata.http import http_session, ssrf_policy, ssrf_session
 from udata.ssrf import BlockedAddressError
 from udata.tests import PytestOnlyTestCase
+
+UDATA_USER_AGENT = f"udata/{version('udata')}"
 
 # An ambient proxy would serve these requests from an unguarded pool manager,
 # so the outcome asserted below would depend on the machine's environment.
@@ -39,3 +43,27 @@ class SSRFSessionFactoryTest(PytestOnlyTestCase):
         with pytest.raises(Exception) as excinfo:
             ssrf_session().get("http://127.0.0.1:9/", timeout=2)
         assert not isinstance(excinfo.value, BlockedAddressError)
+
+
+class UserAgentTest(PytestOnlyTestCase):
+    def test_ssrf_session_identifies_udata(self, rmock):
+        rmock.get("https://example.org/")
+
+        ssrf_session().get("https://example.org/")
+
+        assert rmock.last_request.headers["User-Agent"] == UDATA_USER_AGENT
+
+    def test_http_session_identifies_udata(self, rmock):
+        rmock.get("https://example.org/")
+
+        http_session().get("https://example.org/")
+
+        assert rmock.last_request.headers["User-Agent"] == UDATA_USER_AGENT
+
+    def test_request_headers_do_not_drop_the_user_agent(self, rmock):
+        rmock.get("https://example.org/")
+
+        http_session().get("https://example.org/", headers={"X-Fields": "{*}"})
+
+        assert rmock.last_request.headers["User-Agent"] == UDATA_USER_AGENT
+        assert rmock.last_request.headers["X-Fields"] == "{*}"

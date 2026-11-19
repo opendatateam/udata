@@ -19,6 +19,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.harvest.backends import dcat as dcat_module
 from udata.harvest.backends import get_backend
 from udata.harvest.models import HarvestItem, HarvestJob
+from udata.http import USER_AGENT
 from udata.models import Dataset
 from udata.rdf import DCAT
 from udata.storage.s3 import get_from_json
@@ -961,7 +962,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         actions.run(source)
 
         assert "User-Agent" in get_mock.last_request.headers
-        assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 dcat"
+        assert get_mock.last_request.headers["User-Agent"] == f"{USER_AGENT} dcat"
 
     def test_unsupported_mime_type(self, rmock, caplog):
         url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
@@ -1713,7 +1714,7 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         actions.run(source)
 
         assert "User-Agent" in get_mock.last_request.headers
-        assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 csw-dcat"
+        assert get_mock.last_request.headers["User-Agent"] == f"{USER_AGENT} csw-dcat"
 
     @pytest.mark.options(HARVEST_MAX_ITEMS=2)
     def test_max_items(self, rmock):

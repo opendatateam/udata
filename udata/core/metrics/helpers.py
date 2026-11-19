@@ -10,6 +10,8 @@ from flask import current_app
 from mongoengine import QuerySet
 from pymongo.command_cursor import CommandCursor
 
+from udata.http import http_session
+
 log = logging.getLogger(__name__)
 
 
@@ -61,7 +63,7 @@ def get_metrics_for_model(
         params = {"metric_month__sort": "desc"}
         if id:
             params[f"{model}_id__exact"] = id
-        res = requests.get(model_metrics_api, params)
+        res = http_session().get(model_metrics_api, params=params)
         res.raise_for_status()
         monthly_metrics = compute_monthly_metrics(res.json()["data"], metrics_labels)
         return metrics_by_label(monthly_metrics, metrics_labels)
