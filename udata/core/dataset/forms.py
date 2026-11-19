@@ -118,6 +118,14 @@ class BaseResourceForm(ModelForm):
     extras = fields.ExtrasField()
     schema = fields.FormField(SchemaForm)
 
+    def validate_filetype(self, field):
+        # A remote link only becomes a hosted file through an upload, which sets
+        # the filetype itself: every path editing an existing resource goes
+        # through this form (resource and community resource PUT, dataset PUT,
+        # resources reorder), nested entries included.
+        if self._obj is not None and field.data != self._obj.filetype:
+            raise validators.ValidationError(_("Cannot modify filetype after creation"))
+
     def populate_obj(self, obj):
         # Only protect existing hosted files: a brand new resource has no url
         # yet and must be populated normally. The protected fields are skipped
