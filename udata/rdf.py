@@ -7,7 +7,7 @@ import re
 from collections.abc import Iterator
 from html.parser import HTMLParser
 from typing import cast
-from urllib.parse import quote
+from urllib.parse import quote, urljoin
 
 import mongoengine
 from flask import abort, current_app, request, url_for
@@ -30,6 +30,7 @@ from rdflib.resource import Resource as RdfResource
 from rdflib.term import _is_valid_uri
 from rdflib.util import SUFFIX_FORMAT_MAP
 from rdflib.util import guess_format as raw_guess_format
+from requests.utils import parse_header_links
 
 from udata import uris
 from udata.core.contact_point.models import ContactPoint
@@ -97,8 +98,19 @@ def _fetch_rdflib_location(
         if format == "json-ld"
         else "application/rdf+xml, text/turtle, application/ld+json, */*;q=0.1"
     )
-    response = ssrf_session().get(location, headers={"Accept": accept})
+    session = ssrf_session()
+    response = session.get(location, headers={"Accept": accept})
     response.raise_for_status()
+    if format == "json-ld":
+        # As rdflib's own loader does: a JSON-LD context can be served as HTML pointing to its
+        # JSON-LD version (https://schema.org answers so).
+        for link in parse_header_links(response.headers.get("Link", "")):
+            if link.get("rel") == "alternate" and link.get("type") == "application/ld+json":
+                alternate = urljoin(response.url, link["url"])
+                if alternate not in (response.url, location):
+                    response = session.get(alternate, headers={"Accept": accept})
+                    response.raise_for_status()
+                break
     source = StringInputSource(response.content)
     content_type = response.headers.get("Content-Type")
     source.content_type = content_type.split(";", 1)[0] if content_type else None

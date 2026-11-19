@@ -134,6 +134,44 @@ class RdflibLocationTest(PytestOnlyTestCase):
 
         assert (URIRef("http://data.test.org/catalog"), RDF.type, DCAT.Catalog) in graph
 
+    def test_remote_context_follows_its_jsonld_alternate(self, rmock):
+        rmock.get(
+            "http://data.test.org/vocab",
+            text="<html></html>",
+            headers={
+                "Content-Type": "text/html",
+                "Link": '</vocab/context.jsonld>; rel="alternate"; type="application/ld+json"',
+            },
+        )
+        rmock.get(
+            "http://data.test.org/vocab/context.jsonld", json={"@context": {"@vocab": str(DCAT)}}
+        )
+        data = json.dumps(
+            {
+                "@context": "http://data.test.org/vocab",
+                "@id": "http://data.test.org/catalog",
+                "@type": "Catalog",
+            }
+        )
+
+        graph = Graph().parse(data=data, format="json-ld")
+
+        assert (URIRef("http://data.test.org/catalog"), RDF.type, DCAT.Catalog) in graph
+
+    def test_remote_context_alternate_goes_through_the_guard(self, rmock):
+        rmock.get(
+            "http://data.test.org/vocab",
+            text="<html></html>",
+            headers={
+                "Content-Type": "text/html",
+                "Link": '<file:///etc/passwd>; rel="alternate"; type="application/ld+json"',
+            },
+        )
+        data = json.dumps({"@context": "http://data.test.org/vocab", "@type": "Catalog"})
+
+        with pytest.raises(BlockedAddressError, match="scheme 'file'"):
+            Graph().parse(data=data, format="json-ld")
+
     @pytest.mark.options(URLS_ALLOW_LOCAL=False)
     def test_remote_context_on_a_loopback_address_is_blocked(self):
         # Deliberately no rmock: requests_mock substitutes the session adapter,
