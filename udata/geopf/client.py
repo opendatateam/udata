@@ -10,6 +10,7 @@ from flask import current_app
 
 from udata.geopf.metadata import XML_NS
 from udata.geopf.srs import DEFAULT_SRS
+from udata.http import USER_AGENT
 
 log = logging.getLogger(__name__)
 
@@ -59,6 +60,7 @@ class _GeopfSession(requests.Session):
 
     def __init__(self, timeout: float):
         super().__init__()
+        self.headers["User-Agent"] = USER_AGENT
         self.default_timeout = timeout
 
     def request(self, *args, **kwargs):

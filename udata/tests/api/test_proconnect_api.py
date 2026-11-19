@@ -8,6 +8,7 @@ from flask_security.recoverable import generate_reset_password_token
 from udata.core.api_token.models import ApiToken
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
+from udata.http import USER_AGENT
 from udata.i18n import gettext as _
 from udata.tests.api import PytestOnlyAPITestCase, SessionCookieMixin
 from udata.tests.helpers import capture_mails
@@ -120,6 +121,14 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
         assert (
             response.location == f"{CDATA}/oauth/authorize?client_id=abc&state=xyz&flash=connected"
         )
+
+    def test_calls_to_proconnect_identify_udata(self, proconnect, rmock):
+        UserFactory(email="jane@example.org")
+
+        self.sign_in(proconnect, "jane@example.org")
+
+        assert rmock.request_history
+        assert {r.headers["User-Agent"] for r in rmock.request_history} == {USER_AGENT}
 
     @pytest.mark.options(PROCONNECT_REQUIRE_SECOND_FACTOR=True)
     def test_login_sent_back_for_the_second_factor_lands_back_on_the_page_it_started_from(

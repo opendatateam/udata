@@ -18,6 +18,7 @@ from flask_security.forms import (
 from udata.auth.proconnect import LOGIN_KEY, PENDING_LOGIN_KEY, session_login
 from udata.core.captchetat import bearer_token
 from udata.forms import fields, validators
+from udata.http import http_session
 from udata.i18n import lazy_gettext as _
 
 log = logging.getLogger(__name__)
@@ -185,7 +186,7 @@ def check_captchetat(id: str, code: str) -> bool:
 
     headers = {"Authorization": "Bearer " + bearer_token()}
     try:
-        resp = requests.post(
+        resp = http_session().post(
             f"{captchetat_url}/valider-captcha",
             headers=headers,
             json={

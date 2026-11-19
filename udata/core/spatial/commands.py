@@ -8,7 +8,6 @@ from datetime import UTC, datetime
 from textwrap import dedent
 
 import click
-import requests
 import slugify
 from mongoengine import errors
 from mongoengine.context_managers import switch_collection
@@ -25,6 +24,7 @@ from udata.core.spatial.models import (
     get_zone_bboxes,
 )
 from udata.core.spatial.tasks import detect_and_write_zone
+from udata.http import http_session
 
 log = logging.getLogger(__name__)
 
@@ -116,7 +116,7 @@ def load(geozones_file, levels_file, drop=False):
     """
     log.info("Loading GeoZones levels")
     if levels_file.startswith("http"):
-        response = requests.get(levels_file)
+        response = http_session().get(levels_file)
         # Raise on HTTP errors so a transient error page from the remote server
         # surfaces clearly instead of an opaque JSONDecodeError on the HTML body.
         response.raise_for_status()
@@ -139,7 +139,7 @@ def load(geozones_file, levels_file, drop=False):
 
     log.info("Loading Zones")
     if geozones_file.startswith("http"):
-        response = requests.get(geozones_file)
+        response = http_session().get(geozones_file)
         response.raise_for_status()
         json_geozones = response.json()
     else:

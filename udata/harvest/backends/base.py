@@ -139,7 +139,7 @@ class BaseBackend(ABC):
         self.organizations_to_update = set[Organization]()
         # Harvest source URLs are user-supplied: fetch them through the
         # SSRF-guarded session.
-        self.session = ssrf_session()
+        self.session = ssrf_session(self.name)
 
     @property
     def config(self):
@@ -173,10 +173,7 @@ class BaseBackend(ABC):
         return response
 
     def get_headers(self):
-        return {
-            # TODO: extract site title and version
-            "User-Agent": f"uData/0.1 {self.name}",
-        }
+        return {}
 
     def has_feature(self, key):
         try:

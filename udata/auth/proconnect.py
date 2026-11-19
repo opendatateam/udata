@@ -16,6 +16,7 @@ from werkzeug.security import gen_salt
 from udata.api import API, api
 from udata.auth import current_user, fresh_session_required, login_user, mails
 from udata.core.user.models import ProConnectIdentity, User, datastore
+from udata.http import USER_AGENT
 from udata.uris import cdata_url, homepage_url
 
 ns = api.namespace("proconnect", "Proconnect related operations")
@@ -52,6 +53,7 @@ def init_app(app):
             client_secret=app.config.get("PROCONNECT_CLIENT_SECRET"),
             server_metadata_url=app.config.get("PROCONNECT_OPENID_CONF_URL"),
             client_kwargs={"scope": app.config.get("PROCONNECT_SCOPE")},
+            user_agent=USER_AGENT,
         )
 
 

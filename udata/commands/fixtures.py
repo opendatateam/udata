@@ -10,7 +10,6 @@ import pathlib
 from collections.abc import Callable
 
 import click
-import requests
 from flask import current_app
 
 from udata.api_fields import patch
@@ -35,6 +34,7 @@ from udata.core.site.factories import SiteFactory
 from udata.core.site.models import Site
 from udata.core.user.factories import UserFactory
 from udata.core.user.models import User
+from udata.http import http_session
 
 log = logging.getLogger(__name__)
 
@@ -186,13 +186,14 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
     results_file = pathlib.Path(results_filename)
     datasets_slugs = current_app.config["FIXTURE_DATASET_SLUGS"]
     json_datasets = []
+    session = http_session()
 
     with click.progressbar(datasets_slugs, label="Fetching datasets") as bar:
         for slug in bar:
             json_fixture = {}
 
             url = f"{data_source}{DATASET_URL}/{slug}/"
-            response = requests.get(url)
+            response = session.get(url)
             if not response.ok:
                 print(f"Got a status code {response.status_code} while getting {url}, skipping")
                 continue
@@ -208,27 +209,27 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
                     json_dataset["owner"] = json_owner["id"]
             else:
                 json_org = json_dataset.pop("organization")
-                json_org = requests.get(f"{data_source}{ORG_URL}/{json_org['id']}/").json()
+                json_org = session.get(f"{data_source}{ORG_URL}/{json_org['id']}/").json()
                 json_org = remove_unwanted_keys(json_org, "organization")
                 json_fixture["organization"] = json_org
             json_fixture["resources"] = json_resources
             json_fixture["dataset"] = json_dataset
 
-            json_reuses = requests.get(
+            json_reuses = session.get(
                 f"{data_source}{REUSE_URL}/?dataset={json_dataset['id']}"
             ).json()["data"]
             for reuse in json_reuses:
                 remove_unwanted_keys(reuse, "reuse")
             json_fixture["reuses"] = json_reuses
 
-            json_community = requests.get(
+            json_community = session.get(
                 f"{data_source}{COMMUNITY_RES_URL}/?dataset={json_dataset['id']}"
             ).json()["data"]
             for community_resource in json_community:
                 remove_unwanted_keys(community_resource, "community")
             json_fixture["community_resources"] = json_community
 
-            json_discussion = requests.get(
+            json_discussion = session.get(
                 f"{data_source}{DISCUSSION_URL}/?for={json_dataset['id']}"
             ).json()["data"]
             for discussion in json_discussion:
@@ -240,7 +241,7 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
 
             json_fixture["discussions"] = json_discussion
 
-            json_dataservices = requests.get(
+            json_dataservices = session.get(
                 f"{data_source}{DATASERVICES_URL}/?dataset={json_dataset['id']}"
             ).json()["data"]
             for dataservice in json_dataservices:
@@ -260,10 +261,10 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
 
     # Fetch posts (detail endpoint to get blocs)
     print("Fetching posts...")
-    json_posts_list = requests.get(f"{data_source}{POST_URL}/?page_size=20").json()["data"]
+    json_posts_list = session.get(f"{data_source}{POST_URL}/?page_size=20").json()["data"]
     json_posts = []
     for post_summary in json_posts_list:
-        post_detail = requests.get(f"{data_source}{POST_URL}/{post_summary['slug']}/").json()
+        post_detail = session.get(f"{data_source}{POST_URL}/{post_summary['slug']}/").json()
         remove_unwanted_keys(post_detail, "post")
         if "blocs" in post_detail:
             post_detail["blocs"] = clean_blocs_for_generate(
@@ -273,7 +274,7 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
 
     # Fetch site (with blocs via X-Fields)
     print("Fetching site...")
-    json_site = requests.get(f"{data_source}{SITE_URL}/", headers={"X-Fields": "{*}"}).json()
+    json_site = session.get(f"{data_source}{SITE_URL}/", headers={"X-Fields": "{*}"}).json()
     remove_unwanted_keys(json_site, "site")
     for blocs_field in SITE_BLOCS_FIELDS:
         if blocs_field in json_site:
@@ -331,7 +332,7 @@ def get_or_create_contact_point(data, owner):
 def import_fixtures(source):
     """Build sample fixture data (datasets, posts, site) from local or remote file."""
     if source.startswith("http"):
-        response = requests.get(source)
+        response = http_session().get(source)
         response.raise_for_status()
         json_fixtures = response.json()
     else:

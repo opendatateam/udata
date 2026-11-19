@@ -1,6 +1,6 @@
 import pytest
 
-from udata.http import ssrf_policy, ssrf_session
+from udata.http import USER_AGENT, http_session, ssrf_policy, ssrf_session
 from udata.ssrf import BlockedAddressError
 from udata.tests import PytestOnlyTestCase
 
@@ -39,3 +39,28 @@ class SSRFSessionFactoryTest(PytestOnlyTestCase):
         with pytest.raises(Exception) as excinfo:
             ssrf_session().get("http://127.0.0.1:9/", timeout=2)
         assert not isinstance(excinfo.value, BlockedAddressError)
+
+
+@pytest.mark.parametrize("session", [ssrf_session, http_session])
+class UserAgentTest(PytestOnlyTestCase):
+    def test_identifies_udata(self, session, rmock):
+        rmock.get("https://example.org/")
+
+        session().get("https://example.org/")
+
+        assert rmock.last_request.headers["User-Agent"] == USER_AGENT
+
+    def test_tells_what_the_session_is_for(self, session, rmock):
+        rmock.get("https://example.org/")
+
+        session("dcat").get("https://example.org/")
+
+        assert rmock.last_request.headers["User-Agent"] == f"{USER_AGENT} dcat"
+
+    def test_request_headers_do_not_drop_the_user_agent(self, session, rmock):
+        rmock.get("https://example.org/")
+
+        session().get("https://example.org/", headers={"X-Fields": "{*}"})
+
+        assert rmock.last_request.headers["User-Agent"] == USER_AGENT
+        assert rmock.last_request.headers["X-Fields"] == "{*}"

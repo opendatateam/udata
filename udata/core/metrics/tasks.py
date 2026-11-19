@@ -5,11 +5,11 @@ from collections.abc import Iterator
 from functools import wraps
 from typing import Any
 
-import requests
 from flask import current_app
 
 from udata.core.dataservices.models import Dataservice
 from udata.core.metrics.signals import on_site_metrics_computed
+from udata.http import http_session
 from udata.models import CommunityResource, Dataset, Organization, Reuse, Site
 from udata.mongo.document import UDataDocument as Document
 from udata.tasks import job
@@ -58,7 +58,7 @@ def iterate_on_metrics(target: str, value_keys: list[str], page_size: int = 50) 
         url = f"{current_app.config['METRICS_API']}/{target}_total/data/"
         url += f"?{value_key}__greater=1&page_size={page_size}"
 
-        with requests.Session() as session:
+        with http_session() as session:
             while url is not None:
                 r = session.get(url, timeout=10)
                 r.raise_for_status()

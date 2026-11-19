@@ -1,7 +1,7 @@
-import requests
 from flask import current_app
 from requests.auth import HTTPBasicAuth
 
+from udata.http import http_session
 from udata.models import Dataset, Organization
 from udata.tasks import task
 
@@ -47,7 +47,7 @@ def _put_doi(doi: str, attributes: dict) -> None:
     PUT upserts, unlike POST which rejects an existing DOI. Since our DOI is deterministic
     (prefix/dataset.id), minting it again is a normal case rather than an error to catch.
     """
-    r = requests.put(
+    r = http_session().put(
         f"{current_app.config['DOI_PLATFORM_URI']}/dois/{doi}",
         headers=DOI_HEADERS,
         auth=HTTPBasicAuth(
