@@ -1256,7 +1256,6 @@ class DatasetAPITest(APITestCase):
         data["resources"][0]["url"] = faker.url()
         data["resources"][0]["checksum"] = {"type": "sha1", "value": "0" * 40}
         data["resources"][0]["filesize"] = resource.filesize + 1
-        data["resources"][0]["filetype"] = "remote"
         data["resources"][0]["mime"] = "application/pdf"
         data["resources"][0]["format"] = "pdf"
         response = self.put(url_for("api.dataset", dataset=dataset), data)
@@ -1270,6 +1269,35 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(updated.filetype, "file")
         self.assertEqual(updated.mime, "text/csv")
         self.assertEqual(updated.format, "csv")
+
+    def test_dataset_api_update_cannot_turn_remote_resource_into_file(self):
+        """A remote link must not be turned into a hosted file without any upload"""
+        user = self.login()
+        resource = ResourceFactory(filetype="remote", format="url")
+        dataset = DatasetFactory(owner=user, resources=[resource])
+        data = dataset.to_dict()
+        data["resources"][0]["id"] = str(resource.id)
+        data["resources"][0]["filetype"] = "file"
+        data["resources"][0]["format"] = "pdf"
+        data["resources"][0]["mime"] = "application/pdf"
+        data["resources"][0]["filesize"] = 123456
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert400(response)
+        dataset.reload()
+        self.assertEqual(dataset.resources[0].filetype, "remote")
+        self.assertEqual(dataset.resources[0].format, "url")
+
+    def test_dataset_api_update_cannot_turn_hosted_file_into_remote(self):
+        user = self.login()
+        resource = ResourceFactory()
+        dataset = DatasetFactory(owner=user, resources=[resource])
+        data = dataset.to_dict()
+        data["resources"][0]["id"] = str(resource.id)
+        data["resources"][0]["filetype"] = "remote"
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert400(response)
+        dataset.reload()
+        self.assertEqual(dataset.resources[0].filetype, "file")
 
     def test_dataset_api_update_without_resources(self):
         """It should update a dataset from the API without resources"""
@@ -2666,6 +2694,47 @@ class DatasetResourceAPITest(APITestCase):
         dataset.reload()
         self.assertEqual(dataset.resources[0].filetype, "file")
 
+    def test_reorder_cannot_turn_remote_resource_into_file(self):
+        """A remote link must not be turned into a hosted file without any upload"""
+        resource = ResourceFactory(filetype="remote", format="url")
+        dataset = DatasetFactory(owner=self.user, resources=[resource])
+        data = [
+            {
+                "id": str(resource.id),
+                "title": resource.title,
+                "url": resource.url,
+                "filetype": "file",
+                "format": "pdf",
+                "mime": "application/pdf",
+                "filesize": 123456,
+            }
+        ]
+        response = self.put(url_for("api.resources", dataset=dataset), data)
+        self.assert400(response)
+        dataset.reload()
+        self.assertEqual(dataset.resources[0].filetype, "remote")
+        self.assertEqual(dataset.resources[0].format, "url")
+
+    def test_upload_turns_remote_resource_into_hosted_file(self):
+        """Uploading a file onto a remote resource, then saving its metadata, hosts it"""
+        resource = ResourceFactory(filetype="remote", format="url")
+        dataset = DatasetFactory(owner=self.user, resources=[resource])
+        response = self.post(
+            url_for("api.upload_dataset_resource", dataset=dataset, rid=str(resource.id)),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+        self.assert200(response)
+        data = {"title": "new title", "filetype": "file"}
+        response = self.put(url_for("api.resource", dataset=dataset, rid=str(resource.id)), data)
+        self.assert200(response)
+        dataset.reload()
+        updated = dataset.resources[0]
+        self.assertEqual(updated.filetype, "file")
+        self.assertEqual(updated.title, "new title")
+        self.assertIsNotNone(updated.fs_filename)
+        self.assertTrue(updated.url.endswith("test.txt"))
+
     def test_bulk_update(self):
         resources = ResourceFactory.build_batch(2)
         self.dataset.resources.extend(resources)
@@ -3338,13 +3407,7 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(updated.mime, original_mime)
         self.assertEqual(updated.format, original_format)
 
-    def test_community_resource_update_does_not_override_filetype(self):
-        """A stale client payload must not change the filetype of a hosted file
-
-        Unlike ResourceAPI.put, the community resource PUT endpoint has no
-        explicit guard rejecting filetype changes: the protection relies solely
-        on BaseResourceForm.populate_obj.
-        """
+    def test_community_resource_cannot_update_filetype_file_to_remote(self):
         user = self.login()
         community_resource = CommunityResourceFactory(dataset=DatasetFactory(), owner=user)
         data = {
@@ -3353,8 +3416,62 @@ class CommunityResourceAPITest(APITestCase):
             "filetype": "remote",
         }
         response = self.put(url_for("api.community_resource", community=community_resource), data)
-        self.assert200(response)
+        self.assert400(response)
         self.assertEqual(CommunityResource.objects.first().filetype, "file")
+
+    def test_community_resource_cannot_update_filetype_remote_to_file(self):
+        """A remote link must not be turned into a hosted file without any upload"""
+        user = self.login()
+        community_resource = CommunityResourceFactory(
+            dataset=DatasetFactory(), owner=user, filetype="remote", format="url"
+        )
+        data = {
+            "title": faker.sentence(),
+            "url": community_resource.url,
+            "filetype": "file",
+            "format": "pdf",
+            "mime": "application/pdf",
+            "filesize": 123456,
+        }
+        response = self.put(url_for("api.community_resource", community=community_resource), data)
+        self.assert400(response)
+        updated = CommunityResource.objects.first()
+        self.assertEqual(updated.filetype, "remote")
+        self.assertEqual(updated.format, "url")
+
+    def test_community_resource_update_remote_without_filetype(self):
+        """Omitting filetype keeps the current one instead of the form default"""
+        user = self.login()
+        community_resource = CommunityResourceFactory(
+            dataset=DatasetFactory(), owner=user, filetype="remote"
+        )
+        data = {"title": "new title", "url": community_resource.url}
+        response = self.put(url_for("api.community_resource", community=community_resource), data)
+        self.assert200(response)
+        updated = CommunityResource.objects.first()
+        self.assertEqual(updated.title, "new title")
+        self.assertEqual(updated.filetype, "remote")
+
+    def test_community_resource_upload_turns_remote_into_hosted_file(self):
+        """Uploading a file onto a remote link, then saving its metadata, hosts it"""
+        user = self.login()
+        community_resource = CommunityResourceFactory(
+            dataset=DatasetFactory(), owner=user, filetype="remote", format="url"
+        )
+        response = self.post(
+            url_for("api.upload_community_resource", community=community_resource),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+        self.assert200(response)
+        data = {"title": "new title", "filetype": "file"}
+        response = self.put(url_for("api.community_resource", community=community_resource), data)
+        self.assert200(response)
+        updated = CommunityResource.objects.first()
+        self.assertEqual(updated.filetype, "file")
+        self.assertEqual(updated.title, "new title")
+        self.assertIsNotNone(updated.fs_filename)
+        self.assertTrue(updated.url.endswith("test.txt"))
 
     def test_community_resource_file_update_old_file_deletion(self):
         """It should update a community resource's file and delete the old one"""

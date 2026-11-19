@@ -634,6 +634,9 @@ class UploadMixin:
         infos["title"] = os.path.basename(infos["filename"])
         infos["checksum"] = Checksum(type=CHECKSUM_TYPE, value=infos.pop(CHECKSUM_TYPE))
         infos["filesize"] = infos.pop("size")
+        # Uploading onto a remote resource is how it becomes a hosted file: the
+        # filetype cannot be changed by any metadata update.
+        infos["filetype"] = "file"
         del infos["filename"]
         return infos
 
@@ -761,13 +764,6 @@ class ResourceAPI(ResourceMixin, API):
         dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceFormWithoutId, resource)
-
-        # ensure filetype is not modified after creation
-        if (
-            form._fields.get("filetype").data
-            and form._fields.get("filetype").data != resource.filetype
-        ):
-            abort(400, "Cannot modify filetype after creation")
 
         # populate_obj populates existing resource object with the content of the form.
         # Server-computed fields (url, checksum, filesize…) of hosted resources are
