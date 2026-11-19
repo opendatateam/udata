@@ -118,9 +118,11 @@ class TabularClientTest(PytestOnlyTestCase):
             f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby",
             exc=requests.exceptions.ConnectTimeout,
         )
-        with caplog.at_level("WARNING", logger="udata.core.assistant.tabular"):
-            with pytest.raises(TabularError) as excinfo:
-                TabularClient().get_data(RESOURCE_ID, "a__groupby")
+        with (
+            caplog.at_level("WARNING", logger="udata.core.assistant.tabular"),
+            pytest.raises(TabularError) as excinfo,
+        ):
+            TabularClient().get_data(RESOURCE_ID, "a__groupby")
         assert BASE_URL not in str(excinfo.value)
         assert any(BASE_URL in record.getMessage() for record in caplog.records)
 
@@ -129,9 +131,11 @@ class TabularClientTest(PytestOnlyTestCase):
             f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby",
             text="not json",
         )
-        with caplog.at_level("WARNING", logger="udata.core.assistant.tabular"):
-            with pytest.raises(TabularError) as excinfo:
-                TabularClient().get_data(RESOURCE_ID, "a__groupby")
+        with (
+            caplog.at_level("WARNING", logger="udata.core.assistant.tabular"),
+            pytest.raises(TabularError) as excinfo,
+        ):
+            TabularClient().get_data(RESOURCE_ID, "a__groupby")
         assert "not json" not in str(excinfo.value)
         # The server-side log keeps the diagnostic details (URL, error).
         assert any(

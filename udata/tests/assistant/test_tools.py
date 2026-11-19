@@ -255,7 +255,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         get_profile.assert_not_called()
 
     def test_known_columns_are_used_without_fetching_the_profile(self, mocker):
-        deps, rid = self.active()
+        deps, _rid = self.active()
         get_profile = mocker.patch.object(deps.tabular, "get_profile")
         mocker.patch.object(deps.tabular, "get_data", return_value={"data": []})
         assert self.call("query_data", deps, columns=["dep"]).status == "ok"
