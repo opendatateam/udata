@@ -1,5 +1,13 @@
 # Changelog
 
+## 17.27.1 (2026-11-19)
+
+- chore: upgrade ruff to 0.17 and adopt its default rules ([#4037](https://github.com/opendatateam/udata/pull/4037))
+- fix(auth): land a ProConnect login back on the page it started from ([#4111](https://github.com/opendatateam/udata/pull/4111))
+- fix(dataservices): drop the license criterion from the metadata quality score ([#4109](https://github.com/opendatateam/udata/pull/4109))
+- fix(metrics): store null metrics API values as 0 ([#4110](https://github.com/opendatateam/udata/pull/4110))
+
+
 ## 17.27.0 (2026-11-18)
 
 - chore(deps): update dependency dnspython to v2.9.2 [security] ([#4104](https://github.com/opendatateam/udata/pull/4104))
