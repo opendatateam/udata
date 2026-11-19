@@ -18,7 +18,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.harvest import HarvestMetadata
 from udata.core.organization.models import Organization
-from udata.http import USER_AGENT, ssrf_session
+from udata.http import ssrf_session
 from udata.utils import raise_if_redirect, safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
@@ -139,7 +139,7 @@ class BaseBackend(ABC):
         self.organizations_to_update = set[Organization]()
         # Harvest source URLs are user-supplied: fetch them through the
         # SSRF-guarded session.
-        self.session = ssrf_session()
+        self.session = ssrf_session(self.name)
 
     @property
     def config(self):
@@ -173,7 +173,7 @@ class BaseBackend(ABC):
         return response
 
     def get_headers(self):
-        return {"User-Agent": f"{USER_AGENT} {self.name}"}
+        return {}
 
     def has_feature(self, key):
         try:

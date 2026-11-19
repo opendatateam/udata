@@ -1,12 +1,8 @@
-from importlib.metadata import version
-
 import pytest
 
-from udata.http import http_session, ssrf_policy, ssrf_session
+from udata.http import USER_AGENT, http_session, ssrf_policy, ssrf_session
 from udata.ssrf import BlockedAddressError
 from udata.tests import PytestOnlyTestCase
-
-UDATA_USER_AGENT = f"udata/{version('udata')}"
 
 # An ambient proxy would serve these requests from an unguarded pool manager,
 # so the outcome asserted below would depend on the machine's environment.
@@ -45,25 +41,26 @@ class SSRFSessionFactoryTest(PytestOnlyTestCase):
         assert not isinstance(excinfo.value, BlockedAddressError)
 
 
+@pytest.mark.parametrize("session", [ssrf_session, http_session])
 class UserAgentTest(PytestOnlyTestCase):
-    def test_ssrf_session_identifies_udata(self, rmock):
+    def test_identifies_udata(self, session, rmock):
         rmock.get("https://example.org/")
 
-        ssrf_session().get("https://example.org/")
+        session().get("https://example.org/")
 
-        assert rmock.last_request.headers["User-Agent"] == UDATA_USER_AGENT
+        assert rmock.last_request.headers["User-Agent"] == USER_AGENT
 
-    def test_http_session_identifies_udata(self, rmock):
+    def test_tells_what_the_session_is_for(self, session, rmock):
         rmock.get("https://example.org/")
 
-        http_session().get("https://example.org/")
+        session("dcat").get("https://example.org/")
 
-        assert rmock.last_request.headers["User-Agent"] == UDATA_USER_AGENT
+        assert rmock.last_request.headers["User-Agent"] == f"{USER_AGENT} dcat"
 
-    def test_request_headers_do_not_drop_the_user_agent(self, rmock):
+    def test_request_headers_do_not_drop_the_user_agent(self, session, rmock):
         rmock.get("https://example.org/")
 
-        http_session().get("https://example.org/", headers={"X-Fields": "{*}"})
+        session().get("https://example.org/", headers={"X-Fields": "{*}"})
 
-        assert rmock.last_request.headers["User-Agent"] == UDATA_USER_AGENT
+        assert rmock.last_request.headers["User-Agent"] == USER_AGENT
         assert rmock.last_request.headers["X-Fields"] == "{*}"
