@@ -1,5 +1,13 @@
 # Changelog
 
+## 17.27.2 (2026-11-19)
+
+- fix: identify every outgoing request as udata with its real version ([#4115](https://github.com/opendatateam/udata/pull/4115))
+- fix(rdf): fetch the locations rdflib opens through udata's HTTP session ([#4117](https://github.com/opendatateam/udata/pull/4117))
+- fix(topics): annotate TopicElementsWriter.__enter__ with Self to satisfy ruff PYI034 ([#4116](https://github.com/opendatateam/udata/pull/4116))
+- perf(topics): save the topic once when writing elements in bulk ([#4107](https://github.com/opendatateam/udata/pull/4107))
+
+
 ## 17.27.1 (2026-11-19)
 
 - chore: upgrade ruff to 0.17 and adopt its default rules ([#4037](https://github.com/opendatateam/udata/pull/4037))
