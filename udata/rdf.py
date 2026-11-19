@@ -41,7 +41,7 @@ from udata.core.owned import ownership_filter
 from udata.core.user.models import User
 from udata.frontend.markdown import parse_html
 from udata.harvest.filters import normalize_tag
-from udata.http import ssrf_session
+from udata.http import ssrf_policy, ssrf_session
 from udata.models import Schema
 from udata.mongo.errors import FieldValidationError
 from udata.ssrf import BlockedAddressError
@@ -105,7 +105,7 @@ _create_input_source_from_location = rdflib_parser._create_input_source_from_loc
 
 def _create_input_source_from_allowed_location(file, format, input_source, location):
     scheme = urlsplit(location).scheme
-    if scheme not in ssrf_session().policy.allowed_schemes:
+    if scheme not in ssrf_policy().allowed_schemes:
         raise BlockedAddressError(f"scheme {scheme!r} is not allowed")
     return _create_input_source_from_location(file, format, input_source, location)
 
