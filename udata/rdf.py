@@ -5,9 +5,13 @@ This module centralize udata-wide RDF helpers and configuration
 import logging
 import re
 from collections.abc import Iterator
+from email.message import Message
 from html.parser import HTMLParser
+from io import BytesIO
 from typing import cast
-from urllib.parse import quote, urljoin
+from urllib.parse import quote, urlsplit
+from urllib.request import Request
+from urllib.response import addinfourl
 
 import mongoengine
 from flask import abort, current_app, request, url_for
@@ -25,12 +29,10 @@ from rdflib.namespace import (
     NamespaceManager,
     split_uri,
 )
-from rdflib.parser import StringInputSource
 from rdflib.resource import Resource as RdfResource
 from rdflib.term import _is_valid_uri
 from rdflib.util import SUFFIX_FORMAT_MAP
 from rdflib.util import guess_format as raw_guess_format
-from requests.utils import parse_header_links
 
 from udata import uris
 from udata.core.contact_point.models import ContactPoint
@@ -42,8 +44,9 @@ from udata.harvest.filters import normalize_tag
 from udata.http import ssrf_session
 from udata.models import Schema
 from udata.mongo.errors import FieldValidationError
+from udata.ssrf import BlockedAddressError
 from udata.tags import slug as slugify_tag
-from udata.utils import get_udata_version, uniquify
+from udata.utils import uniquify
 
 log = logging.getLogger(__name__)
 
@@ -90,40 +93,39 @@ FORMAT_MAP["jsonld"] = "json-ld"
 FORMAT_MAP["xml"] = "xml"
 
 
-def _fetch_rdflib_location(
-    file: None, format: str | None, input_source: None, location: str
-) -> tuple[URIRef, bool, None, StringInputSource]:
-    accept = (
-        "application/ld+json, application/json;q=0.9, */*;q=0.1"
-        if format == "json-ld"
-        else "application/rdf+xml, text/turtle, application/ld+json, */*;q=0.1"
+# Whenever rdflib is handed a location instead of data (`Graph.parse(<url>)`, a remote JSON-LD
+# `@context` or `@import`), it opens it itself. Those locations come from harvested catalogs, so
+# rdflib's two ways of opening them are guarded, and the rest of its loader is left untouched:
+# - `_create_input_source_from_location` reads local paths and `file://` URIs with `open()`:
+#   only the schemes the SSRF policy allows get through to it;
+# - `_urlopen`, its only network call, fetches the request rdflib built through the
+#   SSRF-guarded session.
+_create_input_source_from_location = rdflib_parser._create_input_source_from_location
+
+
+def _create_input_source_from_allowed_location(file, format, input_source, location):
+    scheme = urlsplit(location).scheme
+    if scheme not in ssrf_session().policy.allowed_schemes:
+        raise BlockedAddressError(f"scheme {scheme!r} is not allowed")
+    return _create_input_source_from_location(file, format, input_source, location)
+
+
+def _guarded_urlopen(request: Request) -> addinfourl:
+    response = ssrf_session().request(
+        request.get_method(),
+        request.full_url,
+        headers=dict(request.header_items()),
+        data=request.data,
     )
-    session = ssrf_session()
-    session.headers["User-Agent"] = f"udata/{get_udata_version()}"
-    response = session.get(location, headers={"Accept": accept})
     response.raise_for_status()
-    if format == "json-ld":
-        # As rdflib's own loader does: a JSON-LD context can be served as HTML pointing to its
-        # JSON-LD version (https://schema.org answers so).
-        for link in parse_header_links(response.headers.get("Link", "")):
-            if link.get("rel") == "alternate" and link.get("type") == "application/ld+json":
-                alternate = urljoin(response.url, link["url"])
-                if alternate not in (response.url, location):
-                    response = session.get(alternate, headers={"Accept": accept})
-                    response.raise_for_status()
-                break
-    source = StringInputSource(response.content)
-    content_type = response.headers.get("Content-Type")
-    source.content_type = content_type.split(";", 1)[0] if content_type else None
-    return URIRef(response.url), True, None, source
+    headers = Message()
+    for name, value in response.headers.items():
+        headers[name] = value
+    return addinfourl(BytesIO(response.content), headers, response.url, response.status_code)
 
 
-# Whenever rdflib is handed a location instead of data, it opens it itself, with its own urllib
-# loader that also reads local `file://` paths and exposes no hook to replace it. Every such open
-# goes through this single private function: `Graph.parse(<url>)`, a remote JSON-LD `@context` or
-# `@import`, and whatever path rdflib grows next. Those locations come from harvested
-# catalogs, so they are fetched through the SSRF-guarded session, which also refuses `file://`.
-rdflib_parser._create_input_source_from_location = _fetch_rdflib_location
+rdflib_parser._create_input_source_from_location = _create_input_source_from_allowed_location
+rdflib_parser._urlopen = _guarded_urlopen
 
 # Map serialization formats to MIME types
 RDF_MIME_TYPES = {

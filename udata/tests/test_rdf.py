@@ -4,7 +4,6 @@ import inspect
 import json
 
 import pytest
-import requests
 from rdflib import (
     BNode,
     Graph,
@@ -41,7 +40,6 @@ from udata.ssrf import BlockedAddressError
 from udata.tests import PytestOnlyTestCase, TestCase
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import argvalues
-from udata.utils import get_udata_version
 
 
 class ContentNegociationTest(TestCase):
@@ -93,27 +91,32 @@ class ContentNegociationTest(TestCase):
 
 @pytest.mark.usefixtures("no_ambient_proxy")
 class RdflibLocationTest(PytestOnlyTestCase):
-    def test_replaced_loader_is_the_reviewed_one(self):
-        # udata.rdf guards rdflib by replacing this private function: an rdflib upgrade that
-        # changes it, or stops calling it, could reopen the SSRF without any test noticing.
-        # The attribute is already replaced here: read the original from the module source.
-        module_source = inspect.getsource(rdflib_parser)
-        original = next(
-            node
-            for node in ast.parse(module_source).body
-            if isinstance(node, ast.FunctionDef)
-            and node.name == "_create_input_source_from_location"
-        )
-        source = ast.get_source_segment(module_source, original)
-
+    def test_guarded_rdflib_loader_is_the_reviewed_one(self):
+        # udata.rdf guards rdflib through two private names: an rdflib upgrade that changes the
+        # code around them, or stops going through them, could reopen the SSRF unnoticed.
         assert (
             "_create_input_source_from_location"
             in rdflib_parser.create_input_source.__code__.co_names
         )
-        assert (
-            hashlib.sha256(source.encode()).hexdigest()
-            == "51aba9c10f00e1f48391b1dc0c820abb9435fb3de836430e0c1184076b2583c3"
-        ), "rdflib changed the function udata.rdf replaces: review its diff, then update this hash"
+        assert "_urlopen" in rdflib_parser.URLInputSource.__init__.__code__.co_names
+
+        # The names are already replaced here: read the originals from the module source.
+        module_source = inspect.getsource(rdflib_parser)
+        reviewed = {
+            "_create_input_source_from_location": "51aba9c10f00e1f48391b1dc0c820abb9435fb3de836430e0c1184076b2583c3",
+            "URLInputSource": "bfbb31e44e090c3112d0f1b12b6e3b3d64c4850f7247682193537f945aa7323e",
+        }
+        found = {
+            node.name: ast.get_source_segment(module_source, node)
+            for node in ast.parse(module_source).body
+            if getattr(node, "name", None) in reviewed
+        }
+        assert found.keys() == reviewed.keys()
+        for name, source in found.items():
+            assert hashlib.sha256(source.encode()).hexdigest() == reviewed[name], (
+                f"rdflib changed {name}, which udata.rdf relies on to guard its loader: "
+                "review its diff, then update this hash"
+            )
 
     def test_parsed_url_is_fetched(self, rmock):
         rmock.get(
@@ -125,7 +128,6 @@ class RdflibLocationTest(PytestOnlyTestCase):
         graph = Graph().parse("http://data.test.org/catalog.ttl")
 
         assert (URIRef("http://data.test.org/catalog"), RDF.type, DCAT.Catalog) in graph
-        assert rmock.last_request.headers["User-Agent"] == f"udata/{get_udata_version()}"
 
     @pytest.mark.options(URLS_ALLOW_LOCAL=False)
     def test_parsed_url_on_a_loopback_address_is_blocked(self):
@@ -145,7 +147,7 @@ class RdflibLocationTest(PytestOnlyTestCase):
         catalog = tmp_path / "catalog.ttl"
         catalog.write_text(f"<http://data.test.org/catalog> a <{DCAT.Catalog}> .")
 
-        with pytest.raises(requests.exceptions.MissingSchema):
+        with pytest.raises(BlockedAddressError, match="scheme ''"):
             Graph().parse(str(catalog), format="turtle")
 
     def test_remote_context_is_fetched(self, rmock):
