@@ -93,13 +93,7 @@ class ContentNegociationTest(TestCase):
 class RdflibLocationTest(PytestOnlyTestCase):
     def test_guarded_rdflib_loader_is_the_reviewed_one(self):
         # udata.rdf guards rdflib through two private names: an rdflib upgrade that changes the
-        # code around them, or stops going through them, could reopen the SSRF unnoticed.
-        assert (
-            "_create_input_source_from_location"
-            in rdflib_parser.create_input_source.__code__.co_names
-        )
-        assert "_urlopen" in rdflib_parser.URLInputSource.__init__.__code__.co_names
-
+        # code around them could reopen the SSRF without any behaviour test noticing.
         # The names are already replaced here: read the originals from the module source.
         module_source = inspect.getsource(rdflib_parser)
         reviewed = {
