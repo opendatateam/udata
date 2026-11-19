@@ -1445,9 +1445,18 @@ def compute_filter(column: str, field, info, filterable) -> dict:
     if "constraints" not in filterable:
         filterable["constraints"] = []
 
-    if isinstance(field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField) or (
-        isinstance(field, mongo_fields.ListField)
-        and isinstance(field.field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField)
+    is_generic_reference = isinstance(
+        field, mongo_fields.GenericReferenceField | mongo_fields.GenericLazyReferenceField
+    )
+    if (
+        isinstance(field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField)
+        or is_generic_reference
+        or (
+            isinstance(field, mongo_fields.ListField)
+            and isinstance(
+                field.field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField
+            )
+        )
     ):
         filterable["constraints"].append("objectid")
 
@@ -1459,19 +1468,16 @@ def compute_filter(column: str, field, info, filterable) -> dict:
     if field.validation:
         filterable["type"] = validation_to_type(field.validation)
 
-    filterable["choices"] = info.get("choices", None)
-    if hasattr(field, "choices") and field.choices:
-        filterable["choices"] = field.choices
-
-    # A generic reference is stored as `{_cls, _ref}`, which MongoEngine cannot match on an id
-    # alone. Its `choices` are the referenceable document classes, not values of the parameter.
-    if isinstance(
-        field, mongo_fields.GenericReferenceField | mongo_fields.GenericLazyReferenceField
-    ):
-        filterable["constraints"].append("objectid")
+    if is_generic_reference:
+        # Its `choices` are the referenceable document classes, not values of the parameter.
         filterable["choices"] = None
+        # Stored as `{_cls, _ref}`, which MongoEngine cannot match on an id alone.
         if "query" not in filterable:
             filterable["query"] = lambda query, value: query.generic_in(**{column: value})
+    else:
+        filterable["choices"] = info.get("choices", None)
+        if hasattr(field, "choices") and field.choices:
+            filterable["choices"] = field.choices
 
     return filterable
 
