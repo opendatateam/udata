@@ -1,3 +1,5 @@
+from typing import Self
+
 from blinker import Signal
 from flask import url_for
 from mongoengine.errors import DoesNotExist
@@ -138,7 +140,7 @@ class TopicElementsWriter:
         self.topic = topic
         self.written = False
 
-    def __enter__(self) -> "TopicElementsWriter":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(self, *exc_info) -> None:
