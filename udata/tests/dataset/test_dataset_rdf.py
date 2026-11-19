@@ -1348,23 +1348,21 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert daterange.start == date(2017, 1, 1)
         assert daterange.end == date(2017, 12, 31)
 
-    def test_parse_temporal_does_not_dereference_uri(self, tmp_path):
+    def test_parse_temporal_does_not_dereference_uri(self, rmock):
         # The URI comes from the harvested catalog: fetching it would let anyone make the
-        # server request an arbitrary target. A local file is the target observable here.
-        remote = tmp_path / "period.ttl"
-        node = URIRef(remote.as_uri())
-        remote.write_text(
-            f"""
-            @prefix dcat: <http://www.w3.org/ns/dcat#> .
-            @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-            <{node}> dcat:startDate "2017-01-01"^^xsd:date ; dcat:endDate "2017-12-31"^^xsd:date .
-            """
+        # server request an arbitrary public target, which the SSRF guard lets through.
+        node = URIRef("http://data.test.org/periods/2017")
+        rmock.get(
+            str(node),
+            text=f'<{node}> <{DCAT.startDate}> "2017-01-01"^^<{XSD.date}> ;'
+            f' <{DCAT.endDate}> "2017-12-31"^^<{XSD.date}> .',
+            headers={"Content-Type": "text/turtle"},
         )
         g = Graph()
-
         g.set((node, RDF.type, DCT.PeriodOfTime))
 
         assert temporal_from_rdf(g.resource(node)) is None
+        assert not rmock.called
 
     def test_parse_temporal_is_failsafe(self):
         node = URIRef("http://nowhere.org")
