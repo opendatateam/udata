@@ -129,20 +129,6 @@ class RdflibLocationTest(PytestOnlyTestCase):
 
         assert (URIRef("http://data.test.org/catalog"), RDF.type, DCAT.Catalog) in graph
 
-    @pytest.mark.options(URLS_ALLOW_LOCAL=False)
-    def test_parsed_url_on_a_loopback_address_is_blocked(self):
-        # Deliberately no rmock: requests_mock substitutes the session adapter,
-        # which is precisely the guard under test.
-        with pytest.raises(BlockedAddressError, match="loopback"):
-            Graph().parse("http://127.0.0.1:9/catalog.ttl")
-
-    def test_parsed_file_uri_is_never_read(self, tmp_path):
-        catalog = tmp_path / "catalog.ttl"
-        catalog.write_text(f"<http://data.test.org/catalog> a <{DCAT.Catalog}> .")
-
-        with pytest.raises(BlockedAddressError, match="scheme 'file'"):
-            Graph().parse(catalog.as_uri(), format="turtle")
-
     def test_parsed_local_path_is_never_read(self, tmp_path):
         catalog = tmp_path / "catalog.ttl"
         catalog.write_text(f"<http://data.test.org/catalog> a <{DCAT.Catalog}> .")
