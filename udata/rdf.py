@@ -8,7 +8,7 @@ from collections.abc import Iterator
 from email.message import Message
 from html.parser import HTMLParser
 from io import BytesIO
-from typing import cast
+from typing import BinaryIO, TextIO, cast
 from urllib.parse import quote, urlsplit
 from urllib.request import Request
 from urllib.response import addinfourl
@@ -29,6 +29,7 @@ from rdflib.namespace import (
     NamespaceManager,
     split_uri,
 )
+from rdflib.parser import InputSource
 from rdflib.resource import Resource as RdfResource
 from rdflib.term import _is_valid_uri
 from rdflib.util import SUFFIX_FORMAT_MAP
@@ -103,7 +104,12 @@ FORMAT_MAP["xml"] = "xml"
 _create_input_source_from_location = rdflib_parser._create_input_source_from_location
 
 
-def _create_input_source_from_allowed_location(file, format, input_source, location):
+def _create_input_source_from_allowed_location(
+    file: BinaryIO | TextIO | None,
+    format: str | None,
+    input_source: InputSource | None,
+    location: str,
+) -> tuple[URIRef, bool, BinaryIO | TextIO | None, InputSource | None]:
     scheme = urlsplit(location).scheme
     if scheme not in ssrf_policy().allowed_schemes:
         raise BlockedAddressError(f"scheme {scheme!r} is not allowed")
@@ -125,7 +131,7 @@ def _guarded_urlopen(request: Request) -> addinfourl:
 
 
 rdflib_parser._create_input_source_from_location = _create_input_source_from_allowed_location
-rdflib_parser._urlopen = _guarded_urlopen
+rdflib_parser._urlopen = _guarded_urlopen  # pyright: ignore[reportPrivateImportUsage]
 
 # Map serialization formats to MIME types
 RDF_MIME_TYPES = {
