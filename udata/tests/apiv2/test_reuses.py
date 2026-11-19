@@ -215,7 +215,7 @@ class ReuseListAPIV2Test(APITestCase):
 
     def test_reuse_list_private_isolation_between_users(self):
         """A private reuse is only visible to its owner, never to another logged-in
-        user. Guards the `| owned_qs` branch of `visible_by_user`: a regression
+        user. Guards the `| owned_qs` branch of `visible_by_current_user`: a regression
         broadening it would still pass `test_reuse_list_filter_private`."""
         owner = UserFactory()
         other_user = UserFactory()

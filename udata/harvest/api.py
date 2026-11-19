@@ -4,6 +4,7 @@ from werkzeug.exceptions import BadRequest
 
 from udata.api import API, api, fields
 from udata.api_fields import patch, patch_and_save
+from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
 from udata.flask_mongoengine.pagination import Pagination
@@ -219,7 +220,7 @@ class RunSourceAPI(API):
     @api.marshal_with(HarvestSource.__read_fields__)
     def post(self, source: HarvestSource):
         enabled = current_app.config.get("HARVEST_ENABLE_MANUAL_RUN")
-        if not enabled and not current_user.sysadmin:
+        if not enabled and not admin_permission.can():
             api.abort(
                 400,
                 "Cannot run source manually. Please contact the platform if you need to reschedule the harvester.",
