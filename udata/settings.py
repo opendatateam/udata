@@ -670,6 +670,18 @@ class Defaults:
     TABULAR_EXPLORE_URL = None
     TABULAR_ALLOW_REMOTE = True
 
+    # AI assistant settings (see docs/adapting-settings.md)
+    ###########################################################################
+    # The assistant is disabled while AI_BASE_URL is None.
+    AI_BASE_URL = None
+    AI_API_KEY = None
+    # The assistant uses the first one. `name`: the `id` of a model listed by `GET /v1/models`,
+    # never one of its `aliases`.
+    AI_MODELS = [
+        {"name": "gpt-oss-120b", "max_output_tokens": 8192, "reasoning_effort": None},
+    ]
+    TABULAR_API_URL = None
+
     # JSON-LD settings
     ###########################################################################
     MAX_RESOURCES_IN_JSON_LD = 20
@@ -768,6 +780,9 @@ class Testing:
     DATASET_HIDDEN_BADGES = []
     ELASTICSEARCH_URL = None
     ELASTICSEARCH_INDEX_BASENAME = "udata-test"
+    AI_BASE_URL = None
+    AI_API_KEY = None
+    TABULAR_API_URL = None
 
 
 class Debug(Defaults):

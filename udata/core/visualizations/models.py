@@ -9,6 +9,7 @@ from mongoengine.fields import (
     EmbeddedDocumentListField,
     FloatField,
     GenericEmbeddedDocumentField,
+    IntField,
     ListField,
     StringField,
     UUIDField,
@@ -127,6 +128,7 @@ class XAxis(EmbeddedDocument):
             choices=["discrete", "continuous"], required=True
         )  # can be deduced based on the column type, but an int could actually be discrete (code postal)
     )
+    limit = field(IntField(min_value=1, max_value=50))
 
 
 @generate_fields()
