@@ -25,6 +25,7 @@ from udata.rdf import (
     FORMAT_MAP,
     ORG,
     RDF,
+    RDFS,
     SKOS,
     VCARD,
     contact_point_from_foaf,
@@ -33,6 +34,7 @@ from udata.rdf import (
     contact_points_to_rdf,
     guess_format,
     negociate_content,
+    serialize_value,
     vocabulary_key,
     want_rdf,
 )
@@ -214,6 +216,102 @@ class GuessFormatTest:
 
     def test_unkown_mime(self):
         assert guess_format("unknown/mime") is None
+
+
+class RdfUtilsTest(TestCase):
+    def test_serialize_value_uriref(self):
+        value = URIRef("http://example.com/foo")
+
+        assert serialize_value(value) == "http://example.com/foo"
+
+    def test_serialize_value_literal(self):
+        cases = [
+            (Literal("foo"), "foo"),
+            (Literal(42), 42),
+            (Literal("foo", lang="fr"), "foo"),
+        ]
+        for value, expected in cases:
+            with self.subTest(value=value):
+                assert serialize_value(value) == expected
+
+    def test_serialize_value_resource_with_uriref_identifier(self):
+        resource = Graph().resource(URIRef("http://example.com/foo"))
+
+        assert serialize_value(resource) == "http://example.com/foo"
+
+    def test_serialize_value_resource_with_literal_identifier(self):
+        resource = Graph().resource(Literal("foo"))
+
+        assert serialize_value(resource) == "foo"
+
+    def test_serialize_value_resource_with_bnode_identifier(self):
+        # An anonymous resource has no usable identity, even though BNode.toPython() returns str.
+        resource = Graph().resource(BNode())
+
+        assert serialize_value(resource) is None
+
+    def test_serialize_value_resource_with_unwrap(self):
+        graph = Graph()
+        node = URIRef("http://example.com/foo")
+        graph.add((node, DCT.title, Literal("The title")))
+
+        assert serialize_value(graph.resource(node), unwrap=[DCT.title]) == "The title"
+
+    def test_serialize_value_resource_unwrap_uses_first_match_in_order(self):
+        graph = Graph()
+        node = URIRef("http://example.com/foo")
+        graph.add((node, RDFS.label, Literal("The label")))
+        graph.add((node, DCT.title, Literal("The title")))
+
+        assert serialize_value(graph.resource(node), unwrap=[RDFS.label, DCT.title]) == "The label"
+
+    def test_serialize_value_resource_unwrap_uses_next_match(self):
+        graph = Graph()
+        node = URIRef("http://example.com/foo")
+        graph.add((node, DCT.title, Literal("The title")))
+
+        value = serialize_value(graph.resource(node), unwrap=[SKOS.prefLabel, DCT.title])
+
+        assert value == "The title"
+
+    def test_serialize_value_resource_without_unwrap_falls_back_to_identifier(self):
+        graph = Graph()
+        node = URIRef("http://example.com/foo")
+        graph.add((node, DCT.title, Literal("The title")))
+        resource = graph.resource(node)
+
+        for unwrap in [None, []]:
+            with self.subTest(unwrap=unwrap):
+                assert serialize_value(resource, unwrap=unwrap) == "http://example.com/foo"
+
+    def test_serialize_value_resource_unwrap_no_match_falls_back_to_identifier(self):
+        graph = Graph()
+        node = URIRef("http://example.com/foo")
+        graph.add((node, DCT.title, Literal("The title")))
+
+        value = serialize_value(graph.resource(node), unwrap=[SKOS.prefLabel])
+
+        assert value == "http://example.com/foo"
+
+    def test_serialize_value_resource_unwrap_no_match_and_bnode_identifier(self):
+        graph = Graph()
+        node = BNode()
+        graph.add((node, DCT.title, Literal("The title")))
+
+        assert serialize_value(graph.resource(node), unwrap=[SKOS.prefLabel]) is None
+
+    def test_serialize_value_resource_unwrap_skips_empty_values(self):
+        graph = Graph()
+        node = URIRef("http://example.com/foo")
+        graph.add((node, DCT.title, Literal("")))
+        graph.add((node, RDFS.label, Literal("The label")))
+
+        value = serialize_value(graph.resource(node), unwrap=[DCT.title, RDFS.label])
+
+        assert value == "The label"
+
+    def test_serialize_value_unsupported_type(self):
+        assert serialize_value(BNode()) is None
 
 
 class ContactToRdfTest:
