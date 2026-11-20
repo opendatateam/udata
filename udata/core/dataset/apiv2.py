@@ -3,7 +3,6 @@ import re
 
 import mongoengine
 from flask import abort, request, url_for
-from flask_login import current_user
 from flask_restx import marshal
 
 from udata import search
@@ -339,8 +338,8 @@ class DatasetListAPI(API):
     def get(self):
         """List or search all datasets"""
         args = dataset_parser.parse()
-        datasets = Dataset.objects.exclude("resources").visible_by_user(
-            current_user, mongoengine.Q(private=False, archived=None, deleted=None)
+        datasets = Dataset.objects.exclude("resources").visible_by_current_user(
+            mongoengine.Q(private=False, archived=None, deleted=None)
         )
         datasets = dataset_parser.parse_filters(datasets, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING

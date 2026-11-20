@@ -2,7 +2,7 @@ import logging
 import typing as t
 from functools import wraps
 
-from flask import current_app, render_template
+from flask import current_app, g, render_template
 from flask_mail import Message
 from flask_principal import Identity, identity_changed
 from flask_principal import Permission as BasePermission
@@ -41,7 +41,7 @@ class Permission(BasePermission):
 admin_permission = Permission()
 
 
-def authenticate_request(user) -> bool:
+def authenticate_request(user, *, drop_sysadmin_permission: bool) -> bool:
     """Authenticate `user` for this request only.
 
     An API key or an OAuth2 token stands for its holder on the request it comes with. Unlike
@@ -50,13 +50,20 @@ def authenticate_request(user) -> bool:
     Nor is it a login: `current_login_at` stays the date of the last one, the token records
     its own use.
 
+    `drop_sysadmin_permission` withholds a sysadmin's rights from the request: a sysadmin can
+    hand a script a key that does no more than what they could do as a plain user. It has
+    no default so that each credential says whether it grants them.
+
     Flask-Security has no public API for this: these two calls are the ones its own basic auth
     makes (`flask_security.decorators._check_http_auth`).
     """
     if not user.active:
         return False
     current_app.extensions["security"].login_manager._update_request_context_with_user(user)
+    # Sent synchronously: the identity is loaded, with the user's roles, once it returns.
     identity_changed.send(current_app._get_current_object(), identity=Identity(user.fs_uniquifier))
+    if drop_sysadmin_permission:
+        g.identity.provides.discard(RoleNeed("admin"))
     return True
 
 

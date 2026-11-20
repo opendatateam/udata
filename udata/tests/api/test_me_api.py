@@ -14,7 +14,7 @@ from udata.core.discussions.factories import DiscussionFactory
 from udata.core.discussions.models import Message as DiscMsg
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import _
 from udata.models import Discussion, Follow, Member, User
 from udata.tests.helpers import capture_mails, create_test_image
@@ -472,6 +472,26 @@ class MeAPITest(APITestCase):
         response = self.post(url_for("api.my_api_tokens"), {"name": "My CI token"})
         self.assert201(response)
         self.assertEqual(response.json["name"], "My CI token")
+
+    def test_create_token_scopes(self):
+        self.login(AdminFactory())
+
+        default = self.post(url_for("api.my_api_tokens"))
+        sysadmin = self.post(url_for("api.my_api_tokens"), {"scopes": ["sysadmin"]})
+        unknown = self.post(url_for("api.my_api_tokens"), {"scopes": ["admin"]})
+
+        self.assert201(sysadmin)
+        self.assertEqual(ApiToken.objects.get(id=default.json["id"]).scopes, [])
+        self.assertEqual(ApiToken.objects.get(id=sysadmin.json["id"]).scopes, ["sysadmin"])
+        self.assert400(unknown)
+
+    def test_create_token_with_sysadmin_scope_as_a_plain_user(self):
+        user = self.login()
+
+        response = self.post(url_for("api.my_api_tokens"), {"scopes": ["sysadmin"]})
+
+        self.assert403(response)
+        self.assertEqual(ApiToken.objects(user=user).count(), 0)
 
     def test_create_token_with_expiration(self):
         """It should create a token with an expiration date"""

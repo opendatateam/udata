@@ -87,9 +87,7 @@ class ReuseListAPI(API):
     @api.expect(Reuse.__index_parser__)
     @api.marshal_with(Reuse.__page_fields__)
     def get(self):
-        query = Reuse.objects.visible_by_user(
-            current_user, mongoengine.Q(private__ne=True, deleted=None)
-        )
+        query = Reuse.objects.visible_by_current_user(mongoengine.Q(private__ne=True, deleted=None))
         return Reuse.apply_pagination(Reuse.apply_sort_filters(query))
 
     @api.secure

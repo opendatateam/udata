@@ -47,12 +47,11 @@ class TopicSearch(ModelSearchAdapter):
         Fallback Mongo search when ELASTICSEARCH_URL is not configured.
         We mimic the existing TopicsAPI behaviour as much as possible.
         """
-        from flask_security import current_user
         from mongoengine import Q
 
         from udata.core.topic.parsers import TopicApiParser
 
-        topics = Topic.objects.visible_by_user(current_user, Q(private__ne=True))
+        topics = Topic.objects.visible_by_current_user(Q(private__ne=True))
         parser = TopicApiParser()
         topics = parser.parse_filters(topics, args)
 

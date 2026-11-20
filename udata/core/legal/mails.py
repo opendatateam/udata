@@ -3,6 +3,7 @@ from flask_babel import LazyString
 from flask_login import current_user
 from flask_restx.inputs import boolean
 
+from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.discussions.models import Discussion, Message
@@ -51,7 +52,7 @@ def send_legal_notice_on_deletion(obj: DeletableObject, args: dict):
     - send_legal_notice=true was passed in args
     - The current user is a sysadmin
     """
-    if not args.get("send_legal_notice") or not current_user.sysadmin:
+    if not args.get("send_legal_notice") or not admin_permission.can():
         return
 
     if isinstance(obj, Organization):
