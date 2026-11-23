@@ -2555,6 +2555,64 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(updated.url, data["url"])
         self.assertEqual(updated.extras, {"extra:id": "id"})
 
+    def test_update_remote_metadata_keeps_last_modified(self):
+        last_modified = datetime(2020, 1, 1, tzinfo=UTC)
+        resource = ResourceFactory(filetype="remote", last_modified_internal=last_modified)
+        dataset = DatasetFactory(owner=self.user, resources=[resource])
+
+        response = self.put(
+            url_for("api.resource", dataset=dataset, rid=str(resource.id)),
+            {"title": "New title", "url": resource.url, "filetype": "remote"},
+        )
+        self.assert200(response)
+
+        exposed = self.get(url_for("api.resource", dataset=dataset, rid=str(resource.id))).json
+        assert datetime.fromisoformat(exposed["last_modified"]) == last_modified
+
+    def test_update_remote_url_changes_last_modified(self):
+        last_modified = datetime(2020, 1, 1, tzinfo=UTC)
+        resource = ResourceFactory(filetype="remote", last_modified_internal=last_modified)
+        dataset = DatasetFactory(owner=self.user, resources=[resource])
+
+        response = self.put(
+            url_for("api.resource", dataset=dataset, rid=str(resource.id)),
+            {"title": resource.title, "url": "https://example.org/new.csv", "filetype": "remote"},
+        )
+        self.assert200(response)
+
+        exposed = self.get(url_for("api.resource", dataset=dataset, rid=str(resource.id))).json
+        assert datetime.fromisoformat(exposed["last_modified"]) > last_modified
+
+    def test_update_local_metadata_keeps_last_modified(self):
+        """Even with a stale url in the payload: it is ignored for a hosted file (#2544)."""
+        last_modified = datetime(2020, 1, 1, tzinfo=UTC)
+        resource = ResourceFactory(last_modified_internal=last_modified)
+        dataset = DatasetFactory(owner=self.user, resources=[resource])
+
+        response = self.put(
+            url_for("api.resource", dataset=dataset, rid=str(resource.id)),
+            {"title": "New title", "url": "https://stale.example.org/old.csv"},
+        )
+        self.assert200(response)
+
+        exposed = self.get(url_for("api.resource", dataset=dataset, rid=str(resource.id))).json
+        assert datetime.fromisoformat(exposed["last_modified"]) == last_modified
+
+    def test_upload_new_file_changes_last_modified(self):
+        last_modified = datetime(2020, 1, 1, tzinfo=UTC)
+        resource = ResourceFactory(last_modified_internal=last_modified)
+        dataset = DatasetFactory(owner=self.user, resources=[resource])
+
+        response = self.post(
+            url_for("api.upload_dataset_resource", dataset=dataset, rid=str(resource.id)),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+        self.assert200(response)
+
+        exposed = self.get(url_for("api.resource", dataset=dataset, rid=str(resource.id))).json
+        assert datetime.fromisoformat(exposed["last_modified"]) > last_modified
+
     def test_update_local_does_not_override_server_computed_fields(self):
         """A stale client payload must not override upload-computed fields of a hosted file
 
@@ -3308,6 +3366,70 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(CommunityResource.objects.count(), 1)
         self.assertEqual(CommunityResource.objects.first().description, "new description")
         self.assertTrue(CommunityResource.objects.first().url.endswith("test.txt"))
+
+    def test_community_resource_update_metadata_keeps_last_modified(self):
+        user = self.login()
+        last_modified = datetime(2020, 1, 1, tzinfo=UTC)
+        community_resource = CommunityResourceFactory(
+            owner=user, filetype="remote", last_modified_internal=last_modified
+        )
+        data = community_resource.to_dict()
+        data["description"] = "new description"
+
+        response = self.put(url_for("api.community_resource", community=community_resource), data)
+        self.assert200(response)
+
+        exposed = self.get(url_for("api.community_resource", community=community_resource)).json
+        assert datetime.fromisoformat(exposed["last_modified"]) == last_modified
+
+    def test_community_resource_update_url_changes_last_modified(self):
+        user = self.login()
+        last_modified = datetime(2020, 1, 1, tzinfo=UTC)
+        community_resource = CommunityResourceFactory(
+            owner=user, filetype="remote", last_modified_internal=last_modified
+        )
+        data = community_resource.to_dict()
+        data["url"] = "https://example.org/new.csv"
+
+        response = self.put(url_for("api.community_resource", community=community_resource), data)
+        self.assert200(response)
+
+        exposed = self.get(url_for("api.community_resource", community=community_resource)).json
+        assert datetime.fromisoformat(exposed["last_modified"]) > last_modified
+
+    def test_community_resource_update_local_metadata_keeps_last_modified(self):
+        """Even with a stale url in the payload: it is ignored for a hosted file (#2544)."""
+        user = self.login()
+        last_modified = datetime(2020, 1, 1, tzinfo=UTC)
+        community_resource = CommunityResourceFactory(
+            dataset=DatasetFactory(), owner=user, last_modified_internal=last_modified
+        )
+
+        response = self.put(
+            url_for("api.community_resource", community=community_resource),
+            {"title": "New title", "url": "https://stale.example.org/old.csv"},
+        )
+        self.assert200(response)
+
+        exposed = self.get(url_for("api.community_resource", community=community_resource)).json
+        assert datetime.fromisoformat(exposed["last_modified"]) == last_modified
+
+    def test_community_resource_upload_new_file_changes_last_modified(self):
+        user = self.login()
+        last_modified = datetime(2020, 1, 1, tzinfo=UTC)
+        community_resource = CommunityResourceFactory(
+            dataset=DatasetFactory(), owner=user, last_modified_internal=last_modified
+        )
+
+        response = self.post(
+            url_for("api.upload_community_resource", community=community_resource),
+            {"file": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
+        )
+        self.assert200(response)
+
+        exposed = self.get(url_for("api.community_resource", community=community_resource)).json
+        assert datetime.fromisoformat(exposed["last_modified"]) > last_modified
 
     def test_community_resource_update_does_not_override_server_computed_fields(self):
         """A stale client payload must not override upload-computed fields of a hosted file"""
