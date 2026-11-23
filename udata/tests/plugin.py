@@ -4,7 +4,7 @@ from uuid import uuid4
 
 import pytest
 
-from udata.tests.fakes import DataCiteFake, ProConnectFake
+from udata.tests.fakes import DataCiteFake, ProConnectFake, TabularFake
 
 # The storages the resources migration is about, and the images, where what S3 serves an SVG
 # with matters. The others keep their own tests on the local backend.
@@ -38,6 +38,15 @@ def datacite(app, rmock):
     fake = DataCiteFake()
     platform_uri = app.config["DOI_PLATFORM_URI"]
     rmock.put(re.compile(f"^{re.escape(platform_uri)}/dois/"), json=fake.handle_put)
+    return fake
+
+
+@pytest.fixture
+def tabular(app, rmock):
+    """An in-memory api-tabular, wired behind TABULAR_API_URL."""
+    fake = TabularFake()
+    fake.mount(rmock)
+    app.config["TABULAR_API_URL"] = fake.BASE_URL
     return fake
 
 

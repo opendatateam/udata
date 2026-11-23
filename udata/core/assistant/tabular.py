@@ -6,22 +6,27 @@ aggregations, sorting, pagination).
 
 ``TabularRequestRefused`` carries api-tabular's status and error detail, which the
 tools relay to the model as they are: api-tabular is a public API, its errors are
-meant to be read. Other ``TabularError`` messages (network, timeout, invalid JSON)
-stay in the logs, like the internal URLs.
+meant to be read. ``TabularUnexpectedAnswer`` is an answer the models below cannot
+read. Other ``TabularError`` messages (network, timeout, unconfigured) stay in the
+logs, like the internal URLs.
 """
 
 import logging
+from typing import Any, TypeVar
+from uuid import UUID
 
 import requests
 from flask import current_app
+from pydantic import BaseModel, ValidationError
 
 from udata.core.assistant.data_query import PAGE_SIZE
-from udata.utils import normalize_uuid
 
 log = logging.getLogger(__name__)
 
 PROFILE_ROUTE = "/api/resources/{rid}/profile/"
 DATA_ROUTE = "/api/resources/{rid}/data/"
+
+ModelT = TypeVar("ModelT", bound=BaseModel)
 
 # Seconds; a hanging api-tabular call must not stall the agent's tool call.
 TABULAR_TIMEOUT = 30
@@ -29,11 +34,60 @@ TABULAR_TIMEOUT = 30
 MAX_DETAIL_LENGTH = 300
 
 
+class TabularColumn(BaseModel):
+    # A column without type is left out of `columns()`, not the whole profile.
+    python_type: str | None = None
+
+
+class TabularProfileDetails(BaseModel):
+    header: list[str] | None = None
+    columns: dict[str, TabularColumn]
+    # csv-detective leaves it out for large files.
+    total_lines: int | None = None
+
+
+class TabularProfile(BaseModel):
+    """api-tabular's `/profile/` answer, as far as the assistant reads it."""
+
+    profile: TabularProfileDetails
+
+    def columns(self) -> dict[str, str]:
+        """`{name: python_type}`, in `header` order."""
+        columns = self.profile.columns
+        names = self.profile.header if self.profile.header is not None else list(columns)
+        return {
+            name: python_type
+            for name in names
+            if name in columns and (python_type := columns[name].python_type) is not None
+        }
+
+
+class TabularMeta(BaseModel):
+    # Not given for an aggregation.
+    total: int | None = None
+
+
+class TabularLinks(BaseModel):
+    next: str | None = None
+
+
+class TabularPage(BaseModel):
+    """A page of api-tabular's `/data/` answer."""
+
+    data: list[dict[str, Any]]
+    meta: TabularMeta = TabularMeta()
+    links: TabularLinks = TabularLinks()
+
+
 class TabularError(RuntimeError):
-    """Raised on any api-tabular failure (HTTP error, timeout, invalid JSON, unconfigured).
+    """Raised on any api-tabular failure (HTTP error, timeout, unexpected answer, unconfigured).
 
     The message is meant for the logs and never contains the requested URL.
     """
+
+
+class TabularUnexpectedAnswer(TabularError):
+    """api-tabular answered, but not in the shape the models read (invalid JSON included)."""
 
 
 class TabularRequestRefused(TabularError):
@@ -61,37 +115,25 @@ def _error_detail(response: requests.Response) -> str:
     return title if isinstance(title, str) else ""
 
 
-def _validate_resource_id(resource_id: str) -> str:
-    """Reject anything but a plain UUID before it reaches the URL path.
-
-    The value is interpolated into request paths, so a malformed id must be
-    stopped here rather than smuggled into the upstream URL (path traversal,
-    query injection through ``?`` or ``#``).
-    """
-    if (normalized := normalize_uuid(resource_id)) is None:
-        raise TabularError("invalid resource_id: a UUID is expected.")
-    return normalized
-
-
 class TabularClient:
     def __init__(self):
         base_url = current_app.config["TABULAR_API_URL"]
         # A trailing slash would double the one the routes start with.
         self.base_url = base_url.rstrip("/") if base_url else base_url
 
-    def get_profile(self, resource_id: str) -> dict:
-        return self._request(PROFILE_ROUTE.format(rid=_validate_resource_id(resource_id)))
+    def get_profile(self, resource_id: UUID) -> TabularProfile:
+        return self._request(PROFILE_ROUTE.format(rid=resource_id), TabularProfile)
 
-    def get_data(self, resource_id: str, query: str) -> dict:
+    def get_data(self, resource_id: UUID, query: str) -> TabularPage:
         """Fetch ``/data/`` with an already URL-encoded query string, sent verbatim.
 
         The URL is built by concatenation, never through ``params=``, so that
         pre-encoded (possibly double-encoded) parts are not re-encoded.
         """
-        return self._request(f"{DATA_ROUTE.format(rid=_validate_resource_id(resource_id))}?{query}")
+        return self._request(f"{DATA_ROUTE.format(rid=resource_id)}?{query}", TabularPage)
 
-    def _request(self, route: str) -> dict:
-        """JSON of an api-tabular GET."""
+    def _request(self, route: str, model: type[ModelT]) -> ModelT:
+        """An api-tabular GET, read as `model`."""
         if not self.base_url:
             log.warning("api-tabular is not configured (TABULAR_API_URL is not set)")
             raise TabularError("api-tabular is not configured (TABULAR_API_URL is not set)")
@@ -99,7 +141,7 @@ class TabularClient:
         try:
             response = requests.get(url, timeout=TABULAR_TIMEOUT)
             response.raise_for_status()
-            return response.json()
+            return model.model_validate_json(response.content)
         except requests.exceptions.HTTPError as error:
             log.warning("api-tabular request failed: %s: %s", url, error)
             raise TabularRequestRefused(
@@ -108,20 +150,21 @@ class TabularClient:
         except requests.exceptions.RequestException as error:
             log.warning("api-tabular request failed: %s: %s", url, error)
             raise TabularError("the tabular service returned an error.") from error
+        except ValidationError as error:
+            log.warning("api-tabular answered an unexpected shape: %s: %s", url, error)
+            raise TabularUnexpectedAnswer(
+                "the tabular service returned an unexpected answer."
+            ) from error
 
 
-def has_more_rows(first_page: dict) -> bool:
+def has_more_rows(first_page: TabularPage) -> bool:
     """Whether the query of ``first_page``, its page 1 of PAGE_SIZE, matches more rows.
 
     A raw query has an exact ``meta.total``. An aggregated one has none, but api-tabular
     links its page to a next one only when that next page has rows.
     """
-    rows = first_page.get("data") if isinstance(first_page, dict) else None
-    if not isinstance(rows, list) or len(rows) < PAGE_SIZE:
+    if len(first_page.data) < PAGE_SIZE:
         return False
-    meta = first_page.get("meta")
-    total = meta.get("total") if isinstance(meta, dict) else None
-    if isinstance(total, int):
-        return total > PAGE_SIZE
-    links = first_page.get("links")
-    return isinstance(links, dict) and bool(links.get("next"))
+    if first_page.meta.total is not None:
+        return first_page.meta.total > PAGE_SIZE
+    return bool(first_page.links.next)

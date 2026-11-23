@@ -75,11 +75,6 @@ def test_or_child_of_root_and():
     )
 
 
-def test_empty_values_are_dropped():
-    assert build_data_query(filters=Filter(column="a", condition="exact", value="")) == ""
-    assert build_data_query(filters=Filter(column="a", condition="exact")) == ""
-
-
 @pytest.mark.parametrize(
     "value,encoded",
     [

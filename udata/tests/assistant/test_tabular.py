@@ -1,3 +1,5 @@
+from uuid import UUID
+
 import pytest
 import requests
 
@@ -7,13 +9,17 @@ from udata.core.assistant.tabular import (
     TABULAR_TIMEOUT,
     TabularClient,
     TabularError,
+    TabularPage,
+    TabularProfile,
     TabularRequestRefused,
+    TabularUnexpectedAnswer,
     has_more_rows,
 )
 from udata.tests import PytestOnlyTestCase
 
 BASE_URL = "https://tabular.example.com"
-RESOURCE_ID = "5c4ae7a0-e3f1-4a3f-8b1d-2e9f00000000"
+RESOURCE_ID = UUID("5c4ae7a0-e3f1-4a3f-8b1d-2e9f00000000")
+PROFILE = {"profile": {"header": ["a"], "columns": {"a": {"python_type": "int"}}}}
 
 
 class TabularClientTest(PytestOnlyTestCase):
@@ -22,47 +28,46 @@ class TabularClientTest(PytestOnlyTestCase):
 
     def test_a_trailing_slash_in_the_base_url_does_not_double(self, requests_mock):
         self.app.config["TABULAR_API_URL"] = f"{BASE_URL}/"
-        requests_mock.get(f"{BASE_URL}/api/resources/{RESOURCE_ID}/profile/", json={})
+        requests_mock.get(f"{BASE_URL}/api/resources/{RESOURCE_ID}/profile/", json=PROFILE)
         TabularClient().get_profile(RESOURCE_ID)
         assert requests_mock.request_history[0].url.startswith(f"{BASE_URL}/api/")
 
-    def test_get_profile_returns_json_within_the_timeout(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/profile/",
-            json={"profile": {"a": "int"}},
-        )
-        assert TabularClient().get_profile(RESOURCE_ID) == {"profile": {"a": "int"}}
+    def test_get_profile_reads_the_profile_within_the_timeout(self, requests_mock):
+        requests_mock.get(f"{BASE_URL}/api/resources/{RESOURCE_ID}/profile/", json=PROFILE)
+        profile = TabularClient().get_profile(RESOURCE_ID)
+        assert profile == TabularProfile.model_validate(PROFILE)
+        # csv-detective leaves total_lines out for large files.
+        assert profile.profile.total_lines is None
         assert requests_mock.request_history[0].timeout == TABULAR_TIMEOUT
 
-    @pytest.mark.parametrize(
-        "bad_id",
-        [
-            "not-a-uuid",
-            "../admin",
-            "5c4ae7a0-e3f1-4a3f-8b1d-2e9f00000000/extra",
-            "5c4ae7a0-e3f1-4a3f-8b1d-2e9f00000000?apikey=secret",
-            "5c4ae7a0-e3f1-4a3f-8b1d-2e9f00000000#frag",
-            "",
-            None,
-            42,
-        ],
-    )
-    def test_malformed_resource_id_is_rejected_before_any_request(self, requests_mock, bad_id):
-        """Only plain UUIDs may reach the upstream URL path."""
-        client = TabularClient()
-        with pytest.raises(TabularError):
-            client.get_profile(bad_id)
-        with pytest.raises(TabularError):
-            client.get_data(bad_id, "a__groupby")
-        assert not requests_mock.request_history
-
-    def test_uuid_with_uppercase_and_braces_is_normalized(self, requests_mock):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/profile/",
-            json={"ok": True},
+    def test_profile_columns_follow_the_header_order(self):
+        profile = TabularProfile.model_validate(
+            {
+                "profile": {
+                    "header": ["b", "a"],
+                    "columns": {"a": {"python_type": "int"}, "b": {"python_type": "string"}},
+                }
+            }
         )
-        braced = "{5C4AE7A0-E3F1-4A3F-8B1D-2E9F00000000}"
-        assert TabularClient().get_profile(braced) == {"ok": True}
+        assert list(profile.columns().items()) == [("b", "string"), ("a", "int")]
+
+    def test_a_column_without_type_is_left_out_of_the_profile(self):
+        profile = TabularProfile.model_validate(
+            {"profile": {"columns": {"a": {"python_type": "int"}, "b": {}}}}
+        )
+        assert profile.columns() == {"a": "int"}
+
+    @pytest.mark.parametrize("body", [{"text": '{"profile": "x"}'}, {"text": "not json"}])
+    def test_an_unexpected_answer_raises_sanitized_tabular_error(self, requests_mock, caplog, body):
+        requests_mock.get(f"{BASE_URL}/api/resources/{RESOURCE_ID}/profile/", **body)
+        with (
+            caplog.at_level("WARNING", logger="udata.core.assistant.tabular"),
+            pytest.raises(TabularUnexpectedAnswer) as excinfo,
+        ):
+            TabularClient().get_profile(RESOURCE_ID)
+        assert BASE_URL not in str(excinfo.value)
+        assert body["text"] not in str(excinfo.value)
+        assert any(BASE_URL in record.getMessage() for record in caplog.records)
 
     def refused(self, requests_mock, status, **body) -> TabularRequestRefused:
         requests_mock.get(
@@ -76,9 +81,10 @@ class TabularClientTest(PytestOnlyTestCase):
     def error(detail, title="Invalid query") -> dict:
         return {"json": {"errors": [{"code": None, "title": title, "detail": detail}]}}
 
-    def test_an_error_status_relays_the_detail(self, requests_mock):
-        refusal = self.refused(requests_mock, 400, **self.error("Unknown column: x"))
-        assert (refusal.status, refusal.detail) == (400, "Unknown column: x")
+    @pytest.mark.parametrize("status", [400, 403])
+    def test_an_error_status_relays_the_detail(self, requests_mock, status):
+        refusal = self.refused(requests_mock, status, **self.error("Unknown column: x"))
+        assert (refusal.status, refusal.detail) == (status, "Unknown column: x")
 
     def test_an_error_relays_the_message_of_a_database_error(self, requests_mock):
         # api-tabular relays PostgREST's error object as is, internal table name included.
@@ -86,13 +92,6 @@ class TabularClientTest(PytestOnlyTestCase):
         detail = {"code": "42P01", "details": None, "hint": None, "message": message}
         refusal = self.refused(requests_mock, 404, **self.error(detail, "Database error"))
         assert (refusal.status, refusal.detail) == (404, message)
-
-    def test_an_unauthorized_parameter_is_relayed_as_is(self, requests_mock):
-        detail = "score is not among the allowed columns: {'birth', 'id'}"
-        refusal = self.refused(
-            requests_mock, 403, **self.error(detail, title="Unauthorized parameters")
-        )
-        assert (refusal.status, refusal.detail) == (403, detail)
 
     def test_an_error_without_detail_gives_its_title(self, requests_mock):
         refusal = self.refused(requests_mock, 400, **self.error(None, title="Invalid query"))
@@ -126,23 +125,6 @@ class TabularClientTest(PytestOnlyTestCase):
         assert BASE_URL not in str(excinfo.value)
         assert any(BASE_URL in record.getMessage() for record in caplog.records)
 
-    def test_invalid_json_raises_sanitized_tabular_error(self, requests_mock, caplog):
-        requests_mock.get(
-            f"{BASE_URL}/api/resources/{RESOURCE_ID}/data/?a__groupby",
-            text="not json",
-        )
-        with (
-            caplog.at_level("WARNING", logger="udata.core.assistant.tabular"),
-            pytest.raises(TabularError) as excinfo,
-        ):
-            TabularClient().get_data(RESOURCE_ID, "a__groupby")
-        assert "not json" not in str(excinfo.value)
-        # The server-side log keeps the diagnostic details (URL, error).
-        assert any(
-            BASE_URL in record.getMessage() and "Expecting value" in record.getMessage()
-            for record in caplog.records
-        )
-
     def test_unconfigured_raises_tabular_error(self, caplog):
         self.app.config["TABULAR_API_URL"] = None
         client = TabularClient()
@@ -161,32 +143,30 @@ class TabularClientTest(PytestOnlyTestCase):
         result = TabularClient().get_data(
             RESOURCE_ID, "a__groupby&b__sum&page=1&page_size=50&c__exact=x%252Ey"
         )
-        assert result == {"data": [{"a": 1}], "links": {}}
+        assert result == TabularPage(data=[{"a": 1}])
         assert requests_mock.request_history[0].url.endswith(
             "?a__groupby&b__sum&page=1&page_size=50&c__exact=x%252Ey"
         )
 
     def full_page(self, **page):
         """A first page of PAGE_SIZE rows, with these extra response fields."""
-        return {"data": [{"a": i} for i in range(PAGE_SIZE)], **page}
+        return TabularPage.model_validate({"data": [{"a": i} for i in range(PAGE_SIZE)], **page})
 
     NEXT = {"next": "https://tabular.example.com/next"}
 
     def test_has_more_rows_is_false_on_a_partial_page(self):
-        assert has_more_rows({"data": [{"a": 1}] * (PAGE_SIZE - 1), "links": self.NEXT}) is False
+        page = TabularPage.model_validate(
+            {"data": [{"a": 1}] * (PAGE_SIZE - 1), "links": self.NEXT}
+        )
+        assert has_more_rows(page) is False
 
-    @pytest.mark.parametrize("total,expected", [(926, True), (51, True), (50, False)])
+    @pytest.mark.parametrize("total,expected", [(51, True), (50, False)])
     def test_has_more_rows_reads_the_exact_total_of_a_raw_query(self, total, expected):
         assert has_more_rows(self.full_page(links=self.NEXT, meta={"total": total})) is expected
 
-    @pytest.mark.parametrize("links", [{"next": None}, {}, None])
-    def test_has_more_rows_is_false_on_a_full_page_without_next_link(self, links):
+    def test_has_more_rows_is_false_on_a_full_page_without_next_link(self):
         # api-tabular links an aggregated page to the next one only when it has rows
-        assert has_more_rows(self.full_page(links=links)) is False
+        assert has_more_rows(self.full_page()) is False
 
     def test_has_more_rows_follows_the_next_link_of_an_aggregated_page(self):
         assert has_more_rows(self.full_page(links=self.NEXT)) is True
-
-    @pytest.mark.parametrize("page", [None, [], {"data": "rows"}])
-    def test_has_more_rows_is_false_on_an_unexpected_page(self, page):
-        assert has_more_rows(page) is False

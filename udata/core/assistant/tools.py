@@ -11,6 +11,7 @@ import logging
 import threading
 from dataclasses import dataclass, field
 from typing import Any, Literal
+from uuid import UUID
 
 from pydantic import BaseModel
 from pydantic_ai import Agent, RunContext
@@ -19,13 +20,11 @@ from udata.core.assistant.charts import (
     ChartOutput,
     CreateChartInput,
     UpdateChartInput,
-    profile_columns,
     query_aggregate_error,
     to_chart_output,
     to_update_output,
     unknown_column_errors,
     validate_create,
-    validate_update,
 )
 from udata.core.assistant.data_query import (
     MAX_QUERIES_PER_QUESTION,
@@ -42,7 +41,10 @@ from udata.core.assistant.data_query import (
 from udata.core.assistant.tabular import (
     TabularClient,
     TabularError,
+    TabularPage,
+    TabularProfile,
     TabularRequestRefused,
+    TabularUnexpectedAnswer,
     has_more_rows,
 )
 from udata.core.dataset.models import Dataset, Resource, get_dataset_and_resource_by_id
@@ -50,14 +52,12 @@ from udata.mongo.queryset import paginate_embedded_list
 
 log = logging.getLogger(__name__)
 
-# Per-turn budgets. Exhausted tool budgets return a refusal the model can
-# explain; MODEL_REQUEST_LIMIT (passed as pydantic-ai usage limits) is the
-# hard stop for a model that keeps calling tools after a refusal. The query_data
-# budget, MAX_QUERIES_PER_QUESTION, lives in data_query next to PAGE_SIZE.
+# Tool calls per turn: past it, tools refuse and the model can say why.
 MAX_STEPS = 5
 # Resources listed in a dataset's metadata, so a huge dataset cannot flood the context.
 MAX_SERIALIZED_RESOURCES = 20
-# One request per tool round, plus the refused round and the final answer.
+# Stops a model that keeps calling tools after the refusal: one request per tool
+# round, plus the refused round and the final answer.
 MODEL_REQUEST_LIMIT = MAX_STEPS + 2
 
 
@@ -67,12 +67,13 @@ class AssistantDeps:
 
     `resource_id` is the active resource, set only when the requesting user can read
     it (see `load_active_resource`), and `columns` its profile columns, None while
-    the profile could not be fetched.
+    the profile could not be fetched, and `profile_error` a failure that would repeat.
     """
 
     tabular: TabularClient
-    resource_id: str | None = None
+    resource_id: UUID | None = None
     columns: dict[str, str] | None = None
+    profile_error: TabularError | None = None
     tool_count: int = 0
     query_count: int = 0
     # Parallel tool calls run in separate threads: budgets are checked and spent atomically.
@@ -108,40 +109,45 @@ def _consume_query_budget(ctx: RunContext[AssistantDeps]) -> str | None:
 class ActiveResource:
     dataset: Dataset
     resource: Resource
-    profile: dict | None
+    profile: TabularProfile | None
+    profile_error: TabularError | None = None
+
+
+def _repeats(error: TabularError) -> bool:
+    """Whether fetching again would fail the same way: api-tabular answered, not an outage."""
+    if isinstance(error, TabularRequestRefused):
+        return error.status < 500
+    return isinstance(error, TabularUnexpectedAnswer)
 
 
 def load_active_resource(resource_id: str, tabular: TabularClient) -> ActiveResource | None:
     """The resource, its dataset and its profile, None unless the user can read the dataset.
 
-    A profile fetch failure leaves `profile` None: the tools fetch it again.
+    A failed profile fetch leaves `profile` None; the tools fetch it again unless
+    `profile_error` says it would fail the same way.
     """
     dataset, resource = get_dataset_and_resource_by_id(resource_id)
     if dataset is None or resource is None or not dataset.permissions["read"].can():
         return None
     try:
-        profile = tabular.get_profile(resource_id)
-    except TabularError:
+        return ActiveResource(dataset, resource, tabular.get_profile(resource.id))
+    except TabularError as error:
         log.info("Assistant: profile fetch failed for %s", resource_id)
-        profile = None
-    return ActiveResource(dataset, resource, profile)
+        return ActiveResource(dataset, resource, None, error if _repeats(error) else None)
 
 
-def render_profile(profile: dict) -> str:
-    """Render the columns and line count of an api-tabular profile, whatever its shape."""
-    columns = profile_columns(profile)
+def render_profile(profile: TabularProfile) -> str:
+    """Render the columns and line count of an api-tabular profile."""
+    columns = profile.columns()
     lines = ["Columns:", *(f"- {name} ({kind})" for name, kind in columns.items())]
     if not columns:
         lines = ["No column information available."]
-    details = profile.get("profile") if isinstance(profile, dict) else None
-    total_lines = details.get("total_lines") if isinstance(details, dict) else None
-    if isinstance(total_lines, int):
-        lines.append(f"Line count: {total_lines}")
+    if profile.profile.total_lines is not None:
+        lines.append(f"Line count: {profile.profile.total_lines}")
     return "\n".join(lines)
 
 
-# Bounds on what a query result puts in the model's context: the row cap does not
-# bound it, a resource can have hundreds of columns and cells of any length.
+# Bounds on a query result: even 50 rows can be huge with many columns or long cells.
 MAX_CELL_CHARS = 200
 MAX_RESULT_CHARS = 10_000
 
@@ -186,18 +192,13 @@ def _refused(*errors: str) -> ToolError:
     return ToolError(errors=list(errors))
 
 
-def _render_result(result: dict, *, aggregated: bool = False) -> QueryOutput | ToolError:
-    """The `data` rows of an api-tabular response as a pipe-separated table.
+def _render_result(page: TabularPage) -> QueryOutput | ToolError:
+    """The rows of an api-tabular page as a pipe-separated table.
 
-    A query without aggregate has an exact `meta.total`; an aggregated one has none.
     Whole rows past MAX_RESULT_CHARS are left out, with a note.
     """
-    rows = result.get("data") if isinstance(result, dict) else None
-    rows = [row for row in rows or [] if isinstance(row, dict)]
-    meta = result.get("meta") if isinstance(result, dict) else None
-    total = meta.get("total") if isinstance(meta, dict) and not aggregated else None
-    if not isinstance(total, int):
-        total = None
+    rows = page.data
+    total = page.meta.total
     if not rows:
         return QueryOutput(table="", rows=0, total=total)
     columns = list(rows[0])
@@ -227,29 +228,36 @@ def _render_result(result: dict, *, aggregated: bool = False) -> QueryOutput | T
 
 NO_ACTIVE_RESOURCE = "No active resource: open a resource in the data studio."
 TABULAR_UNAVAILABLE = "The tabular service is unavailable."
+TABULAR_UNREADABLE = "The tabular service answered in a form the assistant cannot read."
 
 
 def _tabular_error_message(error: TabularError) -> str:
     """Message for the model: api-tabular's own answer when it gave one."""
     if isinstance(error, TabularRequestRefused):
         return f"The tabular service answered {error.status}: {error.detail}"
+    if isinstance(error, TabularUnexpectedAnswer):
+        return TABULAR_UNREADABLE
     return TABULAR_UNAVAILABLE
 
 
-def _active_columns(ctx: RunContext[AssistantDeps]) -> tuple[str, dict[str, str]]:
+def _active_columns(ctx: RunContext[AssistantDeps]) -> tuple[UUID, dict[str, str]]:
     """Active resource id and its profile columns, or raise `_ToolRefusal`.
 
     The columns come from the request's profile fetch; a failed one is tried again,
-    and its result kept for the next tools. Parallel tool calls may both fetch it:
-    the profile is the same.
+    unless it would fail the same way, and its result kept for the next tools. Parallel
+    tool calls may both fetch it: the profile is the same.
     """
     deps = ctx.deps
     if not deps.resource_id:
         raise _ToolRefusal(NO_ACTIVE_RESOURCE)
+    if deps.profile_error:
+        raise _ToolRefusal(_tabular_error_message(deps.profile_error))
     if deps.columns is None:
         try:
-            deps.columns = profile_columns(deps.tabular.get_profile(deps.resource_id))
+            deps.columns = deps.tabular.get_profile(deps.resource_id).columns()
         except TabularError as error:
+            if _repeats(error):
+                deps.profile_error = error
             raise _ToolRefusal(_tabular_error_message(error)) from error
     return deps.resource_id, deps.columns
 
@@ -259,7 +267,7 @@ class _ToolRefusal(Exception):
 
 
 def _chart_has_more_groups(
-    tabular: TabularClient, resource_id: str, config: CreateChartInput
+    tabular: TabularClient, resource_id: UUID, config: CreateChartInput
 ) -> bool | None:
     """Whether the viewer warns that a series is cut to its first PAGE_SIZE rows, None if unknown.
 
@@ -416,7 +424,7 @@ def register_tools(agent: Agent) -> None:
             result = ctx.deps.tabular.get_data(resource_id, with_page(query))
         except TabularError as error:
             return _refused(_tabular_error_message(error))
-        output = _render_result(result, aggregated=bool(groupby))
+        output = _render_result(result)
         if isinstance(output, QueryOutput) and groupby:
             output.more_groups = has_more_rows(result)
         return output
@@ -437,7 +445,9 @@ def register_tools(agent: Agent) -> None:
             more_groups = _chart_has_more_groups(ctx.deps.tabular, resource_id, config)
         except TabularRequestRefused as refusal:
             return _refused(_tabular_error_message(refusal))
-        return ChartToolOutput(chart=to_chart_output(config, resource_id), more_groups=more_groups)
+        return ChartToolOutput(
+            chart=to_chart_output(config, str(resource_id)), more_groups=more_groups
+        )
 
     @agent.tool
     def update_chart(
@@ -450,6 +460,6 @@ def register_tools(agent: Agent) -> None:
         """
         if refusal := _consume_tool_budget(ctx):
             return _refused(refusal)
-        if errors := validate_update(patch):
-            return _refused(*errors)
-        return UpdateToolOutput(patch=to_update_output(patch))
+        if not (changes := to_update_output(patch)):
+            return _refused("At least one change is required.")
+        return UpdateToolOutput(patch=changes)

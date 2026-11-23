@@ -109,22 +109,19 @@ def _null_condition(f: Filter, column: str) -> str | None:
     return None
 
 
-def _param(f: Filter) -> str | None:
+# Filters without a value are refused before this point.
+def _param(f: Filter) -> str:
     column = _encode_twice(f.column)
     if (null := _null_condition(f, column)) is not None:
         return null
-    if not f.value:
-        return None
     return f"{column}__{f.condition}={_encode_twice(f.value)}"
 
 
-def _condition(f: Filter) -> str | None:
+def _condition(f: Filter) -> str:
     # A quoted column would be parsed with a `[a-z]+` operator, cutting strictly_*.
     column = _encode_in_condition(f.column)
     if (null := _null_condition(f, column)) is not None:
         return null
-    if not f.value:
-        return None
     return f"{column}__{f.condition}.%22{_encode_in_condition(f.value)}%22"
 
 
@@ -152,13 +149,11 @@ def _or_param(group: OrFilters) -> str | None:
 def _build_filter_query(filters: GenericFilter) -> list[str]:
     params: list[str] = []
     if isinstance(filters, Filter):
-        if (p := _param(filters)) is not None:
-            params.append(p)
+        params.append(_param(filters))
     elif isinstance(filters, AndFilters):
         for child in filters.filters:
             if isinstance(child, Filter):
-                if (p := _param(child)) is not None:
-                    params.append(p)
+                params.append(_param(child))
             elif (p := _or_param(child)) is not None:
                 params.append(p)
     elif (p := _or_param(filters)) is not None:
@@ -199,8 +194,8 @@ def build_data_query(
     return "&".join(params)
 
 
-def with_page(query: str, page: int = 1, page_size: int = PAGE_SIZE) -> str:
-    paging = f"page={page}&page_size={page_size}"
+def with_page(query: str) -> str:
+    paging = f"page=1&page_size={PAGE_SIZE}"
     return f"{query}&{paging}" if query else paging
 
 

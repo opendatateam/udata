@@ -17,13 +17,8 @@ from udata.core.visualizations.models import DataSeries, XAxis, YAxis
 
 NUMERIC_TYPES = frozenset({"int", "float"})
 
-# A chart needs both to be saved (`Chart.title` and `Chart.description` are required).
-EMPTY_TEXT_ERRORS = {
-    "title": "The title is required and cannot be empty.",
-    "description": "The description is required and cannot be empty.",
-}
-
-StrippedText = Annotated[str, StringConstraints(strip_whitespace=True)]
+# Never empty: a chart needs a title and a description to be saved.
+StrippedText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 ChartType = model_choices(DataSeries.type)
 AxisType = model_choices(XAxis.type)
 SortBy = model_choices(XAxis.sort_x_by)
@@ -81,26 +76,6 @@ class UpdateChartInput(BaseModel):
     y_axis: YAxisInput | None = None
 
 
-def profile_columns(profile: dict) -> dict[str, str]:
-    """`{name: python_type}` from an api-tabular profile, in `header` order."""
-    details = profile.get("profile") if isinstance(profile, dict) else None
-    if not isinstance(details, dict):
-        return {}
-    columns = details.get("columns")
-    if not isinstance(columns, dict):
-        return {}
-    header = details.get("header")
-    names = header if isinstance(header, list) else list(columns)
-    result = {}
-    for name in names:
-        if not isinstance(name, str):
-            continue
-        column = columns.get(name)
-        if isinstance(column, dict) and isinstance(column.get("python_type"), str):
-            result[name] = column["python_type"]
-    return result
-
-
 def aggregate_error(column: str, aggregate: Aggregate, column_type: str | None) -> str | None:
     """Refusal of an aggregate other than count on a column the profile does not type as numeric."""
     if aggregate == "count" or column_type is None or column_type in NUMERIC_TYPES:
@@ -121,13 +96,8 @@ def unknown_column_errors(names: Iterable[str | None], known: dict[str, str]) ->
     return [f"Unknown column: {name}." for name in unknown]
 
 
-def _empty_text_errors(values: dict[str, str | None]) -> list[str]:
-    return [EMPTY_TEXT_ERRORS[name] for name, value in values.items() if value == ""]
-
-
 def validate_create(config: CreateChartInput, columns: dict[str, str]) -> list[str]:
-    errors = _empty_text_errors({"title": config.title, "description": config.description})
-    errors += unknown_column_errors(
+    errors = unknown_column_errors(
         [
             config.x_axis.column_x,
             # A count series counts the X column: its column_y is never read.
@@ -147,14 +117,6 @@ def validate_create(config: CreateChartInput, columns: dict[str, str]) -> list[s
             errors.append(f"The {series.column_y} series must be numeric or aggregated by count.")
     errors.extend(filter_errors(config.filters))
     return errors
-
-
-def validate_update(patch: UpdateChartInput) -> list[str]:
-    if errors := _empty_text_errors({"title": patch.title, "description": patch.description}):
-        return errors
-    if not to_update_output(patch):
-        return ["At least one change is required."]
-    return []
 
 
 class SeriesOutput(BaseModel):

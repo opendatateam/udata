@@ -5,15 +5,12 @@ from flask import url_for
 from pydantic import ValidationError
 
 from udata.core.assistant.charts import (
-    EMPTY_TEXT_ERRORS,
     CreateChartInput,
     UpdateChartInput,
-    profile_columns,
     to_chart_output,
     to_update_output,
     unknown_column_errors,
     validate_create,
-    validate_update,
 )
 from udata.core.visualizations.models import Chart
 from udata.tests.api import PytestOnlyAPITestCase
@@ -164,10 +161,9 @@ def test_output_without_filters_has_none():
     assert to_chart_output(make(), "rid").model_dump()["series"][0]["filters"] is None
 
 
-def test_update_needs_one_field():
-    assert validate_update(UpdateChartInput()) == ["At least one change is required."]
-    assert validate_update(UpdateChartInput(y_axis={})) == ["At least one change is required."]
-    assert validate_update(UpdateChartInput(title="x")) == []
+def test_update_output_of_no_change_is_empty():
+    assert to_update_output(UpdateChartInput()) == {}
+    assert to_update_output(UpdateChartInput(y_axis={})) == {}
 
 
 def test_update_output_only_has_provided_fields():
@@ -179,30 +175,6 @@ def test_unit_is_not_bounded_beyond_the_chart_model():
     # Like YAxis.unit and the chart form: a long unit is accepted.
     patch = UpdateChartInput(y_axis={"unit": "tonnes équivalent CO2"})
     assert to_update_output(patch) == {"y_axis": {"unit": "tonnes équivalent CO2"}}
-
-
-def test_profile_columns_follows_the_header_order():
-    profile = {
-        "profile": {
-            "header": ["b", "a"],
-            "columns": {"a": {"python_type": "int"}, "b": {"python_type": "string"}},
-        }
-    }
-    cols = profile_columns(profile)
-    assert list(cols) == ["b", "a"]
-    assert cols == {"b": "string", "a": "int"}
-
-
-def test_profile_columns_malformed_returns_empty():
-    assert profile_columns({}) == {}
-    assert profile_columns({"profile": "x"}) == {}
-    assert profile_columns({"profile": {"header": 3, "columns": []}}) == {}
-
-
-def test_update_with_only_nulls_is_an_error():
-    patch = UpdateChartInput(title=None, y_axis=None)
-    assert validate_update(patch) == ["At least one change is required."]
-    assert to_update_output(patch) == {}
 
 
 def test_update_output_drops_top_level_nulls_but_keeps_y_axis_nulls():
@@ -241,8 +213,8 @@ def test_filter_without_value_is_refused():
 
 @pytest.mark.parametrize("field", ["title", "description"])
 def test_blank_title_or_description_is_refused(field):
-    errors = validate_create(make(**{field: "   "}), COLUMNS)
-    assert errors == [EMPTY_TEXT_ERRORS[field]]
+    with pytest.raises(ValidationError, match="at least 1 character"):
+        make(**{field: "   "})
 
 
 def test_output_strips_title_and_description():
@@ -254,7 +226,13 @@ def test_output_strips_title_and_description():
 
 @pytest.mark.parametrize("field", ["title", "description"])
 def test_update_refuses_a_blank_title_or_description(field):
-    assert validate_update(UpdateChartInput(**{field: " "})) == [EMPTY_TEXT_ERRORS[field]]
+    with pytest.raises(ValidationError, match="at least 1 character"):
+        UpdateChartInput(**{field: " "})
+
+
+def test_the_tool_schema_asks_for_a_non_empty_title():
+    schema = CreateChartInput.model_json_schema()
+    assert schema["properties"]["title"]["minLength"] == 1
 
 
 def test_update_output_strips_the_title():

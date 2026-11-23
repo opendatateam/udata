@@ -669,6 +669,8 @@ class Defaults(object):
 
     TABULAR_EXPLORE_URL = None
     TABULAR_ALLOW_REMOTE = True
+    # api-tabular, read by the AI assistant for resource profiles and data.
+    TABULAR_API_URL = None
 
     # AI assistant settings (see docs/adapting-settings.md)
     ###########################################################################
@@ -680,7 +682,6 @@ class Defaults(object):
     AI_MODELS = [
         {"name": "gpt-oss-120b", "max_output_tokens": 8192, "reasoning_effort": None},
     ]
-    TABULAR_API_URL = None
 
     # JSON-LD settings
     ###########################################################################

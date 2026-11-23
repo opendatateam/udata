@@ -5,11 +5,14 @@ instead of being handed a canned response per test.
 """
 
 import json
+import operator
+import re
 import time
 from dataclasses import dataclass
-from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
+from urllib.parse import parse_qs, unquote, urlencode, urlparse, urlunparse
 from uuid import uuid4
 
+import requests
 from joserfc import jwt
 from joserfc.jwk import RSAKey
 
@@ -214,3 +217,176 @@ class DataCiteFake:
         if attributes.get("event") == "publish":
             record["state"] = "findable"
         return {"data": {"attributes": record}}
+
+
+class TabularFake:
+    """An in-memory api-tabular that answers like its `main` branch, for what tests send.
+
+    A parameter it does not model raises `NotImplementedError`.
+    """
+
+    BASE_URL = "https://tabular.test"
+    AGGREGATES = {
+        "sum": lambda values: sum(values) if values else None,
+        "count": len,
+        "min": lambda values: min(values, default=None),
+        "max": lambda values: max(values, default=None),
+    }
+    NUMERIC_TYPES = {"int", "float"}
+    # `less` and `greater` include the bound, like api-tabular.
+    ORDERINGS = {"less": operator.le, "greater": operator.ge}
+    OPERATORS = {"groupby", "sort", "differs", *AGGREGATES, *ORDERINGS}
+
+    def __init__(self):
+        self.resources: dict[str, dict] = {}
+        self.queries: list[str] = []
+        self.profile_requests: list[str] = []
+        self._failure: tuple[int, str] | None = None
+        self._unreachable = False
+
+    def mount(self, rmock) -> None:
+        resource = f"^{re.escape(self.BASE_URL)}/api/resources/[^/]+"
+        rmock.get(re.compile(f"{resource}/profile/$"), text=self._profile)
+        rmock.get(re.compile(f"{resource}/data/"), text=self._data)
+
+    def add_resource(self, rid, columns: dict[str, str], rows: list[dict] | None = None) -> None:
+        """A resource of `columns` (`{name: python_type}`) holding `rows`."""
+        self.resources[str(rid)] = {"columns": columns, "rows": rows or []}
+
+    def fails_with(self, status_code: int, detail) -> None:
+        """Make every subsequent call answer `status_code` with api-tabular's error body."""
+        self._failure = (status_code, self._error("Invalid query", detail))
+
+    def answers_unreadable(self) -> None:
+        """Make every subsequent call answer 200 with a body of no expected shape."""
+        self._failure = (200, json.dumps({"profile": None}))
+
+    def unreachable(self) -> None:
+        """Make every subsequent call fail on the network, after being recorded."""
+        self._unreachable = True
+
+    def recovers(self) -> None:
+        self._unreachable = False
+
+    @staticmethod
+    def _error(title: str, detail) -> str:
+        return json.dumps({"errors": [{"code": None, "title": title, "detail": detail}]})
+
+    def _answer(self, rid: str, context) -> dict | str:
+        """The resource, or the answer that replaces it."""
+        if self._unreachable:
+            raise requests.exceptions.ConnectionError("tabular.test is unreachable")
+        if self._failure:
+            context.status_code, body = self._failure
+            return body
+        if (resource := self.resources.get(rid)) is None:
+            context.status_code = 404
+            return "404: Not Found"
+        return resource
+
+    def _unknown_column(self, resource: dict, names: list[str], context) -> str | None:
+        """api-tabular's 400 for the first of `names` the resource lacks, if any."""
+        for name in names:
+            if name not in resource["columns"]:
+                context.status_code = 400
+                return self._error("Database error", {"message": f"column {name} does not exist"})
+        return None
+
+    def _profile(self, request, context) -> str:
+        rid = request.path.split("/")[3]
+        self.profile_requests.append(rid)
+        resource = self._answer(rid, context)
+        if isinstance(resource, str):
+            return resource
+        columns = resource["columns"]
+        return json.dumps(
+            {
+                "profile": {
+                    "header": list(columns),
+                    "columns": {name: {"python_type": kind} for name, kind in columns.items()},
+                    "total_lines": len(resource["rows"]),
+                }
+            }
+        )
+
+    def _data(self, request, context) -> str:
+        query = urlparse(request.url).query
+        self.queries.append(query)
+        resource = self._answer(request.path.split("/")[3], context)
+        if isinstance(resource, str):
+            return resource
+        page, page_size = 1, 20
+        columns = groupby = aggregate = sort = None
+        rows = list(resource["rows"])
+        for param in (param for param in query.split("&") if param):
+            # The client encodes names and values twice so that `=` and `,` survive.
+            raw_name, _, raw_value = param.partition("=")
+            name, value = unquote(unquote(raw_name)), unquote(unquote(raw_value))
+            if name == "page":
+                page = int(value)
+            elif name == "page_size":
+                page_size = int(value)
+            elif name == "columns":
+                columns = [unquote(unquote(column)) for column in raw_value.split(",")]
+                if unknown := self._unknown_column(resource, columns, context):
+                    return unknown
+            else:
+                column, _, op = name.rpartition("__")
+                if op not in self.OPERATORS:
+                    raise NotImplementedError(f"TabularFake does not model {name}")
+                if unknown := self._unknown_column(resource, [column], context):
+                    return unknown
+                if op == "groupby":
+                    groupby = column
+                elif op in self.AGGREGATES:
+                    aggregate = (column, op)
+                elif op == "sort":
+                    sort = (column, value == "desc")
+                elif op == "differs":
+                    # Like PostgREST's `isdistinct`, it keeps the nulls.
+                    rows = [
+                        row for row in rows if row.get(column) is None or str(row[column]) != value
+                    ]
+                else:
+                    if resource["columns"][column] not in self.NUMERIC_TYPES:
+                        raise NotImplementedError("TabularFake orders numeric columns only")
+                    compare = self.ORDERINGS[op]
+                    rows = [
+                        row
+                        for row in rows
+                        if row.get(column) is not None and compare(float(row[column]), float(value))
+                    ]
+        if aggregate:
+            rows = self._aggregate(rows, groupby, aggregate)
+        elif columns:
+            rows = [{name: row.get(name) for name in columns} for row in rows]
+        if sort:
+            column, descending = sort
+            rows.sort(
+                key=lambda row: (row.get(column) is None, row.get(column)), reverse=descending
+            )
+        start = (page - 1) * page_size
+        next_url = None
+        if len(rows) > start + page_size:
+            kept = [param for param in query.split("&") if param and not param.startswith("page=")]
+            next_query = "&".join([*kept, f"page={page + 1}"])
+            next_url = urlunparse(urlparse(request.url)._replace(query=next_query))
+        body = {"data": rows[start : start + page_size], "links": {"next": next_url}, "meta": {}}
+        if not aggregate:
+            body["meta"]["total"] = len(rows)
+        return json.dumps(body)
+
+    def _aggregate(self, rows, groupby, aggregate):
+        column, op = aggregate
+        groups: dict = {}
+        for row in rows:
+            groups.setdefault(row.get(groupby) if groupby else None, []).append(row)
+        if not groupby:
+            groups = {None: rows}
+        result = []
+        for key, members in groups.items():
+            values = [row[column] for row in members if row.get(column) is not None]
+            out = {groupby: key} if groupby else {}
+            out[f"{column}__{op}"] = self.AGGREGATES[op](values)
+            result.append(out)
+        return result

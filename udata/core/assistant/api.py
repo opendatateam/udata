@@ -11,13 +11,13 @@ import logging
 import queue
 import re
 import threading
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Iterator
 from contextlib import aclosing
 
 from flask import Response, current_app, request, stream_with_context
 from flask_login import current_user
 from pydantic import ValidationError
-from pydantic_ai import CancellationToken
+from pydantic_ai import Agent, CancellationToken, RunContext
 from pydantic_ai.capabilities import Hooks
 from pydantic_ai.exceptions import (
     AgentRunError,
@@ -36,15 +36,15 @@ from pydantic_ai.exceptions import (
     UsageLimitExceeded,
 )
 from pydantic_ai.messages import ModelMessage, UserPromptPart
+from pydantic_ai.models import ModelRequestContext
 from pydantic_ai.ui import SSE_CONTENT_TYPE
 from pydantic_ai.ui.vercel_ai import VercelAIAdapter, VercelAIEventStream
-from pydantic_ai.ui.vercel_ai.request_types import TextUIPart
+from pydantic_ai.ui.vercel_ai.request_types import TextUIPart, UIMessage
 from pydantic_ai.ui.vercel_ai.response_types import AbortChunk, BaseChunk, ErrorChunk
 from pydantic_ai.usage import UsageLimits
 
 from udata.api import API, api
 from udata.core.assistant.agent import get_agent
-from udata.core.assistant.charts import profile_columns
 from udata.core.assistant.history import asks, compact_history
 from udata.core.assistant.models import TITLE_MAX_LENGTH, AssistantConversation
 from udata.core.assistant.prompts import language_instructions
@@ -81,7 +81,7 @@ MAX_CHAT_ID_LENGTH = 64
 UNTRUSTED_TAG = re.compile(r"<(?=/?untrusted)", re.IGNORECASE)
 
 
-def _check_new_turn(messages) -> list:
+def _check_new_turn(messages: list[UIMessage]) -> list[UIMessage]:
     """The client's new turn, after the last assistant reply: user text only.
 
     Earlier messages are ignored, the stored conversation is the history. Anything but
@@ -92,7 +92,7 @@ def _check_new_turn(messages) -> list:
     if not new_turn:
         api.abort(400, _("The conversation has no user message."))
     for message in new_turn:
-        # With pydantic_ai metadata, pydantic-ai reads other content than the text counted below.
+        # Such metadata can carry content that the length check below would not see.
         if message.role != "user" or not all(
             isinstance(part, TextUIPart) and "pydantic_ai" not in (part.provider_metadata or {})
             for part in message.parts
@@ -130,7 +130,9 @@ def _stored_history(conversation: AssistantConversation) -> list[ModelMessage]:
 
 
 def _save_conversation(
-    conversation: AssistantConversation, messages: list[ModelMessage], active
+    conversation: AssistantConversation,
+    messages: list[ModelMessage],
+    active: ActiveResource | None,
 ) -> None:
     conversation.messages = AssistantConversation.stored_messages(messages)
     conversation.title = conversation.title or _first_question(messages)
@@ -146,7 +148,9 @@ def _context_hook(context: str) -> Hooks:
     than of the instructions.
     """
 
-    def before_model_request(ctx, request_context):
+    def before_model_request(
+        ctx: RunContext[AssistantDeps], request_context: ModelRequestContext
+    ) -> ModelRequestContext:
         messages = list(request_context.messages)
         index = max(i for i, m in enumerate(messages) if asks(m))
         question = messages[index]
@@ -267,9 +271,7 @@ class AssistantEventStream(VercelAIEventStream):
     """
 
     async def on_error(self, error: Exception) -> AsyncIterator[BaseChunk]:
-        # Provider failures and run limits are operational. A rejected key, an unknown
-        # model, an exhausted quota or a response cut by `max_output_tokens` is for the
-        # instance to fix, and anything else a bug: all are for Sentry.
+        # Configuration problems and bugs go to Sentry, provider hiccups and limits do not.
         misconfigured = isinstance(
             error,
             ModelAuthenticationError
@@ -286,9 +288,7 @@ class AssistantEventStream(VercelAIEventStream):
             yield chunk
 
     async def on_cancelled(self, cancelled: RunCancelled) -> AsyncIterator[BaseChunk]:
-        # The AI SDK ends a stream quietly on an abort chunk, without its reason: a
-        # timeout is an error the user must see. Any other cancellation is the client
-        # leaving, which nobody reads.
+        # The user must see a timeout; any other cancellation is the user leaving.
         if isinstance(cancelled, RunTimedOut):
             log.warning("Assistant turn timed out after %s s", AI_TURN_TIMEOUT)
             yield ErrorChunk(error_text=_("The response took too long and was interrupted."))
@@ -315,22 +315,24 @@ _STREAM_FAILED = object()
 STREAM_JOIN_TIMEOUT = 5
 
 
-def _stream_in_thread(agent, stream, cancellation_token, sdk_version: int):
+def _stream_in_thread(
+    agent: Agent[AssistantDeps],
+    stream: AsyncIterator[str],
+    cancellation_token: CancellationToken,
+    sdk_version: int,
+) -> Iterator[str]:
     """Relay the async SSE ``stream`` to this sync WSGI generator, chunk by chunk.
 
-    The whole stream runs in one asyncio task, in a thread with its own loop:
-    pydantic-ai's cancel scopes must be entered and exited in the same task, so
-    a client disconnect cancels the run instead of closing generators from
-    another one. The task is created here, so it copies the request context
-    that tools need for permission checks.
+    The stream runs in a single task of its own thread, so that a client disconnect
+    can cancel the run. The task is created here to keep the request context, which
+    the tools need for permission checks.
     """
     chunks = queue.SimpleQueue()
     loop = asyncio.new_event_loop()
 
     async def pump():
         try:
-            # Entering the agent ties the provider's HTTP client to this
-            # turn: it is closed on exit instead of leaking a connection.
+            # Closes the provider's HTTP connection at the end of the turn.
             await agent.__aenter__()
             try:
                 async with aclosing(aiter(stream)) as iterator:
@@ -358,22 +360,19 @@ def _stream_in_thread(agent, stream, cancellation_token, sdk_version: int):
     try:
         while (chunk := chunks.get()) is not _STREAM_END:
             if chunk is _STREAM_FAILED:
-                # The HTTP stream already started: report the failure as an
-                # SSE error chunk, details stay in the server logs.
+                # The response has started: the failure is sent as an error event.
                 message = _("An error occurred while generating the response.")
                 yield f"data: {ErrorChunk(error_text=message).encode(sdk_version)}\n\n"
             else:
                 yield chunk
     except GeneratorExit:
-        # Client disconnected. Only the run is cancelled: pydantic-ai then ends
-        # the stream as an abort, so the pump exits the agent without a pending
-        # CancelledError interrupting that cleanup.
+        # The client left: cancelling the run lets the stream end cleanly.
         cancellation_token.cancel()
         raise
     finally:
         thread.join(STREAM_JOIN_TIMEOUT)
         if thread.is_alive():
-            # Stuck in a synchronous call (api-tabular): the daemon thread ends on its own.
+            # Likely waiting on api-tabular: the thread ends on its own.
             log.warning("Assistant chat stream still running after the client left")
 
 
@@ -383,27 +382,21 @@ class AssistantChatAPI(API):
     @api.doc("assistant_chat")
     def post(self):
         """Stream an assistant reply as Vercel AI SSE events"""
-        # Bounds every read of the body from here on. Werkzeug truncates a chunked body
-        # at the limit without a 413: the extra byte reveals an oversized one.
+        # One byte over the limit, so that an oversized body can be told apart.
         request.max_content_length = MAX_REQUEST_BYTES + 1
-        # Disabled state is ``AI_BASE_URL`` unset; a missing API key is a
-        # misconfiguration. Both make the assistant unavailable: 503.
+        # Without AI_BASE_URL the assistant is off; without a key it is misconfigured.
         if not current_app.config["AI_BASE_URL"]:
             api.abort(503, _("The assistant is not available."))
         if not current_app.config["AI_API_KEY"]:
             log.error("Assistant enabled without an AI provider API key (AI_API_KEY)")
             api.abort(503, _("The assistant is not available."))
 
-        # The raw body is read below, which skips the JSON content type check of
-        # request.json. The API is exempt from CSRF: without the check, a text/plain
-        # post from another same-site origin, which needs no preflight, would run the
-        # agent with the user's session cookie.
+        # Requiring JSON blocks cross-site form posts: this API has no CSRF token.
         if not request.is_json:
             api.abort(415)
 
-        # Validate before building the agent so a bad body never reaches it. The
-        # body may already be cached: Flask-Security reads it to look for an auth
-        # token when the request carries no session.
+        # Checked before the agent is built, and after reading too: the body may have
+        # been read before the limit above was set.
         if (request.content_length or 0) > MAX_REQUEST_BYTES:
             api.abort(413)
         body = request.get_data()
@@ -428,8 +421,9 @@ class AssistantChatAPI(API):
         active = load_active_resource(resource_id, tabular) if resource_id else None
         deps = AssistantDeps(
             tabular=tabular,
-            resource_id=str(active.resource.id) if active else None,
-            columns=profile_columns(active.profile) if active and active.profile else None,
+            resource_id=active.resource.id if active else None,
+            columns=active.profile.columns() if active and active.profile else None,
+            profile_error=active.profile_error if active else None,
         )
         agent = get_agent()
         adapter = AssistantAdapter(
