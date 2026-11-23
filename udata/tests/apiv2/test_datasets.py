@@ -285,6 +285,18 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data["next_page"] is None
         assert data["previous_page"] is None
 
+    def test_get_resources_of_a_dataset_whose_resources_were_emptied(self):
+        """Saving a dataset with no resources left removes the field: the list is empty, not a 500"""
+        dataset = DatasetFactory(resources=[ResourceFactory()])
+        dataset.resources = []
+        dataset.save()
+        assert "resources" not in Dataset._get_collection().find_one({"_id": dataset.id})
+
+        response = self.get(url_for("apiv2.resources", dataset=dataset.id))
+        self.assert200(response)
+        assert response.json["data"] == []
+        assert response.json["total"] == 0
+
     def test_get_next_page(self):
         """Should fetch 2 pages of resources from the API"""
         resources = [ResourceFactory() for _ in range(80)]
