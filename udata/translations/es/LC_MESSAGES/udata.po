@@ -464,6 +464,10 @@ msgstr ""
 msgid "Invalid conversation id."
 msgstr ""
 
+#: udata/core/assistant/api.py:129
+msgid "This conversation can no longer be read. Start a new one."
+msgstr ""
+
 #: udata/core/assistant/api.py:192
 msgid "Invalid resource_id: a resource UUID is expected."
 msgstr ""

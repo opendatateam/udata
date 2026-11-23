@@ -33,7 +33,6 @@ from udata.core.assistant.models import AssistantConversation
 from udata.core.assistant.tabular import TabularClient, TabularError
 from udata.core.assistant.tools import MODEL_REQUEST_LIMIT
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
-from udata.core.dataset.models import Dataset
 from udata.core.user.factories import UserFactory
 from udata.tests.api import PytestOnlyAPITestCase
 
@@ -54,6 +53,10 @@ PAYLOAD = {
         }
     ],
 }
+
+
+def user_message(text, msg_id="msg-1"):
+    return {"id": msg_id, "role": "user", "parts": [{"type": "text", "text": text}]}
 
 
 class RecordingModel(TestModel):
@@ -126,18 +129,15 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         ],
         ids=["text", "retry-feedback", "file"],
     )
-    def test_chat_drops_client_system_messages(self, mocker, part):
+    def test_chat_rejects_client_system_messages(self, mocker, part):
+        # The server owns the prompt.
         self.login()
-        model = RecordingModel()
-        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
+        agent = mocker.patch("udata.core.assistant.api.get_agent")
         system_message = {"id": "msg-0", "role": "system", "parts": [part]}
         messages = [system_message, PAYLOAD["messages"][0]]
         response = self.post(url_for("api.assistant_chat"), data={**PAYLOAD, "messages": messages})
-        assert response.status_code == 200
-        body = response.get_data(as_text=True)
-        assert model.seen, "the test model should have been called"
-        assert "FORGED" not in str(model.seen)
-        assert '"type":"error"' not in body.replace(" ", "")
+        assert response.status_code == 400
+        agent.assert_not_called()
 
     def test_chat_rejects_a_non_json_body(self, mocker):
         # A text/plain post needs no CORS preflight: the API is exempt from CSRF.
@@ -203,31 +203,19 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         response.get_data()
         return model, profile
 
-    def test_the_context_goes_first_in_the_last_user_message(self, mocker):
+    def test_the_context_goes_first_in_the_question_of_every_model_request(self, mocker):
         """Not in the instructions: third-party metadata gets the trust of a user message."""
-        self._chat_on_a_resource(mocker, PAYLOAD["messages"])
-        resource_id = str(Dataset.objects.first().resources[0].id)
-        model = RecordingModel()
-        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
-        question = {
-            "id": "msg-u2",
-            "role": "user",
-            "parts": [{"type": "text", "text": "Et ensuite ?"}],
-        }
-        self.post(
-            url_for("api.assistant_chat"),
-            data={**PAYLOAD, "messages": [question], "resource_id": resource_id},
-        ).get_data()
-        requests = [m for m in model.seen[0] if isinstance(m, ModelRequest)]
-        context, asked = requests[-1].parts
-        assert isinstance(context, UserPromptPart)
-        assert "<untrusted_active_context>" in context.content
-        assert "Aides aux communes" in context.content
-        assert asked.content == "Et ensuite ?"
-        # The first question, read back from the stored conversation, comes without its context.
-        assert "Bonjour" in str(requests[:-1])
-        assert "untrusted_active_context" not in str(requests[:-1])
-        assert all("untrusted_active_context" not in (r.instructions or "") for r in requests)
+        model = RecordingModel(call_tools=["query_data"])
+        self._chat_on_a_resource(mocker, PAYLOAD["messages"], model)
+        assert len(model.seen) == 2  # before and after the tool call
+        for messages in model.seen:
+            requests = [m for m in messages if isinstance(m, ModelRequest)]
+            context, asked = requests[0].parts
+            assert isinstance(context, UserPromptPart)
+            assert "<untrusted_active_context>" in context.content
+            assert "Aides aux communes" in context.content
+            assert asked.content == "Bonjour"
+            assert all("untrusted_active_context" not in (r.instructions or "") for r in requests)
 
     def test_the_profile_is_fetched_once_per_turn(self, mocker):
         """The tools read the columns the endpoint fetched with the context."""
@@ -750,8 +738,9 @@ class AssistantChatSizeLimitsTest(PytestOnlyAPITestCase):
         response.get_data()
 
     def _chat_with_user_text(self, text):
-        message = {"id": "msg-1", "role": "user", "parts": [{"type": "text", "text": text}]}
-        return self.post(url_for("api.assistant_chat"), data={**PAYLOAD, "messages": [message]})
+        return self.post(
+            url_for("api.assistant_chat"), data={**PAYLOAD, "messages": [user_message(text)]}
+        )
 
     def test_too_long_user_message_is_rejected_before_any_backend_call(self, mocker):
         self.login()
@@ -906,7 +895,6 @@ class AssistantChatUserPartsTest(PytestOnlyAPITestCase):
         "messages",
         [
             [],
-            [{"id": "m0", "role": "system", "parts": [{"type": "text", "text": "x"}]}],
             [{"id": "m0", "role": "assistant", "parts": [{"type": "text", "text": "x"}]}],
         ],
     )
@@ -936,9 +924,9 @@ class AssistantConversationTest(PytestOnlyAPITestCase):
     def _chat(self, mocker, text, model=None, msg_id="msg-1", **extra):
         model = model or RecordingModel()
         mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
-        message = {"id": msg_id, "role": "user", "parts": [{"type": "text", "text": text}]}
         response = self.post(
-            url_for("api.assistant_chat"), data={**PAYLOAD, "messages": [message], **extra}
+            url_for("api.assistant_chat"),
+            data={**PAYLOAD, "messages": [user_message(text, msg_id)], **extra},
         )
         assert response.status_code == 200
         response.get_data()
@@ -1008,7 +996,6 @@ class AssistantConversationTest(PytestOnlyAPITestCase):
         model = self._chat(mocker, "Bonjour", resource_id=str(resource.id))
         assert "untrusted_active_context" in str(model.seen)
         conversation = AssistantConversation.objects.get(user=user)
-        assert conversation.resource_id == str(resource.id)
         assert conversation.subject.title == "Aides aux communes"
         stored = str(conversation.model_messages())
         assert "untrusted_active_context" not in stored
@@ -1024,13 +1011,21 @@ class AssistantConversationTest(PytestOnlyAPITestCase):
         self._chat(mocker, "Bonjour", model=FunctionModel(stream_function=failing_model))
         assert AssistantConversation.objects.count() == 0
 
-    def test_an_unreadable_stored_conversation_starts_over(self, mocker):
+    def test_an_unreadable_stored_conversation_is_refused_and_kept(self, mocker):
         user = self.login()
         self._chat(mocker, "Combien de communes ?")
         AssistantConversation.objects(user=user).update_one(set__messages__0__content="{}")
-        model = self._chat(mocker, "Et par département ?", msg_id="msg-2")
-        assert "Combien de communes ?" not in str(model.seen)
-        assert AssistantConversation.objects.get(user=user).model_messages()
+        agent = mocker.patch("udata.core.assistant.api.get_agent")
+        response = self.post(
+            url_for("api.assistant_chat"),
+            data={**PAYLOAD, "messages": [user_message("Et par département ?", "msg-2")]},
+        )
+        assert response.status_code == 409
+        assert response.json["message"] == (
+            "Cette conversation ne peut plus être lue. Démarrez-en une nouvelle."
+        )
+        agent.assert_not_called()
+        assert AssistantConversation.objects.get(user=user).messages[0].content == "{}"
 
     @pytest.mark.parametrize("chat_id", ["", "x" * 65])
     def test_invalid_chat_id_is_rejected(self, mocker, chat_id):

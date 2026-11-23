@@ -35,33 +35,27 @@ def results(messages) -> list:
 
 def test_all_the_text_is_kept():
     messages = [m for index in range(10) for m in exchange(index)]
-    text = str(compact_history(messages, None))
+    text = str(compact_history(messages))
     assert all(f"question {i}" in text and f"answer {i}" in text for i in range(10))
 
 
 def test_only_the_recent_tool_results_are_kept():
     messages = [m for index in range(5) for m in exchange(index, result=f"rows {index}")]
-    compacted = compact_history(messages, None)
+    compacted = compact_history(messages)
     assert results(compacted) == [CLEARED_TOOL_RESULT] * 2 + ["rows 2", "rows 3", "rows 4"]
     # The calls stay, each with its result: providers refuse a call without one.
     assert sum(isinstance(p, ToolCallPart) for m in compacted for p in m.parts) == 5
 
 
-def test_the_context_and_the_instructions_are_not_kept():
-    messages = exchange(0)
-    messages[0] = ModelRequest(
-        parts=[UserPromptPart(content="<context>"), UserPromptPart(content="question 0")],
-        instructions="prompt",
-    )
-    compacted = compact_history(messages, "<context>")
-    assert [part.content for part in compacted[0].parts] == ["question 0"]
+def test_the_instructions_are_not_kept():
+    compacted = compact_history(exchange(0))
     assert all(m.instructions is None for m in compacted if isinstance(m, ModelRequest))
 
 
 def test_the_oldest_exchanges_go_beyond_the_size_bound(monkeypatch):
     monkeypatch.setattr(history, "MAX_HISTORY_BYTES", 6_000)
     messages = [m for index in range(20) for m in exchange(index)]
-    compacted = compact_history(messages, None)
+    compacted = compact_history(messages)
     text = str(compacted)
     assert "question 19" in text
     assert "question 0" not in text
@@ -71,6 +65,6 @@ def test_the_oldest_exchanges_go_beyond_the_size_bound(monkeypatch):
 
 def test_a_last_exchange_beyond_the_size_bound_is_kept(monkeypatch):
     monkeypatch.setattr(history, "MAX_HISTORY_BYTES", 10)
-    compacted = compact_history([*exchange(0), *exchange(1)], None)
+    compacted = compact_history([*exchange(0), *exchange(1)])
     assert "question 1" in str(compacted)
     assert "question 0" not in str(compacted)

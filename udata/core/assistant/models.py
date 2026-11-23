@@ -11,6 +11,7 @@ from mongoengine.fields import (
 from pydantic import ConfigDict, TypeAdapter
 from pydantic_ai.messages import ModelMessage
 
+from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.document import UDataDocument as Document
 
 __all__ = ("AssistantConversation", "AssistantMessage")
@@ -30,22 +31,18 @@ class AssistantMessage(EmbeddedDocument):
     content = StringField(required=True)
 
 
-class AssistantConversation(Document):
+class AssistantConversation(Datetimed, Document):
     """A conversation with the assistant, as the model reads it again on the next turn."""
 
     # The chat id the client sends: unique per user only.
     chat_id = StringField(required=True)
     user = ReferenceField("User", required=True)
     subject = ReferenceField("Dataset")
-    resource_id = StringField()
     title = StringField(required=True)
     messages = ListField(EmbeddedDocumentField(AssistantMessage))
-    created = DateTimeField(default=lambda: datetime.now(UTC), required=True)
-    last_modified = DateTimeField(default=lambda: datetime.now(UTC), required=True)
 
     meta = {
-        "indexes": [{"fields": ["user", "chat_id"], "unique": True}, "-created"],
-        "ordering": ["-created"],
+        "indexes": [{"fields": ["user", "chat_id"], "unique": True}],
         "auto_create_index_on_save": True,
     }
 

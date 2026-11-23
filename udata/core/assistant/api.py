@@ -13,13 +13,12 @@ import re
 import threading
 from collections.abc import AsyncIterator
 from contextlib import aclosing
-from datetime import UTC, datetime
-from functools import cached_property
 
 from flask import Response, current_app, request, stream_with_context
 from flask_login import current_user
 from pydantic import ValidationError
 from pydantic_ai import CancellationToken
+from pydantic_ai.capabilities import Hooks
 from pydantic_ai.exceptions import (
     AgentRunError,
     IncompleteToolCall,
@@ -46,7 +45,7 @@ from pydantic_ai.usage import UsageLimits
 from udata.api import API, api
 from udata.core.assistant.agent import get_agent
 from udata.core.assistant.charts import profile_columns
-from udata.core.assistant.history import compact_history
+from udata.core.assistant.history import asks, compact_history
 from udata.core.assistant.models import TITLE_MAX_LENGTH, AssistantConversation
 from udata.core.assistant.prompts import language_instructions
 from udata.core.assistant.tabular import TabularClient
@@ -85,22 +84,19 @@ UNTRUSTED_TAG = re.compile(r"<(?=/?untrusted)", re.IGNORECASE)
 def _check_new_turn(messages) -> list:
     """The client's new turn, after the last assistant reply: user text only.
 
-    Earlier messages are ignored, the stored conversation is the history. System
-    messages are dropped, the server owns the prompt. Anything but text is refused: the
-    server would fetch a file for the model, past every size limit.
+    Earlier messages are ignored, the stored conversation is the history. Anything but
+    text is refused: the server would fetch a file for the model, past every size limit.
     """
-    messages = [message for message in messages if message.role != "system"]
     last_reply = max((i for i, m in enumerate(messages) if m.role == "assistant"), default=-1)
     new_turn = messages[last_reply + 1 :]
     if not new_turn:
         api.abort(400, _("The conversation has no user message."))
     for message in new_turn:
+        # With pydantic_ai metadata, pydantic-ai reads other content than the text counted below.
         if message.role != "user" or not all(
-            isinstance(part, TextUIPart) for part in message.parts
+            isinstance(part, TextUIPart) and "pydantic_ai" not in (part.provider_metadata or {})
+            for part in message.parts
         ):
-            api.abort(400, _("Only text messages are accepted."))
-        # With this metadata, pydantic-ai reads other content than the text counted below.
-        if any("pydantic_ai" in (part.provider_metadata or {}) for part in message.parts):
             api.abort(400, _("Only text messages are accepted."))
         if not any(part.text.strip() for part in message.parts):
             api.abort(400, _("A user message cannot be empty."))
@@ -128,9 +124,9 @@ def _stored_history(conversation: AssistantConversation) -> list[ModelMessage]:
     try:
         return conversation.model_messages()
     except ValidationError:
-        # Stored by another pydantic-ai version: a new conversation beats a failed turn.
-        log.warning("Unreadable assistant conversation %s, starting over", conversation.id)
-        return []
+        # Stored by another pydantic-ai version: kept as it is, for a migration to read.
+        log.exception("Unreadable assistant conversation %s", conversation.id)
+        api.abort(409, _("This conversation can no longer be read. Start a new one."))
 
 
 def _save_conversation(
@@ -139,9 +135,27 @@ def _save_conversation(
     conversation.messages = AssistantConversation.stored_messages(messages)
     conversation.title = conversation.title or _first_question(messages)
     conversation.subject = active.dataset if active else None
-    conversation.resource_id = str(active.resource.id) if active else None
-    conversation.last_modified = datetime.now(UTC)
     conversation.save()
+
+
+def _context_hook(context: str) -> Hooks:
+    """Puts the server context first in the question, in what the model is sent only.
+
+    Rebuilt on each request, the context never reaches the stored conversation: the model
+    reads the current one, next to its question, with the trust of a user message rather
+    than of the instructions.
+    """
+
+    def before_model_request(ctx, request_context):
+        messages = list(request_context.messages)
+        index = max(i for i, m in enumerate(messages) if asks(m))
+        question = messages[index]
+        parts = [UserPromptPart(content=context), *question.parts]
+        messages[index] = dataclasses.replace(question, parts=parts)
+        request_context.messages = messages
+        return request_context
+
+    return Hooks(before_model_request=before_model_request)
 
 
 def _extract_context(extra: dict | None) -> tuple[str | None, dict | None]:
@@ -283,25 +297,6 @@ class AssistantEventStream(VercelAIEventStream):
 
 
 class AssistantAdapter(VercelAIAdapter):
-    # Server context added to the last user message (see `build_context`).
-    context: str | None = None
-
-    @cached_property
-    def messages(self) -> list[ModelMessage]:
-        """The client's new turn, the server context put first in its question.
-
-        The context is rebuilt on each request and left out of the stored conversation
-        (`compact_history`): the model reads only the current one, next to the question it
-        is about, with the trust of a user message rather than of the instructions.
-        """
-        messages = super().messages
-        if self.context:
-            # The new turn holds user text only (`_check_new_turn`): its last message is a request.
-            question = messages[-1]
-            parts = [UserPromptPart(content=self.context), *question.parts]
-            messages[-1] = dataclasses.replace(question, parts=parts)
-        return messages
-
     def build_event_stream(self) -> AssistantEventStream:
         return AssistantEventStream(
             self.run_input,
@@ -427,6 +422,7 @@ class AssistantChatAPI(API):
         conversation = AssistantConversation.objects(
             user=user, chat_id=chat_id
         ).first() or AssistantConversation(user=user, chat_id=chat_id)
+        message_history = _stored_history(conversation)
 
         tabular = TabularClient()
         active = load_active_resource(resource_id, tabular) if resource_id else None
@@ -436,7 +432,6 @@ class AssistantChatAPI(API):
             columns=profile_columns(active.profile) if active and active.profile else None,
         )
         agent = get_agent()
-        # Only the client's new turn is read: the stored conversation is the history.
         adapter = AssistantAdapter(
             agent,
             run_input,
@@ -444,16 +439,17 @@ class AssistantChatAPI(API):
             allowed_file_url_schemes=frozenset(),
             manage_message_history="server",
         )
-        adapter.context = build_context(active, visualization)
+        context = build_context(active, visualization)
         cancellation_token = CancellationToken()
         instructions = language_instructions(get_locale())
 
         stream = adapter.encode_stream(
             adapter.run_stream(
-                message_history=_stored_history(conversation),
+                message_history=message_history,
+                capabilities=[_context_hook(context)] if context else None,
                 # A failed or interrupted run is not kept: the client drops that turn too.
                 on_complete=lambda result: _save_conversation(
-                    conversation, compact_history(result.all_messages(), adapter.context), active
+                    conversation, compact_history(result.all_messages()), active
                 ),
                 deps=deps,
                 instructions=instructions,
