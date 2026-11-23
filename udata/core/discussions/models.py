@@ -181,10 +181,6 @@ class NotificationExtra(EmbeddedDocument):
     external_url = StringField(validation=_validate_notification_external_url)
 
 
-def filter_by_subject(base_query, filter_value):
-    return base_query.generic_in(subject=filter_value)
-
-
 def filter_by_organization(base_query, filter_value):
     # Deferred: `Dataservice` imports `Discussion` at module level, so importing the subject
     # models here would load `Reuse` — which declares a delete rule on `Dataservice` — before
@@ -238,14 +234,6 @@ def check_organization_voice(organization, obj, **_kwargs):
             "help": "Filters discussions on their closed status if specified",
         },
         {
-            "key": "for",
-            "type": str,
-            "is_list": True,
-            "constraints": ["objectid"],
-            "query": filter_by_subject,
-            "help": "Filter discussions for a given subject",
-        },
-        {
             "key": "org",
             "type": str,
             "constraints": ["objectid"],
@@ -281,6 +269,11 @@ class Discussion(SpamMixin, Linkable, Document):
         GenericReferenceField(choices=DISCUSSION_SUBJECTS, required=True),
         nested_fields=api.model_reference,
         description="The discussion target object",
+        filterable={
+            "key": "for",
+            "is_list": True,
+            "help": "Filter discussions for a given subject",
+        },
     )
     title = field(StringField(required=True), sortable=True, description="The discussion title")
     discussion = field(
