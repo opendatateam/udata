@@ -477,10 +477,15 @@ def pull_offerings_for_dataset(dataset, token) -> int:
             links = _offering_links(offering)
             if not links:
                 log.warning(
-                    "geopf: offering=%s has no URL, skipping dataset=%s",
+                    "geopf: offering=%s has no URL, keeping its resources as is, dataset=%s",
                     offering["_id"],
                     dataset.id,
                 )
+                live_keys |= {
+                    _resource_key(r)
+                    for r in dataset.resources
+                    if resource_offering_metadata(r).id == offering["_id"]
+                }
             for link in links:
                 live_keys.add((offering["_id"], link.layer, link.format))
                 _upsert_offering_resource(dataset, offering, link, now)

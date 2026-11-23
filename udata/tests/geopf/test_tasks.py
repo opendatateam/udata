@@ -421,6 +421,15 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
 
         assert set(self._offering_resources(dataset)) == {"ex_wfs:point1"}
 
+    def test_keeps_resources_of_offering_without_urls(self):
+        dataset = self._dataset()
+        self._pull(dataset, [WMS_OFFERING])
+        resource_id = self._offering_resources(dataset)["ex_wmsv"].id
+
+        self._pull(dataset, [{**WMS_OFFERING, "urls": []}])
+
+        assert self._offering_resources(dataset)["ex_wmsv"].id == resource_id
+
     def test_replaces_resource_synced_before_layers(self):
         legacy = ResourceFactory.build(
             title="Service WFS - ex_wfs",
