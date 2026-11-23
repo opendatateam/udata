@@ -474,14 +474,7 @@ def pull_offerings_for_dataset(dataset, token) -> int:
     for offering_id, offering in offerings.items():
         links = _offering_links(offering)
         if not links:
-            log.warning(
-                "geopf: offering=%s has no URL, keeping its resources as is, dataset=%s",
-                offering_id,
-                dataset.id,
-            )
-            synced |= {
-                r.id for r in dataset.resources if resource_offering_metadata(r).id == offering_id
-            }
+            log.warning("geopf: offering=%s has no URL, dataset=%s", offering_id, dataset.id)
         for link in links:
             synced.add(_upsert_offering_resource(dataset, offering, link, now).id)
 

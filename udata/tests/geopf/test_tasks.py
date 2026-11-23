@@ -421,14 +421,14 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
 
         assert set(self._offering_resources(dataset)) == {"ex_wfs:point1"}
 
-    def test_keeps_resources_of_offering_without_urls(self):
+    def test_removes_resources_of_offering_without_urls(self):
         dataset = self._dataset()
         self._pull(dataset, [WMS_OFFERING])
-        resource_id = self._offering_resources(dataset)["ex_wmsv"].id
 
-        self._pull(dataset, [{**WMS_OFFERING, "urls": []}])
+        count = self._pull(dataset, [{**WMS_OFFERING, "urls": []}])
 
-        assert self._offering_resources(dataset)["ex_wmsv"].id == resource_id
+        assert count == 1
+        assert self._offering_resources(dataset) == {}
 
     def test_replaces_resource_synced_before_layers(self):
         legacy = ResourceFactory.build(
