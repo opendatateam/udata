@@ -40,7 +40,7 @@ class TabularClientTest(PytestOnlyTestCase):
         assert profile.profile.total_lines is None
         assert requests_mock.request_history[0].timeout == TABULAR_TIMEOUT
 
-    def test_profile_columns_follow_the_header_order(self):
+    def test_the_columns_of_a_profile_follow_the_header_order(self):
         profile = TabularProfile.model_validate(
             {
                 "profile": {

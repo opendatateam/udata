@@ -109,7 +109,7 @@ def _null_condition(f: Filter, column: str) -> str | None:
     return None
 
 
-# Filters without a value are refused before this point.
+# Neither `_param` nor `_condition` gets a filter without a value: it is refused before.
 def _param(f: Filter) -> str:
     column = _encode_twice(f.column)
     if (null := _null_condition(f, column)) is not None:

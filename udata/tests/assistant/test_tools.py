@@ -263,7 +263,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         assert result == ToolError(errors=[TABULAR_UNREADABLE])
         assert len(self.tabular.profile_requests) == 1
 
-    def test_a_profile_refused_by_the_service_relays_its_answer_once(self):
+    def test_a_profile_refused_by_the_service_is_relayed_without_being_fetched_again(self):
         # A resource api-tabular does not know.
         deps = self.make_deps(resource_id=uuid4())
         for _ in range(2):
