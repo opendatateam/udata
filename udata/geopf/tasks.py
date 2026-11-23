@@ -510,8 +510,6 @@ class OfferingLink:
     format: str | None
 
 
-# Query parameters naming the layer in the URLs geopf gives, per service
-OFFERING_LAYER_PARAMS = {"WMS": ("layers", "layer"), "WFS": ("typenames", "typename")}
 # Parameter naming the layer on the GetCapabilities we store, as harvested geopf resources do
 GETCAP_LAYER_PARAM = {"WMS": "layer", "WFS": "TYPENAMES"}
 
@@ -530,10 +528,10 @@ def _offering_links(offering: dict) -> list[OfferingLink]:
         service = (entry.get("type") or "").upper()
         parsed = urlparse(url)
         params = {k.lower(): v for k, v in parse_qsl(parsed.query)}
-        layer = next(
-            (params[p] for p in OFFERING_LAYER_PARAMS.get(service, ()) if params.get(p)),
-            offering.get("layer_name") or "",
-        )
+        layer = offering.get("layer_name") or ""
+        if service == "WFS":
+            # WFS `layer_name` is only the namespace, the URL names the feature type
+            layer = params.get("typenames") or params.get("typename") or layer
         if service in GETCAP_LAYER_PARAM:
             url = _getcap_url(parsed, service, params.get("version"), layer)
         link = OfferingLink(layer=layer, url=url, format=service.lower() or None)

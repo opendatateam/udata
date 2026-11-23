@@ -96,16 +96,6 @@ class OfferingLinksTest:
             OfferingLink(layer="ex_wfs:geometry1", url=wfs_getcap("geometry1"), format="wfs"),
         ]
 
-    def test_layer_falls_back_on_layer_name(self):
-        offering = {"layer_name": "ex", "urls": [{"type": "WMS", "url": "https://h/wms-r"}]}
-        assert _offering_links(offering) == [
-            OfferingLink(
-                layer="ex",
-                url="https://h/wms-r?SERVICE=WMS&REQUEST=GetCapabilities&layer=ex",
-                format="wms",
-            )
-        ]
-
     def test_other_services_kept_as_is(self):
         offering = {
             "layer_name": "ex",

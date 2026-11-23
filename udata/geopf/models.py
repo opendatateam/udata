@@ -112,7 +112,7 @@ class GeopfResourceOfferingMetadata(EmbeddedDocument):
         StringField(),
         readonly=True,
         allow_null=True,
-        description="The layer this resource points to (WFS: `namespace:feature_type`)",
+        description="The layer name, e.g. `my_layer_wmsv` (WMS) or `my_layer_wfs:my_table` (WFS)",
     )
     last_synced_at = field(
         DateTimeField(),
