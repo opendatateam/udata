@@ -1,5 +1,43 @@
 # Changelog
 
+## 17.28.0 (2026-11-23)
+
+- chore(deps): update astral-sh/setup-uv action to v10.4.0 ([#4119](https://github.com/opendatateam/udata/pull/4119))
+- chore(deps): upgrade dependencies and use major-only upper bounds ([#4112](https://github.com/opendatateam/udata/pull/4112))
+- feat(api_token): grant the sysadmin rights only to tokens with the sysadmin scope ([#4114](https://github.com/opendatateam/udata/pull/4114))
+- feat(reports): filter reports by subject through a generic reference filter ([#4118](https://github.com/opendatateam/udata/pull/4118))
+
+
+## 17.27.2 (2026-11-19)
+
+- fix: identify every outgoing request as udata with its real version ([#4115](https://github.com/opendatateam/udata/pull/4115))
+- fix(rdf): fetch the locations rdflib opens through udata's HTTP session ([#4117](https://github.com/opendatateam/udata/pull/4117))
+- fix(topics): annotate TopicElementsWriter.__enter__ with Self to satisfy ruff PYI034 ([#4116](https://github.com/opendatateam/udata/pull/4116))
+- perf(topics): save the topic once when writing elements in bulk ([#4107](https://github.com/opendatateam/udata/pull/4107))
+
+
+## 17.27.1 (2026-11-19)
+
+- chore: upgrade ruff to 0.17 and adopt its default rules ([#4037](https://github.com/opendatateam/udata/pull/4037))
+- fix(auth): land a ProConnect login back on the page it started from ([#4111](https://github.com/opendatateam/udata/pull/4111))
+- fix(dataservices): drop the license criterion from the metadata quality score ([#4109](https://github.com/opendatateam/udata/pull/4109))
+- fix(metrics): store null metrics API values as 0 ([#4110](https://github.com/opendatateam/udata/pull/4110))
+
+
+## 17.27.0 (2026-11-18)
+
+- chore(deps): update dependency dnspython to v2.9.2 [security] ([#4104](https://github.com/opendatateam/udata/pull/4104))
+- chore(deps): update rustfs/rustfs docker tag to v1.0.6 ([#4105](https://github.com/opendatateam/udata/pull/4105))
+- feat: add a setting to require the 2FA from members of certified organizations ([#4102](https://github.com/opendatateam/udata/pull/4102))
+- feat: detect geozone from spatial.geom ([#3857](https://github.com/opendatateam/udata/pull/3857))
+- feat: require a fresh session to create an API token and mail its creation ([#4090](https://github.com/opendatateam/udata/pull/4090))
+- fix(api): restore the list masks of reuses and contact points ([#4042](https://github.com/opendatateam/udata/pull/4042))
+- fix(edito): expose the status and access type fields the front cards read in the bloc card masks ([#4108](https://github.com/opendatateam/udata/pull/4108))
+- fix: issue a working token on an OAuth2 refresh ([#4100](https://github.com/opendatateam/udata/pull/4100))
+- fix: remove the OAuth2 password grant ([#4099](https://github.com/opendatateam/udata/pull/4099))
+- fix: store OAuth2 client secrets and tokens hashed ([#4101](https://github.com/opendatateam/udata/pull/4101))
+
+
 ## 17.26.0 (2026-11-13)
 
 - chore(deps): update dependency faker to >=40.54, <40.55 ([#4085](https://github.com/opendatateam/udata/pull/4085))

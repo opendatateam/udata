@@ -3,7 +3,6 @@ import re
 
 import mongoengine
 from flask import abort, request, url_for
-from flask_login import current_user
 from flask_restx import marshal
 
 from udata import search
@@ -268,12 +267,12 @@ resource_page_fields = apiv2.model(
 )
 
 dataset_page_fields = apiv2.model(
-    "DatasetPage", fields.pager(dataset_fields), mask="data{{{0}}},*".format(DEFAULT_MASK_APIV2)
+    "DatasetPage", fields.pager(dataset_fields), mask=f"data{{{DEFAULT_MASK_APIV2}}},*"
 )
 dataset_search_page_fields = apiv2.model(
     "DatasetSearchPage",
     fields.search_pager(dataset_fields),
-    mask="data{{{0}}},*".format(DEFAULT_MASK_APIV2),
+    mask=f"data{{{DEFAULT_MASK_APIV2}}},*",
 )
 
 specific_resource_fields = apiv2.model(
@@ -339,8 +338,8 @@ class DatasetListAPI(API):
     def get(self):
         """List or search all datasets"""
         args = dataset_parser.parse()
-        datasets = Dataset.objects.exclude("resources").visible_by_user(
-            current_user, mongoengine.Q(private=False, archived=None, deleted=None)
+        datasets = Dataset.objects.exclude("resources").visible_by_current_user(
+            mongoengine.Q(private=False, archived=None, deleted=None)
         )
         datasets = dataset_parser.parse_filters(datasets, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING

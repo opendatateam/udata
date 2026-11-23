@@ -22,7 +22,7 @@ TEST_LIST = [
 ]
 
 
-class ObjDict(object):
+class ObjDict:
     def __init__(self, d):
         self.__dict__.update(d)
 
@@ -176,7 +176,7 @@ class ToIsoTest:
 
 class RecursiveGetTest:
     def test_get_root_attribute(self):
-        class Tester(object):
+        class Tester:
             attr = "value"
 
         tester = Tester()
@@ -187,10 +187,10 @@ class RecursiveGetTest:
         assert recursive_get(tester, "key") == "value"
 
     def test_get_nested_attribute(self):
-        class Nested(object):
+        class Nested:
             attr = "value"
 
-        class Tester(object):
+        class Tester:
             def __init__(self):
                 self.nested = Nested()
 
@@ -202,7 +202,7 @@ class RecursiveGetTest:
         assert recursive_get(tester, "nested.key") == "value"
 
     def test_attr_not_found(self):
-        class Tester(object):
+        class Tester:
             pass
 
         tester = Tester()
@@ -213,10 +213,10 @@ class RecursiveGetTest:
         assert recursive_get(tester, "not-found") is None
 
     def test_nested_attribute_not_found(self):
-        class Nested(object):
+        class Nested:
             attr = "value"
 
-        class Tester(object):
+        class Tester:
             def __init__(self):
                 self.nested = Nested()
 
@@ -236,7 +236,7 @@ class RecursiveGetTest:
         assert recursive_get(tester, "") is None
 
 
-class SafeUnicodeTest(object):
+class SafeUnicodeTest:
     def test_unicode_stays_unicode(self):
         assert safe_unicode("ééé") == "ééé"
 

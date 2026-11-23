@@ -104,12 +104,9 @@ class DataserviceSearch(ModelSearchAdapter):
 
         try:
             timeout = 10
-            headers = {"User-Agent": "udata-search-service/1.0"}
             # machine_documentation_url is user-supplied: fetch it through the
             # SSRF-guarded session, which validates the resolved IP at connect time.
-            response = ssrf_session().get(
-                url, timeout=timeout, stream=True, headers=headers, allow_redirects=False
-            )
+            response = ssrf_session().get(url, timeout=timeout, stream=True, allow_redirects=False)
             response.raise_for_status()
             raise_if_redirect(response)
 
@@ -133,7 +130,7 @@ class DataserviceSearch(ModelSearchAdapter):
 
         except requests.RequestException:
             return None
-        except Exception:
+        except Exception:  # noqa: BLE001 (indexing must not fail on an unreadable OpenAPI spec)
             return None
 
     @classmethod
@@ -153,7 +150,7 @@ class DataserviceSearch(ModelSearchAdapter):
         organization = None
 
         topic_ids = list(
-            set(te.topic.id for te in TopicElement.objects(element=dataservice) if te.topic)
+            {te.topic.id for te in TopicElement.objects(element=dataservice) if te.topic}
         )
 
         if dataservice.organization:

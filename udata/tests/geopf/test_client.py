@@ -11,6 +11,7 @@ from udata.geopf.client import (
     _extract_file_identifier,
     _GeopfSession,
 )
+from udata.http import USER_AGENT
 from udata.tests import PytestOnlyTestCase
 from udata.tests.geopf import (
     TEST_API_BASE,
@@ -417,6 +418,7 @@ class GeopfClientAuthTest(PytestOnlyTestCase):
         rmock.get(f"{TEST_API_URL}/offerings", json=[])
         GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).list_offerings("sd-1")
         assert rmock.last_request.headers["Authorization"] == f"Bearer {TEST_TOKEN}"
+        assert rmock.last_request.headers["User-Agent"] == USER_AGENT
 
     def test_no_datastore_id_raises_on_datastore_scoped_call(self):
         with pytest.raises(GeopfError):
@@ -438,6 +440,8 @@ class TimeoutSessionTest(PytestOnlyTestCase):
 
     def test_network_failure_raises_geopf_error(self):
         session = _GeopfSession(timeout=42)
-        with patch("requests.Session.request", side_effect=requests.exceptions.ConnectionError()):
-            with pytest.raises(GeopfError):
-                session.get("https://example.com")
+        with (
+            patch("requests.Session.request", side_effect=requests.exceptions.ConnectionError()),
+            pytest.raises(GeopfError),
+        ):
+            session.get("https://example.com")

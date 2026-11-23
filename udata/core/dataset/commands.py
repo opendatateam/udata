@@ -2,11 +2,11 @@ import json
 import logging
 
 import click
-import requests
 from bson import ObjectId
 
 from udata.commands import cli, exit_with_error, success
 from udata.core.dataset.constants import DEFAULT_LICENSE
+from udata.http import http_session
 from udata.models import Dataset, License
 
 from . import actions
@@ -14,7 +14,7 @@ from . import actions
 log = logging.getLogger(__name__)
 
 # Use CKAN license group from opendefinition as default license list
-DEFAULT_LICENSE_FILE = "http://licenses.opendefinition.org/licenses/groups/ckan.json"  # noqa
+DEFAULT_LICENSE_FILE = "http://licenses.opendefinition.org/licenses/groups/ckan.json"
 
 FLAGS_MAP = {
     "domain_content": "domain_content",
@@ -31,7 +31,7 @@ FLAGS_MAP = {
 def licenses(source=DEFAULT_LICENSE_FILE):
     """Feed the licenses from a JSON file"""
     if source.startswith("http"):
-        json_licenses = requests.get(source).json()
+        json_licenses = http_session().get(source).json()
     else:
         with open(source) as fp:
             json_licenses = json.load(fp)
@@ -68,7 +68,6 @@ def licenses(source=DEFAULT_LICENSE_FILE):
 @cli.group("dataset")
 def grp():
     """Dataset related operations"""
-    pass
 
 
 @grp.command()
@@ -79,7 +78,7 @@ def archive_one(dataset_id, comment):
     try:
         dataset = Dataset.objects.get(id=dataset_id)
     except Dataset.DoesNotExist:
-        exit_with_error("Cannot find a dataset with id %s" % dataset_id)
+        exit_with_error(f"Cannot find a dataset with id {dataset_id}")
     else:
         actions.archive(dataset, comment)
 
@@ -93,13 +92,13 @@ def archive(filepath, comment):
     errors = 0
     log.info("Archiving datasets...")
     with open(filepath) as inputfile:
-        for line in inputfile.readlines():
+        for line in inputfile:
             line = line.rstrip()
             if not line:
                 continue
             try:
                 dataset = Dataset.objects.get(id=ObjectId(line))
-            except Exception as e:  # noqa  (Never stop on failure)
+            except Exception as e:  # Never stop on failure
                 log.error("Unable to archive dataset %s: %s", line, e)
                 errors += 1
                 continue

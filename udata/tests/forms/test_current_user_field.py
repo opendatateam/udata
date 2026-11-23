@@ -67,7 +67,7 @@ class CurrentUserFieldTest(DBTestCase):
         self.assertEqual(ownable.owner, user)
 
     def test_with_other_user(self):
-        Ownable, OwnableForm = self.factory()
+        _Ownable, OwnableForm = self.factory()
         user = UserFactory()
         other = UserFactory()
 
@@ -148,19 +148,19 @@ class CurrentUserFieldTest(DBTestCase):
         self.assertEqual(ownable.owner, user)
 
     def test_with_invalid_data(self):
-        Ownable, OwnableForm = self.factory()
+        _Ownable, OwnableForm = self.factory()
         user = UserFactory()
 
         login_user(user)
 
-        form = OwnableForm(MultiDict({"owner": str("wrongwith12c")}))
+        form = OwnableForm(MultiDict({"owner": "wrongwith12c"}))
 
         form.validate()
         self.assertIn("owner", form.errors)
         self.assertEqual(len(form.errors["owner"]), 1)
 
     def test_with_user_not_found(self):
-        Ownable, OwnableForm = self.factory()
+        _Ownable, OwnableForm = self.factory()
         user = UserFactory()
 
         login_user(user)
@@ -172,7 +172,7 @@ class CurrentUserFieldTest(DBTestCase):
         self.assertEqual(len(form.errors["owner"]), 1)
 
     def test_with_user_not_logged_found(self):
-        Ownable, OwnableForm = self.factory()
+        _Ownable, OwnableForm = self.factory()
         user = UserFactory()
 
         form = OwnableForm(MultiDict({"owner": str(user.id)}))

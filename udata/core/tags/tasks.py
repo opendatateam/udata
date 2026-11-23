@@ -35,7 +35,7 @@ TAGGED = {
 def count_tags(self):
     """Count tag occurences by type and update the tag collection"""
     for key, model in TAGGED.items():
-        collection = "{0}_tags".format(key)
+        collection = f"{key}_tags"
         results = model.objects(tags__exists=True).map_reduce(map_tags, reduce_tags, collection)
         for result in results:
             tag, _ = Tag.objects.get_or_create(name=result.key)

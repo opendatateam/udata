@@ -53,8 +53,8 @@ class DataservicesAPI(API):
     @api.marshal_with(Dataservice.__page_fields__)
     def get(self):
         """List or search all dataservices"""
-        query = Dataservice.objects.visible_by_user(
-            current_user, Q(private__ne=True, archived_at=None, deleted_at=None)
+        query = Dataservice.objects.visible_by_current_user(
+            Q(private__ne=True, archived_at=None, deleted_at=None)
         )
 
         return Dataservice.apply_pagination(Dataservice.apply_sort_filters(query))
@@ -242,7 +242,7 @@ class DataserviceDatasetsAPI(API):
 
         try:
             datasets = Dataset.objects.filter(id__in=[d["id"] for d in data]).only("id")
-            diff = set(d.id for d in datasets) - set(d.id for d in dataservice.datasets)
+            diff = {d.id for d in datasets} - {d.id for d in dataservice.datasets}
         except ValidationError:
             api.abort(400, "Malformed object id(s) in request")
 

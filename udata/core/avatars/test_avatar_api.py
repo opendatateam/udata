@@ -19,7 +19,7 @@ class InternalBackendTest(PytestOnlyAPITestCase):
         assert200(response)
         assert response.mimetype == "image/png"
         assert response.is_streamed
-        etag, weak = response.get_etag()
+        etag, _weak = response.get_etag()
         assert etag is not None
 
     def test_render_twice_the_same(self):

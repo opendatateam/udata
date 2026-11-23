@@ -4,7 +4,7 @@ TAG_MIN_LENGTH = 2
 TAG_MAX_LENGTH = 50
 
 
-class WidgetHelper(object):
+class WidgetHelper:
     classes = []
     attributes = {}
 
@@ -19,7 +19,7 @@ class WidgetHelper(object):
         for key, value in self.attributes.items():
             kwargs.setdefault(key, value)
 
-        return super(WidgetHelper, self).__call__(field, **kwargs)
+        return super().__call__(field, **kwargs)
 
 
 class TextInput(WidgetHelper, widgets.TextInput):
@@ -42,4 +42,4 @@ class DateRangePicker(WidgetHelper, widgets.HiddenInput):
         if field.data:
             kwargs["data-start-date"] = field.data.start
             kwargs["data-end-date"] = field.data.end
-        return super(DateRangePicker, self).__call__(field, **kwargs)
+        return super().__call__(field, **kwargs)

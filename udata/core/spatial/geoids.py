@@ -4,13 +4,11 @@ This module centralize GeoID resources and helpers.
 See https://github.com/etalab/geoids for more details
 """
 
-__all__ = ("GeoIDError", "parse", "build", "from_zone")
+__all__ = ("GeoIDError", "build", "from_zone", "parse")
 
 
 class GeoIDError(ValueError):
     """Raised when an error occur while parsing or building a GeoID"""
-
-    pass
 
 
 def parse(text):
@@ -18,12 +16,12 @@ def parse(text):
     # Kept validity parsing for legacy parsing and migration.
     # Validity is parsed but ignored.
     if "@" in text:
-        spatial, validity = text.split("@")
+        spatial, _validity = text.split("@")
     else:
         spatial = text
     spatial = spatial.lower().replace("/", ":")  # Backward compatibility
     if ":" not in spatial:
-        raise GeoIDError("Bad GeoID format: {0}".format(text))
+        raise GeoIDError(f"Bad GeoID format: {text}")
     # country-subset is a special case:
     if spatial.startswith("country-subset:"):
         level, code = spatial.split(":", 1)
@@ -34,7 +32,7 @@ def parse(text):
 
 def build(level, code):
     """Serialize a GeoID from its parts"""
-    return ":".join((level, code))
+    return f"{level}:{code}"
 
 
 def from_zone(zone):

@@ -10,7 +10,7 @@ from udata.api_fields import lazy_reference, patch, patch_and_save
 from udata.auth import admin_permission
 from udata.core.discussions.models import Discussion
 from udata.core.topic import DEFAULT_PAGE_SIZE
-from udata.core.topic.models import Topic, TopicElement
+from udata.core.topic.models import Topic, TopicElement, TopicElementsWriter
 from udata.core.topic.parsers import TopicApiParser, TopicElementsParser
 from udata.core.topic.permissions import TopicEditPermission
 from udata.core.topic.search import TopicSearch
@@ -98,7 +98,7 @@ class TopicsAPI(API):
     def get(self):
         """List all topics"""
         args = topic_parser.parse()
-        topics = Topic.objects.visible_by_user(current_user, mongoengine.Q(private__ne=True))
+        topics = Topic.objects.visible_by_current_user(mongoengine.Q(private__ne=True))
         topics = topic_parser.parse_filters(topics, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
         return topics.order_by(sort).paginate(args["page"], args["page_size"])
@@ -129,10 +129,9 @@ class TopicsAPI(API):
         topic.save()
 
         if elements_data is not None:
-            for element_data in elements_data:
-                element = patch(TopicElement(), element_data)
-                element.topic = topic
-                element.save()
+            with TopicElementsWriter(topic) as writer:
+                for element_data in elements_data:
+                    writer.save(patch(TopicElement(), element_data))
 
         return topic, 201
 
@@ -166,11 +165,11 @@ class TopicAPI(API):
         patch_and_save(topic, data)
 
         if elements_data is not None:
-            TopicElement.objects(topic=topic).delete()
-            for element_data in elements_data:
-                element = patch(TopicElement(), element_data)
-                element.topic = topic
-                element.save()
+            with TopicElementsWriter(topic) as writer:
+                for element in topic.elements.no_cache():
+                    writer.delete(element)
+                for element_data in elements_data:
+                    writer.save(patch(TopicElement(), element_data))
 
         return topic
 
@@ -224,17 +223,16 @@ class TopicElementsAPI(API):
         elements = []
         for element_data in data:
             try:
-                element = patch(TopicElement(), element_data)
-                element.topic = topic
-                elements.append(element)
+                elements.append(patch(TopicElement(), element_data))
             except FieldValidationError as e:
                 errors.append({e.field: [str(e)]})
 
         if errors:
             apiv2.abort(400, errors=errors)
 
-        for element in elements:
-            element.save()
+        with TopicElementsWriter(topic) as writer:
+            for element in elements:
+                writer.save(element)
 
         return elements, 201
 
@@ -251,8 +249,10 @@ class TopicElementsAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        # TODO: this triggers performance issues on a huge topic (too many tasks, too many activities)
-        topic.elements.delete()
+        # TODO: still one activity and one element reindex task per element on a huge topic
+        with TopicElementsWriter(topic) as writer:
+            for element in topic.elements.no_cache():
+                writer.delete(element)
 
         return None, 204
 

@@ -16,7 +16,10 @@ from udata.api.oauth2 import OAuth2Client, OAuth2Token
 from udata.auth import PermissionDenied
 from udata.core.api_token.hashing import hash_token
 from udata.core.api_token.models import ApiToken
-from udata.core.user.factories import UserFactory
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.models import Dataset
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
 from udata.forms import Form, fields, validators
 from udata.tests.api import PytestOnlyAPITestCase, basic_header
@@ -26,6 +29,7 @@ from udata.tests.helpers import (
     assert401,
     assert403,
     assert_status,
+    capture_mails,
 )
 
 TOKEN_LIFETIME = 30 * 24 * 60 * 60
@@ -58,12 +62,12 @@ class FakeAPI(API):
 def oauth(app, request):
     marker = request.node.get_closest_marker("oauth")
     custom_kwargs = marker.kwargs if marker else {}
-    kwargs = dict(
-        name="test-client",
-        owner=UserFactory(),
-        redirect_uris=["https://test.org/callback"],
-        secret=hash_token(CLIENT_SECRET),
-    )
+    kwargs = {
+        "name": "test-client",
+        "owner": UserFactory(),
+        "redirect_uris": ["https://test.org/callback"],
+        "secret": hash_token(CLIENT_SECRET),
+    }
     kwargs.update(custom_kwargs)
     return OAuth2Client.objects.create(**kwargs)
 
@@ -137,9 +141,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         """Should handle wrong OAuth header authentication"""
         OAuth2TokenFactory(client=oauth, access="access-token", refresh="refresh-token")
 
-        response = self.post(
-            url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", "not-my-token"])}
-        )
+        response = self.post(url_for("api.fake"), headers={"Authorization": "Bearer not-my-token"})
 
         assert401(response)
         assert response.content_type == "application/json"
@@ -175,7 +177,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         from udata.core.api_token.models import ApiToken
 
         user = UserFactory()
-        token, plaintext = ApiToken.generate(user)
+        _token, plaintext = ApiToken.generate(user)
         user.mark_as_deleted()
         response = self.post(url_for("api.fake"), headers={"X-API-KEY": plaintext})
 
@@ -245,7 +247,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         )
 
         assert_status(response, 302)
-        uri, params = response.location.split("?")
+        uri, _params = response.location.split("?")
         assert uri == oauth.default_redirect_uri
 
     def test_authorization_accept(self, oauth):
@@ -267,7 +269,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         )
 
         assert_status(response, 302)
-        uri, params = response.location.split("?")
+        uri, _params = response.location.split("?")
 
         assert uri == oauth.default_redirect_uri
 
@@ -413,7 +415,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
             json=False,
         )
 
-        uri, params = response.location.split("?")
+        _uri, params = response.location.split("?")
         code = parse_qs(params)["code"][0]
 
         self.logout()
@@ -474,9 +476,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
         token = response.json["access_token"]
 
-        response = self.post(
-            url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", token])}
-        )
+        response = self.post(url_for("api.fake"), headers={"Authorization": f"Bearer {token}"})
 
         assert200(response)
         assert response.content_type == "application/json"
@@ -525,9 +525,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
         token = response.json["access_token"]
 
-        response = self.post(
-            url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", token])}
-        )
+        response = self.post(url_for("api.fake"), headers={"Authorization": f"Bearer {token}"})
 
         assert200(response)
         assert response.content_type == "application/json"
@@ -577,9 +575,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
         token = response.json["access_token"]
 
-        response = self.post(
-            url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", token])}
-        )
+        response = self.post(url_for("api.fake"), headers={"Authorization": f"Bearer {token}"})
 
         assert200(response)
         assert response.content_type == "application/json"
@@ -640,7 +636,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
                 json=False,
             )
 
-            uri, params = response.location.split("?")
+            _uri, params = response.location.split("?")
             code = parse_qs(params)["code"][0]
 
             self.logout()
@@ -674,7 +670,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
             json=False,
         )
 
-        uri, params = response.location.split("?")
+        _uri, params = response.location.split("?")
         code = parse_qs(params)["code"][0]
 
         self.logout()
@@ -1115,3 +1111,112 @@ class HeaderAuthTest(PytestOnlyAPITestCase):
         )
         token.reload()
         assert token.last_used_at is not None
+
+
+class ApiKeyScopesTest(PytestOnlyAPITestCase):
+    """A sysadmin's key only carries the sysadmin rights with the `sysadmin` scope: without
+    it, the key does what its owner could do as a plain user."""
+
+    def test_sysadmin_scope_grants_the_sysadmin_rights(self):
+        dataset = DatasetFactory(organization=OrganizationFactory())
+
+        with self.api_user(AdminFactory(), scopes=["sysadmin"]):
+            response = self.put(url_for("api.dataset", dataset=dataset), {"title": "Renamed"})
+
+        assert200(response)
+        assert Dataset.objects.get(id=dataset.id).title == "Renamed"
+
+    def test_no_sysadmin_scope_withholds_the_sysadmin_rights(self):
+        dataset = DatasetFactory(organization=OrganizationFactory(), title="Original")
+
+        with self.api_user(AdminFactory(), scopes=[]):
+            response = self.put(url_for("api.dataset", dataset=dataset), {"title": "Renamed"})
+
+        assert403(response)
+        assert Dataset.objects.get(id=dataset.id).title == "Original"
+
+    def test_sysadmin_scope_alone_grants_nothing(self):
+        dataset = DatasetFactory(organization=OrganizationFactory(), title="Original")
+
+        with self.api_user(UserFactory(), scopes=["sysadmin"]):
+            response = self.put(url_for("api.dataset", dataset=dataset), {"title": "Renamed"})
+
+        assert403(response)
+        assert Dataset.objects.get(id=dataset.id).title == "Original"
+
+    def test_no_sysadmin_scope_keeps_the_owner_rights(self):
+        admin = AdminFactory()
+        dataset = DatasetFactory(owner=admin)
+
+        with self.api_user(admin, scopes=[]):
+            response = self.put(url_for("api.dataset", dataset=dataset), {"title": "Renamed"})
+
+        assert200(response)
+        assert Dataset.objects.get(id=dataset.id).title == "Renamed"
+
+    def test_sysadmin_scope_shows_the_private_objects_of_others(self):
+        private = DatasetFactory(organization=OrganizationFactory(), private=True)
+
+        with self.api_user(AdminFactory(), scopes=["sysadmin"]):
+            response = self.get(url_for("api.datasets"))
+
+        assert [d["id"] for d in response.json["data"]] == [str(private.id)]
+
+    def test_no_sysadmin_scope_hides_the_private_objects_of_others(self):
+        DatasetFactory(organization=OrganizationFactory(), private=True)
+
+        with self.api_user(AdminFactory(), scopes=[]):
+            response = self.get(url_for("api.datasets"))
+
+        assert response.json["data"] == []
+
+    def test_no_sysadmin_scope_sends_no_legal_notice(self):
+        admin = AdminFactory()
+        dataset = DatasetFactory(owner=admin)
+
+        with self.api_user(admin, scopes=[]), capture_mails() as mails:
+            response = self.delete(
+                url_for("api.dataset", dataset=dataset) + "?send_legal_notice=true"
+            )
+
+        assert_status(response, 204)
+        assert mails == []
+
+    def test_no_sysadmin_scope_hides_the_inactive_users(self):
+        user = UserFactory(active=False)
+
+        with self.api_user(AdminFactory(), scopes=[]):
+            response = self.get(url_for("api.user", user=user))
+
+        assert_status(response, 410)
+
+    def test_oauth2_token_keeps_the_sysadmin_rights(self, oauth):
+        OAuth2TokenFactory(client=oauth, user=AdminFactory(), access="access-token")
+        dataset = DatasetFactory(organization=OrganizationFactory())
+
+        response = self.put(
+            url_for("api.dataset", dataset=dataset),
+            {"title": "Renamed"},
+            headers={"Authorization": "Bearer access-token"},
+        )
+
+        assert200(response)
+        assert Dataset.objects.get(id=dataset.id).title == "Renamed"
+
+
+@pytest.mark.options(READ_ONLY_MODE=True)
+class ApiKeyScopesReadOnlyModeTest(PytestOnlyAPITestCase):
+    """The read-only mode lets the sysadmins through, a key only with its `sysadmin` scope."""
+
+    def test_sysadmin_scope_bypasses_the_read_only_mode(self):
+        with self.api_user(AdminFactory(), scopes=["sysadmin"]):
+            response = self.post(url_for("api.datasets"), DatasetFactory.as_dict())
+
+        assert_status(response, 201)
+
+    def test_no_sysadmin_scope_is_held_by_the_read_only_mode(self):
+        with self.api_user(AdminFactory(), scopes=[]):
+            response = self.post(url_for("api.datasets"), DatasetFactory.as_dict())
+
+        assert_status(response, 423)
+        assert Dataset.objects.count() == 0

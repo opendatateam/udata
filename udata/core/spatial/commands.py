@@ -8,7 +8,6 @@ from datetime import UTC, datetime
 from textwrap import dedent
 
 import click
-import requests
 import slugify
 from mongoengine import errors
 from mongoengine.context_managers import switch_collection
@@ -25,6 +24,7 @@ from udata.core.spatial.models import (
     get_zone_bboxes,
 )
 from udata.core.spatial.tasks import detect_and_write_zone
+from udata.http import http_session
 
 log = logging.getLogger(__name__)
 
@@ -42,7 +42,6 @@ DEFAULT_LEVELS_FILE = (
 @cli.group("spatial")
 def grp():
     """Geospatial related operations"""
-    pass
 
 
 def load_levels(col, json_levels):
@@ -71,7 +70,7 @@ def load_zones(col, json_geozones):
             params["bbox"] = geozone["bbox"]
         try:
             col.objects(id=geozone["_id"]).modify(
-                upsert=True, **{"set__{0}".format(k): v for k, v in params.items()}
+                upsert=True, **{f"set__{k}": v for k, v in params.items()}
             )
             loaded_geozones += 1
         except errors.ValidationError as e:
@@ -93,7 +92,7 @@ def handle_error(to_delete=None):
     try:
         yield
     except KeyboardInterrupt:
-        print("")  # Proper warning message under the "^C" display
+        print()  # Proper warning message under the "^C" display
         log.warning("Interrupted by signal")
     except Exception as e:
         log.error(e)
@@ -117,7 +116,7 @@ def load(geozones_file, levels_file, drop=False):
     """
     log.info("Loading GeoZones levels")
     if levels_file.startswith("http"):
-        response = requests.get(levels_file)
+        response = http_session().get(levels_file)
         # Raise on HTTP errors so a transient error page from the remote server
         # surfaces clearly instead of an opaque JSONDecodeError on the HTML body.
         response.raise_for_status()
@@ -128,20 +127,19 @@ def load(geozones_file, levels_file, drop=False):
 
     ts = datetime.now(UTC).isoformat().replace("-", "").replace(":", "").split(".")[0]
     if drop and GeoLevel.objects.count():
-        name = "_".join((GeoLevel._get_collection_name(), ts))
+        name = f"{GeoLevel._get_collection_name()}_{ts}"
         target = GeoLevel._get_collection_name()
-        with switch_collection(GeoLevel, name):
-            with handle_error(GeoLevel):
-                total = load_levels(GeoLevel, json_levels)
-                GeoLevel.objects._collection.rename(target, dropTarget=True)
+        with switch_collection(GeoLevel, name), handle_error(GeoLevel):
+            total = load_levels(GeoLevel, json_levels)
+            GeoLevel.objects._collection.rename(target, dropTarget=True)
     else:
         with handle_error():
             total = load_levels(GeoLevel, json_levels)
-    log.info("Loaded {total} levels".format(total=total))
+    log.info(f"Loaded {total} levels")
 
     log.info("Loading Zones")
     if geozones_file.startswith("http"):
-        response = requests.get(geozones_file)
+        response = http_session().get(geozones_file)
         response.raise_for_status()
         json_geozones = response.json()
     else:
@@ -149,16 +147,15 @@ def load(geozones_file, levels_file, drop=False):
             json_geozones = json.load(f)
 
     if drop and GeoZone.objects.count():
-        name = "_".join((GeoZone._get_collection_name(), ts))
+        name = f"{GeoZone._get_collection_name()}_{ts}"
         target = GeoZone._get_collection_name()
-        with switch_collection(GeoZone, name):
-            with handle_error(GeoZone):
-                total = load_zones(GeoZone, json_geozones)
-                GeoZone.objects._collection.rename(target, dropTarget=True)
+        with switch_collection(GeoZone, name), handle_error(GeoZone):
+            total = load_zones(GeoZone, json_geozones)
+            GeoZone.objects._collection.rename(target, dropTarget=True)
     else:
         with handle_error():
             total = load_zones(GeoZone, json_geozones)
-    log.info("Loaded {total} zones".format(total=total))
+    log.info(f"Loaded {total} zones")
 
     log.info("Clean removed geozones in datasets")
     count = fixup_removed_geozone()
@@ -219,7 +216,7 @@ def migrate():
 
     level_summary = "\n".join(
         [
-            " - {0}: {1}".format(geolevel.id, counter[geolevel.id])
+            f" - {geolevel.id}: {counter[geolevel.id]}"
             for geolevel in GeoLevel.objects.order_by("admin_level")
         ]
     )

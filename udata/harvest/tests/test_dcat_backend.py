@@ -19,8 +19,9 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.harvest.backends import dcat as dcat_module
 from udata.harvest.backends import get_backend
 from udata.harvest.models import HarvestItem, HarvestJob
+from udata.http import USER_AGENT
 from udata.models import Dataset
-from udata.rdf import DCAT
+from udata.rdf import DCAT, DCT
 from udata.storage.s3 import get_from_json
 from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import argvalues, assert200
@@ -132,7 +133,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
         assert len(datasets) == 3
 
-        for i in "1 2 3".split():
+        for i in ["1", "2", "3"]:
             d = datasets[i]
             assert d.title == f"Dataset {i}"
             assert d.description == f"Dataset {i} description"
@@ -334,6 +335,12 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert len(dataservices) == 0
 
     def test_harvest_literal_spatial(self, rmock):
+        # evian.json is a Project Open Data catalog, whose remote @context is replaced by a gist
+        pod_context = URIS_TO_REPLACE[
+            "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld"
+        ]
+        with open(os.path.join(DCAT_FILES_DIR, "pod-catalog-context.jsonld")) as f:
+            rmock.get(pod_context, text=f.read())
         url = mock_dcat(rmock, "evian.json")
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
@@ -537,8 +544,8 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
-        assert set(datasets["1"].tags).issuperset(set(["repartition-des-especes", "inspire"]))
-        assert set(datasets["2"].tags).issuperset(set(["hydrographie", "inspire"]))
+        assert set(datasets["1"].tags).issuperset({"repartition-des-especes", "inspire"})
+        assert set(datasets["2"].tags).issuperset({"hydrographie", "inspire"})
         assert "inspire" not in datasets["3"].tags
 
     def test_simple_nested_attributes(self, rmock):
@@ -760,26 +767,27 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert (
             dataset.harvest.remote_id
             == "0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2"
-        )  # noqa
+        )
         assert (
             dataset.harvest.dct_identifier
             == "0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2"
-        )  # noqa
+        )
         assert dataset.harvest.issued_at.date() == date(2004, 11, 3)
         assert dataset.harvest.created_at is None
         assert dataset.harvest.modified_at is None
         assert (
             dataset.harvest.uri
             == "https://sig.oreme.org/geonetwork/srv/resources/datasets/0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2"
-        )  # noqa
+        )
         assert dataset.harvest.remote_url is None  # the uri validation failed
         assert dataset.description.startswith("Data of type chemistry")
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2004, 11, 3)
         assert dataset.temporal_coverage.end == date(2005, 3, 30)
-        assert set(dataset.tags) == set(
-            ["inspire", "biodiversity-dynamics"]
-        )  # The DCAT.theme with rdf:resource don't have labels properly defined
+        assert set(dataset.tags) == {
+            "inspire",
+            "biodiversity-dynamics",
+        }  # The DCAT.theme with rdf:resource don't have labels properly defined
 
     def test_sigoreme_xml_catalog(self, rmock):
         LicenseFactory(id="fr-lo", title="Licence ouverte / Open Licence")
@@ -804,11 +812,11 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert (
             dataset.harvest.uri
             == "https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//datasets/0437a976-cff1-4fa6-807a-c23006df2f8f"
-        )  # noqa
+        )
         assert (
             dataset.harvest.remote_url
             == "https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//datasets/0437a976-cff1-4fa6-807a-c23006df2f8f"
-        )  # noqa
+        )
         assert dataset.harvest.last_update.date() == date.today()
 
     def test_conflicting_dois_are_reported_in_the_harvest_logs(self, rmock):
@@ -826,8 +834,10 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert [(entry.level, entry.message) for entry in item.logs if entry.level != "DEBUG"] == [
             (
                 "WARNING",
-                "Several DOIs identify this dataset, none is kept: "
-                "10.15148/0e999ffc, 10.15148/762d02eb",
+                (
+                    "Several DOIs identify this dataset, none is kept: "
+                    "10.15148/0e999ffc, 10.15148/762d02eb"
+                ),
             )
         ]
 
@@ -958,7 +968,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         actions.run(source)
 
         assert "User-Agent" in get_mock.last_request.headers
-        assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 dcat"
+        assert get_mock.last_request.headers["User-Agent"] == f"{USER_AGENT} dcat"
 
     def test_unsupported_mime_type(self, rmock, caplog):
         url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
@@ -1001,37 +1011,34 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert not [r for r in caplog.records if r.levelno >= logging.ERROR]
 
     def test_use_replaced_uris(self, rmock, mocker):
-        # Create a mock URL that will be replaced, but use an embedded context to avoid external requests
+        broken_context = "http://broken.test.org/context.jsonld"
+        replacement_context = TEST_URL_PATTERN.format(path="context.jsonld", domain=TEST_DOMAIN)
+        mocker.patch.dict(URIS_TO_REPLACE, {broken_context: replacement_context})
+        rmock.get(
+            replacement_context,
+            json={"@context": {"@vocab": "http://www.w3.org/ns/dcat#", "dct": str(DCT)}},
+        )
         url = TEST_URL_PATTERN.format(path="", domain=TEST_DOMAIN)
         rmock.get(
             url,
             json={
-                "@context": {
-                    "@vocab": "http://www.w3.org/ns/dcat#",
-                    "dcat": "http://www.w3.org/ns/dcat#",
-                },
-                "@type": "dcat:Catalog",
-                "dataset": [],
+                "@context": broken_context,
+                "@type": "Catalog",
+                "dataset": [
+                    {"@type": "Dataset", "dct:identifier": "1", "dct:title": "Dataset 1"},
+                ],
             },
         )
         rmock.head(url, headers={"Content-Type": "application/json"})
 
-        org = OrganizationFactory()
-        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
-
-        # The test just checks that the replacement mechanism exists and can be patched
-        # We don't actually test URL replacement here since it would require mocking urllib
-        mocker.patch.dict(
-            URIS_TO_REPLACE,
-            {},  # Empty dict to test the mechanism exists
-        )
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
         actions.run(source)
 
         source.reload()
 
         job = source.get_last_job()
-        assert len(job.items) == 0
         assert job.status == "done"
+        assert Dataset.objects.get(harvest__dct_identifier="1").title == "Dataset 1"
 
     def test_target_404(self, rmock):
         filename = "obvious-format.jsonld"
@@ -1710,7 +1717,7 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         actions.run(source)
 
         assert "User-Agent" in get_mock.last_request.headers
-        assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 csw-dcat"
+        assert get_mock.last_request.headers["User-Agent"] == f"{USER_AGENT} csw-dcat"
 
     @pytest.mark.options(HARVEST_MAX_ITEMS=2)
     def test_max_items(self, rmock):
@@ -2006,17 +2013,15 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
             dataset.description
             == "Le présent standard de données COVADIS concerne les documents de plans locaux d'urbanisme (PLU) et les plans d'occupation des sols (POS qui valent PLU)."
         )
-        assert set(dataset.tags) == set(
-            [
-                "amenagement-urbanisme-zonages-planification",
-                "cartigny",
-                "document-durbanisme",
-                "donnees-ouvertes",
-                "plu",
-                "usage-des-sols",
-                "inspire",
-            ]
-        )
+        assert set(dataset.tags) == {
+            "amenagement-urbanisme-zonages-planification",
+            "cartigny",
+            "document-durbanisme",
+            "donnees-ouvertes",
+            "plu",
+            "usage-des-sols",
+            "inspire",
+        }
         assert dataset.harvest.issued_at.date() == date(2017, 10, 7)
         assert dataset.harvest.created_at.date() == date(2013, 3, 8)
         assert dataset.spatial.geom == {

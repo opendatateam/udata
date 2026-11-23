@@ -1,6 +1,6 @@
 import logging
 from collections import OrderedDict
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from urllib.parse import urlencode
 
 import requests
@@ -10,11 +10,13 @@ from flask import current_app
 from mongoengine import QuerySet
 from pymongo.command_cursor import CommandCursor
 
+from udata.http import http_session
+
 log = logging.getLogger(__name__)
 
 
 def get_last_13_months() -> list[str]:
-    dstart = datetime.today().replace(day=1) - timedelta(days=365)
+    dstart = datetime.now(UTC).replace(day=1) - timedelta(days=365)
     months = rrule(freq=MONTHLY, count=13, dtstart=dstart)
     return [month.strftime("%Y-%m") for month in months]
 
@@ -61,7 +63,7 @@ def get_metrics_for_model(
         params = {"metric_month__sort": "desc"}
         if id:
             params[f"{model}_id__exact"] = id
-        res = requests.get(model_metrics_api, params)
+        res = http_session().get(model_metrics_api, params=params)
         res.raise_for_status()
         monthly_metrics = compute_monthly_metrics(res.json()["data"], metrics_labels)
         return metrics_by_label(monthly_metrics, metrics_labels)

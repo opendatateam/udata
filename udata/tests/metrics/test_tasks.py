@@ -106,6 +106,34 @@ class TasksMetricsTest(PytestOnlyTestCase):
         assert datasets[4].metrics.get("views") == 2
         assert datasets[4].metrics.get("resources_downloads") == 7
 
+    def test_update_datasets_stores_missing_values_as_zero(self, app, rmock):
+        """The metrics API is queried with an OR on the value keys
+
+        A dataset downloaded but never visited comes back with `visit: null`, which used
+        to be stored as is and broke consumers expecting a number.
+        """
+        downloaded_only = DatasetFactory()
+        visited_only = DatasetFactory()
+        mock_metrics_api(
+            app,
+            rmock,
+            "datasets",
+            ["visit", "download_resource"],
+            [
+                {"dataset_id": str(downloaded_only.id), "visit": None, "download_resource": 5},
+                {"dataset_id": str(visited_only.id), "visit": 3, "download_resource": None},
+            ],
+        )
+
+        update_datasets()
+        downloaded_only.reload()
+        visited_only.reload()
+
+        assert downloaded_only.metrics.get("views") == 0
+        assert downloaded_only.metrics.get("resources_downloads") == 5
+        assert visited_only.metrics.get("views") == 3
+        assert visited_only.metrics.get("resources_downloads") == 0
+
     def test_update_resources_metrics(self, app, rmock):
         resources = [ResourceFactory() for i in range(5)]
         dataset_a_with_resources = DatasetFactory(resources=resources)

@@ -18,6 +18,7 @@ from flask_security.forms import (
 from udata.auth.proconnect import LOGIN_KEY, PENDING_LOGIN_KEY, session_login
 from udata.core.captchetat import bearer_token
 from udata.forms import fields, validators
+from udata.http import http_session
 from udata.i18n import lazy_gettext as _
 
 log = logging.getLogger(__name__)
@@ -64,10 +65,7 @@ class ExtendedRegisterForm(WithCaptcha, RegisterFormV2):
         if not self.validate_captcha():
             return False
 
-        if not super().validate(**kwargs):
-            return False
-
-        return True
+        return super().validate(**kwargs)
 
 
 # Giving a password to an account that signs in with ProConnect only, through a reset that only
@@ -123,10 +121,7 @@ class ExtendedForgotPasswordForm(WithCaptcha, ForgotPasswordForm):
         if not self.validate_captcha():
             return False
 
-        if not super().validate(**kwargs):
-            return False
-
-        return True
+        return super().validate(**kwargs)
 
 
 class ExtendedTwoFactorSetupForm(TwoFactorSetupForm):
@@ -191,7 +186,7 @@ def check_captchetat(id: str, code: str) -> bool:
 
     headers = {"Authorization": "Bearer " + bearer_token()}
     try:
-        resp = requests.post(
+        resp = http_session().post(
             f"{captchetat_url}/valider-captcha",
             headers=headers,
             json={

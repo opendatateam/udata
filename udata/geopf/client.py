@@ -10,6 +10,7 @@ from flask import current_app
 
 from udata.geopf.metadata import XML_NS
 from udata.geopf.srs import DEFAULT_SRS
+from udata.http import USER_AGENT
 
 log = logging.getLogger(__name__)
 
@@ -46,13 +47,9 @@ class GeopfError(Exception):
 class GeopfTimeoutError(GeopfError):
     """Raised when a polled operation does not complete within the configured timeout."""
 
-    pass
-
 
 class GeopfReauthRequired(GeopfError):
     """Raised when there is no valid (or refreshable) geopf token for the acting user."""
-
-    pass
 
 
 class _GeopfSession(requests.Session):
@@ -63,6 +60,7 @@ class _GeopfSession(requests.Session):
 
     def __init__(self, timeout: float):
         super().__init__()
+        self.headers["User-Agent"] = USER_AGENT
         self.default_timeout = timeout
 
     def request(self, *args, **kwargs):

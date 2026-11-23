@@ -1,6 +1,6 @@
 import logging
 from copy import copy
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from itertools import chain
 
 from blinker import Signal
@@ -46,7 +46,7 @@ from udata.uris import cdata_url
 from . import mails
 from .constants import AVATAR_SIZES, BIGGEST_AVATAR_SIZE
 
-__all__ = ("User", "Role", "datastore")
+__all__ = ("Role", "User", "datastore")
 
 log = logging.getLogger(__name__)
 
@@ -312,6 +312,8 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
 
     @property
     def sysadmin(self):
+        """Whether the user holds the role. What the current request may do as one is
+        `admin_permission`: an API key can withhold the role."""
         return self.has_role("admin")
 
     @property
@@ -387,9 +389,10 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         Overrides default implementation in Flask-Security to add configurable 2FA requirement for sysadmins.
         This is called AFTER the user has successfully authenticated.
         """
-        if self.two_factor_required_by_policy or len(tf_setup_methods) > 0:
-            if current_app.config["SECURITY_TWO_FACTOR_ALWAYS_VALIDATE"] or not tf_fresh:
-                return True, tf_setup_methods
+        if (self.two_factor_required_by_policy or len(tf_setup_methods) > 0) and (
+            current_app.config["SECURITY_TWO_FACTOR_ALWAYS_VALIDATE"] or not tf_fresh
+        ):
+            return True, tf_setup_methods
         return False, tf_setup_methods
 
     def check_tf_required_setup(self) -> bool:
@@ -514,14 +517,14 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
                 storage = storages.avatars
                 storage.delete(self.avatar.filename)
                 storage.delete(self.avatar.original)
-                for key, value in self.avatar.thumbnails.items():
+                for value in self.avatar.thumbnails.values():
                     storage.delete(value)
             except FileNotFoundError as e:
                 log.error(f"File not found while deleting user #{self.id} avatar: {e}")
 
         copied_user = copy(self)
-        self.email = "{}@deleted".format(self.id)
-        self.slug = "deleted-{}".format(self.id)
+        self.email = f"{self.id}@deleted"
+        self.slug = f"deleted-{self.id}"
         self.password = None
         self.active = False
         self.first_name = "DELETED"
@@ -535,9 +538,7 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
         self.save()
         from udata.core.api_token.models import ApiToken
 
-        ApiToken.objects(user=self, revoked_at=None).update(
-            set__revoked_at=datetime.now(timezone.utc)
-        )
+        ApiToken.objects(user=self, revoked_at=None).update(set__revoked_at=datetime.now(UTC))
         from udata.geopf.auth import revoke_token
         from udata.geopf.models import GeopfToken
 

@@ -25,7 +25,7 @@ class SpatialTemporalResolutionTest(DBTestCase):
         for i in range(3):
             GeoZoneFactory(code=zone.code)
 
-        geoid = "{0.level}:{0.code}".format(zone)
+        geoid = f"{zone.level}:{zone.code}"
         result = GeoZone.objects.resolve(geoid, id_only=True)
 
         self.assertEqual(result, zone.id)

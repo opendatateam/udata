@@ -22,12 +22,14 @@ class AuthTest(APITestCase):
         return url_for("security.confirm_change_email", token=token)
 
     def open_expired(self, link):
-        with capture_mails() as mails:
-            # A negative validity makes any freshly signed token already expired
-            with mock.patch.dict(
+        # A negative validity makes any freshly signed token already expired
+        with (
+            capture_mails() as mails,
+            mock.patch.dict(
                 current_app.config, {"SECURITY_CONFIRM_EMAIL_WITHIN": timedelta(seconds=-1)}
-            ):
-                response = self.get(link)
+            ),
+        ):
+            response = self.get(link)
         return response, mails
 
     def test_change_mail_notifies_the_previous_address(self):

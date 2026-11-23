@@ -49,7 +49,7 @@ class APITestCaseMixin:
         self.client = app.test_client()
 
     @contextmanager
-    def api_user(self, user=None):
+    def api_user(self, user=None, scopes=None):
         """
         Context manager for API key authentication.
 
@@ -58,7 +58,7 @@ class APITestCaseMixin:
                 response = self.get(url)
         """
         self._user = user or UserFactory()
-        token, plaintext = ApiToken.generate(self._user)
+        _token, plaintext = ApiToken.generate(self._user, scopes=scopes)
         self._api_key = plaintext
         yield self._user
         self._user = None
@@ -114,11 +114,11 @@ class APITestCaseMixin:
         method = getattr(self.client, verb)
         return method(url, **kwargs)
 
-    def get(self, url, *args, **kwargs):
+    def get(self, url, **kwargs):
         """Perform a GET request with JSON handling."""
-        return self.perform("get", url, *args, **kwargs)
+        return self.perform("get", url, **kwargs)
 
-    def post(self, url, data=None, json=True, *args, **kwargs):
+    def post(self, url, data=None, json=True, **kwargs):
         """
         Perform a POST request.
 
@@ -126,13 +126,13 @@ class APITestCaseMixin:
             url: URL to request
             data: Data to send (will be JSON-encoded if json=True)
             json: If True, send as JSON (default: True)
-            *args, **kwargs: Additional arguments
+            **kwargs: Additional arguments
         """
         if not json:
-            return self.client.post(url, data=data or {}, *args, **kwargs)
-        return self.perform("post", url, data=data or {}, *args, **kwargs)
+            return self.client.post(url, data=data or {}, **kwargs)
+        return self.perform("post", url, data=data or {}, **kwargs)
 
-    def put(self, url, data=None, json=True, *args, **kwargs):
+    def put(self, url, data=None, json=True, **kwargs):
         """
         Perform a PUT request.
 
@@ -140,13 +140,13 @@ class APITestCaseMixin:
             url: URL to request
             data: Data to send (will be JSON-encoded if json=True)
             json: If True, send as JSON (default: True)
-            *args, **kwargs: Additional arguments
+            **kwargs: Additional arguments
         """
         if not json:
-            return self.client.put(url, data=data or {}, *args, **kwargs)
-        return self.perform("put", url, data=data or {}, *args, **kwargs)
+            return self.client.put(url, data=data or {}, **kwargs)
+        return self.perform("put", url, data=data or {}, **kwargs)
 
-    def patch(self, url, data=None, json=True, *args, **kwargs):
+    def patch(self, url, data=None, json=True, **kwargs):
         """
         Perform a PATCH request.
 
@@ -154,19 +154,19 @@ class APITestCaseMixin:
             url: URL to request
             data: Data to send (will be JSON-encoded if json=True)
             json: If True, send as JSON (default: True)
-            *args, **kwargs: Additional arguments
+            **kwargs: Additional arguments
         """
         if not json:
-            return self.client.patch(url, data=data or {}, *args, **kwargs)
-        return self.perform("patch", url, data=data or {}, *args, **kwargs)
+            return self.client.patch(url, data=data or {}, **kwargs)
+        return self.perform("patch", url, data=data or {}, **kwargs)
 
-    def delete(self, url, data=None, *args, **kwargs):
+    def delete(self, url, data=None, **kwargs):
         """Perform a DELETE request with JSON handling."""
-        return self.perform("delete", url, data=data or {}, *args, **kwargs)
+        return self.perform("delete", url, data=data or {}, **kwargs)
 
-    def options(self, url, data=None, *args, **kwargs):
+    def options(self, url, data=None, **kwargs):
         """Perform an OPTIONS request with JSON handling."""
-        return self.perform("options", url, data=data or {}, *args, **kwargs)
+        return self.perform("options", url, data=data or {}, **kwargs)
 
     def assertStatus(self, response, status_code, message=None):
         __tracebackhide__ = True

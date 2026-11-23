@@ -181,10 +181,6 @@ class NotificationExtra(EmbeddedDocument):
     external_url = StringField(validation=_validate_notification_external_url)
 
 
-def filter_by_subject(base_query, filter_value):
-    return base_query.generic_in(subject=filter_value)
-
-
 def filter_by_organization(base_query, filter_value):
     # Deferred: `Dataservice` imports `Discussion` at module level, so importing the subject
     # models here would load `Reuse` — which declares a delete rule on `Dataservice` — before
@@ -212,6 +208,21 @@ def filter_by_closed(base_query, filter_value):
     return base_query(closed=None)
 
 
+def subject_is_readable(subject) -> bool:
+    """Whether the current user may see `subject`, like the subject's own API decides.
+
+    `Topic` carries no read permission: its API serves private topics to anyone.
+    """
+    permissions = getattr(subject, "permissions", None) or {}
+    return "read" not in permissions or permissions["read"].can()
+
+
+def check_subject_is_readable(subject, field, **_kwargs):
+    # Same message as an unknown id, so the answer doesn't tell a hidden object exists.
+    if not subject_is_readable(subject):
+        raise FieldValidationError(field=field, message=f"Unknown reference '{subject.id}'")
+
+
 def check_organization_voice(organization, obj, **_kwargs):
     """Check the current user may speak in the name of `organization` in the discussion `obj`.
 
@@ -236,14 +247,6 @@ def check_organization_voice(organization, obj, **_kwargs):
             "type": boolean,
             "query": filter_by_closed,
             "help": "Filters discussions on their closed status if specified",
-        },
-        {
-            "key": "for",
-            "type": str,
-            "is_list": True,
-            "constraints": ["objectid"],
-            "query": filter_by_subject,
-            "help": "Filter discussions for a given subject",
         },
         {
             "key": "org",
@@ -281,6 +284,12 @@ class Discussion(SpamMixin, Linkable, Document):
         GenericReferenceField(choices=DISCUSSION_SUBJECTS, required=True),
         nested_fields=api.model_reference,
         description="The discussion target object",
+        checks=[check_subject_is_readable],
+        filterable={
+            "key": "for",
+            "is_list": True,
+            "help": "Filter discussions for a given subject",
+        },
     )
     title = field(StringField(required=True), sortable=True, description="The discussion title")
     discussion = field(

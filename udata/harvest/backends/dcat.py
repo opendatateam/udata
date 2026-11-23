@@ -1,8 +1,9 @@
 import logging
 import traceback
 from abc import ABC, abstractmethod
+from collections.abc import Generator
 from datetime import date
-from typing import ClassVar, Generator
+from typing import ClassVar
 
 from flask import current_app
 from rdflib import Graph, Literal, Node, URIRef
@@ -65,7 +66,7 @@ CSW_NAMESPACE = "http://www.opengis.net/cat/csw/2.0.2"
 # Useful to patch essential failing URIs
 URIS_TO_REPLACE = {
     # See https://github.com/datagouv/data.gouv.fr/issues/1151
-    "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld": "https://gist.githubusercontent.com/maudetes/f019586185d6f59dcfb07f97148a1973/raw/585c3c7bf602b5a4e635b137257d0619792e2c1f/gistfile1.txt"  # noqa
+    "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld": "https://gist.githubusercontent.com/maudetes/f019586185d6f59dcfb07f97148a1973/raw/585c3c7bf602b5a4e635b137257d0619792e2c1f/gistfile1.txt"
 }
 
 # Custom record id format `urn:iso19139:parent:<parent record id>` (SEMIC XSLT datagouv patch)
@@ -88,7 +89,7 @@ def custom_iso19139_parent_record_id_from_rdf(graph: Graph, node: Node) -> str |
     specification in the datagouv ISO-to-DCAT XSLT.
     """
     for obj in graph.objects(node, DCAT.inSeries):
-        if isinstance(obj, URIRef) or isinstance(obj, Literal):
+        if isinstance(obj, (URIRef, Literal)):
             # URIRef: <dcat:inSeries rdf:resource="...">
             # Literal: <dcat:inSeries>...</dcat:inSeries> (lenient)
             value = str(obj).strip()
@@ -478,14 +479,12 @@ class BaseCswDcatBackend(DcatBackend, ABC):
         """
         Return the CSW `outputSchema` property.
         """
-        pass
 
     @abstractmethod
     def as_dcat(self, tree: PyXdmNode) -> PyXdmNode:
         """
         Return the input tree as a DCAT tree.
         """
-        pass
 
     @property
     @override
@@ -529,7 +528,7 @@ class BaseCswDcatBackend(DcatBackend, ABC):
                 try:
                     doc = self.as_dcat(result).to_string("utf-8")
                     page_graph.parse(data=doc, format=self.format)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001 (one broken record must not stop the page)
                     # Record the original XML even when as_dcat() succeeds, because the conversion
                     # might lose some information needed to understand the problem.
                     xml = result.to_string("utf-8")
@@ -565,7 +564,7 @@ class BaseCswDcatBackend(DcatBackend, ABC):
         returned_count = int(search_results.get_attribute_value("numberOfRecordsReturned"))
 
         # Break conditions copied gratefully from
-        # noqa https://github.com/geonetwork/core-geonetwork/blob/main/harvesters/src/main/java/org/fao/geonet/kernel/harvest/harvester/csw/Harvester.java#L338-L369
+        # https://github.com/geonetwork/core-geonetwork/blob/main/harvesters/src/main/java/org/fao/geonet/kernel/harvest/harvester/csw/Harvester.java#L338-L369
         should_break = (
             # A value of 0 means all records have been returned (standard CSW)
             (next_record == 0)

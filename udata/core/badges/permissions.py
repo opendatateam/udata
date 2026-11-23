@@ -12,4 +12,4 @@ class BadgePermission(Permission):
             organization_id = subject.id
         needs.append(OrganizationAdminNeed(organization_id))
 
-        super(BadgePermission, self).__init__(*needs)
+        super().__init__(*needs)

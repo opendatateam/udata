@@ -177,7 +177,7 @@ class SpamTest(APITestCase):
         self.assertTrue(self.has_spam_report(dataset))
 
         report = Report.objects(subject=dataset, reason=REASON_AUTO_SPAM).first()
-        report.dismissed_at = datetime.utcnow()
+        report.dismissed_at = datetime.now(UTC)
         report.save()
 
         dataset.reload()
@@ -312,7 +312,7 @@ class SpamTest(APITestCase):
         TCHAP_BOT_TOKEN="token",
     )
     def test_tchap_send_message_builds_matrix_url(self):
-        with patch("udata.notifications.tchap.requests.post") as post:
+        with patch("requests.Session.post") as post:
             send_message.run("hello")
 
         post.assert_called_once()
@@ -328,7 +328,7 @@ class SpamTest(APITestCase):
 
     @pytest.mark.options(TCHAP_HOMESERVER=None, TCHAP_ROOM_ID="!room:example.org")
     def test_tchap_send_message_noop_without_config(self):
-        with patch("udata.notifications.tchap.requests.post") as post:
+        with patch("requests.Session.post") as post:
             send_message.run("hello")
 
         post.assert_not_called()

@@ -1,3 +1,5 @@
+from typing import Self
+
 from blinker import Signal
 from flask import url_for
 from mongoengine.errors import DoesNotExist
@@ -103,7 +105,7 @@ class TopicElement(Auditable, Document):
         super().post_save(sender, document, **kwargs)
         if document.topic and document.element and hasattr(document.element, "id"):
             reindex.delay(*as_task_param(document.element))
-        if document.topic:
+        if document.topic and "topic_save" not in kwargs.get("ignores", []):
             document.topic.save()
 
     @classmethod
@@ -112,12 +114,48 @@ class TopicElement(Auditable, Document):
         try:
             if document.topic and document.element and hasattr(document.element, "id"):
                 reindex.delay(*as_task_param(document.element))
-            if document.topic:
+            if document.topic and "topic_save" not in kwargs.get("ignores", []):
                 document.topic.save()
         except DoesNotExist:
             # Topic might have been deleted, causing dereferencing to fail
             pass
         cls.on_delete.send(document)
+
+
+class TopicElementsWriter:
+    """Write elements of a topic, then save the topic once if anything was written.
+
+    Saving a topic reindexes it, which reads all its elements: saving it for each element
+    written made bulk writes quadratic. Elements are written with `"topic_save"` in their
+    signal `ignores`, and the topic is saved on exit, even if the block fails midway, so
+    that its index reflects the elements already written or deleted.
+
+        with TopicElementsWriter(topic) as writer:
+            writer.save(element)
+    """
+
+    def __init__(self, topic: "Topic"):
+        # Set on each element: an element loaded from the database would otherwise reload
+        # its own copy of the topic (and of its organization, for the activity) on delete.
+        self.topic = topic
+        self.written = False
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, *exc_info) -> None:
+        if self.written:
+            self.topic.save()
+
+    def save(self, element: TopicElement) -> None:
+        element.topic = self.topic
+        element.save(signal_kwargs={"ignores": ["topic_save"]})
+        self.written = True
+
+    def delete(self, element: TopicElement) -> None:
+        element.topic = self.topic
+        element.delete(signal_kwargs={"ignores": ["topic_save"]})
+        self.written = True
 
 
 @generate_fields()
@@ -187,13 +225,13 @@ class Topic(Datetimed, Auditable, Linkable, Owned, Document[TopicQuerySet]):
         if not self.id:
             return set()
 
-        return set(
+        return {
             str(elem["element"]["_ref"].id)
             for elem in TopicElement.objects.filter(topic=self, __raw__={"element._cls": cls})
             .fields(element=1)
             .no_dereference()
             .as_pymongo()
-        )
+        }
 
     def self_web_url(self, **kwargs):
         return cdata_url(f"/topics/{self._link_id(**kwargs)}", **kwargs)

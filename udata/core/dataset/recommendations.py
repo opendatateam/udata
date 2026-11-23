@@ -4,10 +4,10 @@ from importlib.resources import files
 
 import jsonschema
 import mongoengine
-import requests
 from flask import current_app
 
 from udata.commands import error, success
+from udata.http import http_session
 from udata.models import Dataset, Reuse
 from udata.tasks import job
 from udata.uris import validate
@@ -16,11 +16,7 @@ log = logging.getLogger(__name__)
 
 
 def recommendations_clean():
-    nb_datasets = Dataset.objects.filter(
-        **{
-            "extras__recommendations__exists": True,
-        }
-    ).update(
+    nb_datasets = Dataset.objects.filter(extras__recommendations__exists=True).update(
         **{
             "unset__extras__recommendations": True,
             "unset__extras__recommendations-reuses": True,
@@ -34,7 +30,7 @@ schema_path = files("udata").joinpath("schemas", "recommendations.json")
 
 
 def get_recommendations_data(url):
-    response = requests.get(url, timeout=10)
+    response = http_session().get(url, timeout=10)
     response.raise_for_status()
     data = response.json()
 

@@ -87,9 +87,7 @@ class ReuseListAPI(API):
     @api.expect(Reuse.__index_parser__)
     @api.marshal_with(Reuse.__page_fields__)
     def get(self):
-        query = Reuse.objects.visible_by_user(
-            current_user, mongoengine.Q(private__ne=True, deleted=None)
-        )
+        query = Reuse.objects.visible_by_current_user(mongoengine.Q(private__ne=True, deleted=None))
         return Reuse.apply_pagination(Reuse.apply_sort_filters(query))
 
     @api.secure
@@ -211,7 +209,7 @@ class ReuseDatasetsAPI(API):
         try:
             dataset = Dataset.objects.get_or_404(id=id_or_404(payload["id"]))
         except Dataset.DoesNotExist:
-            msg = "Dataset {0} does not exists".format(payload["id"])
+            msg = "Dataset {} does not exists".format(payload["id"])
             return api.abort(404, msg)
 
         if dataset in reuse.datasets:
@@ -238,7 +236,7 @@ class ReuseDataservicesAPI(API):
         try:
             dataservice = Dataservice.objects.get_or_404(id=id_or_404(payload["id"]))
         except Dataservice.DoesNotExist:
-            msg = "Dataservice {0} does not exists".format(payload["id"])
+            msg = "Dataservice {} does not exists".format(payload["id"])
             return api.abort(404, msg)
 
         if dataservice in reuse.dataservices:

@@ -25,7 +25,7 @@ class QuerySetSelectField(SelectFieldBase):
         allow_blank=False,
         **kwargs,
     ):
-        super(QuerySetSelectField, self).__init__(label, validators, **kwargs)
+        super().__init__(label, validators, **kwargs)
         self.allow_blank = allow_blank
         self.queryset = queryset
 
@@ -45,9 +45,8 @@ class QuerySetSelectField(SelectFieldBase):
                     self.data = None
 
     def pre_validate(self, form):
-        if not self.allow_blank or self.data is not None:
-            if not self.data:
-                raise ValidationError(_("Not a valid choice"))
+        if (not self.allow_blank or self.data is not None) and not self.data:
+            raise ValidationError(_("Not a valid choice"))
 
 
 class ModelSelectField(QuerySetSelectField):
@@ -58,4 +57,4 @@ class ModelSelectField(QuerySetSelectField):
 
     def __init__(self, label="", validators=None, model=None, **kwargs):
         queryset = kwargs.pop("queryset", model.objects)
-        super(ModelSelectField, self).__init__(label, validators, queryset=queryset, **kwargs)
+        super().__init__(label, validators, queryset=queryset, **kwargs)

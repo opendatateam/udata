@@ -80,9 +80,11 @@ class DownloadToTempfileTest(PytestOnlyTestCase):
     def test_raises_when_size_limit_exceeded(self, rmock):
         rmock.get("https://example.com/data.gpkg", content=b"x" * 2048)
         chunks = _download_chunks("https://example.com/data.gpkg")
-        with pytest.raises(GeopfError, match="GEOPF_MAX_FILE_SIZE"):
-            with _copy_to_tempfile(chunks, "subject"):
-                pass
+        with (
+            pytest.raises(GeopfError, match="GEOPF_MAX_FILE_SIZE"),
+            _copy_to_tempfile(chunks, "subject"),
+        ):
+            pass
 
 
 class LocalStorageToTempfileTest(PytestOnlyTestCase):
@@ -106,29 +108,33 @@ class LocalStorageToTempfileTest(PytestOnlyTestCase):
             "udata.geopf.tasks.storages.resources.open", return_value=io.BytesIO(b"x" * 2048)
         ):
             chunks = _storage_chunks("uploads/my-data.gpkg")
-            with pytest.raises(GeopfError, match="GEOPF_MAX_FILE_SIZE"):
-                with _copy_to_tempfile(chunks, "subject"):
-                    pass
+            with (
+                pytest.raises(GeopfError, match="GEOPF_MAX_FILE_SIZE"),
+                _copy_to_tempfile(chunks, "subject"),
+            ):
+                pass
 
 
 class OpenResourceFileTest(PytestOnlyTestCase):
     def test_uses_the_real_path_directly_when_the_backend_supports_it(self):
         """The common case (e.g. the local backend): no copy, no temp file."""
         r = ResourceFactory.build(filetype="file", fs_filename="uploads/my-data.gpkg")
-        with patch("udata.geopf.tasks.storages.resources.path", return_value=__file__) as mock_path:
-            with _open_resource_file(r) as f:
-                assert f.name == __file__
+        with (
+            patch("udata.geopf.tasks.storages.resources.path", return_value=__file__) as mock_path,
+            _open_resource_file(r) as f,
+        ):
+            assert f.name == __file__
         mock_path.assert_called_once_with(r.fs_filename)
 
     def test_falls_back_to_a_copy_when_the_backend_has_no_direct_path(self):
         """E.g. the S3 backend: `.path()` raises `OperationNotSupported`."""
         r = ResourceFactory.build(filetype="file", fs_filename="uploads/my-data.gpkg")
-        with patch("udata.geopf.tasks.storages.resources.path", side_effect=OperationNotSupported):
-            with patch(
-                "udata.geopf.tasks.storages.resources.open", return_value=io.BytesIO(b"x" * 16)
-            ):
-                with _open_resource_file(r) as f:
-                    assert f.read() == b"x" * 16
+        with (
+            patch("udata.geopf.tasks.storages.resources.path", side_effect=OperationNotSupported),
+            patch("udata.geopf.tasks.storages.resources.open", return_value=io.BytesIO(b"x" * 16)),
+            _open_resource_file(r) as f,
+        ):
+            assert f.read() == b"x" * 16
 
     def test_downloads_remote_resources(self, rmock):
         r = ResourceFactory.build(
@@ -502,13 +508,15 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
         dataset = DatasetFactory(resources=[resource])
         resource_id = str(dataset.resources[0].id)
 
-        with patch("udata.geopf.tasks._run_pipeline", side_effect=GeopfError("boom")):
-            with pytest.raises(GeopfError):
-                push_resource_to_geopf.apply(
-                    args=[str(dataset.id), resource_id],
-                    kwargs={"access_token": "test-token", "datastore_id": TEST_DATASTORE_ID},
-                    throw=True,
-                )
+        with (
+            patch("udata.geopf.tasks._run_pipeline", side_effect=GeopfError("boom")),
+            pytest.raises(GeopfError),
+        ):
+            push_resource_to_geopf.apply(
+                args=[str(dataset.id), resource_id],
+                kwargs={"access_token": "test-token", "datastore_id": TEST_DATASTORE_ID},
+                throw=True,
+            )
 
         dataset.reload()
         r = next(r for r in dataset.resources if str(r.id) == resource_id)
@@ -520,13 +528,15 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
         dataset = DatasetFactory(resources=[resource])
         resource_id = str(dataset.resources[0].id)
 
-        with patch("udata.geopf.tasks._run_pipeline", side_effect=GeopfTimeoutError("timed out")):
-            with pytest.raises(GeopfTimeoutError):
-                push_resource_to_geopf.apply(
-                    args=[str(dataset.id), resource_id],
-                    kwargs={"access_token": "test-token", "datastore_id": TEST_DATASTORE_ID},
-                    throw=True,
-                )
+        with (
+            patch("udata.geopf.tasks._run_pipeline", side_effect=GeopfTimeoutError("timed out")),
+            pytest.raises(GeopfTimeoutError),
+        ):
+            push_resource_to_geopf.apply(
+                args=[str(dataset.id), resource_id],
+                kwargs={"access_token": "test-token", "datastore_id": TEST_DATASTORE_ID},
+                throw=True,
+            )
 
         dataset.reload()
         r = next(r for r in dataset.resources if str(r.id) == resource_id)
@@ -575,13 +585,15 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
         dataset = DatasetFactory(resources=[resource])
         resource_id = str(dataset.resources[0].id)
 
-        with patch("udata.geopf.tasks._run_pipeline", side_effect=GeopfError("boom")):
-            with pytest.raises(GeopfError):
-                push_resource_to_geopf.apply(
-                    args=[str(dataset.id), resource_id],
-                    kwargs={"access_token": "test-token", "datastore_id": "ds-bad"},
-                    throw=True,
-                )
+        with (
+            patch("udata.geopf.tasks._run_pipeline", side_effect=GeopfError("boom")),
+            pytest.raises(GeopfError),
+        ):
+            push_resource_to_geopf.apply(
+                args=[str(dataset.id), resource_id],
+                kwargs={"access_token": "test-token", "datastore_id": "ds-bad"},
+                throw=True,
+            )
 
         dataset.reload()
         assert dataset_push_metadata(dataset).datastore_id is None
@@ -596,13 +608,15 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
         )
         resource_id = str(dataset.resources[0].id)
 
-        with patch("udata.geopf.tasks.GeopfClient") as mock_client_cls:
-            with patch("udata.geopf.tasks._run_pipeline"):
-                push_resource_to_geopf.apply(
-                    args=[str(dataset.id), resource_id],
-                    # a different datastore_id is explicitly passed, but must be ignored
-                    kwargs={"access_token": "test-token", "datastore_id": "ds-other"},
-                )
+        with (
+            patch("udata.geopf.tasks.GeopfClient") as mock_client_cls,
+            patch("udata.geopf.tasks._run_pipeline"),
+        ):
+            push_resource_to_geopf.apply(
+                args=[str(dataset.id), resource_id],
+                # a different datastore_id is explicitly passed, but must be ignored
+                kwargs={"access_token": "test-token", "datastore_id": "ds-other"},
+            )
 
         mock_client_cls.assert_called_once_with(token="test-token", datastore_id="ds-established")
         dataset.reload()
@@ -624,15 +638,17 @@ class PushResourceTaskTest(PytestOnlyDBTestCase):
         resource_id = str(dataset.resources[0].id)
         user = UserFactory()
 
-        with patch(
-            "udata.geopf.tasks.resolve_access_token", return_value="resolved-token"
-        ) as mock_resolve:
-            with patch("udata.geopf.tasks.GeopfClient") as mock_client_cls:
-                with patch("udata.geopf.tasks._run_pipeline"):
-                    push_resource_to_geopf.apply(
-                        args=[str(dataset.id), resource_id],
-                        kwargs={"user_id": str(user.id), "datastore_id": TEST_DATASTORE_ID},
-                    )
+        with (
+            patch(
+                "udata.geopf.tasks.resolve_access_token", return_value="resolved-token"
+            ) as mock_resolve,
+            patch("udata.geopf.tasks.GeopfClient") as mock_client_cls,
+            patch("udata.geopf.tasks._run_pipeline"),
+        ):
+            push_resource_to_geopf.apply(
+                args=[str(dataset.id), resource_id],
+                kwargs={"user_id": str(user.id), "datastore_id": TEST_DATASTORE_ID},
+            )
 
         mock_resolve.assert_called_once()
         assert mock_resolve.call_args.kwargs["user"].id == user.id
@@ -658,13 +674,15 @@ class PullOfferingsTaskTest(PytestOnlyDBTestCase):
     def test_sets_error_status_on_failure(self):
         dataset = DatasetFactory()
 
-        with patch("udata.geopf.tasks.pull_offerings_for_dataset", side_effect=GeopfError("boom")):
-            with pytest.raises(GeopfError):
-                pull_offerings_from_geopf.apply(
-                    args=[str(dataset.id)],
-                    kwargs={"access_token": "test-token"},
-                    throw=True,
-                )
+        with (
+            patch("udata.geopf.tasks.pull_offerings_for_dataset", side_effect=GeopfError("boom")),
+            pytest.raises(GeopfError),
+        ):
+            pull_offerings_from_geopf.apply(
+                args=[str(dataset.id)],
+                kwargs={"access_token": "test-token"},
+                throw=True,
+            )
 
         dataset.reload()
         assert dataset.geopf.pull.status == "error"
@@ -674,13 +692,15 @@ class PullOfferingsTaskTest(PytestOnlyDBTestCase):
         dataset = DatasetFactory()
         user = UserFactory()
 
-        with patch(
-            "udata.geopf.tasks.resolve_access_token", return_value="resolved-token"
-        ) as mock_resolve:
-            with patch("udata.geopf.tasks.pull_offerings_for_dataset", return_value=0) as mock_pull:
-                pull_offerings_from_geopf.apply(
-                    args=[str(dataset.id)], kwargs={"user_id": str(user.id)}, throw=True
-                )
+        with (
+            patch(
+                "udata.geopf.tasks.resolve_access_token", return_value="resolved-token"
+            ) as mock_resolve,
+            patch("udata.geopf.tasks.pull_offerings_for_dataset", return_value=0) as mock_pull,
+        ):
+            pull_offerings_from_geopf.apply(
+                args=[str(dataset.id)], kwargs={"user_id": str(user.id)}, throw=True
+            )
 
         mock_resolve.assert_called_once()
         assert mock_resolve.call_args.kwargs["user"].id == user.id
@@ -692,13 +712,15 @@ class PullOfferingsTaskTest(PytestOnlyDBTestCase):
         resource_id = str(dataset.resources[0].id)
         user = UserFactory()
 
-        with patch("udata.geopf.tasks.resolve_access_token", return_value="resolved-token"):
-            with patch("udata.geopf.tasks.GeopfClient"):
-                with patch("udata.geopf.tasks._run_pipeline") as mock_pipeline:
-                    push_resource_to_geopf.apply(
-                        args=[str(dataset.id), resource_id],
-                        kwargs={"user_id": str(user.id), "datastore_id": TEST_DATASTORE_ID},
-                    )
+        with (
+            patch("udata.geopf.tasks.resolve_access_token", return_value="resolved-token"),
+            patch("udata.geopf.tasks.GeopfClient"),
+            patch("udata.geopf.tasks._run_pipeline") as mock_pipeline,
+        ):
+            push_resource_to_geopf.apply(
+                args=[str(dataset.id), resource_id],
+                kwargs={"user_id": str(user.id), "datastore_id": TEST_DATASTORE_ID},
+            )
 
         assert mock_pipeline.call_args.kwargs["notify_email"] == user.email
 

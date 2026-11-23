@@ -2,7 +2,6 @@ from datetime import UTC, date, datetime, timedelta
 from xml.etree.ElementTree import XML
 
 import pytest
-import requests
 from flask import url_for
 from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import FOAF, OWL, RDF, RDFS, XSD, Namespace
@@ -80,16 +79,6 @@ from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import argvalues, assert200, assert_redirects
 from udata.utils import faker
 
-GOV_UK_REF = "http://reference.data.gov.uk/id/year/2017"
-
-try:
-    requests.head(GOV_UK_REF, timeout=0.1)
-except requests.exceptions.RequestException:
-    GOV_UK_REF_IS_UP = False
-else:
-    GOV_UK_REF_IS_UP = True
-
-
 XML_RDF_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 <rdf:RDF xmlns:dcat="http://www.w3.org/ns/dcat#"
          xmlns:dct="http://purl.org/dc/terms/"
@@ -106,7 +95,7 @@ XML_RDF_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 
 
 def _to_geojson(coords):
-    return f"""{{"type": "Polygon", "coordinates": [{str(coords)}]}}"""
+    return f"""{{"type": "Polygon", "coordinates": [{coords!s}]}}"""
 
 
 def _to_wkt(coords):
@@ -183,7 +172,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         assert d.value(DCT.modified) == Literal(dataset.harvest.modified_at)
         assert d.value(DCT.accrualPeriodicity).identifier == FREQ.daily
         assert d.value(DCAT.landingPage).identifier == URIRef(remote_url)
-        expected_tags = set(Literal(t) for t in dataset.tags)
+        expected_tags = {Literal(t) for t in dataset.tags}
         assert set(d.objects(DCAT.keyword)) == expected_tags
         assert len(list(d.objects(DCAT.distribution))) == len(resources)
         org = d.value(DCT.publisher)
@@ -410,8 +399,8 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         d = dataset_to_rdf(dataset)
         g = d.graph
 
-        len(list(g.subjects(RDF.type, DCAT.Distribution))) == 4
-        len(list(g.subjects(RDF.type, DCAT.DataService))) == 1
+        assert len(list(g.subjects(RDF.type, DCAT.Distribution))) == 4
+        assert len(list(g.subjects(RDF.type, DCAT.DataService))) == 1
         dataservice_as_distribution = g.resource(next(g.subjects(DCAT.accessService)))
         dataservice_uri = URIRef(dataservice.url_for(_useId=True))
         assert dataservice_as_distribution.value(DCAT.accessURL).identifier == URIRef(
@@ -934,7 +923,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         g = Graph()
 
         description = faker.paragraph()
-        html_description = "<div>{0}</div>".format(description)
+        html_description = f"<div>{description}</div>"
         g.add((node, RDF.type, DCAT.Distribution))
         g.add((node, DCT.title, Literal(faker.sentence())))
         g.add((node, DCT.description, Literal(html_description)))
@@ -1319,7 +1308,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         start = faker.past_date(start_date="-30d")
         end = faker.future_date(end_date="+30d")
 
-        pot = Literal("{0}/{1}".format(start.isoformat(), end.isoformat()))
+        pot = Literal(f"{start.isoformat()}/{end.isoformat()}")
 
         daterange = temporal_from_rdf(pot)
 
@@ -1345,18 +1334,35 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert daterange.start == date(2017, 6, 1)
         assert daterange.end == date(2017, 6, 30)
 
-    @pytest.mark.skipif(not GOV_UK_REF_IS_UP, reason="Gov.uk references is unreachable")
-    def test_parse_temporal_as_gov_uk_format(self):
-        node = URIRef("http://reference.data.gov.uk/id/year/2017")
+    def test_parse_temporal_from_named_node(self):
+        node = URIRef("http://data.test.org/periods/2017")
         g = Graph()
 
         g.set((node, RDF.type, DCT.PeriodOfTime))
+        g.set((node, DCAT.startDate, Literal(date(2017, 1, 1))))
+        g.set((node, DCAT.endDate, Literal(date(2017, 12, 31))))
 
         daterange = temporal_from_rdf(g.resource(node))
 
         assert isinstance(daterange, DateRange)
         assert daterange.start == date(2017, 1, 1)
         assert daterange.end == date(2017, 12, 31)
+
+    def test_parse_temporal_does_not_dereference_uri(self, rmock):
+        # The URI comes from the harvested catalog: fetching it would let anyone make the
+        # server request an arbitrary public target, which the SSRF guard lets through.
+        node = URIRef("http://data.test.org/periods/2017")
+        rmock.get(
+            str(node),
+            text=f'<{node}> <{DCAT.startDate}> "2017-01-01"^^<{XSD.date}> ;'
+            f' <{DCAT.endDate}> "2017-12-31"^^<{XSD.date}> .',
+            headers={"Content-Type": "text/turtle"},
+        )
+        g = Graph()
+        g.set((node, RDF.type, DCT.PeriodOfTime))
+
+        assert temporal_from_rdf(g.resource(node)) is None
+        assert not rmock.called
 
     def test_parse_temporal_is_failsafe(self):
         node = URIRef("http://nowhere.org")

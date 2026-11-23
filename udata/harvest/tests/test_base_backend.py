@@ -325,7 +325,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         job = backend.harvest()
 
         assert len(job.items) == 2 * n
-        assert all([item.remote_url for item in job.items])
+        assert all(item.remote_url for item in job.items)
 
     def test_harvest_source_id(self):
         nb_datasets = 3
@@ -466,15 +466,13 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert "archived_reason" not in dataservice_no_arch.harvest
 
         # test unarchive: archive manually then relaunch harvest
-        dataset = Dataset.objects.get(**{"harvest__remote_id": mock_datasets[0].remote_id})
+        dataset = Dataset.objects.get(harvest__remote_id=mock_datasets[0].remote_id)
         dataset.archived = datetime.now(UTC)
         dataset.harvest.archived_at = datetime.now(UTC)
         dataset.harvest.archived_reason = "not-on-remote"
         dataset.save()
 
-        dataservice = Dataservice.objects.get(
-            **{"harvest__remote_id": mock_dataservices[0].remote_id}
-        )
+        dataservice = Dataservice.objects.get(harvest__remote_id=mock_dataservices[0].remote_id)
         dataservice.archived_at = datetime.now(UTC)
         dataservice.harvest.archived_at = datetime.now(UTC)
         dataservice.harvest.archived_reason = "not-on-remote"
@@ -642,13 +640,13 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert Dataset.objects.count() == len({d.remote_id for d in dataset_records})
         assert Dataservice.objects.count() == len({d.remote_id for d in dataservice_records})
         seen = set()
-        for job in job.items:
-            if job.remote_id not in seen:
-                assert job.status == "done"
-                seen.add(job.remote_id)
+        for item in job.items:
+            if item.remote_id not in seen:
+                assert item.status == "done"
+                seen.add(item.remote_id)
             else:
-                assert job.status == "failed"
-                assert job.remote_id in job.errors[0].message
+                assert item.status == "failed"
+                assert item.remote_id in item.errors[0].message
 
     @pytest.mark.options(CDATA_BASE_URL="http://localhost")
     @pytest.mark.parametrize(
@@ -821,7 +819,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
 
             # gated metrics (behind Organization.compute_aggregate_metrics)
             for metric in ["datasets_by_months", "dataservices_by_months"]:
-                assert (metric in org.metrics) is (True if liverun else False)
+                assert (metric in org.metrics) is bool(liverun)
 
             # signals
             signals[before_harvest_job].assert_called_with(backend)
@@ -1041,7 +1039,7 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             harvest={
                 "remote_id": "dataset",
                 "last_update": last_update,
-                **{match_field: match_value(source)},
+                match_field: match_value(source),
             }
         )
         backend = MockBackend(source)

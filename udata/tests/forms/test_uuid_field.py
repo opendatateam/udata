@@ -65,7 +65,7 @@ class UUIDFieldTest(TestCase):
         self.assertEqual(fake.id, id)
 
     def test_with_invalid_uuid_string(self):
-        Fake, FakeForm = self.factory()
+        _Fake, FakeForm = self.factory()
 
         form = FakeForm(MultiDict({"id": "not-an-uuid"}))
 

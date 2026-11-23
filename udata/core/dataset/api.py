@@ -47,6 +47,7 @@ from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.storages.utils import CHECKSUM_TYPE
 from udata.core.topic.models import Topic
 from udata.frontend.markdown import md
+from udata.http import http_session
 from udata.i18n import gettext as _
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 from udata.utils import get_by, get_rss_feed_list
@@ -332,8 +333,8 @@ class DatasetListAPI(API):
     def get(self):
         """List or search all datasets"""
         args = dataset_parser.parse()
-        datasets = Dataset.objects.visible_by_user(
-            current_user, mongoengine.Q(private=False, archived=None, deleted=None)
+        datasets = Dataset.objects.visible_by_current_user(
+            mongoengine.Q(private=False, archived=None, deleted=None)
         )
         datasets = dataset_parser.parse_filters(datasets, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
@@ -610,13 +611,9 @@ class ResourcesAPI(API):
             )
         if any(isinstance(r, dict) and "id" not in r for r in resources):
             api.abort(400, "Each resource must have an 'id' field")
-        if set(r["id"] if isinstance(r, dict) else r for r in resources) != set(
-            str(r.id) for r in dataset.resources
-        ):
-            api.abort(
-                400,
-                f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in dataset.resources)}",
-            )
+        existing_ids = {str(r.id) for r in dataset.resources}
+        if {r["id"] if isinstance(r, dict) else r for r in resources} != existing_ids:
+            api.abort(400, f"Resource ids must match existing ones in dataset, ie: {existing_ids}")
         data = {"resources": resources}
         form = ResourcesListForm.from_json(
             data, obj=dataset, instance=dataset, meta={"csrf": False}
@@ -628,7 +625,7 @@ class ResourcesAPI(API):
         return dataset.resources, 200
 
 
-class UploadMixin(object):
+class UploadMixin:
     def handle_upload(self, dataset):
         prefix = "/".join((dataset.slug, datetime.now(UTC).strftime("%Y%m%d-%H%M%S")))
         infos = handle_upload(storages.resources, prefix)
@@ -679,7 +676,7 @@ class UploadNewCommunityResources(UploadMixin, API):
         return community_resource, 201
 
 
-class ResourceMixin(object):
+class ResourceMixin:
     def get_resource_or_404(self, dataset, id):
         resource = get_by(dataset.resources, id=id)
         if not resource:
@@ -825,7 +822,7 @@ class ResourceAnalysisAPI(ResourceMixin, API):
         try:
             # Hydra only probes the resource (HEAD, GET and CORS requests, 5 s each) before
             # answering, the download and the analysis itself are queued on its side.
-            r = requests.post(
+            r = http_session().post(
                 f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/checks",
                 json={"resource_id": str(resource.id), "force_analysis": True},
                 headers=analyser_headers(),

@@ -5,6 +5,7 @@ from flask import abort, current_app, make_response
 
 from udata.api import API, apiv2
 from udata.app import cache
+from udata.http import http_session
 
 log = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ def bearer_token():
         return previous_value
     log.debug(f"New access token requested from {url}")
     try:
-        oauth = requests.post(
+        oauth = http_session().post(
             f"{url}/api/oauth/token",
             data={
                 "grant_type": "client_credentials",
@@ -48,9 +49,9 @@ def bearer_token():
         if not access_token:
             raise requests.exceptions.RequestException(CAPTCHETAT_ERROR)
         cache.set(token_cache_key, access_token, timeout=body.get("expires_in", 0))
-    except requests.exceptions.RequestException as request_exception:
+    except requests.exceptions.RequestException:
         log.exception(f"Error while getting access token from {url}")
-        raise request_exception
+        raise
     else:
         return access_token
 
@@ -68,7 +69,7 @@ class CaptchEtatAPI(API):
             if token:
                 headers = {"Authorization": "Bearer " + token}
             captchetat_url = current_app.config.get("CAPTCHETAT_BASE_URL")
-            req = requests.get(
+            req = http_session().get(
                 f"{captchetat_url}/simple-captcha-endpoint", headers=headers, params=args
             )
             req.raise_for_status()

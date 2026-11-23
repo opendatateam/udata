@@ -251,6 +251,18 @@ class ReportsAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(response.json["total"], 2)
 
+    def test_reports_api_filter_by_subject_and_handled(self):
+        dataset = DatasetFactory()
+        pending = Report(subject=dataset, reason=REASON_SPAM).save()
+        Report(subject=dataset, reason=REASON_OTHERS, dismissed_at=datetime.now(UTC)).save()
+        Report(subject=DatasetFactory(), reason=REASON_SPAM).save()
+
+        self.login(AdminFactory())
+
+        response = self.get(url_for("api.reports", subject=str(dataset.id), handled="false"))
+        self.assert200(response)
+        self.assertEqual([r["id"] for r in response.json["data"]], [str(pending.id)])
+
     def test_reports_api_list_sort_by_reported_at(self):
         user = UserFactory()
 

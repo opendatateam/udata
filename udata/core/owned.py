@@ -5,6 +5,7 @@ from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field
+from udata.auth import admin_permission, current_user
 from udata.core.checks import only_creation
 from udata.core.organization.models import Organization
 from udata.core.user.models import User
@@ -22,15 +23,16 @@ class OwnedQuerySet(UDataQuerySet):
             qs |= Q(owner=owner) | Q(organization=owner)
         return self(qs)
 
-    def visible_by_user(self, user: User, visible_query: Q):
-        """Return EVERYTHING visible to the user."""
-        if user.is_anonymous:
+    def visible_by_current_user(self, visible_query: Q):
+        """Return EVERYTHING visible to the user of the request. What a sysadmin sees depends
+        on the credential they came with, not on the user alone."""
+        if current_user.is_anonymous:
             return self(visible_query)
 
-        if user.sysadmin:
+        if admin_permission.can():
             return self()
 
-        owners = list(user.organizations) + [user.id]
+        owners = list(current_user.organizations) + [current_user.id]
         # We create a new queryset because we want a pristine self._query_obj.
         owned_qs: OwnedQuerySet = self.__class__(self._document, self._collection_obj).owned_by(
             *owners
@@ -55,8 +57,6 @@ def ownership_filter(owner: Organization | User) -> dict:
 
 
 def check_owner_is_current_user(owner, **_kwargs):
-    from udata.auth import admin_permission, current_user
-
     if (
         current_user.is_authenticated
         and owner
@@ -67,7 +67,6 @@ def check_owner_is_current_user(owner, **_kwargs):
 
 
 def check_organization_is_valid_for_current_user(organization, **_kwargs):
-    from udata.auth import current_user
     from udata.models import Organization
 
     # An explicit null clears the producer, like `check_owner_is_current_user` above:
@@ -85,7 +84,7 @@ def check_organization_is_valid_for_current_user(organization, **_kwargs):
         )
 
 
-class Owned(object):
+class Owned:
     """
     A mixin to factorize owning behavior between users and organizations.
     """

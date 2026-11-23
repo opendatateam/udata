@@ -150,7 +150,7 @@ class Migration:
         return self._record
 
     def __eq__(self, value):
-        return isinstance(value, Migration) and getattr(value, "filename") == self.filename
+        return isinstance(value, Migration) and value.filename == self.filename
 
     def execute(self, recordonly=False, dryrun=False):
         """
@@ -181,7 +181,7 @@ class Migration:
                 self.add_record("migrate", out, False, traceback=tb)
                 raise MigrationError(
                     "Error while executing migration", output=out, exc=e, traceback=tb
-                )
+                ) from e
 
         if not dryrun:
             self.add_record("migrate", out, True)
@@ -258,13 +258,14 @@ def load_migration(filename):
 
     try:
         script = files("udata").joinpath("migrations", filename).read_bytes()
-    except Exception:
+    except FileNotFoundError:
         # Return None if file doesn't exist instead of raising
         return None
 
     spec = importlib.util.spec_from_loader(name, loader=None)
     module = importlib.util.module_from_spec(spec)
-    exec(script, module.__dict__)
+    # Migration filenames are dated (`2021-08-17-...`), not importable module names.
+    exec(script, module.__dict__)  # noqa: S102
     module.__file__ = str(files("udata").joinpath("migrations", filename))
     return module
 

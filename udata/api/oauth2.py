@@ -177,7 +177,7 @@ class OAuth2Token(Document):
     meta = {"collection": "oauth2_token", "indexes": ["user"]}
 
     def __str__(self):
-        return "<OAuth2Token({0.client.name})>".format(self)
+        return f"<OAuth2Token({self.client.name})>"
 
     def check_client(self, client):
         return self.client == client
@@ -219,7 +219,7 @@ class OAuth2Code(Document):
     meta = {"collection": "oauth2_code"}
 
     def __str__(self):
-        return "<OAuth2Code({0.client.name}, {0.user.fullname})>".format(self)
+        return f"<OAuth2Code({self.client.name}, {self.user.fullname})>"
 
     def is_expired(self):
         # MongoEngine returns naive datetimes, so compare with naive datetime
@@ -403,7 +403,9 @@ def save_token(token, request):
 def check_credentials():
     try:
         with require_oauth.acquire() as token:
-            if authenticate_request(token.user):
+            # The `admin` scope isn't enforced on OAuth2 tokens yet: the stored ones hold
+            # `default` or nothing, and their sysadmins rely on them for their rights.
+            if authenticate_request(token.user, drop_sysadmin_permission=False):
                 g.api_credential = token
                 token.update(set__last_used_at=datetime.now(UTC))
         return True
