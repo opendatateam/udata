@@ -108,6 +108,12 @@ class GeopfResourceOfferingMetadata(EmbeddedDocument):
     """Local state of a resource created from a pulled Géoplateforme offering."""
 
     id = field(StringField(), readonly=True, allow_null=True, description="The geopf offering id")
+    layer = field(
+        StringField(),
+        readonly=True,
+        allow_null=True,
+        description="The layer this resource points to (WFS: `namespace:feature_type`)",
+    )
     last_synced_at = field(
         DateTimeField(),
         readonly=True,
