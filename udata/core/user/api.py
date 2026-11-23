@@ -261,9 +261,13 @@ class ApiTokenListAPI(API):
     def post(self):
         """Create a new API token. The plaintext token is returned only once."""
         data = api.json_payload()
+        scopes = data.get("scopes") or []
+        # Validated before it is read: a body sending a number or a string would make the
+        # check below crash, or match a substring.
+        ApiToken.scopes.validate(scopes)
         # The scope would hand the token the sysadmin rights on a later promotion of its
         # owner, rights nobody granted it then.
-        if "sysadmin" in (data.get("scopes") or []) and not admin_permission.can():
+        if "sysadmin" in scopes and not admin_permission.can():
             api.abort(403, "Only a sysadmin can create a token with the sysadmin scope")
         user = current_user._get_current_object()
         expires_at = parse_future_datetime(data["expires_at"]) if data.get("expires_at") else None
@@ -271,7 +275,7 @@ class ApiTokenListAPI(API):
             user,
             name=data.get("name"),
             expires_at=expires_at,
-            scopes=data.get("scopes"),
+            scopes=scopes,
         )
         token._plaintext = plaintext
         # Queued: should SMTP fail, the plaintext, returned only once, would be lost.

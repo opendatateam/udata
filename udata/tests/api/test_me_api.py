@@ -493,6 +493,16 @@ class MeAPITest(APITestCase):
         self.assert403(response)
         self.assertEqual(ApiToken.objects(user=user).count(), 0)
 
+    def test_create_token_with_scopes_not_a_list(self):
+        user = self.login()
+
+        number = self.post(url_for("api.my_api_tokens"), {"scopes": 5})
+        string = self.post(url_for("api.my_api_tokens"), {"scopes": "sysadmin"})
+
+        self.assert400(number)
+        self.assert400(string)
+        self.assertEqual(ApiToken.objects(user=user).count(), 0)
+
     def test_create_token_with_expiration(self):
         """It should create a token with an expiration date"""
         self.login()
