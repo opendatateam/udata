@@ -262,8 +262,6 @@ class ApiTokenListAPI(API):
         """Create a new API token. The plaintext token is returned only once."""
         data = api.json_payload()
         scopes = data.get("scopes") or []
-        # Validated before it is read: a body sending a number or a string would make the
-        # check below crash, or match a substring.
         ApiToken.scopes.validate(scopes)
         # The scope would hand the token the sysadmin rights on a later promotion of its
         # owner, rights nobody granted it then.
