@@ -462,6 +462,10 @@ msgstr ""
 msgid "Invalid request body."
 msgstr ""
 
+#: udata/core/assistant/api.py:437
+msgid "Invalid conversation id."
+msgstr ""
+
 #: udata/core/assistant/api.py:192
 msgid "Invalid resource_id: a resource UUID is expected."
 msgstr ""

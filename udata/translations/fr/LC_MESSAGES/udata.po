@@ -509,6 +509,10 @@ msgstr "Votre message est trop long (%(max)s caractères maximum)."
 msgid "Invalid request body."
 msgstr "Corps de requête invalide."
 
+#: udata/core/assistant/api.py:437
+msgid "Invalid conversation id."
+msgstr "Identifiant de conversation invalide."
+
 #: udata/core/assistant/api.py:192
 msgid "Invalid resource_id: a resource UUID is expected."
 msgstr "resource_id invalide : un UUID de ressource est attendu."

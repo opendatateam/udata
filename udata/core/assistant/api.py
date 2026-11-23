@@ -13,9 +13,11 @@ import re
 import threading
 from collections.abc import AsyncIterator
 from contextlib import aclosing
+from datetime import UTC, datetime
 from functools import cached_property
 
 from flask import Response, current_app, request, stream_with_context
+from flask_login import current_user
 from pydantic import ValidationError
 from pydantic_ai import CancellationToken
 from pydantic_ai.exceptions import (
@@ -34,30 +36,18 @@ from pydantic_ai.exceptions import (
     RunTimedOut,
     UsageLimitExceeded,
 )
-from pydantic_ai.messages import (
-    BaseToolReturnPart,
-    BinaryContent,
-    FileUrl,
-    ModelMessage,
-    ModelRequest,
-    UploadedFile,
-    UserPromptPart,
-)
+from pydantic_ai.messages import ModelMessage, UserPromptPart
 from pydantic_ai.ui import SSE_CONTENT_TYPE
 from pydantic_ai.ui.vercel_ai import VercelAIAdapter, VercelAIEventStream
-from pydantic_ai.ui.vercel_ai.request_types import (
-    DynamicToolUIPart,
-    ReasoningUIPart,
-    StepStartUIPart,
-    TextUIPart,
-    ToolUIPart,
-)
+from pydantic_ai.ui.vercel_ai.request_types import TextUIPart
 from pydantic_ai.ui.vercel_ai.response_types import AbortChunk, BaseChunk, ErrorChunk
 from pydantic_ai.usage import UsageLimits
 
 from udata.api import API, api
 from udata.core.assistant.agent import get_agent
 from udata.core.assistant.charts import profile_columns
+from udata.core.assistant.history import compact_history
+from udata.core.assistant.models import TITLE_MAX_LENGTH, AssistantConversation
 from udata.core.assistant.prompts import language_instructions
 from udata.core.assistant.tabular import TabularClient
 from udata.core.assistant.tools import (
@@ -86,36 +76,30 @@ MAX_VISUALIZATION_BYTES = 20_000
 # Guards against scripted or tampered clients, far above any real conversation.
 MAX_REQUEST_BYTES = 512 * 1024
 MAX_USER_MESSAGE_CHARS = 4_000
+MAX_CHAT_ID_LENGTH = 64
 
 # The start of an untrusted context tag, opening or closing.
 UNTRUSTED_TAG = re.compile(r"<(?=/?untrusted)", re.IGNORECASE)
 
 
-# Parts our own stream emits, sent back with the history. Others are refused: an
-# assistant ``file`` becomes binary model input and a ``data-*`` part can carry
-# whole messages or model settings.
-ASSISTANT_PART_TYPES = (TextUIPart, ReasoningUIPart, StepStartUIPart, ToolUIPart, DynamicToolUIPart)
+def _check_new_turn(messages) -> list:
+    """The client's new turn, after the last assistant reply: user text only.
 
-
-def _check_messages(messages) -> None:
-    """Reject unexpected parts, empty user messages, too much user text and no user message.
-
-    pydantic-ai fetches the URL of a user ``file`` part server-side and forwards its
-    content to the provider, bypassing every size limit: users only send text.
+    Earlier messages are ignored, the stored conversation is the history. System
+    messages are dropped, the server owns the prompt. Anything but text is refused: the
+    server would fetch a file for the model, past every size limit.
     """
-    if not any(message.role == "user" for message in messages):
+    messages = [message for message in messages if message.role != "system"]
+    last_reply = max((i for i, m in enumerate(messages) if m.role == "assistant"), default=-1)
+    new_turn = messages[last_reply + 1 :]
+    if not new_turn:
         api.abort(400, _("The conversation has no user message."))
-    for message in messages:
-        if message.role == "assistant":
-            if not all(isinstance(part, ASSISTANT_PART_TYPES) for part in message.parts):
-                api.abort(400, _("Only text messages are accepted."))
-            continue
-        if message.role != "user":
-            continue
-        if not all(isinstance(part, TextUIPart) for part in message.parts):
+    for message in new_turn:
+        if message.role != "user" or not all(
+            isinstance(part, TextUIPart) for part in message.parts
+        ):
             api.abort(400, _("Only text messages are accepted."))
-        # Pydantic AI metadata turns a user text part into retry feedback or structured
-        # content, both read from the metadata and not from the counted text.
+        # With this metadata, pydantic-ai reads other content than the text counted below.
         if any("pydantic_ai" in (part.provider_metadata or {}) for part in message.parts):
             api.abort(400, _("Only text messages are accepted."))
         if not any(part.text.strip() for part in message.parts):
@@ -129,50 +113,35 @@ def _check_messages(messages) -> None:
                     max=MAX_USER_MESSAGE_CHARS,
                 ),
             )
+    return new_turn
 
 
-def _holds_file(content) -> bool:
-    """Whether loaded message content holds a file, at any depth of a tool return."""
-    if isinstance(content, FileUrl | BinaryContent | UploadedFile):
-        return True
-    if isinstance(content, list | tuple):
-        return any(_holds_file(item) for item in content)
-    if isinstance(content, dict):
-        return any(_holds_file(item) for item in content.values())
-    return False
-
-
-def _check_no_file_content(messages) -> None:
-    """Reject a history that loads with a file in it.
-
-    The output of a tool part sent back by the client loads as a file when it has a
-    file ``kind``: a forged one would make the server download a URL of the client's
-    choosing, or forward binary data past the text limits. Our tools only return text
-    and JSON. The history is loaded as the agent will load it, so whatever pydantic-ai
-    reads as a file is caught.
-    """
-    try:
-        loaded = VercelAIAdapter.load_messages(messages)
-    except (ValueError, RecursionError):
-        # A tool input string nested too deep for the JSON scanner raises RecursionError.
-        api.abort(400, _("Invalid request body."))
-    for message in loaded:
+def _first_question(messages: list[ModelMessage]) -> str:
+    for message in messages:
         for part in message.parts:
-            # BaseToolReturnPart also covers the provider-executed tool returns.
-            if isinstance(part, UserPromptPart | BaseToolReturnPart) and _holds_file(part.content):
-                api.abort(400, _("Only text messages are accepted."))
+            if isinstance(part, UserPromptPart) and isinstance(part.content, str):
+                return part.content[:TITLE_MAX_LENGTH]
+    return ""
 
 
-def _is_empty_assistant_message(message) -> bool:
-    """An assistant message without text nor tool call, as an errored stream leaves.
+def _stored_history(conversation: AssistantConversation) -> list[ModelMessage]:
+    try:
+        return conversation.model_messages()
+    except ValidationError:
+        # Stored by another pydantic-ai version: a new conversation beats a failed turn.
+        log.warning("Unreadable assistant conversation %s, starting over", conversation.id)
+        return []
 
-    Providers reject such a message, which would lock the conversation.
-    """
-    return message.role == "assistant" and not any(
-        isinstance(part, ToolUIPart | DynamicToolUIPart)
-        or (isinstance(part, TextUIPart) and part.text.strip())
-        for part in message.parts
-    )
+
+def _save_conversation(
+    conversation: AssistantConversation, messages: list[ModelMessage], active
+) -> None:
+    conversation.messages = AssistantConversation.stored_messages(messages)
+    conversation.title = conversation.title or _first_question(messages)
+    conversation.subject = active.dataset if active else None
+    conversation.resource_id = str(active.resource.id) if active else None
+    conversation.last_modified = datetime.now(UTC)
+    conversation.save()
 
 
 def _extract_context(extra: dict | None) -> tuple[str | None, dict | None]:
@@ -319,22 +288,18 @@ class AssistantAdapter(VercelAIAdapter):
 
     @cached_property
     def messages(self) -> list[ModelMessage]:
-        """The client's messages, the context put first in the last user request.
+        """The client's new turn, the server context put first in its question.
 
-        Recomputed on each request and never sent back: the context stays next to the
-        question it is about, with the trust of a user message, not of the instructions.
+        The context is rebuilt on each request and left out of the stored conversation
+        (`compact_history`): the model reads only the current one, next to the question it
+        is about, with the trust of a user message rather than of the instructions.
         """
         messages = super().messages
-        if not self.context:
-            return messages
-        for index in range(len(messages) - 1, -1, -1):
-            message = messages[index]
-            if isinstance(message, ModelRequest) and any(
-                isinstance(part, UserPromptPart) for part in message.parts
-            ):
-                parts = [UserPromptPart(content=self.context), *message.parts]
-                messages[index] = dataclasses.replace(message, parts=parts)
-                break
+        if self.context:
+            # The new turn holds user text only (`_check_new_turn`): its last message is a request.
+            question = messages[-1]
+            parts = [UserPromptPart(content=self.context), *question.parts]
+            messages[-1] = dataclasses.replace(question, parts=parts)
         return messages
 
     def build_event_stream(self) -> AssistantEventStream:
@@ -454,14 +419,14 @@ class AssistantChatAPI(API):
         except (ValidationError, ValueError, RecursionError):
             api.abort(400, _("Invalid request body."))
         resource_id, visualization = _extract_context(run_input.model_extra)
-        # The server owns the system prompt: client system messages are dropped
-        # before the adapter loads them. sanitize_messages is not enough: a system
-        # text part carrying a retry_feedback marker loads as a RetryFeedbackPart
-        # that reaches the model unbounded, and a non-text part makes loading raise.
-        run_input.messages = [m for m in run_input.messages if m.role != "system"]
-        _check_messages(run_input.messages)
-        _check_no_file_content(run_input.messages)
-        run_input.messages = [m for m in run_input.messages if not _is_empty_assistant_message(m)]
+        run_input.messages = _check_new_turn(run_input.messages)
+        chat_id = run_input.id
+        if not 0 < len(chat_id) <= MAX_CHAT_ID_LENGTH:
+            api.abort(400, _("Invalid conversation id."))
+        user = current_user._get_current_object()
+        conversation = AssistantConversation.objects(
+            user=user, chat_id=chat_id
+        ).first() or AssistantConversation(user=user, chat_id=chat_id)
 
         tabular = TabularClient()
         active = load_active_resource(resource_id, tabular) if resource_id else None
@@ -471,10 +436,13 @@ class AssistantChatAPI(API):
             columns=profile_columns(active.profile) if active and active.profile else None,
         )
         agent = get_agent()
-        # No file URL from the client, even if one got past _check_no_file_content: the
-        # adapter drops them before the agent sees the history.
+        # Only the client's new turn is read: the stored conversation is the history.
         adapter = AssistantAdapter(
-            agent, run_input, accept=SSE_CONTENT_TYPE, allowed_file_url_schemes=frozenset()
+            agent,
+            run_input,
+            accept=SSE_CONTENT_TYPE,
+            allowed_file_url_schemes=frozenset(),
+            manage_message_history="server",
         )
         adapter.context = build_context(active, visualization)
         cancellation_token = CancellationToken()
@@ -482,6 +450,11 @@ class AssistantChatAPI(API):
 
         stream = adapter.encode_stream(
             adapter.run_stream(
+                message_history=_stored_history(conversation),
+                # A failed or interrupted run is not kept: the client drops that turn too.
+                on_complete=lambda result: _save_conversation(
+                    conversation, compact_history(result.all_messages(), adapter.context), active
+                ),
                 deps=deps,
                 instructions=instructions,
                 cancellation_token=cancellation_token,

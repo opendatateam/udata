@@ -1,0 +1,63 @@
+from datetime import UTC, datetime
+
+from mongoengine import EmbeddedDocument
+from mongoengine.fields import (
+    DateTimeField,
+    EmbeddedDocumentField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
+from pydantic import ConfigDict, TypeAdapter
+from pydantic_ai.messages import ModelMessage
+
+from udata.mongo.document import UDataDocument as Document
+
+__all__ = ("AssistantConversation", "AssistantMessage")
+
+TITLE_MAX_LENGTH = 120
+
+# One message, with the settings of pydantic-ai's ModelMessagesTypeAdapter.
+MESSAGE_ADAPTER = TypeAdapter(
+    ModelMessage,
+    config=ConfigDict(defer_build=True, ser_json_bytes="base64", val_json_bytes="base64"),
+)
+
+
+class AssistantMessage(EmbeddedDocument):
+    posted_on = DateTimeField(default=lambda: datetime.now(UTC), required=True)
+    # JSON text, not a dict: Mongo refuses keys with a dot, as column names may have.
+    content = StringField(required=True)
+
+
+class AssistantConversation(Document):
+    """A conversation with the assistant, as the model reads it again on the next turn."""
+
+    # The chat id the client sends: unique per user only.
+    chat_id = StringField(required=True)
+    user = ReferenceField("User", required=True)
+    subject = ReferenceField("Dataset")
+    resource_id = StringField()
+    title = StringField(required=True)
+    messages = ListField(EmbeddedDocumentField(AssistantMessage))
+    created = DateTimeField(default=lambda: datetime.now(UTC), required=True)
+    last_modified = DateTimeField(default=lambda: datetime.now(UTC), required=True)
+
+    meta = {
+        "indexes": [{"fields": ["user", "chat_id"], "unique": True}, "-created"],
+        "ordering": ["-created"],
+        "auto_create_index_on_save": True,
+    }
+
+    def model_messages(self) -> list[ModelMessage]:
+        return [MESSAGE_ADAPTER.validate_json(stored.content) for stored in self.messages]
+
+    @staticmethod
+    def stored_messages(messages: list[ModelMessage]) -> list[AssistantMessage]:
+        return [
+            AssistantMessage(
+                posted_on=message.timestamp or datetime.now(UTC),
+                content=MESSAGE_ADAPTER.dump_json(message).decode(),
+            )
+            for message in messages
+        ]
