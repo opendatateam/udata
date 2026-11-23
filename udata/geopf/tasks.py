@@ -468,32 +468,27 @@ def pull_offerings_for_dataset(dataset, token) -> int:
         return 0
 
     client = GeopfClient(token=token, datastore_id=datastore_id)
-    live_offering_ids = set()
-    live_keys = set()
+    offerings = {o["_id"]: o for sd_id in stored_data_ids for o in client.list_offerings(sd_id)}
     now = datetime.now(UTC)
-    for sd_id in stored_data_ids:
-        for offering in client.list_offerings(sd_id):
-            live_offering_ids.add(offering["_id"])
-            links = _offering_links(offering)
-            if not links:
-                log.warning(
-                    "geopf: offering=%s has no URL, keeping its resources as is, dataset=%s",
-                    offering["_id"],
-                    dataset.id,
-                )
-                live_keys |= {
-                    _resource_key(r)
-                    for r in dataset.resources
-                    if resource_offering_metadata(r).id == offering["_id"]
-                }
-            for link in links:
-                live_keys.add((offering["_id"], link.layer, link.format))
-                _upsert_offering_resource(dataset, offering, link, now)
+    synced = set()
+    for offering_id, offering in offerings.items():
+        links = _offering_links(offering)
+        if not links:
+            log.warning(
+                "geopf: offering=%s has no URL, keeping its resources as is, dataset=%s",
+                offering_id,
+                dataset.id,
+            )
+            synced |= {
+                r.id for r in dataset.resources if resource_offering_metadata(r).id == offering_id
+            }
+        for link in links:
+            synced.add(_upsert_offering_resource(dataset, offering, link, now).id)
 
-    # Remove resources whose offering or layer no longer exists, and pre-layer ones
+    # Offering resources not synced above: offering or layer gone, or synced before layers
     for resource in list(dataset.resources):
         meta = resource_offering_metadata(resource)
-        if meta.id and _resource_key(resource) not in live_keys:
+        if meta.id and resource.id not in synced:
             log.info(
                 "geopf: removing resource=%s (offering=%s layer=%s gone) dataset=%s",
                 resource.id,
@@ -503,7 +498,7 @@ def pull_offerings_for_dataset(dataset, token) -> int:
             )
             dataset.remove_resource(resource)
 
-    return len(live_offering_ids)
+    return len(offerings)
 
 
 @dataclass(frozen=True)
@@ -556,15 +551,19 @@ def _getcap_url(parsed, service: str, version: str | None, layer: str) -> str:
     return urlunparse(parsed._replace(query=encoded, fragment=""))
 
 
-def _resource_key(resource) -> tuple:
-    meta = resource_offering_metadata(resource)
-    return (meta.id, meta.layer, resource.format)
-
-
-def _upsert_offering_resource(dataset, offering: dict, link: OfferingLink, now: datetime) -> None:
+def _upsert_offering_resource(dataset, offering: dict, link: OfferingLink, now: datetime):
+    """Create or update the resource for `link`, and return it."""
     offering_id = offering["_id"]
-    key = (offering_id, link.layer, link.format)
-    existing = next((r for r in dataset.resources if _resource_key(r) == key), None)
+    existing = next(
+        (
+            r
+            for r in dataset.resources
+            if (meta := resource_offering_metadata(r)).id == offering_id
+            and meta.layer == link.layer
+            and r.format == link.format
+        ),
+        None,
+    )
 
     if existing is None:
         resource = Resource(
@@ -588,11 +587,13 @@ def _upsert_offering_resource(dataset, offering: dict, link: OfferingLink, now: 
             link.layer,
             dataset.id,
         )
-    else:
-        if existing.url != link.url:
-            existing.url = link.url
-            dataset.update_resource(existing)
-        set_resource_offering_metadata(dataset, existing, last_synced_at=now)
+        return resource
+
+    if existing.url != link.url:
+        existing.url = link.url
+        dataset.update_resource(existing)
+    set_resource_offering_metadata(dataset, existing, last_synced_at=now)
+    return existing
 
 
 def _set_metadata_section(
