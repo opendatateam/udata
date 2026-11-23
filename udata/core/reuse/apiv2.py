@@ -1,6 +1,5 @@
 import mongoengine
 from flask import url_for
-from flask_login import current_user
 
 from udata import search
 from udata.api import API, apiv2, fields
@@ -97,7 +96,7 @@ class ReuseListAPI(API):
         # `no_dereference()` avoids loading the referenced documents (datasets,
         # dataservices) when listing reuses; the datasets total is read from the
         # stored metric (see `reuse_fields`).
-        query = Reuse.objects.no_dereference().visible_by_user(
-            current_user, mongoengine.Q(private__ne=True, deleted=None)
+        query = Reuse.objects.no_dereference().visible_by_current_user(
+            mongoengine.Q(private__ne=True, deleted=None)
         )
         return Reuse.apply_pagination(Reuse.apply_sort_filters(query))

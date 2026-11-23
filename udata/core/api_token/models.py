@@ -54,8 +54,8 @@ class ApiToken(db.Document):
         description="User-given label for this token, only visible to its owner and sysadmins",
     )
     scopes = field(
-        db.ListField(db.StringField(choices=["admin"]), default=lambda: ["admin"]),
-        description="Token scopes",
+        db.ListField(db.StringField(choices=["sysadmin"])),
+        description="Token scopes: a sysadmin's token only has the sysadmin rights with `sysadmin`",
     )
     kind = field(
         db.StringField(choices=["api_key"], default="api_key"),
@@ -111,7 +111,7 @@ class ApiToken(db.Document):
             user=user,
             name=name,
             expires_at=expires_at,
-            scopes=scopes or ["admin"],
+            scopes=scopes or [],
         )
         token.save()
         return token, plaintext
