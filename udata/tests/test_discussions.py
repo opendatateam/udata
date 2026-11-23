@@ -131,6 +131,64 @@ class DiscussionsTest(APITestCase):
         self.assertIsNotNone(message.posted_on)
         self.assertFalse(self.has_spam_report(discussion, message.id))
 
+    def test_new_discussion_on_a_subject_hidden_from_the_user(self):
+        """A subject the user cannot read answers like an unknown id: no thread is
+        planted on it, and the answer doesn't tell the object exists."""
+        self.login()
+        hidden_subjects = [
+            DatasetFactory(private=True),
+            DatasetFactory(deleted=datetime.now(UTC)),
+            ReuseFactory(private=True),
+            DataserviceFactory(private=True),
+            PostFactory(published=None),
+        ]
+
+        for subject in hidden_subjects:
+            response = self.post(
+                url_for("api.discussions"),
+                {
+                    "title": "test title",
+                    "comment": "bla bla",
+                    "subject": {"class": subject.__class__.__name__, "id": subject.id},
+                },
+            )
+            self.assert400(response)
+            unknown_id = ObjectId()
+            unknown = self.post(
+                url_for("api.discussions"),
+                {
+                    "title": "test title",
+                    "comment": "bla bla",
+                    "subject": {"class": subject.__class__.__name__, "id": unknown_id},
+                },
+            )
+            self.assertEqual(
+                response.json["errors"],
+                {
+                    "subject": unknown.json["errors"]["subject"].replace(
+                        str(unknown_id), str(subject.id)
+                    )
+                },
+            )
+
+        self.assertEqual(Discussion.objects.count(), 0)
+
+    def test_new_discussion_on_own_private_dataset(self):
+        user = self.login()
+        dataset = DatasetFactory(private=True, owner=user)
+
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "title": "test title",
+                "comment": "bla bla",
+                "subject": {"class": "Dataset", "id": dataset.id},
+            },
+        )
+
+        self.assert201(response)
+        self.assertEqual(Discussion.objects(subject=dataset).count(), 1)
+
     def test_new_discussion_on_behalf_of_org(self):
         user = self.login()
         org1 = OrganizationFactory(editors=[user])
@@ -1026,6 +1084,20 @@ class DiscussionsTest(APITestCase):
         self.assertIsNotNone(data["discussion"][1]["posted_on"])
         discussion.reload()
         self.assertFalse(self.has_spam_report(discussion, discussion.discussion[1].id))
+
+    def test_add_comment_to_discussion_on_a_subject_hidden_from_the_user(self):
+        owner = UserFactory()
+        dataset = DatasetFactory(private=True, owner=owner)
+        discussion = DiscussionFactory(
+            subject=dataset, user=owner, discussion=[MessageDiscussionFactory(posted_by=owner)]
+        )
+
+        self.login()
+        response = self.post(url_for("api.discussion", id=discussion.id), {"comment": "intrusion"})
+
+        self.assert404(response)
+        discussion.reload()
+        self.assertEqual(len(discussion.discussion), 1)
 
     def test_comment_discussion_without_comment_nor_close(self):
         """Nothing to post and nothing to close is a 400, whatever shape the emptiness takes."""

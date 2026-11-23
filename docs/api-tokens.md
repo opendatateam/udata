@@ -26,9 +26,13 @@ A configurable prefix (default: `udata_`) is prepended to every generated token.
 
 Since the plaintext is never stored, we also save a `token_prefix`: the global prefix followed by the first 8 characters of the random part (e.g. `udata_abc123xy`). This lets users match the beginning of their token as they see it with what's displayed in the UI.
 
-### Scope defaults to `admin`
+### The `sysadmin` scope
 
-Tokens currently grant full access matching the user's permissions. The scope is `admin` to reflect this reality. When restricted scopes are added (phase 2), new values like `normal` will be introduced with the corresponding permission checks.
+A token grants its owner's rights, except the sysadmin ones: those come only with the `sysadmin` scope, held by a sysadmin. Without it, a sysadmin's token does what its owner could do as a plain user, so that a script can be handed a key that cannot act on behalf of the platform. Tokens have no scope by default.
+
+Only a sysadmin can create a token with the `sysadmin` scope. Anyone else holding it would get the sysadmin rights on a later promotion, rights nobody granted the token then.
+
+The scope is enforced on API keys only: OAuth2 tokens still grant their owner's sysadmin rights.
 
 ### Revocation as soft-delete
 
@@ -43,7 +47,7 @@ Deleting a token marks it as revoked (`revoked_at` timestamp) rather than removi
 
 ## Future work
 
-- **Restricted scopes (phase 2)**: add `normal` scope with permission enforcement, so that admin-only endpoints require `scope="admin"` + `is_admin`
+- **OAuth2 scopes**: enforce the `admin` scope on OAuth2 tokens, as the `sysadmin` scope is on API keys
 - **Refresh tokens**: add `refresh` kind for short-lived JWT access tokens in the SPA
 - **Bulk revocation**: `DELETE /api/1/me/tokens/` (all my tokens), admin endpoint for revoking a user's tokens
 - **Default expiration**: configurable duration applied when no explicit `expires_at` is provided

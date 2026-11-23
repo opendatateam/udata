@@ -1,5 +1,13 @@
 # Changelog
 
+## 17.28.0 (2026-11-23)
+
+- chore(deps): update astral-sh/setup-uv action to v10.4.0 ([#4119](https://github.com/opendatateam/udata/pull/4119))
+- chore(deps): upgrade dependencies and use major-only upper bounds ([#4112](https://github.com/opendatateam/udata/pull/4112))
+- feat(api_token): grant the sysadmin rights only to tokens with the sysadmin scope ([#4114](https://github.com/opendatateam/udata/pull/4114))
+- feat(reports): filter reports by subject through a generic reference filter ([#4118](https://github.com/opendatateam/udata/pull/4118))
+
+
 ## 17.27.2 (2026-11-19)
 
 - fix: identify every outgoing request as udata with its real version ([#4115](https://github.com/opendatateam/udata/pull/4115))

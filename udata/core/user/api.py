@@ -257,16 +257,23 @@ class ApiTokenListAPI(API):
     @api.expect(ApiToken.__write_fields__)
     @api.marshal_with(apitoken_created_fields, code=201)
     @api.response(401, "The session must be reauthenticated")
+    @api.response(403, "Only a sysadmin can create a token with the sysadmin scope")
     def post(self):
         """Create a new API token. The plaintext token is returned only once."""
         data = api.json_payload()
+        scopes = data.get("scopes") or []
+        ApiToken.scopes.validate(scopes)
+        # The scope would hand the token the sysadmin rights on a later promotion of its
+        # owner, rights nobody granted it then.
+        if "sysadmin" in scopes and not admin_permission.can():
+            api.abort(403, "Only a sysadmin can create a token with the sysadmin scope")
         user = current_user._get_current_object()
         expires_at = parse_future_datetime(data["expires_at"]) if data.get("expires_at") else None
         token, plaintext = ApiToken.generate(
             user,
             name=data.get("name"),
             expires_at=expires_at,
-            scopes=data.get("scopes"),
+            scopes=scopes,
         )
         token._plaintext = plaintext
         # Queued: should SMTP fail, the plaintext, returned only once, would be lost.
@@ -465,7 +472,7 @@ class UserAPI(API):
     @api.marshal_with(User.__read_fields__)
     def get(self, user):
         """Get a user given its identifier"""
-        if current_user.is_anonymous or not current_user.sysadmin:
+        if not admin_permission.can():
             if not user.active:
                 api.abort(410, "User is not active")
             if user.deleted:

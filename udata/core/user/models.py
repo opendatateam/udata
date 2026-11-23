@@ -312,6 +312,8 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
 
     @property
     def sysadmin(self):
+        """Whether the user holds the role. What the current request may do as one is
+        `admin_permission`: an API key can withhold the role."""
         return self.has_role("admin")
 
     @property
