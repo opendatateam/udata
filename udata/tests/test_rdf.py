@@ -218,100 +218,63 @@ class GuessFormatTest:
         assert guess_format("unknown/mime") is None
 
 
-class RdfUtilsTest(TestCase):
-    def test_serialize_value_uriref(self):
-        value = URIRef("http://example.com/foo")
+class RdfUtilsTest(PytestOnlyTestCase):
+    @pytest.mark.parametrize(
+        "value,expected",
+        argvalues(
+            [
+                (URIRef("http://example.com/foo"), "http://example.com/foo", "uriref"),
+                (Literal("foo"), "foo", "literal-str"),
+                (Literal(42), 42, "literal-int"),
+                (Literal("foo", lang="fr"), "foo", "literal-lang"),
+                (BNode(), None, "bnode"),
+                (
+                    Graph().resource(URIRef("http://example.com/foo")),
+                    "http://example.com/foo",
+                    "resource-uriref",
+                ),
+                (Graph().resource(Literal("foo")), "foo", "resource-literal"),
+                (Graph().resource(BNode()), None, "resource-bnode"),
+            ]
+        ),
+    )
+    def test_serialize_value_types(self, value, expected):
+        assert serialize_value(value) == expected
 
-        assert serialize_value(value) == "http://example.com/foo"
-
-    def test_serialize_value_literal(self):
-        cases = [
-            (Literal("foo"), "foo"),
-            (Literal(42), 42),
-            (Literal("foo", lang="fr"), "foo"),
-        ]
-        for value, expected in cases:
-            with self.subTest(value=value):
-                assert serialize_value(value) == expected
-
-    def test_serialize_value_resource_with_uriref_identifier(self):
-        resource = Graph().resource(URIRef("http://example.com/foo"))
-
-        assert serialize_value(resource) == "http://example.com/foo"
-
-    def test_serialize_value_resource_with_literal_identifier(self):
-        resource = Graph().resource(Literal("foo"))
-
-        assert serialize_value(resource) == "foo"
-
-    def test_serialize_value_resource_with_bnode_identifier(self):
-        # An anonymous resource has no usable identity, even though BNode.toPython() returns str.
-        resource = Graph().resource(BNode())
-
-        assert serialize_value(resource) is None
-
-    def test_serialize_value_resource_with_unwrap(self):
+    @pytest.mark.parametrize(
+        "unwrap,expected",
+        argvalues(
+            [
+                ([DCT.title], "title", "title"),
+                ([RDFS.label], "label", "label"),
+                ([SKOS.prefLabel], "http://example.com/foo", "missing"),
+                ([SKOS.altLabel], "http://example.com/foo", "empty"),
+                ([SKOS.note], "http://example.com/foo", "bnode"),
+                ([RDFS.label, DCT.title], "label", "in-order"),
+                ([SKOS.prefLabel, DCT.title], "title", "skip-missing"),
+                ([SKOS.altLabel, DCT.title], "title", "skip-empty"),
+                ([SKOS.note, DCT.title], "title", "skip-bnode"),
+                ([], "http://example.com/foo", "no-list"),
+                (None, "http://example.com/foo", "none"),
+            ]
+        ),
+    )
+    def test_serialize_value_unwrap(self, unwrap, expected):
         graph = Graph()
         node = URIRef("http://example.com/foo")
-        graph.add((node, DCT.title, Literal("The title")))
+        graph.add((node, DCT.title, Literal("title")))
+        graph.add((node, RDFS.label, Literal("label")))
+        graph.add((node, SKOS.altLabel, Literal("")))
+        graph.add((node, SKOS.note, BNode()))
 
-        assert serialize_value(graph.resource(node), unwrap=[DCT.title]) == "The title"
+        assert serialize_value(graph.resource(node), unwrap=unwrap) == expected
 
-    def test_serialize_value_resource_unwrap_uses_first_match_in_order(self):
-        graph = Graph()
-        node = URIRef("http://example.com/foo")
-        graph.add((node, RDFS.label, Literal("The label")))
-        graph.add((node, DCT.title, Literal("The title")))
-
-        assert serialize_value(graph.resource(node), unwrap=[RDFS.label, DCT.title]) == "The label"
-
-    def test_serialize_value_resource_unwrap_uses_next_match(self):
-        graph = Graph()
-        node = URIRef("http://example.com/foo")
-        graph.add((node, DCT.title, Literal("The title")))
-
-        value = serialize_value(graph.resource(node), unwrap=[SKOS.prefLabel, DCT.title])
-
-        assert value == "The title"
-
-    def test_serialize_value_resource_without_unwrap_falls_back_to_identifier(self):
-        graph = Graph()
-        node = URIRef("http://example.com/foo")
-        graph.add((node, DCT.title, Literal("The title")))
-        resource = graph.resource(node)
-
-        for unwrap in [None, []]:
-            with self.subTest(unwrap=unwrap):
-                assert serialize_value(resource, unwrap=unwrap) == "http://example.com/foo"
-
-    def test_serialize_value_resource_unwrap_no_match_falls_back_to_identifier(self):
-        graph = Graph()
-        node = URIRef("http://example.com/foo")
-        graph.add((node, DCT.title, Literal("The title")))
-
-        value = serialize_value(graph.resource(node), unwrap=[SKOS.prefLabel])
-
-        assert value == "http://example.com/foo"
-
-    def test_serialize_value_resource_unwrap_no_match_and_bnode_identifier(self):
+    def test_serialize_value_unwrap_no_match_bnode(self):
         graph = Graph()
         node = BNode()
-        graph.add((node, DCT.title, Literal("The title")))
+        graph.add((node, DCT.title, Literal("title")))
 
         assert serialize_value(graph.resource(node), unwrap=[SKOS.prefLabel]) is None
-
-    def test_serialize_value_resource_unwrap_skips_empty_values(self):
-        graph = Graph()
-        node = URIRef("http://example.com/foo")
-        graph.add((node, DCT.title, Literal("")))
-        graph.add((node, RDFS.label, Literal("The label")))
-
-        value = serialize_value(graph.resource(node), unwrap=[DCT.title, RDFS.label])
-
-        assert value == "The label"
-
-    def test_serialize_value_unsupported_type(self):
-        assert serialize_value(BNode()) is None
 
 
 class ContactToRdfTest:
