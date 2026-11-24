@@ -279,23 +279,36 @@ class GeopfClient:
 
     def list_offerings(self, stored_data_id: str) -> list:
         """Return all offerings for a stored_data, including urls and type."""
-        offerings = []
+        return self._list_all(
+            "offerings",
+            {"stored_data": stored_data_id, "fields": "urls,type,layer_name,status,open"},
+        )
+
+    def list_vector_pyramids(self, vectordb_id: str) -> list:
+        """Return the vector pyramids generated from a VECTOR-DB stored_data, with their tags.
+
+        Relies on the `vectordb_id` tag cartes.gouv.fr sets on the pyramids it generates.
+        """
+        return self._list_all(
+            "stored_data",
+            {
+                "type": "ROK4-PYRAMID-VECTOR",
+                "tags[vectordb_id]": vectordb_id,
+                "fields": "tags",
+            },
+        )
+
+    def _list_all(self, path: str, params: dict) -> list:
+        """GET every page of a datastore listing, following `Content-Range`."""
+        items = []
         page = 1
         while True:
-            resp = self.session.get(
-                self._url("offerings"),
-                params={
-                    "stored_data": stored_data_id,
-                    "fields": "urls,type,layer_name,status,open",
-                    "page": page,
-                },
-            )
+            resp = self.session.get(self._url(path), params={**params, "page": page})
             self._raise(resp)
-            body = resp.json()
-            offerings += body
+            items += resp.json()
             match = CONTENT_RANGE_RE.search(resp.headers.get("Content-Range", ""))
-            if not match or len(offerings) >= int(match["total"]):
-                return offerings
+            if not match or len(items) >= int(match["total"]):
+                return items
             page += 1
 
     # --- metadata ---

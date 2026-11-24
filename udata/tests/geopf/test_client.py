@@ -314,6 +314,17 @@ class GeopfClientOfferingsTest(PytestOnlyTestCase):
         assert rmock.request_history[0].qs["page"] == ["1"]
         assert rmock.request_history[1].qs["page"] == ["2"]
 
+    def test_list_vector_pyramids_filters_on_vectordb_tag(self, rmock):
+        pyramids = [{"_id": "pyr-1", "tags": {"vectordb_id": "sd-1"}}]
+        rmock.get(f"{TEST_API_URL}/stored_data", json=pyramids)
+        result = GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).list_vector_pyramids(
+            "sd-1"
+        )
+        assert result == pyramids
+        qs = rmock.last_request.qs
+        assert qs["type"] == ["rok4-pyramid-vector"]
+        assert qs["tags[vectordb_id]"] == ["sd-1"]
+
 
 @TEST_GEOPF_CONF
 class GeopfClientMetadataTest(PytestOnlyTestCase):

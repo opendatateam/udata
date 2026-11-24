@@ -472,7 +472,16 @@ def pull_offerings_for_dataset(dataset, token) -> int:
         return 0
 
     client = GeopfClient(token=token, datastore_id=datastore_id)
-    offerings = {o["_id"]: o for sd_id in stored_data_ids for o in client.list_offerings(sd_id)}
+    # Tile services are published on vector pyramids generated from the pushed data
+    pyramid_ids = {
+        p["_id"]
+        for sd_id in stored_data_ids
+        for p in client.list_vector_pyramids(sd_id)
+        if (p.get("tags") or {}).get("is_sample") != "true"
+    }
+    offerings = {
+        o["_id"]: o for sd_id in stored_data_ids | pyramid_ids for o in client.list_offerings(sd_id)
+    }
     now = datetime.now(UTC)
     synced = set()
     for offering_id, offering in offerings.items():
@@ -515,7 +524,7 @@ def _offering_links(offering: dict) -> list[OfferingLink]:
     """One link per entry of the offering `urls` (WFS has one per feature type).
 
     WMS and WFS URLs (a GetMap template, a DescribeFeatureType) become a GetCapabilities
-    carrying the layer. Other services are kept as is.
+    carrying the layer. WMTS is skipped, other services (TMS) are kept as is.
     """
     links = {}
     for entry in offering.get("urls") or []:
@@ -523,6 +532,9 @@ def _offering_links(offering: dict) -> list[OfferingLink]:
         if not url:
             continue
         service = (entry.get("type") or "").upper()
+        if service == "WMTS":
+            # geopf's WMTS only serves raster pyramids, udata only pushes vector data
+            continue
         parsed = urlparse(url)
         params = {k.lower(): v for k, v in parse_qsl(parsed.query)}
         layer = offering.get("layer_name") or ""
