@@ -8,6 +8,7 @@ from mongoengine import ValidationError
 
 from udata import models as udata_models
 from udata.core import csv, storages
+from udata.core.assistant.models import AssistantConversation
 from udata.core.badges import tasks as badge_tasks
 from udata.core.constants import HVD
 from udata.core.dataservices.models import Dataservice
@@ -54,6 +55,8 @@ def purge_datasets(self):
         Transfer.objects(subject=dataset).delete()
         # Remove assignments
         Assignment.objects(subject=dataset).delete()
+        # Remove assistant conversations: they hold rows of its data
+        AssistantConversation.objects(subject=dataset).delete()
         # Remove each dataset's resource's file
         storage = storages.resources
         for resource in dataset.resources:

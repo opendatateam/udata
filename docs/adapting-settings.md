@@ -530,6 +530,45 @@ List of API's endpoints to block when `READ_ONLY_MODE` is set to `True`. Endpoin
 
 List of datasets slugs to query to fill the fixture file.
 
+## AI assistant
+
+The chart assistant (`POST /api/1/assistant/chat/`) talks to an OpenAI-compatible provider, such as [Albert](https://albert.sites.beta.gouv.fr/), and reads resource data from [api-tabular](https://github.com/datagouv/api-tabular).
+
+!!! warning
+    Each answer is streamed by the API worker that received it, from a background thread. A turn is cut after 120 seconds, but an api-tabular request running at that moment finishes first: each one can take 30 seconds and a tool can chain several, so a worker can be held for about four minutes in the worst case. Before enabling the assistant:
+
+    * size the API workers for the expected concurrent conversations: with the 5 uWSGI processes of the [installation guide](installation.md), five conversations at once leave no worker for the rest of the API;
+    * enable threads in uWSGI (`enable-threads = true`);
+    * raise the proxy read timeout to about 300 seconds (`uwsgi_read_timeout` or `proxy_read_timeout` with nginx, 60 seconds by default): a turn can stay silent while the model reasons or api-tabular answers, and the timeout message comes at its end.
+
+### AI_BASE_URL
+
+**default**: `None`
+
+Base URL of the OpenAI-compatible provider API (ex: `https://albert.api.etalab.gouv.fr/v1`). The assistant is disabled, and its endpoint answers `503`, while it is `None`.
+
+### AI_API_KEY
+
+**default**: `None`
+
+API key sent to the provider. The endpoint answers `503` when `AI_BASE_URL` is set without it.
+
+### AI_MODELS
+
+**default**: `[{"name": "gpt-oss-120b", "max_output_tokens": 8192, "reasoning_effort": None}]`
+
+Provider models available to the assistant, which uses the first one. Each model is a dict:
+
+* `name` (required): name of the provider model. With Albert, use the `id` of a model listed by `GET /v1/models`, never one of its `aliases`: Albert renames aliases without notice.
+* `max_output_tokens`: bound on the tokens of each model response, reasoning included. Missing or `None` keeps the provider default.
+* `reasoning_effort`: reasoning effort sent to the provider (`openai_reasoning_effort`). Missing or `None` keeps the provider default; `"none"` disables reasoning on models that would otherwise stream it.
+
+### TABULAR_API_URL
+
+**default**: `None`
+
+Base URL of the api-tabular service (ex: `https://tabular-api.data.gouv.fr`), from which the assistant reads resource profiles and data. Without it, the assistant answers that the tabular service is unavailable.
+
 ## Example configuration file
 
 Here a sample configuration file:
