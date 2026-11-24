@@ -554,7 +554,6 @@ def _upsert_offering_resource(dataset, offering: dict, link: OfferingLink, now: 
             for r in dataset.resources
             if (meta := resource_offering_metadata(r)).id == offering_id
             and meta.layer == link.layer
-            and r.format == link.format
         ),
         None,
     )
