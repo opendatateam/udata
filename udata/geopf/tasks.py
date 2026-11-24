@@ -496,7 +496,7 @@ def pull_offerings_for_dataset(dataset, token) -> int:
 
 @dataclass(frozen=True)
 class OfferingLink:
-    """One resource worth of an offering: a single layer, or a single WFS feature type."""
+    """A resource to sync from an offering `urls` entry: its URL, format and layer."""
 
     layer: str
     url: str
@@ -528,6 +528,7 @@ def _offering_links(offering: dict) -> list[OfferingLink]:
         if service in GETCAP_LAYER_PARAM:
             url = _getcap_url(parsed, service, params.get("version"), layer)
         link = OfferingLink(layer=layer, url=url, format=service.lower() or None)
+        # keep one link per pair of (layer, format); defensive
         links.setdefault((link.layer, link.format), link)
     return list(links.values())
 
