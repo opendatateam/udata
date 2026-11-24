@@ -301,15 +301,16 @@ def serialize_value(value: RdfResource | URIRef | Literal, unwrap: list[URIRef] 
     If the value is a RdfResource:
         - if `unwrap` is set, look for children of the RdfResource in the order they are listed in
           `unwrap`, and return the value of the first matching element (if any),
-        - otherwise return the identifier of the RdfResource.
+        - else if the RdfResource identifier is a URIRef or a Literal, return it as a string.
     """
-    if isinstance(value, (URIRef, Literal)):
-        return value.toPython()
-    elif isinstance(value, RdfResource):
+    if isinstance(value, RdfResource):
         for uriref in unwrap or []:
             if val := rdf_value(value, uriref):
                 return val
-        return value.identifier.toPython()
+        value = value.identifier
+    if isinstance(value, (URIRef, Literal)):
+        return value.toPython()
+    return None
 
 
 def rdf_unique_values(

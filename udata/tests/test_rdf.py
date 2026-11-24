@@ -25,6 +25,7 @@ from udata.rdf import (
     FORMAT_MAP,
     ORG,
     RDF,
+    RDFS,
     SKOS,
     VCARD,
     contact_point_from_foaf,
@@ -33,6 +34,7 @@ from udata.rdf import (
     contact_points_to_rdf,
     guess_format,
     negociate_content,
+    serialize_value,
     vocabulary_key,
     want_rdf,
 )
@@ -214,6 +216,65 @@ class GuessFormatTest:
 
     def test_unkown_mime(self):
         assert guess_format("unknown/mime") is None
+
+
+class RdfUtilsTest(PytestOnlyTestCase):
+    @pytest.mark.parametrize(
+        "value,expected",
+        argvalues(
+            [
+                (URIRef("http://example.com/foo"), "http://example.com/foo", "uriref"),
+                (Literal("foo"), "foo", "literal-str"),
+                (Literal(42), 42, "literal-int"),
+                (Literal("foo", lang="fr"), "foo", "literal-lang"),
+                (BNode(), None, "bnode"),
+                (
+                    Graph().resource(URIRef("http://example.com/foo")),
+                    "http://example.com/foo",
+                    "resource-uriref",
+                ),
+                (Graph().resource(Literal("foo")), "foo", "resource-literal"),
+                (Graph().resource(BNode()), None, "resource-bnode"),
+            ]
+        ),
+    )
+    def test_serialize_value_types(self, value, expected):
+        assert serialize_value(value) == expected
+
+    @pytest.mark.parametrize(
+        "unwrap,expected",
+        argvalues(
+            [
+                ([DCT.title], "title", "title"),
+                ([RDFS.label], "label", "label"),
+                ([SKOS.prefLabel], "http://example.com/foo", "missing"),
+                ([SKOS.altLabel], "http://example.com/foo", "empty"),
+                ([SKOS.note], "http://example.com/foo", "bnode"),
+                ([RDFS.label, DCT.title], "label", "in-order"),
+                ([SKOS.prefLabel, DCT.title], "title", "skip-missing"),
+                ([SKOS.altLabel, DCT.title], "title", "skip-empty"),
+                ([SKOS.note, DCT.title], "title", "skip-bnode"),
+                ([], "http://example.com/foo", "no-list"),
+                (None, "http://example.com/foo", "none"),
+            ]
+        ),
+    )
+    def test_serialize_value_unwrap(self, unwrap, expected):
+        graph = Graph()
+        node = URIRef("http://example.com/foo")
+        graph.add((node, DCT.title, Literal("title")))
+        graph.add((node, RDFS.label, Literal("label")))
+        graph.add((node, SKOS.altLabel, Literal("")))
+        graph.add((node, SKOS.note, BNode()))
+
+        assert serialize_value(graph.resource(node), unwrap=unwrap) == expected
+
+    def test_serialize_value_unwrap_no_match_bnode(self):
+        graph = Graph()
+        node = BNode()
+        graph.add((node, DCT.title, Literal("title")))
+
+        assert serialize_value(graph.resource(node), unwrap=[SKOS.prefLabel]) is None
 
 
 class ContactToRdfTest:
