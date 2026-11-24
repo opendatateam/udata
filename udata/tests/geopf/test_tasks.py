@@ -362,16 +362,20 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
         )
 
     def _pull(self, dataset, offerings, pyramids=()):
+        """Pull `offerings` into `dataset`, return the count and the `GeopfClient` class mock.
+
+        `offerings` is a list for every stored data, or a dict of lists by stored data id.
+        """
         mock_client = MagicMock()
         mock_client.list_vector_pyramids.return_value = list(pyramids)
         if isinstance(offerings, dict):
             mock_client.list_offerings.side_effect = lambda sd_id: offerings.get(sd_id, [])
         else:
             mock_client.list_offerings.return_value = offerings
-        with patch("udata.geopf.tasks.GeopfClient", return_value=mock_client):
+        with patch("udata.geopf.tasks.GeopfClient", return_value=mock_client) as mock_client_cls:
             count = pull_offerings_for_dataset(dataset, TEST_TOKEN)
         dataset.reload()
-        return count
+        return count, mock_client_cls
 
     def _offering_resources(self, dataset):
         return {
@@ -382,15 +386,11 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
 
     def test_adds_resource_for_new_offering(self):
         dataset = self._dataset()
-        mock_client = MagicMock()
-        mock_client.list_offerings.return_value = [WMS_OFFERING]
 
-        with patch("udata.geopf.tasks.GeopfClient", return_value=mock_client) as mock_client_cls:
-            count = pull_offerings_for_dataset(dataset, TEST_TOKEN)
+        count, mock_client_cls = self._pull(dataset, [WMS_OFFERING])
 
         mock_client_cls.assert_called_once_with(token=TEST_TOKEN, datastore_id="ds-1")
         assert count == 1
-        dataset.reload()
         resource = self._offering_resources(dataset)["ex_wmsv"]
         assert resource.title == "ex_wmsv"
         assert resource.url == WMS_GETCAP
@@ -400,7 +400,7 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
     def test_adds_one_resource_per_wfs_feature_type(self):
         dataset = self._dataset()
 
-        count = self._pull(dataset, [WFS_OFFERING])
+        count, _ = self._pull(dataset, [WFS_OFFERING])
 
         assert count == 1
         resources = self._offering_resources(dataset)
@@ -412,7 +412,7 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
     def test_adds_tms_resource_from_vector_pyramid(self):
         dataset = self._dataset()
 
-        count = self._pull(
+        count, _ = self._pull(
             dataset,
             {
                 "sd-1": [WMS_OFFERING],
@@ -457,7 +457,7 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
         dataset = self._dataset()
         self._pull(dataset, [WMS_OFFERING])
 
-        count = self._pull(dataset, [{**WMS_OFFERING, "urls": []}])
+        count, _ = self._pull(dataset, [{**WMS_OFFERING, "urls": []}])
 
         assert count == 1
         assert self._offering_resources(dataset) == {}
@@ -478,6 +478,17 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
         resources = self._offering_resources(dataset)
         assert set(resources) == {"ex_wfs:point1", "ex_wfs:geometry1"}
         assert legacy.id not in {r.id for r in dataset.resources}
+
+    def test_resync_keeps_resource_after_format_edit(self):
+        dataset = self._dataset()
+        self._pull(dataset, [WMS_OFFERING])
+        resource = self._offering_resources(dataset)["ex_wmsv"]
+        resource.format = "ogc:wms"
+        dataset.save()
+
+        self._pull(dataset, [WMS_OFFERING])
+
+        assert self._offering_resources(dataset)["ex_wmsv"].id == resource.id
 
     def test_skips_when_no_datastore_pinned(self):
         # no geopf.push.datastore_id: dataset was never successfully pushed
@@ -513,27 +524,16 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
         assert resource.url == WMS_GETCAP
 
     def test_removes_resource_for_deleted_offering(self):
-        gpkg = ResourceFactory.build(
-            format="gpkg",
-            geopf=GeopfResourceMetadata(push=GeopfResourcePushMetadata(stored_data_id="sd-1")),
-        )
         gone_offering = ResourceFactory.build(
             filetype="remote",
             type="api",
             geopf=GeopfResourceMetadata(offering=GeopfResourceOfferingMetadata(id="offer-gone")),
         )
-        dataset = DatasetFactory(
-            resources=[gpkg, gone_offering],
-            geopf=GeopfDatasetMetadata(push=GeopfDatasetPushMetadata(datastore_id="ds-1")),
-        )
-        mock_client = MagicMock()
-        mock_client.list_offerings.return_value = []
+        dataset = self._dataset(gone_offering)
 
-        with patch("udata.geopf.tasks.GeopfClient", return_value=mock_client):
-            count = pull_offerings_for_dataset(dataset, TEST_TOKEN)
+        count, _ = self._pull(dataset, [])
 
         assert count == 0
-        dataset.reload()
         assert not any(resource_offering_metadata(r).id for r in dataset.resources)
 
 

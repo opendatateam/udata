@@ -616,9 +616,7 @@ class GeopfDatasetStatusApiTest(APITestCase):
             url="http://data.example.com/wfs",
             geopf=GeopfResourceMetadata(
                 offering=GeopfResourceOfferingMetadata(
-                    id="off-1",
-                    layer="communes",
-                    last_synced_at=datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC),
+                    id="off-1", last_synced_at=datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC)
                 )
             ),
         )
@@ -633,11 +631,7 @@ class GeopfDatasetStatusApiTest(APITestCase):
                 "title": "Service WFS - communes",
                 "format": "wfs",
                 "url": "http://data.example.com/wfs",
-                "offering": {
-                    "id": "off-1",
-                    "layer": "communes",
-                    "last_synced_at": "2026-01-02T03:04:05+00:00",
-                },
+                "offering": {"id": "off-1", "last_synced_at": "2026-01-02T03:04:05+00:00"},
             }
         ]
 
