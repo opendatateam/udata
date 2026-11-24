@@ -12,6 +12,7 @@ from pydantic_ai.providers.openai import OpenAIProvider
 
 from udata.core.assistant.prompts import SYSTEM_INSTRUCTIONS
 from udata.core.assistant.tools import AssistantDeps, register_tools
+from udata.http import user_agent
 
 # Retries the model gets for invalid tool arguments or output. A failed model call is
 # retried by the OpenAI client itself (twice, on rate limits, 5xx and connection errors),
@@ -29,7 +30,10 @@ def get_agent() -> Agent[AssistantDeps, str]:
             api_key=current_app.config["AI_API_KEY"],
         ),
     )
-    model_settings: OpenAIChatModelSettings = {}
+    # pydantic-ai sets its own User-Agent on each request: only a per-request header replaces it.
+    model_settings: OpenAIChatModelSettings = {
+        "extra_headers": {"User-Agent": user_agent("assistant")}
+    }
     if max_tokens := model_config.get("max_output_tokens"):
         model_settings["max_tokens"] = max_tokens
     if effort := model_config.get("reasoning_effort"):
@@ -40,7 +44,7 @@ def get_agent() -> Agent[AssistantDeps, str]:
         instructions=SYSTEM_INSTRUCTIONS,
         deps_type=AssistantDeps,
         retries=MODEL_RETRIES,
-        model_settings=model_settings or None,
+        model_settings=model_settings,
     )
     register_tools(agent)
     return agent

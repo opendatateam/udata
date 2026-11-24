@@ -48,14 +48,11 @@ from udata.core.assistant.tabular import (
     has_more_rows,
 )
 from udata.core.dataset.models import Dataset, Resource, get_dataset_and_resource_by_id
-from udata.mongo.queryset import paginate_embedded_list
 
 log = logging.getLogger(__name__)
 
 # Tool calls per turn: past it, tools refuse and the model can say why.
 MAX_STEPS = 5
-# Resources listed in a dataset's metadata, so a huge dataset cannot flood the context.
-MAX_SERIALIZED_RESOURCES = 20
 # Stops a model that keeps calling tools after the refusal: one request per tool
 # round, plus the refused round and the final answer.
 MODEL_REQUEST_LIMIT = MAX_STEPS + 2
@@ -211,14 +208,14 @@ def _render_result(page: TabularPage) -> QueryOutput | ToolError:
             "Run it again with `columns` to keep only a few of them."
         )
     shown = 0
-    for row in rows[:PAGE_SIZE]:
+    for row in rows:
         line = " | ".join(_cell(row.get(column)) for column in columns)
         size += len(line) + 1
         if size > MAX_RESULT_CHARS:
             break
         lines.append(line)
         shown += 1
-    if shown < min(len(rows), PAGE_SIZE):
+    if shown < len(rows):
         lines.append(
             f"Result cut to {shown} rows for its size: "
             "select fewer columns or aggregate to see the rest."
@@ -303,12 +300,9 @@ def _chart_has_more_groups(
             read.add(key)
             first_page = tabular.get_data(resource_id, with_page(query))
             more_groups = more_groups or has_more_rows(first_page)
-    except TabularRequestRefused as refusal:
-        if refusal.status < 500:
+    except TabularError as error:
+        if isinstance(error, TabularRequestRefused) and error.status < 500:
             raise
-        log.warning("Could not check the group count of a chart", exc_info=True)
-        return None
-    except TabularError:
         log.warning("Could not check the group count of a chart", exc_info=True)
         return None
     limit = config.x_axis.limit
@@ -318,22 +312,12 @@ def _chart_has_more_groups(
 
 
 def serialize_dataset_metadata(dataset: Dataset) -> str:
-    """JSON metadata of a dataset loaded without its resources, listing the first ones only."""
-    resources, total = paginate_embedded_list(
-        Dataset, dataset.id, "resources", Resource, page=1, page_size=MAX_SERIALIZED_RESOURCES
-    )
+    """JSON metadata of a dataset: what tells the model where the data comes from."""
     payload = {
-        "id": str(dataset.id),
         "title": dataset.title,
         "license": dataset.license.title if dataset.license else None,
         "organization": dataset.organization.name if dataset.organization else None,
-        "resources": [
-            {"id": str(resource.id), "title": resource.title, "format": resource.format}
-            for resource in resources
-        ],
     }
-    if total > len(resources):
-        payload["more_resources"] = f"… and {total - len(resources)} more"
     return json.dumps(payload, ensure_ascii=False, indent=2)
 
 

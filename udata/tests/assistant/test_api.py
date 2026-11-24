@@ -171,7 +171,7 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert "<untrusted_active_context>" in seen
         assert "Aides aux communes" in seen
         assert "Subventions 2025" in seen
-        assert f"Active resource (resource_id to use with the tools): {resource.id}" in seen
+        assert f"Active resource: {resource.id}" in seen
         assert "nom_commune" in seen
 
     def _chat_on_a_resource(self, mocker, tabular, messages, model=None):
@@ -429,9 +429,7 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         response = self.post(url_for("api.assistant_chat"), data=payload)
         assert response.status_code == 200
         response.get_data()
-        assert f"Active resource (resource_id to use with the tools): {resource.id}" in str(
-            model.seen
-        )
+        assert f"Active resource: {resource.id}" in str(model.seen)
 
     def test_chat_caps_model_requests_per_turn(self, mocker):
         """A model that keeps calling tools after the tool budget is refused
@@ -624,23 +622,26 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         token_cancel.return_value.cancel.assert_called_once()
 
 
-class AssistantChatSizeLimitsTest(PytestOnlyAPITestCase):
-    def _raw_chat(self, body, content_length=True):
-        """POST raw bytes; without content_length, mimic a chunked upload."""
-        environ = EnvironBuilder(
-            self.app,
-            path=url_for("api.assistant_chat"),
-            method="POST",
-            data=body,
-            headers={"Content-Type": "application/json"},
-        ).get_environ()
-        if not content_length:
-            del environ["CONTENT_LENGTH"]
-            environ["HTTP_TRANSFER_ENCODING"] = "chunked"
-            environ["wsgi.input_terminated"] = True
-        # A Request keeps the environ as is; a dict would be rebuilt with a length.
-        return self.client.open(Request(environ))
+def raw_chat(test, body, headers=None, chunked=False, content_length=None):
+    """POST raw bytes to the chat; chunked mimics an upload without a length."""
+    environ = EnvironBuilder(
+        test.app,
+        path=url_for("api.assistant_chat"),
+        method="POST",
+        data=body,
+        headers={"Content-Type": "application/json", **(headers or {})},
+    ).get_environ()
+    if chunked:
+        del environ["CONTENT_LENGTH"]
+        environ["HTTP_TRANSFER_ENCODING"] = "chunked"
+        environ["wsgi.input_terminated"] = True
+    if content_length is not None:
+        environ["CONTENT_LENGTH"] = str(content_length)
+    # A Request keeps the environ as is; a dict would be rebuilt with a length.
+    return test.client.open(Request(environ))
 
+
+class AssistantChatSizeLimitsTest(PytestOnlyAPITestCase):
     def _payload_of_size(self, size):
         """A valid chat payload whose JSON encoding is exactly ``size`` bytes."""
         filler = {"id": "msg-0", "role": "assistant", "parts": [{"type": "text", "text": ""}]}
@@ -659,7 +660,7 @@ class AssistantChatSizeLimitsTest(PytestOnlyAPITestCase):
     def test_oversized_body_is_rejected_before_any_backend_call(self, mocker):
         self.login()
         agent, tabular = self._mock_backends(mocker)
-        response = self._raw_chat(self._payload_of_size(MAX_REQUEST_BYTES + 1))
+        response = raw_chat(self, self._payload_of_size(MAX_REQUEST_BYTES + 1))
         assert response.status_code == 413
         agent.assert_not_called()
         tabular.assert_not_called()
@@ -667,38 +668,30 @@ class AssistantChatSizeLimitsTest(PytestOnlyAPITestCase):
     def test_oversized_chunked_body_without_content_length_is_rejected(self, mocker):
         self.login()
         agent, tabular = self._mock_backends(mocker)
-        response = self._raw_chat(
-            self._payload_of_size(MAX_REQUEST_BYTES + 1), content_length=False
-        )
+        response = raw_chat(self, self._payload_of_size(MAX_REQUEST_BYTES + 1), chunked=True)
         assert response.status_code == 413
         agent.assert_not_called()
         tabular.assert_not_called()
 
-    def test_oversized_content_length_header_is_rejected(self, mocker):
+    def test_content_length_over_the_limit_is_rejected_without_reading_the_body(self, mocker):
         self.login()
         agent, _tabular = self._mock_backends(mocker)
-        environ = EnvironBuilder(
-            self.app,
-            path=url_for("api.assistant_chat"),
-            method="POST",
-            data=json.dumps(PAYLOAD),
-            headers={"Content-Type": "application/json"},
-        ).get_environ()
-        environ["CONTENT_LENGTH"] = str(MAX_REQUEST_BYTES + 1)
-        assert self.client.open(Request(environ)).status_code == 413
+        # The body is shorter than announced: reading it would not give a 413.
+        response = raw_chat(self, json.dumps(PAYLOAD), content_length=MAX_REQUEST_BYTES + 2)
+        assert response.status_code == 413
         agent.assert_not_called()
 
     def test_body_at_the_size_limit_is_accepted(self, mocker):
         self.login()
         mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
-        response = self._raw_chat(self._payload_of_size(MAX_REQUEST_BYTES))
+        response = raw_chat(self, self._payload_of_size(MAX_REQUEST_BYTES))
         assert response.status_code == 200
         response.get_data()
 
     def test_chunked_body_at_the_size_limit_is_accepted(self, mocker):
         self.login()
         mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
-        response = self._raw_chat(self._payload_of_size(MAX_REQUEST_BYTES), content_length=False)
+        response = raw_chat(self, self._payload_of_size(MAX_REQUEST_BYTES), chunked=True)
         assert response.status_code == 200
         response.get_data()
 
@@ -751,7 +744,7 @@ class AssistantChatSizeLimitsTest(PytestOnlyAPITestCase):
 
     def test_auth_is_checked_before_the_size_limit(self, mocker):
         agent, _tabular = self._mock_backends(mocker)
-        response = self._raw_chat(self._payload_of_size(MAX_REQUEST_BYTES + 1))
+        response = raw_chat(self, self._payload_of_size(MAX_REQUEST_BYTES + 1))
         assert response.status_code == 401
         agent.assert_not_called()
 
@@ -759,27 +752,13 @@ class AssistantChatSizeLimitsTest(PytestOnlyAPITestCase):
 class AssistantChatAuthenticationTest(PytestOnlyAPITestCase):
     """Flask-Security reads JSON bodies of sessionless requests before the view."""
 
-    def _raw_chat(self, body, headers, content_length=True):
-        environ = EnvironBuilder(
-            self.app,
-            path=url_for("api.assistant_chat"),
-            method="POST",
-            data=body,
-            headers={"Content-Type": "application/json", **headers},
-        ).get_environ()
-        if not content_length:
-            del environ["CONTENT_LENGTH"]
-            environ["HTTP_TRANSFER_ENCODING"] = "chunked"
-            environ["wsgi.input_terminated"] = True
-        return self.client.open(Request(environ))
-
     def _api_key_headers(self):
         _token, plaintext = ApiToken.generate(UserFactory())
         return {"X-API-KEY": plaintext}
 
     def test_api_key_chat_streams(self, mocker):
         mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
-        response = self._raw_chat(json.dumps(PAYLOAD), self._api_key_headers())
+        response = raw_chat(self, json.dumps(PAYLOAD), self._api_key_headers())
         assert response.status_code == 200
         assert "data: " in response.get_data(as_text=True)
 
@@ -787,7 +766,7 @@ class AssistantChatAuthenticationTest(PytestOnlyAPITestCase):
     def test_sessionless_deeply_nested_json_is_rejected(self, mocker, auth, status):
         agent = mocker.patch("udata.core.assistant.api.get_agent")
         headers = self._api_key_headers() if auth == "api_key" else {}
-        response = self._raw_chat("[" * 300_000, headers)
+        response = raw_chat(self, "[" * 300_000, headers)
         assert response.status_code == status
         agent.assert_not_called()
 
@@ -796,23 +775,19 @@ class AssistantChatAuthenticationTest(PytestOnlyAPITestCase):
 
     def test_api_key_oversized_body_is_rejected(self, mocker):
         agent = mocker.patch("udata.core.assistant.api.get_agent")
-        response = self._raw_chat(self._oversized_body(), self._api_key_headers())
+        response = raw_chat(self, self._oversized_body(), self._api_key_headers())
         assert response.status_code == 413
         agent.assert_not_called()
 
     def test_api_key_oversized_chunked_body_is_rejected(self, mocker):
         agent = mocker.patch("udata.core.assistant.api.get_agent")
-        response = self._raw_chat(
-            self._oversized_body(), self._api_key_headers(), content_length=False
-        )
+        response = raw_chat(self, self._oversized_body(), self._api_key_headers(), chunked=True)
         assert response.status_code == 413
         agent.assert_not_called()
 
     def test_api_key_chunked_chat_streams(self, mocker):
         mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
-        response = self._raw_chat(
-            json.dumps(PAYLOAD), self._api_key_headers(), content_length=False
-        )
+        response = raw_chat(self, json.dumps(PAYLOAD), self._api_key_headers(), chunked=True)
         assert response.status_code == 200
         response.get_data()
 
@@ -901,7 +876,6 @@ class AssistantConversationTest(PytestOnlyAPITestCase):
         user = self.login()
         self._chat(mocker, "Combien de communes ?")
         conversation = AssistantConversation.objects.get(user=user, chat_id=PAYLOAD["id"])
-        assert conversation.title == "Combien de communes ?"
         assert conversation.subject is None
         messages = conversation.model_messages()
         assert "Combien de communes ?" in str(messages[0])
@@ -950,8 +924,12 @@ class AssistantConversationTest(PytestOnlyAPITestCase):
         user = self.login()
         model = self._chat(mocker, "Bonjour")
         assert "Question privée" not in str(model.seen)
-        assert AssistantConversation.objects.get(user=other).title == "Question privée"
-        assert AssistantConversation.objects.get(user=user).title == "Bonjour"
+        assert "Question privée" in str(
+            AssistantConversation.objects.get(user=other).model_messages()
+        )
+        assert "Question privée" not in str(
+            AssistantConversation.objects.get(user=user).model_messages()
+        )
 
     def test_the_server_context_is_not_stored(self, mocker, tabular):
         user = self.login()

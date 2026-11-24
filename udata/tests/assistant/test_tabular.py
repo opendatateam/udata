@@ -15,6 +15,7 @@ from udata.core.assistant.tabular import (
     TabularUnexpectedAnswer,
     has_more_rows,
 )
+from udata.http import user_agent
 from udata.tests import PytestOnlyTestCase
 
 BASE_URL = "https://tabular.example.com"
@@ -39,6 +40,7 @@ class TabularClientTest(PytestOnlyTestCase):
         # csv-detective leaves total_lines out for large files.
         assert profile.profile.total_lines is None
         assert requests_mock.request_history[0].timeout == TABULAR_TIMEOUT
+        assert requests_mock.request_history[0].headers["User-Agent"] == user_agent("assistant")
 
     def test_the_columns_of_a_profile_follow_the_header_order(self):
         profile = TabularProfile.model_validate(

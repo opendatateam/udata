@@ -13,10 +13,11 @@ import re
 import threading
 from collections.abc import AsyncIterator, Iterator
 from contextlib import aclosing
+from uuid import UUID
 
 from flask import Response, current_app, request, stream_with_context
 from flask_login import current_user
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError, field_validator
 from pydantic_ai import Agent, CancellationToken, RunContext
 from pydantic_ai.capabilities import Hooks
 from pydantic_ai.exceptions import (
@@ -46,7 +47,7 @@ from pydantic_ai.usage import UsageLimits
 from udata.api import API, api
 from udata.core.assistant.agent import get_agent
 from udata.core.assistant.history import asks, compact_history
-from udata.core.assistant.models import TITLE_MAX_LENGTH, AssistantConversation
+from udata.core.assistant.models import AssistantConversation
 from udata.core.assistant.prompts import language_instructions
 from udata.core.assistant.tabular import TabularClient
 from udata.core.assistant.tools import (
@@ -59,7 +60,6 @@ from udata.core.assistant.tools import (
 )
 from udata.i18n import get_locale
 from udata.i18n import gettext as _
-from udata.utils import normalize_uuid
 
 log = logging.getLogger(__name__)
 
@@ -112,14 +112,6 @@ def _check_new_turn(messages: list[UIMessage]) -> list[UIMessage]:
     return new_turn
 
 
-def _first_question(messages: list[ModelMessage]) -> str:
-    for message in messages:
-        for part in message.parts:
-            if isinstance(part, UserPromptPart) and isinstance(part.content, str):
-                return part.content[:TITLE_MAX_LENGTH]
-    return ""
-
-
 def _stored_history(conversation: AssistantConversation) -> list[ModelMessage]:
     try:
         return conversation.model_messages()
@@ -135,7 +127,6 @@ def _save_conversation(
     active: ActiveResource | None,
 ) -> None:
     conversation.messages = AssistantConversation.stored_messages(messages)
-    conversation.title = conversation.title or _first_question(messages)
     conversation.subject = active.dataset if active else None
     conversation.save()
 
@@ -162,25 +153,32 @@ def _context_hook(context: str) -> Hooks:
     return Hooks(before_model_request=before_model_request)
 
 
+class ChatContext(BaseModel):
+    """The ``resource_id`` and ``visualization`` of the body, outside the Vercel AI protocol."""
+
+    resource_id: UUID | None = None
+    visualization: dict | None = None
+
+    @field_validator("visualization")
+    @classmethod
+    def _bounded(cls, visualization: dict | None) -> dict | None:
+        if visualization is not None:
+            size = len(json.dumps(visualization, ensure_ascii=False).encode())
+            if size > MAX_VISUALIZATION_BYTES:
+                raise ValueError(f"visualization over {MAX_VISUALIZATION_BYTES} bytes")
+        return visualization
+
+
 def _extract_context(extra: dict | None) -> tuple[str | None, dict | None]:
-    """Validate the optional ``resource_id`` and ``visualization`` fields of the body.
-
-    Neither is part of the Vercel AI protocol: they are the extra fields its request
-    models allow. An invalid UUID or an invalid visualization (not an object, or
-    larger than ``MAX_VISUALIZATION_BYTES``) aborts with a 400.
-    """
-    extra = extra or {}
-    resource_id = extra.get("resource_id")
-    if resource_id is not None and (resource_id := normalize_uuid(resource_id)) is None:
-        api.abort(400, _("Invalid resource_id: a resource UUID is expected."))
-
-    visualization = extra.get("visualization")
-    if visualization is not None and (
-        not isinstance(visualization, dict)
-        or len(json.dumps(visualization, ensure_ascii=False).encode()) > MAX_VISUALIZATION_BYTES
-    ):
+    """The validated context of the body: a 400 if a field is invalid."""
+    try:
+        context = ChatContext.model_validate(extra or {})
+    except ValidationError as error:
+        if error.errors()[0]["loc"] == ("resource_id",):
+            api.abort(400, _("Invalid resource_id: a resource UUID is expected."))
         api.abort(400, _("Invalid visualization context."))
-    return resource_id, visualization
+    resource_id = str(context.resource_id) if context.resource_id else None
+    return resource_id, context.visualization
 
 
 def _escape_untrusted(text: str) -> str:
@@ -201,7 +199,7 @@ def build_context(active: ActiveResource | None, visualization: dict | None) -> 
     if active is not None:
         lines = [
             (
-                f"Active resource (resource_id to use with the tools): {active.resource.id}"
+                f"Active resource: {active.resource.id}"
                 f" — {_escape_untrusted(active.resource.title or '')}"
             ),
             "Metadata of the dataset owning the resource:",
@@ -382,7 +380,7 @@ class AssistantChatAPI(API):
     @api.doc("assistant_chat")
     def post(self):
         """Stream an assistant reply as Vercel AI SSE events"""
-        # One byte over the limit, so that an oversized body can be told apart.
+        # One byte over: werkzeug cuts a chunked body at the limit instead of refusing it.
         request.max_content_length = MAX_REQUEST_BYTES + 1
         # Without AI_BASE_URL the assistant is off; without a key it is misconfigured.
         if not current_app.config["AI_BASE_URL"]:
@@ -395,16 +393,12 @@ class AssistantChatAPI(API):
         if not request.is_json:
             api.abort(415)
 
-        # Checked before the agent is built, and after reading too: the body may have
-        # been read before the limit above was set.
-        if (request.content_length or 0) > MAX_REQUEST_BYTES:
-            api.abort(413)
         body = request.get_data()
         if len(body) > MAX_REQUEST_BYTES:
             api.abort(413)
         try:
             run_input = VercelAIAdapter.build_run_input(body)
-        except (ValidationError, ValueError, RecursionError):
+        except ValidationError:
             api.abort(400, _("Invalid request body."))
         resource_id, visualization = _extract_context(run_input.model_extra)
         run_input.messages = _check_new_turn(run_input.messages)

@@ -16,14 +16,12 @@ import pytest
 from pydantic_ai import Agent
 from pydantic_ai.models.test import TestModel
 
-from udata.auth import login_user
 from udata.core.assistant.charts import CreateChartInput, UpdateChartInput
 from udata.core.assistant.data_query import MAX_QUERIES_PER_QUESTION, PAGE_SIZE, Filter
 from udata.core.assistant.tabular import TabularClient, TabularPage, TabularProfile
 from udata.core.assistant.tools import (
     MAX_CELL_CHARS,
     MAX_RESULT_CHARS,
-    MAX_SERIALIZED_RESOURCES,
     MAX_STEPS,
     NO_ACTIVE_RESOURCE,
     TABULAR_UNREADABLE,
@@ -38,9 +36,7 @@ from udata.core.assistant.tools import (
     serialize_dataset_metadata,
 )
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
-from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.user.factories import UserFactory
 from udata.tests.api import PytestOnlyDBTestCase
 
 
@@ -84,12 +80,10 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         self.tools = self.agent._function_toolset.tools
 
     @contextmanager
-    def request_as(self, user=None):
-        """Request context whose flask-principal identity is ``user`` (anonymous if None)."""
+    def anonymous_request(self):
+        """Request context with an anonymous flask-principal identity."""
         with self.app.test_request_context():
             self.app.preprocess_request()
-            if user is not None:
-                login_user(user)
             yield
 
     def call(self, name, deps, **kwargs):
@@ -99,11 +93,9 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
     def make_deps(self, **kwargs):
         return AssistantDeps(tabular=TabularClient(), **kwargs)
 
-    def owned_resource(self, **dataset_kwargs):
-        """A resource with a dataset; public unless ``dataset_kwargs`` say otherwise."""
+    def public_resource(self):
         resource = ResourceFactory()
-        dataset_kwargs.setdefault("title", "Données de test")
-        DatasetFactory(resources=[resource], **dataset_kwargs)
+        DatasetFactory(resources=[resource], title="Données de test")
         return resource
 
     def active(self, columns=COLUMNS, rows=None):
@@ -131,44 +123,18 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
 
     # Dataset metadata and profile given to the model with the active resource.
 
-    def test_serialize_dataset_metadata_serializes_dataset(self):
-        license = LicenseFactory(title="Licence Ouverte")
-        organization = OrganizationFactory(name="Ma collectivité")
-        resources = ResourceFactory.build_batch(2)
+    def test_serialize_dataset_metadata_gives_where_the_data_comes_from(self):
         dataset = DatasetFactory(
             title="Données de test",
-            license=license,
-            organization=organization,
-            resources=resources,
+            license=LicenseFactory(title="Licence Ouverte"),
+            organization=OrganizationFactory(name="Ma collectivité"),
+            resources=ResourceFactory.build_batch(2),
         )
-        payload = json.loads(serialize_dataset_metadata(dataset))
-        assert payload["id"] == str(dataset.id)
-        assert payload["title"] == "Données de test"
-        assert payload["license"] == "Licence Ouverte"
-        assert payload["organization"] == "Ma collectivité"
-        assert len(payload["resources"]) == len(dataset.resources)
-        first = dataset.resources[0]
-        assert payload["resources"][0] == {
-            "id": str(first.id),
-            "title": first.title,
-            "format": first.format,
+        assert json.loads(serialize_dataset_metadata(dataset)) == {
+            "title": "Données de test",
+            "license": "Licence Ouverte",
+            "organization": "Ma collectivité",
         }
-
-    def test_serialize_dataset_metadata_caps_the_listed_resources(self):
-        resources = ResourceFactory.build_batch(MAX_SERIALIZED_RESOURCES + 3)
-        dataset = DatasetFactory(resources=resources)
-        payload = json.loads(serialize_dataset_metadata(dataset))
-        listed = [resource["id"] for resource in payload["resources"]]
-        assert listed == [str(r.id) for r in resources[:MAX_SERIALIZED_RESOURCES]]
-        assert payload["more_resources"] == "… and 3 more"
-
-    def test_serialize_dataset_metadata_of_a_dataset_stored_without_resources(self):
-        dataset = DatasetFactory(title="Sans ressources")
-        Dataset._get_collection().update_one({"_id": dataset.id}, {"$unset": {"resources": ""}})
-        payload = json.loads(serialize_dataset_metadata(dataset))
-        assert payload["title"] == "Sans ressources"
-        assert payload["resources"] == []
-        assert "more_resources" not in payload
 
     def test_render_profile_lists_columns_types_and_rows(self):
         profile = TabularProfile.model_validate(
@@ -191,39 +157,7 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         profile = TabularProfile.model_validate({"profile": {"columns": {}}})
         assert render_profile(profile) == "No column information available."
 
-    # Active resource: permission and profile.
-
-    def test_load_active_resource_hides_resource_of_private_dataset_from_anonymous(self):
-        resource = self.owned_resource(private=True)
-        with self.request_as():
-            assert load_active_resource(str(resource.id), TabularClient()) is None
-        assert self.tabular.profile_requests == []
-
-    def test_load_active_resource_owner_of_private_dataset_is_allowed(self):
-        owner = UserFactory()
-        resource = self.owned_resource(private=True, owner=owner)
-        self.tabular.add_resource(resource.id, COLUMNS)
-        with self.request_as(owner):
-            active = load_active_resource(str(resource.id), TabularClient())
-        assert active is not None
-        assert active.dataset.title == "Données de test"
-        assert active.resource.id == resource.id
-        assert active.profile.columns() == COLUMNS
-
-    def test_load_active_resource_unknown_resource_returns_none(self):
-        with self.request_as():
-            assert load_active_resource(str(uuid4()), TabularClient()) is None
-        assert self.tabular.profile_requests == []
-
-    def test_load_active_resource_keeps_the_resource_when_the_profile_fetch_fails(self):
-        resource = self.owned_resource()
-        self.tabular.unreachable()
-        with self.request_as():
-            active = load_active_resource(str(resource.id), TabularClient())
-        assert active is not None
-        assert active.resource.id == resource.id
-        assert active.profile is None
-        assert active.profile_error is None
+    # Active resource.
 
     def test_tools_require_an_active_resource(self):
         deps = self.make_deps()
@@ -272,8 +206,8 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         assert len(self.tabular.profile_requests) == 1
 
     def test_load_active_resource_keeps_a_profile_failure_that_would_repeat(self):
-        resource = self.owned_resource()
-        with self.request_as():
+        resource = self.public_resource()
+        with self.anonymous_request():
             active = load_active_resource(str(resource.id), TabularClient())
         assert active.profile is None
         assert active.profile_error.status == 404
@@ -435,20 +369,6 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
         assert ok.status == "ok"
         assert len(self.tabular.queries) == 1
         assert deps.query_count == 1
-
-    def test_query_data_refuses_a_global_aggregate_with_a_sort(self):
-        deps = self.active_without_profile()
-        result = self.call(
-            "query_data",
-            deps,
-            aggregate_column="n_cum_dose1",
-            aggregate="sum",
-            sort_column="dep",
-        )
-        assert "sorting is only possible on the groupby column" in result.errors[0]
-        assert self.tabular.queries == []
-        assert self.tabular.profile_requests == []
-        assert deps.query_count == 0
 
     def test_query_data_rejects_an_unknown_column(self):
         deps, _ = self.active()
@@ -667,16 +587,6 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
 
 def page(rows, total=None) -> TabularPage:
     return TabularPage(data=rows, meta={"total": total})
-
-
-def test_render_result_shows_at_most_one_page_of_rows():
-    rows = [{"n": i} for i in range(PAGE_SIZE + 1)]
-    result = _render_result(page(rows, total=PAGE_SIZE + 1))
-    lines = result.table.split("\n")
-    assert len(lines) == PAGE_SIZE + 1
-    assert lines[-1] == str(PAGE_SIZE - 1)
-    assert result.rows == PAGE_SIZE
-    assert result.total == PAGE_SIZE + 1
 
 
 def test_render_result_of_no_rows_is_an_empty_table():

@@ -6,6 +6,7 @@ from udata.core.assistant.agent import get_agent
 from udata.core.assistant.prompts import SYSTEM_INSTRUCTIONS
 from udata.core.assistant.tabular import TabularClient
 from udata.core.assistant.tools import AssistantDeps
+from udata.http import user_agent
 from udata.tests.api import PytestOnlyDBTestCase
 
 
@@ -18,14 +19,20 @@ class AssistantAgentTest(PytestOnlyDBTestCase):
         ]
         agent = get_agent()
         assert agent.model.model_name == "first"
-        assert agent.model_settings == {"max_tokens": 2048, "openai_reasoning_effort": "none"}
+        assert agent.model_settings == {
+            "extra_headers": {"User-Agent": user_agent("assistant")},
+            "max_tokens": 2048,
+            "openai_reasoning_effort": "none",
+        }
 
     def test_agent_bounds_the_output_tokens_by_default(self):
-        assert get_agent().model_settings == {"max_tokens": 8192}
+        assert get_agent().model_settings["max_tokens"] == 8192
 
-    def test_agent_keeps_the_provider_defaults_without_settings(self):
+    def test_agent_only_identifies_itself_without_settings(self):
         self.app.config["AI_MODELS"] = [{"name": "gpt-oss-120b"}]
-        assert get_agent().model_settings is None
+        assert get_agent().model_settings == {
+            "extra_headers": {"User-Agent": user_agent("assistant")}
+        }
 
     def test_the_model_receives_the_instructions_and_tool_descriptions(self):
         received = {}

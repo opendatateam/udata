@@ -1,6 +1,5 @@
 """Declarative chart tool inputs, validation and conversion to the chart model."""
 
-import copy
 from collections.abc import Iterable
 from typing import Annotated, Any
 
@@ -161,7 +160,7 @@ def to_chart_output(config: CreateChartInput, resource_id: str) -> ChartOutput:
                 column_y=config.x_axis.column_x if s.aggregate_y == "count" else s.column_y,
                 aggregate_y=s.aggregate_y,
                 resource_id=resource_id,
-                filters=copy.deepcopy(filters),
+                filters=filters,
             )
             for s in series
         ],

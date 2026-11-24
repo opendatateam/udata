@@ -1,8 +1,5 @@
-from datetime import UTC, datetime
-
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import (
-    DateTimeField,
     EmbeddedDocumentField,
     ListField,
     ReferenceField,
@@ -16,8 +13,6 @@ from udata.mongo.document import UDataDocument as Document
 
 __all__ = ("AssistantConversation", "AssistantMessage")
 
-TITLE_MAX_LENGTH = 120
-
 # One message, with the settings of pydantic-ai's ModelMessagesTypeAdapter.
 MESSAGE_ADAPTER = TypeAdapter(
     ModelMessage,
@@ -26,7 +21,6 @@ MESSAGE_ADAPTER = TypeAdapter(
 
 
 class AssistantMessage(EmbeddedDocument):
-    posted_on = DateTimeField(default=lambda: datetime.now(UTC), required=True)
     # JSON text, not a dict: Mongo refuses keys with a dot, as column names may have.
     content = StringField(required=True)
 
@@ -38,7 +32,6 @@ class AssistantConversation(Datetimed, Document):
     chat_id = StringField(required=True)
     user = ReferenceField("User", required=True)
     subject = ReferenceField("Dataset")
-    title = StringField(required=True)
     messages = ListField(EmbeddedDocumentField(AssistantMessage))
 
     meta = {
@@ -52,9 +45,6 @@ class AssistantConversation(Datetimed, Document):
     @staticmethod
     def stored_messages(messages: list[ModelMessage]) -> list[AssistantMessage]:
         return [
-            AssistantMessage(
-                posted_on=message.timestamp or datetime.now(UTC),
-                content=MESSAGE_ADAPTER.dump_json(message).decode(),
-            )
+            AssistantMessage(content=MESSAGE_ADAPTER.dump_json(message).decode())
             for message in messages
         ]

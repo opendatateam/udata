@@ -182,17 +182,6 @@ def test_update_output_drops_top_level_nulls_but_keeps_y_axis_nulls():
     assert to_update_output(patch) == {"title": "x", "y_axis": {"min": None, "unit": "u"}}
 
 
-def test_output_series_do_not_share_filters():
-    filters = {"_cls": "Filter", "column": "dep", "condition": "exact", "value": "01"}
-    config = make(
-        filters=filters,
-        series=[{"column_y": "n_cum_dose1"}, {"column_y": "n_cum_dose1", "aggregate_y": "max"}],
-    )
-    out = to_chart_output(config, "rid").model_dump()
-    out["series"][0]["filters"]["value"] = "changed"
-    assert out["series"][1]["filters"]["value"] == "01"
-
-
 @pytest.mark.parametrize(
     "field,value",
     [

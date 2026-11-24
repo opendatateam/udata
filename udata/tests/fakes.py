@@ -233,8 +233,8 @@ class TabularFake:
         "max": lambda values: max(values, default=None),
     }
     NUMERIC_TYPES = {"int", "float"}
-    # `less` and `greater` include the bound, like api-tabular.
-    ORDERINGS = {"less": operator.le, "greater": operator.ge}
+    # `less` includes the bound, like api-tabular.
+    ORDERINGS = {"less": operator.le}
     OPERATORS = {"groupby", "sort", "differs", *AGGREGATES, *ORDERINGS}
 
     def __init__(self):
@@ -341,7 +341,9 @@ class TabularFake:
                 elif op in self.AGGREGATES:
                     aggregate = (column, op)
                 elif op == "sort":
-                    sort = (column, value == "desc")
+                    if value != "asc":
+                        raise NotImplementedError("TabularFake sorts in ascending order only")
+                    sort = column
                 elif op == "differs":
                     # Like PostgREST's `isdistinct`, it keeps the nulls.
                     rows = [
@@ -361,10 +363,7 @@ class TabularFake:
         elif columns:
             rows = [{name: row.get(name) for name in columns} for row in rows]
         if sort:
-            column, descending = sort
-            rows.sort(
-                key=lambda row: (row.get(column) is None, row.get(column)), reverse=descending
-            )
+            rows.sort(key=lambda row: (row.get(sort) is None, row.get(sort)))
         start = (page - 1) * page_size
         next_url = None
         if len(rows) > start + page_size:
@@ -378,11 +377,11 @@ class TabularFake:
 
     def _aggregate(self, rows, groupby, aggregate):
         column, op = aggregate
-        groups: dict = {}
-        for row in rows:
-            groups.setdefault(row.get(groupby) if groupby else None, []).append(row)
-        if not groupby:
-            groups = {None: rows}
+        groups: dict = {None: rows}
+        if groupby:
+            groups = {}
+            for row in rows:
+                groups.setdefault(row.get(groupby), []).append(row)
         result = []
         for key, members in groups.items():
             values = [row[column] for row in members if row.get(column) is not None]

@@ -20,6 +20,7 @@ from flask import current_app
 from pydantic import BaseModel, ValidationError
 
 from udata.core.assistant.data_query import PAGE_SIZE
+from udata.http import http_session
 
 log = logging.getLogger(__name__)
 
@@ -120,6 +121,8 @@ class TabularClient:
         base_url = current_app.config["TABULAR_API_URL"]
         # A trailing slash would double the one the routes start with.
         self.base_url = base_url.rstrip("/") if base_url else base_url
+        # The calls of a turn reuse its connection.
+        self.session = http_session("assistant")
 
     def get_profile(self, resource_id: UUID) -> TabularProfile:
         return self._request(PROFILE_ROUTE.format(rid=resource_id), TabularProfile)
@@ -139,7 +142,7 @@ class TabularClient:
             raise TabularError("api-tabular is not configured (TABULAR_API_URL is not set)")
         url = f"{self.base_url}{route}"
         try:
-            response = requests.get(url, timeout=TABULAR_TIMEOUT)
+            response = self.session.get(url, timeout=TABULAR_TIMEOUT)
             response.raise_for_status()
             return model.model_validate_json(response.content)
         except requests.exceptions.HTTPError as error:
