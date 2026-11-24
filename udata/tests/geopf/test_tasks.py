@@ -21,9 +21,10 @@ from udata.geopf.models import (
 )
 from udata.geopf.srs import DEFAULT_SRS
 from udata.geopf.tasks import (
+    OfferingLink,
     _copy_to_tempfile,
     _download_chunks,
-    _offering_url,
+    _offering_links,
     _open_resource_file,
     _resource_filename,
     _run_pipeline,
@@ -42,17 +43,76 @@ from udata.tests import PytestOnlyTestCase
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.geopf import TEST_DATASTORE_ID, TEST_GEOPF_CONF, TEST_TOKEN
 
+WMS_TEMPLATE = (
+    "https://data.geopf.fr/wms-v?service=WMS&version=1.3.0&request=GetMap&layers=ex_wmsv"
+    "&bbox={xmin},{ymin},{xmax},{ymax}&styles={styles}&width={width}&height={height}"
+    "&srs={srs}&format={format}"
+)
+WMS_GETCAP = (
+    "https://data.geopf.fr/wms-v?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&layer=ex_wmsv"
+)
 
-class OfferingUrlTest:
-    def test_returns_first_url(self):
-        offering = {"urls": [{"url": "http://wfs.example.com"}, {"url": "http://wms.example.com"}]}
-        assert _offering_url(offering) == "http://wfs.example.com"
 
-    def test_empty_urls_returns_empty_string(self):
-        assert _offering_url({"urls": []}) == ""
+def wfs_describe(feature_type):
+    return (
+        "https://data.geopf.fr/wfs?service=WFS&version=2.0.0&request=DescribeFeatureType"
+        f"&typeNames=ex_wfs:{feature_type}"
+    )
 
-    def test_no_urls_key_returns_empty_string(self):
-        assert _offering_url({}) == ""
+
+def wfs_getcap(feature_type):
+    return (
+        "https://data.geopf.fr/wfs?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetCapabilities"
+        f"&TYPENAMES=ex_wfs:{feature_type}"
+    )
+
+
+WMS_OFFERING = {
+    "_id": "offer-wms",
+    "type": "WMS-VECTOR",
+    "layer_name": "ex_wmsv",
+    "urls": [{"type": "WMS", "url": WMS_TEMPLATE}],
+}
+WFS_OFFERING = {
+    "_id": "offer-wfs",
+    "type": "WFS",
+    "layer_name": "ex_wfs",
+    "urls": [
+        {"type": "WFS", "url": wfs_describe("point1")},
+        {"type": "WFS", "url": wfs_describe("geometry1")},
+    ],
+}
+
+
+class OfferingLinksTest:
+    def test_wms_template_becomes_getcap_with_layer(self):
+        assert _offering_links(WMS_OFFERING) == [
+            OfferingLink(layer="ex_wmsv", url=WMS_GETCAP, format="wms")
+        ]
+
+    def test_wfs_one_link_per_feature_type(self):
+        assert _offering_links(WFS_OFFERING) == [
+            OfferingLink(layer="ex_wfs:point1", url=wfs_getcap("point1"), format="wfs"),
+            OfferingLink(layer="ex_wfs:geometry1", url=wfs_getcap("geometry1"), format="wfs"),
+        ]
+
+    def test_other_services_kept_as_is(self):
+        offering = {
+            "layer_name": "ex",
+            "urls": [
+                {"type": "WMTS", "url": "https://h/wmts?request=GetTile&layer=ex"},
+                {"type": "TMS", "url": "https://h/tms/1.0.0/ex/{z}/{x}/{y}.pbf"},
+            ],
+        }
+        assert _offering_links(offering) == [
+            OfferingLink(layer="ex", url="https://h/wmts?request=GetTile&layer=ex", format="wmts"),
+            OfferingLink(layer="ex", url="https://h/tms/1.0.0/ex/{z}/{x}/{y}.pbf", format="tms"),
+        ]
+
+    def test_no_urls(self):
+        assert _offering_links({"urls": []}) == []
+        assert _offering_links({"urls": [{"type": "WMS", "url": ""}]}) == []
+        assert _offering_links({}) == []
 
 
 class ResourceFilenameTest(PytestOnlyTestCase):
@@ -287,38 +347,113 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
         assert count == 0
         mock_client_cls.assert_not_called()
 
-    def test_adds_resource_for_new_offering(self):
+    def _dataset(self, *resources):
         gpkg = ResourceFactory.build(
             format="gpkg",
             geopf=GeopfResourceMetadata(push=GeopfResourcePushMetadata(stored_data_id="sd-1")),
         )
-        dataset = DatasetFactory(
-            resources=[gpkg],
+        return DatasetFactory(
+            resources=[gpkg, *resources],
             geopf=GeopfDatasetMetadata(push=GeopfDatasetPushMetadata(datastore_id="ds-1")),
         )
-        mock_client = MagicMock()
-        mock_client.list_offerings.return_value = [
-            {
-                "_id": "offer-1",
-                "type": "WFS",
-                "layer_name": "layer1",
-                "urls": [{"url": "http://wfs.example.com"}],
-            }
-        ]
 
+    def _pull(self, dataset, offerings):
+        """Pull `offerings` into `dataset`, return the count and the `GeopfClient` class mock."""
+        mock_client = MagicMock()
+        mock_client.list_offerings.return_value = offerings
         with patch("udata.geopf.tasks.GeopfClient", return_value=mock_client) as mock_client_cls:
             count = pull_offerings_for_dataset(dataset, TEST_TOKEN)
+        dataset.reload()
+        return count, mock_client_cls
+
+    def _offering_resources(self, dataset):
+        return {
+            resource_offering_metadata(r).layer: r
+            for r in dataset.resources
+            if resource_offering_metadata(r).id
+        }
+
+    def test_adds_resource_for_new_offering(self):
+        dataset = self._dataset()
+
+        count, mock_client_cls = self._pull(dataset, [WMS_OFFERING])
 
         mock_client_cls.assert_called_once_with(token=TEST_TOKEN, datastore_id="ds-1")
         assert count == 1
-        dataset.reload()
-        offering_resource = next(
-            (r for r in dataset.resources if resource_offering_metadata(r).id == "offer-1"),
-            None,
+        resource = self._offering_resources(dataset)["ex_wmsv"]
+        assert resource.title == "ex_wmsv"
+        assert resource.url == WMS_GETCAP
+        assert resource.format == "wms"
+        assert resource_offering_metadata(resource).id == "offer-wms"
+
+    def test_adds_one_resource_per_wfs_feature_type(self):
+        dataset = self._dataset()
+
+        count, _ = self._pull(dataset, [WFS_OFFERING])
+
+        assert count == 1
+        resources = self._offering_resources(dataset)
+        assert set(resources) == {"ex_wfs:point1", "ex_wfs:geometry1"}
+        assert resources["ex_wfs:point1"].url == wfs_getcap("point1")
+        assert resources["ex_wfs:geometry1"].url == wfs_getcap("geometry1")
+        assert all(r.format == "wfs" for r in resources.values())
+
+    def test_resync_is_stable_when_urls_order_changes(self):
+        dataset = self._dataset()
+        self._pull(dataset, [WFS_OFFERING])
+        ids = {layer: r.id for layer, r in self._offering_resources(dataset).items()}
+
+        reordered = {**WFS_OFFERING, "urls": list(reversed(WFS_OFFERING["urls"]))}
+        self._pull(dataset, [reordered])
+
+        resources = self._offering_resources(dataset)
+        assert {layer: r.id for layer, r in resources.items()} == ids
+        assert resources["ex_wfs:point1"].url == wfs_getcap("point1")
+
+    def test_removes_resource_for_dropped_feature_type(self):
+        dataset = self._dataset()
+        self._pull(dataset, [WFS_OFFERING])
+
+        self._pull(dataset, [{**WFS_OFFERING, "urls": WFS_OFFERING["urls"][:1]}])
+
+        assert set(self._offering_resources(dataset)) == {"ex_wfs:point1"}
+
+    def test_removes_resources_of_offering_without_urls(self):
+        dataset = self._dataset()
+        self._pull(dataset, [WMS_OFFERING])
+
+        count, _ = self._pull(dataset, [{**WMS_OFFERING, "urls": []}])
+
+        assert count == 1
+        assert self._offering_resources(dataset) == {}
+
+    def test_replaces_resource_synced_before_layers(self):
+        legacy = ResourceFactory.build(
+            title="Service WFS - ex_wfs",
+            url=wfs_describe("point1"),
+            format="wfs",
+            filetype="remote",
+            type="api",
+            geopf=GeopfResourceMetadata(offering=GeopfResourceOfferingMetadata(id="offer-wfs")),
         )
-        assert offering_resource is not None
-        assert offering_resource.url == "http://wfs.example.com"
-        assert offering_resource.format == "wfs"
+        dataset = self._dataset(legacy)
+
+        self._pull(dataset, [WFS_OFFERING])
+
+        resources = self._offering_resources(dataset)
+        assert set(resources) == {"ex_wfs:point1", "ex_wfs:geometry1"}
+        assert legacy.id not in {r.id for r in dataset.resources}
+
+    def test_resync_keeps_resource_after_format_edit(self):
+        dataset = self._dataset()
+        self._pull(dataset, [WMS_OFFERING])
+        resource = self._offering_resources(dataset)["ex_wmsv"]
+        resource.format = "ogc:wms"
+        dataset.save()
+
+        self._pull(dataset, [WMS_OFFERING])
+
+        assert self._offering_resources(dataset)["ex_wmsv"].id == resource.id
 
     def test_skips_when_no_datastore_pinned(self):
         # no geopf.push.datastore_id: dataset was never successfully pushed
@@ -335,61 +470,35 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
         mock_client_cls.assert_not_called()
 
     def test_updates_url_for_changed_offering(self):
-        gpkg = ResourceFactory.build(
-            format="gpkg",
-            geopf=GeopfResourceMetadata(push=GeopfResourcePushMetadata(stored_data_id="sd-1")),
-        )
-        stale_offering = ResourceFactory.build(
-            url="http://old.example.com/wfs",
+        stale = ResourceFactory.build(
+            title="ex_wmsv",
+            url="https://old.example.com/wms-v?SERVICE=WMS&REQUEST=GetCapabilities&layer=ex_wmsv",
+            format="wms",
             filetype="remote",
             type="api",
-            geopf=GeopfResourceMetadata(offering=GeopfResourceOfferingMetadata(id="offer-1")),
+            geopf=GeopfResourceMetadata(
+                offering=GeopfResourceOfferingMetadata(id="offer-wms", layer="ex_wmsv")
+            ),
         )
-        dataset = DatasetFactory(
-            resources=[gpkg, stale_offering],
-            geopf=GeopfDatasetMetadata(push=GeopfDatasetPushMetadata(datastore_id="ds-1")),
-        )
-        mock_client = MagicMock()
-        mock_client.list_offerings.return_value = [
-            {
-                "_id": "offer-1",
-                "type": "WFS",
-                "layer_name": "layer1",
-                "urls": [{"url": "http://new.example.com/wfs"}],
-            }
-        ]
+        dataset = self._dataset(stale)
 
-        with patch("udata.geopf.tasks.GeopfClient", return_value=mock_client):
-            pull_offerings_for_dataset(dataset, TEST_TOKEN)
+        self._pull(dataset, [WMS_OFFERING])
 
-        dataset.reload()
-        resource = next(
-            r for r in dataset.resources if resource_offering_metadata(r).id == "offer-1"
-        )
-        assert resource.url == "http://new.example.com/wfs"
+        resource = self._offering_resources(dataset)["ex_wmsv"]
+        assert resource.id == stale.id
+        assert resource.url == WMS_GETCAP
 
     def test_removes_resource_for_deleted_offering(self):
-        gpkg = ResourceFactory.build(
-            format="gpkg",
-            geopf=GeopfResourceMetadata(push=GeopfResourcePushMetadata(stored_data_id="sd-1")),
-        )
         gone_offering = ResourceFactory.build(
             filetype="remote",
             type="api",
             geopf=GeopfResourceMetadata(offering=GeopfResourceOfferingMetadata(id="offer-gone")),
         )
-        dataset = DatasetFactory(
-            resources=[gpkg, gone_offering],
-            geopf=GeopfDatasetMetadata(push=GeopfDatasetPushMetadata(datastore_id="ds-1")),
-        )
-        mock_client = MagicMock()
-        mock_client.list_offerings.return_value = []
+        dataset = self._dataset(gone_offering)
 
-        with patch("udata.geopf.tasks.GeopfClient", return_value=mock_client):
-            count = pull_offerings_for_dataset(dataset, TEST_TOKEN)
+        count, _ = self._pull(dataset, [])
 
         assert count == 0
-        dataset.reload()
         assert not any(resource_offering_metadata(r).id for r in dataset.resources)
 
 

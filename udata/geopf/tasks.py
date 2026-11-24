@@ -3,8 +3,9 @@ import logging
 import os
 import re
 import tempfile
+from dataclasses import dataclass
 from datetime import UTC, datetime
-from urllib.parse import quote, urlparse
+from urllib.parse import parse_qsl, quote, urlencode, urlparse, urlunparse
 from uuid import UUID
 
 from flask import current_app
@@ -467,72 +468,125 @@ def pull_offerings_for_dataset(dataset, token) -> int:
         return 0
 
     client = GeopfClient(token=token, datastore_id=datastore_id)
-    live_offering_ids = set()
-    for sd_id in stored_data_ids:
-        for offering in client.list_offerings(sd_id):
-            live_offering_ids.add(offering["_id"])
-            _upsert_offering_resource(dataset, offering)
+    offerings = {o["_id"]: o for sd_id in stored_data_ids for o in client.list_offerings(sd_id)}
+    now = datetime.now(UTC)
+    synced = set()
+    for offering_id, offering in offerings.items():
+        links = _offering_links(offering)
+        if not links:
+            log.warning("geopf: offering=%s has no URL, dataset=%s", offering_id, dataset.id)
+        for link in links:
+            synced.add(_upsert_offering_resource(dataset, offering, link, now).id)
 
-    # Remove resources whose offering no longer exists on GeoPortail
+    # Offering resources not synced above: offering or layer gone, or synced before layers
     for resource in list(dataset.resources):
-        oid = resource_offering_metadata(resource).id
-        if oid and oid not in live_offering_ids:
+        meta = resource_offering_metadata(resource)
+        if meta.id and resource.id not in synced:
             log.info(
-                "geopf: removing resource=%s (offering=%s gone) dataset=%s",
+                "geopf: removing resource=%s (offering=%s layer=%s gone) dataset=%s",
                 resource.id,
-                oid,
+                meta.id,
+                meta.layer,
                 dataset.id,
             )
             dataset.remove_resource(resource)
 
-    return len(live_offering_ids)
+    return len(offerings)
 
 
-def _upsert_offering_resource(dataset, offering: dict) -> None:
+@dataclass(frozen=True)
+class OfferingLink:
+    """A resource to sync from an offering `urls` entry: its URL, format and layer."""
+
+    layer: str
+    url: str
+    format: str | None
+
+
+# Parameter naming the layer on the GetCapabilities we store, as harvested geopf resources do
+GETCAP_LAYER_PARAM = {"WMS": "layer", "WFS": "TYPENAMES"}
+
+
+def _offering_links(offering: dict) -> list[OfferingLink]:
+    """One link per entry of the offering `urls` (WFS has one per feature type).
+
+    WMS and WFS URLs (a GetMap template, a DescribeFeatureType) become a GetCapabilities
+    carrying the layer. Other services are kept as is.
+    """
+    links = {}
+    for entry in offering.get("urls") or []:
+        url = entry.get("url") or ""
+        if not url:
+            continue
+        service = (entry.get("type") or "").upper()
+        parsed = urlparse(url)
+        params = {k.lower(): v for k, v in parse_qsl(parsed.query)}
+        layer = offering.get("layer_name") or ""
+        if service == "WFS":
+            # WFS `layer_name` is only the namespace, the URL names the feature type
+            layer = params.get("typenames") or params.get("typename") or layer
+        if service in GETCAP_LAYER_PARAM:
+            url = _getcap_url(parsed, service, params.get("version"), layer)
+        link = OfferingLink(layer=layer, url=url, format=service.lower() or None)
+        # keep one link per pair of (layer, format); defensive
+        links.setdefault((link.layer, link.format), link)
+    return list(links.values())
+
+
+def _getcap_url(parsed, service: str, version: str | None, layer: str) -> str:
+    query = {"SERVICE": service}
+    if version:
+        query["VERSION"] = version
+    query["REQUEST"] = "GetCapabilities"
+    if layer:
+        query[GETCAP_LAYER_PARAM[service]] = layer
+    # keep `ns:feature_type` readable
+    encoded = urlencode(query, safe=":", quote_via=quote)
+    return urlunparse(parsed._replace(query=encoded, fragment=""))
+
+
+def _upsert_offering_resource(dataset, offering: dict, link: OfferingLink, now: datetime):
+    """Create or update the resource for `link`, and return it."""
     offering_id = offering["_id"]
-    service_type = offering.get("type", "")
-    layer_name = offering.get("layer_name", "")
-    url = _offering_url(offering)
-    if not url:
-        log.warning("geopf: offering=%s has no URL, skipping dataset=%s", offering_id, dataset.id)
-        return
-
-    title = f"Service {service_type} - {layer_name}" if layer_name else f"Service {service_type}"
-    now = datetime.now(UTC)
     existing = next(
-        (r for r in dataset.resources if resource_offering_metadata(r).id == offering_id),
+        (
+            r
+            for r in dataset.resources
+            if (meta := resource_offering_metadata(r)).id == offering_id
+            and meta.layer == link.layer
+        ),
         None,
     )
 
     if existing is None:
         resource = Resource(
-            title=title,
-            url=url,
-            format=service_type.lower() if service_type else None,
+            # bare layer name, like harvested geopf resources: hydra falls back on it
+            title=link.layer or offering_id,
+            url=link.url,
+            format=link.format,
             filetype="remote",
             type="api",
             geopf=GeopfResourceMetadata(
-                offering=GeopfResourceOfferingMetadata(id=offering_id, last_synced_at=now)
+                offering=GeopfResourceOfferingMetadata(
+                    id=offering_id, layer=link.layer, last_synced_at=now
+                )
             ),
         )
         dataset.add_resource(resource)
         log.info(
-            "geopf: added resource offering=%s type=%s layer=%s dataset=%s",
+            "geopf: added resource offering=%s format=%s layer=%s dataset=%s",
             offering_id,
-            service_type,
-            layer_name,
+            link.format,
+            link.layer,
             dataset.id,
         )
-    else:
-        if existing.url != url:
-            existing.url = url
-            dataset.update_resource(existing)
-        set_resource_offering_metadata(dataset, existing, last_synced_at=now)
+        return resource
 
-
-def _offering_url(offering: dict) -> str:
-    urls = offering.get("urls") or []
-    return urls[0].get("url", "") if urls else ""
+    if existing.url != link.url:
+        existing.url = link.url
+        dataset.update_resource(existing)
+    set_resource_offering_metadata(dataset, existing, last_synced_at=now)
+    return existing
 
 
 def _set_metadata_section(
