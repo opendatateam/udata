@@ -1,5 +1,15 @@
 # Changelog
 
+## 17.29.0 (2026-11-24)
+
+- feat(assistant): add an AI assistant that builds charts from a resource ([#4076](https://github.com/opendatateam/udata/pull/4076))
+- fix(datasets): list the resources of a dataset stored without them ([#4130](https://github.com/opendatateam/udata/pull/4130))
+- fix(discussions): refuse to discuss a subject the user cannot read ([#4124](https://github.com/opendatateam/udata/pull/4124))
+- fix(geopf): handle TMS services ([#4131](https://github.com/opendatateam/udata/pull/4131))
+- fix(geopf): services urls and resource title ([#4128](https://github.com/opendatateam/udata/pull/4128))
+- fix(harvest): empty DCAT text nodes yield their node id as contents ([#4121](https://github.com/opendatateam/udata/pull/4121))
+
+
 ## 17.28.0 (2026-11-23)
 
 - chore(deps): update astral-sh/setup-uv action to v10.4.0 ([#4119](https://github.com/opendatateam/udata/pull/4119))
