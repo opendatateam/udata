@@ -244,12 +244,9 @@ class GeopfClient:
 
     # --- tagging ---
 
-    def tag_entity(self, entity_type: str, entity_id: str, datasheet_name: str) -> None:
-        # entity_type: "uploads", "stored_data", "metadata"
-        resp = self.session.post(
-            self._url(f"{entity_type}/{entity_id}/tags"),
-            json={"datasheet_name": datasheet_name},
-        )
+    def tag_entity(self, entity_type: str, entity_id: str, tags: dict[str, str]) -> None:
+        # entity_type: "uploads", "stored_data", "metadata"; tags are added to existing ones
+        resp = self.session.post(self._url(f"{entity_type}/{entity_id}/tags"), json=tags)
         self._raise(resp)
 
     # --- datastores ---

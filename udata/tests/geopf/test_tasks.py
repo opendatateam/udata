@@ -216,7 +216,7 @@ class SyncMetadataTest(PytestOnlyDBTestCase):
         assert result == "meta-new"
         client.upload_metadata.assert_called_once()
         client.tag_entity.assert_called_once_with(
-            "metadata", "meta-new", resolve_datasheet_name(dataset)
+            "metadata", "meta-new", {"datasheet_name": resolve_datasheet_name(dataset)}
         )
         dataset.reload()
         assert dataset.geopf.push.metadata_id == "meta-new"
@@ -535,6 +535,13 @@ class RunPipelineTest(PytestOnlyDBTestCase):
             srs=DEFAULT_SRS,
             notify_email=None,
             entity_url=stored_data_details_url(f"Mon jeu de données ({str(dataset.id)[-6:]})"),
+        )
+        datasheet_name = resolve_datasheet_name(dataset)
+        client.tag_entity.assert_any_call("uploads", "upload-1", {"datasheet_name": datasheet_name})
+        client.tag_entity.assert_any_call(
+            "stored_data",
+            "sd-1",
+            {"datasheet_name": datasheet_name, "upload_id": "upload-1", "proc_int_id": "exec-1"},
         )
         dataset.reload()
         r = next(r for r in dataset.resources if r.id == resource.id)

@@ -189,7 +189,7 @@ def _run_pipeline(
                 f"Upload checks failed with status {status}" + (f":\n{reason}" if reason else "")
             )
 
-        client.tag_entity("uploads", upload_id, datasheet_name)
+        client.tag_entity("uploads", upload_id, {"datasheet_name": datasheet_name})
 
         exec_id = client.launch_processing(
             upload_id,
@@ -204,6 +204,8 @@ def _run_pipeline(
             dataset_id,
             resource_id,
         )
+        # cartes.gouv.fr expects these on a VECTOR-DB, e.g. to generate a vector pyramid
+        integration_tags = {"upload_id": upload_id, "proc_int_id": exec_id}
 
         exec_status, stored_data_id = client.poll_execution(exec_id)
 
@@ -254,7 +256,9 @@ def _run_pipeline(
                 log.warning("geopf: could not clean up upload=%s: %s", upload_id, e)
         raise
 
-    client.tag_entity("stored_data", stored_data_id, datasheet_name)
+    client.tag_entity(
+        "stored_data", stored_data_id, {"datasheet_name": datasheet_name, **integration_tags}
+    )
 
     sync_metadata(dataset, client)
 
@@ -406,7 +410,7 @@ def sync_metadata(dataset, client) -> str:
     else:
         metadata_id = client.upload_metadata(xml)
         log.info("geopf: uploaded metadata=%s dataset=%s", metadata_id, dataset.id)
-        client.tag_entity("metadata", metadata_id, datasheet_name)
+        client.tag_entity("metadata", metadata_id, {"datasheet_name": datasheet_name})
         set_dataset_push_metadata(dataset, metadata_id=metadata_id)
     return metadata_id
 

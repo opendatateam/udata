@@ -277,12 +277,13 @@ class GeopfClientProcessingTest(PytestOnlyTestCase):
 
 @TEST_GEOPF_CONF
 class GeopfClientTaggingTest(PytestOnlyTestCase):
-    def test_tag_entity_sends_datasheet_name(self, rmock):
-        rmock.post(f"{TEST_API_URL}/uploads/u1/tags", json={})
+    def test_tag_entity_sends_tags(self, rmock):
+        rmock.post(f"{TEST_API_URL}/stored_data/sd1/tags", json={})
+        tags = {"datasheet_name": "my-sheet", "upload_id": "u1", "proc_int_id": "e1"}
         GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).tag_entity(
-            "uploads", "u1", "my-sheet"
+            "stored_data", "sd1", tags
         )
-        assert rmock.last_request.json() == {"datasheet_name": "my-sheet"}
+        assert rmock.last_request.json() == tags
 
 
 @TEST_GEOPF_CONF
