@@ -570,6 +570,9 @@ class User(SpamMixin, WithMetrics, UserMixin, Linkable, Document):
                     if message.posted_by == self:
                         message.content = "DELETED"
                 discussion.save()
+        from udata.core.assistant.models import AssistantConversation
+
+        AssistantConversation.objects(user=self).delete()
         from udata.models import Follow  # Circular imports.
 
         Follow.objects(follower=self).delete()

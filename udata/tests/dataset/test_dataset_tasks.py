@@ -3,6 +3,7 @@ import pytest
 # Those imports seem mandatory for the csv adapters to be registered.
 # This might be because of the decorator mechanism.
 import udata.core.dataset.activities  # noqa: F401  (connects the activity handlers)
+from udata.core.assistant.models import AssistantConversation
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset import tasks
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter  # noqa
@@ -42,6 +43,8 @@ class DatasetTasksTest(PytestOnlyDBTestCase):
         )
 
         discussion = DiscussionFactory(subject=datasets[0])
+        for d in datasets:
+            AssistantConversation.objects.create(chat_id=str(d.id), user=user, subject=d)
 
         follower = Follow.objects.create(follower=user, following=datasets[0])
 
@@ -58,6 +61,7 @@ class DatasetTasksTest(PytestOnlyDBTestCase):
         assert topic_element.element is None
 
         assert Discussion.objects.filter(id=discussion.id).count() == 0
+        assert [c.subject.id for c in AssistantConversation.objects] == [datasets[1].id]
         assert Follow.objects.filter(id=follower.id).count() == 0
         assert HarvestJob.objects.filter(items__dataset=datasets[0].id).count() == 0
         assert Dataservice.objects.filter(datasets=datasets[0].id).count() == 0

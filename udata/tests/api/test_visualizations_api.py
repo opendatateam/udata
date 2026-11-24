@@ -105,6 +105,51 @@ class VisualizationAPITest(PytestOnlyAPITestCase):
         assert visualization.description == chart.description
         assert visualization.owner == user
 
+    @pytest.mark.parametrize("limit", [1, 50])
+    def test_visualization_api_create_with_x_axis_limit(self, limit):
+        """It should create a visualization with an X axis value limit"""
+        user = self.login()
+        chart = ChartFactory.build(owner=user)
+        chart.owner = str(user.id)
+        data = chart.to_dict()
+        data["x_axis"]["limit"] = limit
+        response = self.post(url_for("api.visualizations"), data)
+        assert response.status_code == 201
+
+        visualization = Chart.objects.first()
+        assert visualization.x_axis.limit == limit
+
+        response = self.get(url_for("api.visualization", visualization=visualization))
+        assert response.status_code == 200
+        assert response.json["x_axis"]["limit"] == limit
+
+    def test_visualization_api_create_without_x_axis_limit(self):
+        """It should create a visualization without an X axis value limit"""
+        user = self.login()
+        chart = ChartFactory.build(owner=user)
+        chart.owner = str(user.id)
+        response = self.post(url_for("api.visualizations"), chart.to_dict())
+        assert response.status_code == 201
+
+        visualization = Chart.objects.first()
+        assert visualization.x_axis.limit is None
+
+        response = self.get(url_for("api.visualization", visualization=visualization))
+        assert response.status_code == 200
+        assert response.json["x_axis"]["limit"] is None
+
+    @pytest.mark.parametrize("limit", [0, 51])
+    def test_visualization_api_rejects_out_of_range_x_axis_limit(self, limit):
+        user = self.login()
+        chart = ChartFactory.build(owner=user)
+        chart.owner = str(user.id)
+        data = chart.to_dict()
+        data["x_axis"]["limit"] = limit
+        response = self.post(url_for("api.visualizations"), data)
+        assert response.status_code == 400
+        assert "limit" in response.json["errors"]["x_axis"]
+        assert Chart.objects.count() == 0
+
     def test_visualization_api_create_with_non_object_embedded_document(self):
         user = self.login()
         chart = ChartFactory.build(owner=user)
