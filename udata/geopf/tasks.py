@@ -189,7 +189,7 @@ def _run_pipeline(
                 f"Upload checks failed with status {status}" + (f":\n{reason}" if reason else "")
             )
 
-        client.tag_entity("uploads", upload_id, datasheet_name)
+        client.tag_entity("uploads", upload_id, {"datasheet_name": datasheet_name})
 
         exec_id = client.launch_processing(
             upload_id,
@@ -204,6 +204,8 @@ def _run_pipeline(
             dataset_id,
             resource_id,
         )
+        # cartes.gouv.fr expects these on a VECTOR-DB, e.g. to generate a vector pyramid
+        integration_tags = {"upload_id": upload_id, "proc_int_id": exec_id}
 
         exec_status, stored_data_id = client.poll_execution(exec_id)
 
@@ -254,7 +256,9 @@ def _run_pipeline(
                 log.warning("geopf: could not clean up upload=%s: %s", upload_id, e)
         raise
 
-    client.tag_entity("stored_data", stored_data_id, datasheet_name)
+    client.tag_entity(
+        "stored_data", stored_data_id, {"datasheet_name": datasheet_name, **integration_tags}
+    )
 
     sync_metadata(dataset, client)
 
@@ -406,7 +410,7 @@ def sync_metadata(dataset, client) -> str:
     else:
         metadata_id = client.upload_metadata(xml)
         log.info("geopf: uploaded metadata=%s dataset=%s", metadata_id, dataset.id)
-        client.tag_entity("metadata", metadata_id, datasheet_name)
+        client.tag_entity("metadata", metadata_id, {"datasheet_name": datasheet_name})
         set_dataset_push_metadata(dataset, metadata_id=metadata_id)
     return metadata_id
 
@@ -468,7 +472,16 @@ def pull_offerings_for_dataset(dataset, token) -> int:
         return 0
 
     client = GeopfClient(token=token, datastore_id=datastore_id)
-    offerings = {o["_id"]: o for sd_id in stored_data_ids for o in client.list_offerings(sd_id)}
+    # Tile services are published on vector pyramids generated from the pushed data
+    pyramid_ids = {
+        p["_id"]
+        for sd_id in stored_data_ids
+        for p in client.list_vector_pyramids(sd_id)
+        if (p.get("tags") or {}).get("is_sample") != "true"
+    }
+    offerings = {
+        o["_id"]: o for sd_id in stored_data_ids | pyramid_ids for o in client.list_offerings(sd_id)
+    }
     now = datetime.now(UTC)
     synced = set()
     for offering_id, offering in offerings.items():
@@ -511,7 +524,7 @@ def _offering_links(offering: dict) -> list[OfferingLink]:
     """One link per entry of the offering `urls` (WFS has one per feature type).
 
     WMS and WFS URLs (a GetMap template, a DescribeFeatureType) become a GetCapabilities
-    carrying the layer. Other services are kept as is.
+    carrying the layer. WMTS is skipped, other services (TMS) are kept as is.
     """
     links = {}
     for entry in offering.get("urls") or []:
@@ -519,6 +532,9 @@ def _offering_links(offering: dict) -> list[OfferingLink]:
         if not url:
             continue
         service = (entry.get("type") or "").upper()
+        if service == "WMTS":
+            # geopf's WMTS only serves raster pyramids, udata only pushes vector data
+            continue
         parsed = urlparse(url)
         params = {k.lower(): v for k, v in parse_qsl(parsed.query)}
         layer = offering.get("layer_name") or ""
@@ -528,8 +544,8 @@ def _offering_links(offering: dict) -> list[OfferingLink]:
         if service in GETCAP_LAYER_PARAM:
             url = _getcap_url(parsed, service, params.get("version"), layer)
         link = OfferingLink(layer=layer, url=url, format=service.lower() or None)
-        # keep one link per pair of (layer, format); defensive
-        links.setdefault((link.layer, link.format), link)
+        # one link per layer, the sync match key; defensive
+        links.setdefault(link.layer, link)
     return list(links.values())
 
 

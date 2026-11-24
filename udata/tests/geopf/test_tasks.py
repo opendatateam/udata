@@ -82,6 +82,18 @@ WFS_OFFERING = {
         {"type": "WFS", "url": wfs_describe("geometry1")},
     ],
 }
+TMS_OFFERING = {
+    "_id": "offer-tms",
+    "type": "WMTS-TMS",
+    "layer_name": "ex_tms",
+    "urls": [
+        {
+            "type": "WMTS",
+            "url": "https://data.geopf.fr/wmts?service=WMTS&request=GetTile&layer=ex_tms",
+        },
+        {"type": "TMS", "url": "https://data.geopf.fr/tms/1.0.0/ex_tms"},
+    ],
+}
 
 
 class OfferingLinksTest:
@@ -96,17 +108,9 @@ class OfferingLinksTest:
             OfferingLink(layer="ex_wfs:geometry1", url=wfs_getcap("geometry1"), format="wfs"),
         ]
 
-    def test_other_services_kept_as_is(self):
-        offering = {
-            "layer_name": "ex",
-            "urls": [
-                {"type": "WMTS", "url": "https://h/wmts?request=GetTile&layer=ex"},
-                {"type": "TMS", "url": "https://h/tms/1.0.0/ex/{z}/{x}/{y}.pbf"},
-            ],
-        }
-        assert _offering_links(offering) == [
-            OfferingLink(layer="ex", url="https://h/wmts?request=GetTile&layer=ex", format="wmts"),
-            OfferingLink(layer="ex", url="https://h/tms/1.0.0/ex/{z}/{x}/{y}.pbf", format="tms"),
+    def test_tms_kept_as_is_and_wmts_skipped(self):
+        assert _offering_links(TMS_OFFERING) == [
+            OfferingLink(layer="ex_tms", url="https://data.geopf.fr/tms/1.0.0/ex_tms", format="tms")
         ]
 
     def test_no_urls(self):
@@ -216,7 +220,7 @@ class SyncMetadataTest(PytestOnlyDBTestCase):
         assert result == "meta-new"
         client.upload_metadata.assert_called_once()
         client.tag_entity.assert_called_once_with(
-            "metadata", "meta-new", resolve_datasheet_name(dataset)
+            "metadata", "meta-new", {"datasheet_name": resolve_datasheet_name(dataset)}
         )
         dataset.reload()
         assert dataset.geopf.push.metadata_id == "meta-new"
@@ -357,10 +361,17 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
             geopf=GeopfDatasetMetadata(push=GeopfDatasetPushMetadata(datastore_id="ds-1")),
         )
 
-    def _pull(self, dataset, offerings):
-        """Pull `offerings` into `dataset`, return the count and the `GeopfClient` class mock."""
+    def _pull(self, dataset, offerings, pyramids=()):
+        """Pull `offerings` into `dataset`, return the count and the `GeopfClient` class mock.
+
+        `offerings` is a list for every stored data, or a dict of lists by stored data id.
+        """
         mock_client = MagicMock()
-        mock_client.list_offerings.return_value = offerings
+        mock_client.list_vector_pyramids.return_value = list(pyramids)
+        if isinstance(offerings, dict):
+            mock_client.list_offerings.side_effect = lambda sd_id: offerings.get(sd_id, [])
+        else:
+            mock_client.list_offerings.return_value = offerings
         with patch("udata.geopf.tasks.GeopfClient", return_value=mock_client) as mock_client_cls:
             count = pull_offerings_for_dataset(dataset, TEST_TOKEN)
         dataset.reload()
@@ -397,6 +408,30 @@ class PullOfferingsTest(PytestOnlyDBTestCase):
         assert resources["ex_wfs:point1"].url == wfs_getcap("point1")
         assert resources["ex_wfs:geometry1"].url == wfs_getcap("geometry1")
         assert all(r.format == "wfs" for r in resources.values())
+
+    def test_adds_tms_resource_from_vector_pyramid(self):
+        dataset = self._dataset()
+
+        count, _ = self._pull(
+            dataset,
+            {
+                "sd-1": [WMS_OFFERING],
+                "pyr-1": [TMS_OFFERING],
+                "pyr-sample": [{**TMS_OFFERING, "_id": "offer-sample"}],
+            },
+            pyramids=[
+                {"_id": "pyr-1", "tags": {"vectordb_id": "sd-1", "is_sample": "false"}},
+                {"_id": "pyr-sample", "tags": {"vectordb_id": "sd-1", "is_sample": "true"}},
+            ],
+        )
+
+        assert count == 2
+        resources = self._offering_resources(dataset)
+        assert set(resources) == {"ex_wmsv", "ex_tms"}
+        tms = resources["ex_tms"]
+        assert tms.url == "https://data.geopf.fr/tms/1.0.0/ex_tms"
+        assert tms.format == "tms"
+        assert resource_offering_metadata(tms).id == "offer-tms"
 
     def test_resync_is_stable_when_urls_order_changes(self):
         dataset = self._dataset()
@@ -532,6 +567,13 @@ class RunPipelineTest(PytestOnlyDBTestCase):
             srs=DEFAULT_SRS,
             notify_email=None,
             entity_url=stored_data_details_url(f"Mon jeu de données ({str(dataset.id)[-6:]})"),
+        )
+        datasheet_name = resolve_datasheet_name(dataset)
+        client.tag_entity.assert_any_call("uploads", "upload-1", {"datasheet_name": datasheet_name})
+        client.tag_entity.assert_any_call(
+            "stored_data",
+            "sd-1",
+            {"datasheet_name": datasheet_name, "upload_id": "upload-1", "proc_int_id": "exec-1"},
         )
         dataset.reload()
         r = next(r for r in dataset.resources if r.id == resource.id)
