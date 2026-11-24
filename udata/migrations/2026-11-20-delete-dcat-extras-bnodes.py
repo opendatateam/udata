@@ -27,15 +27,18 @@ def migrate(db):
     db = get_db()
 
     for field in RESOURCE_FIELDS:
-        db.dataset.update_many(
+        # str field
+        r = db.dataset.update_many(
             {f"resources.{field}": RX_UNIT},
             {"$unset": {f"resources.$[r].{field}": ""}},
             array_filters=[{f"r.{field}": RX_UNIT}],
         )
+        # str array field
+        # nothing to process in Resource
+        log.info(f"- {field} (resource): {r.modified_count}")
 
     for field in EXTRAS_DCAT_FIELDS:
         path = f"extras.dcat.{field}"
-        log.info(f"- {path}...")
 
         # Dataset extras
         # str field
@@ -43,7 +46,7 @@ def migrate(db):
         # str array field
         ra = db.dataset.update_many({path: {"$elemMatch": RX}}, {"$pull": {path: RX}})
         db.dataset.update_many({path: {"$size": 0}}, {"$unset": {path: ""}})
-        log.info(f"  - datasets updated: {rs.modified_count + ra.modified_count}")
+        log.info(f"- {path} (dataset): {rs.modified_count + ra.modified_count}")
 
         # Resources extras
         rpath = f"resources.$[r].{path}"
@@ -65,4 +68,4 @@ def migrate(db):
             {"$unset": {rpath: ""}},
             array_filters=[{rid: {"$size": 0}}],
         )
-        log.info(f"  - resources updated: {rrs.modified_count + rra.modified_count}")
+        log.info(f"- {path} (resource): {rrs.modified_count + rra.modified_count}")

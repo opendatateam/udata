@@ -19,11 +19,10 @@ SAME = object()
 @dataclass
 class Fields:
     base_str: list[str] = field(default_factory=list)
-    base_array: list[str] = field(default_factory=list)
     dcat_str: list[str] = field(default_factory=list)
     dcat_array: list[str] = field(default_factory=list)
     canary_str: tuple[str, str] | None = None
-    canary_array: tuple[str, str] | None = None
+    canary_array: tuple[str, list[str]] | None = None
 
 
 DATASET_FIELDS = Fields(
@@ -66,7 +65,6 @@ def fake_fields(fields: Fields, value: str | list | None):
     return {
         # base fields, always set even when None, to override Factory default
         **{f: str_value for f in fields.base_str},
-        **{f: array_value for f in fields.base_array},
         "extras": {
             "dcat": {
                 # extras fields, only set when not None, as Factory doesn't initialize anything
@@ -87,9 +85,8 @@ def fake_fields(fields: Fields, value: str | list | None):
 def assert_migrated(actual: Dataset | Resource, fields: Fields, value: str | list | None):
     expected = fake_fields(fields, value)
 
-    for base in ["base_str", "base_array"]:
-        for f in getattr(fields, base) or []:
-            assert getattr(actual, f) == expected.get(f)
+    for f in fields.base_str or []:
+        assert getattr(actual, f) == expected.get(f)
 
     for canary in ["canary_str", "canary_array"]:
         if c := getattr(fields, canary):
@@ -101,7 +98,7 @@ def assert_migrated(actual: Dataset | Resource, fields: Fields, value: str | lis
 class MigrationTest(PytestOnlyDBTestCase):
     ARGVALUES = argvalues(
         [
-            # cases that apply to both str and array (array obtained by wrapping str in llist)
+            # cases that apply to both str and array (array obtained by wrapping str in list)
             (BNODE_ID, None, "match-standard"),
             (BNODE_ID.lower(), None, "match-lowercase"),
             ("whatever", SAME, "no-match"),
