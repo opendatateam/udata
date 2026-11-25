@@ -41,6 +41,9 @@ LOGIN_KEY = "proconnect_login"
 SECOND_FACTOR_ASKED_KEY = "proconnect_second_factor_asked"
 # The page the agent signed in from (an OAuth authorization, say), to land back on.
 NEXT_KEY = "proconnect_next"
+# The account whose password login waits for its 2FA setup, when the agent chose the second
+# factor of ProConnect instead: the ProConnect login must land on that account.
+SETUP_ACCOUNT_KEY = "proconnect_setup_account"
 
 
 def init_app(app):
@@ -183,9 +186,28 @@ class ProconnectLoginAPI(API):
             tf_clean_session()
         session.pop(PENDING_LOGIN_KEY, None)
         session.pop(SECOND_FACTOR_ASKED_KEY, None)
+        session.pop(SETUP_ACCOUNT_KEY, None)
         session[NEXT_KEY] = request.args.get("next")
 
         return authorize_redirect()
+
+
+@ns.route("/two-factor-setup/", endpoint="proconnect_two_factor_setup")
+class ProconnectTwoFactorSetupAPI(API):
+    def get(self):
+        """Complete the login waiting for its 2FA setup with the second factor of ProConnect,
+        which then stands for the udata one."""
+        # A browser navigation from the cdata page, whose pending login may have expired.
+        if session.get("tf_state") != "setup_from_login":
+            return redirect(login_page_url())
+
+        # The pending login stays: the agent can still set up the udata 2FA if ProConnect
+        # signs them in to another account.
+        session[SETUP_ACCOUNT_KEY] = session["tf_user_id"]
+        session.pop(SECOND_FACTOR_ASKED_KEY, None)
+        session[NEXT_KEY] = request.args.get("next")
+
+        return authorize_redirect(require_second_factor=True)
 
 
 @ns.route("/reauth/", endpoint="proconnect_reauth")
@@ -220,6 +242,7 @@ class ProconnectAuthAPI(API):
             return reauthenticate()
 
         second_factor_asked = session.pop(SECOND_FACTOR_ASKED_KEY, False)
+        setup_account = session.pop(SETUP_ACCOUNT_KEY, None)
         authentication = authenticate()
         proconnect_user = authentication.userinfo
         email = proconnect_user["email"]
@@ -228,6 +251,17 @@ class ProconnectAuthAPI(API):
         user = User.objects(
             proconnect__sub=authentication.sub, proconnect__verified_at__ne=None, deleted=None
         ).first() or datastore.find_user(email=email)
+        if setup_account is not None:
+            # The agent means to protect the account they just gave the password of: signing
+            # them in to another one, or creating it, would leave that one without a 2FA.
+            if user is None or user.fs_uniquifier != setup_account:
+                flash = "proconnect_other_account"
+                return redirect(
+                    cdata_url("/setup-two-factor", flash=flash) or homepage_url(flash=flash)
+                )
+            # This login replaces the password one.
+            tf_clean_session()
+            session.pop(PENDING_LOGIN_KEY, None)
         if not user:
             user = datastore.create_user(
                 email=email,

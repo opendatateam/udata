@@ -42,6 +42,21 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
         callback = proconnect.authorize(authorize_url)
         return self.get(url_for("api.proconnect_auth", **callback))
 
+    def start_password_login_waiting_for_its_2fa_setup(self, user):
+        response = self.post(
+            url_for("security.login"),
+            {"email": user.email, "password": "password"},
+            headers={"Accept": "application/json"},
+        )
+        assert response.json["response"]["tf_state"] == "setup_from_login"
+
+    def set_up_two_factor_with_proconnect(self, proconnect, email, next=None, **agent):
+        """Leave the 2FA setup of the pending login for ProConnect, as its cdata page offers."""
+        proconnect.agent_has_session(email, **agent)
+        response = self.get(url_for("api.proconnect_two_factor_setup", next=next))
+        callback = proconnect.authorize(response.location)
+        return self.get(url_for("api.proconnect_auth", **callback))
+
     def set_up_two_factor(self, setup):
         return self.post(
             url_for("security.two_factor_setup"),
@@ -850,6 +865,68 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
 
         assert response.location == f"{CDATA}/setup-two-factor"
         self.assert401(self.get(url_for("api.me")))
+
+    @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True)
+    def test_2fa_setup_completes_with_the_second_factor_of_proconnect(self, proconnect):
+        admin = AdminFactory(
+            email="admin@example.org", password="password", confirmed_at=datetime.now()
+        )
+        self.start_password_login_waiting_for_its_2fa_setup(admin)
+
+        # ProConnect doesn't require a second factor by default: this login does.
+        response = self.set_up_two_factor_with_proconnect(
+            proconnect, "admin@example.org", next="/datasets/", second_factor=False
+        )
+
+        assert proconnect.second_factors == 1
+        assert response.location == f"{CDATA}/datasets/?flash=proconnect_only_available"
+        self.assert_logged_in_as(admin)
+        assert self.identity_of(admin).verified_at is not None
+
+    @pytest.mark.options(
+        SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True, PROCONNECT_REQUIRE_SECOND_FACTOR=True
+    )
+    def test_sysadmin_trusting_proconnect_completes_a_password_login_with_it(self, proconnect):
+        # The udata 2FA can't be set up from this login: ProConnect holds the second factor.
+        admin = AdminFactory(
+            email="admin@example.org", password="password", confirmed_at=datetime.now()
+        )
+        self.sign_in(proconnect, "admin@example.org")
+        self.get(url_for("security.logout"))
+        self.start_password_login_waiting_for_its_2fa_setup(admin)
+
+        self.set_up_two_factor_with_proconnect(proconnect, "admin@example.org")
+
+        self.assert_logged_in_as(admin)
+
+    @pytest.mark.parametrize("other_account_exists", [False, True])
+    @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True)
+    def test_2fa_setup_with_proconnect_does_not_sign_in_to_another_account(
+        self, proconnect, other_account_exists
+    ):
+        admin = AdminFactory(
+            email="jane@gmail.example", password="password", confirmed_at=datetime.now()
+        )
+        if other_account_exists:
+            UserFactory(email="jane.dupont@interieur.example")
+        self.start_password_login_waiting_for_its_2fa_setup(admin)
+
+        response = self.set_up_two_factor_with_proconnect(
+            proconnect, "jane.dupont@interieur.example"
+        )
+
+        assert response.location == f"{CDATA}/setup-two-factor?flash=proconnect_other_account"
+        self.assert401(self.get(url_for("api.me")))
+        assert User.objects(email="jane.dupont@interieur.example").count() == int(
+            other_account_exists
+        )
+        # The password login still waits for its 2FA, which can be the udata one.
+        self.assert200(self.set_up_two_factor("authenticator"))
+
+    def test_2fa_setup_with_proconnect_without_a_pending_login_goes_to_the_login_page(self):
+        response = self.get(url_for("api.proconnect_two_factor_setup"))
+
+        assert response.location == f"{CDATA}/login"
 
     def test_login_sends_an_agent_with_2fa_to_the_cdata_validation_page(self, proconnect):
         UserFactory(
