@@ -253,7 +253,14 @@ class ProconnectAuthAPI(API):
 
         second_factor_asked = session.pop(SECOND_FACTOR_ASKED_KEY, False)
         setup_account_uniquifier = session.pop(SETUP_ACCOUNT_KEY, None)
-        authentication = authenticate()
+        try:
+            authentication = authenticate()
+        except OAuthError:
+            if setup_account_uniquifier is None:
+                raise
+            # The agent cancelled, or ProConnect refused the second factor required: the
+            # password login stays for the agent to set up the udata 2FA.
+            return redirect(two_factor_setup_page_url("proconnect_failed"))
         proconnect_user = authentication.userinfo
         email = proconnect_user["email"]
         # The identity trusted as an account holder's finds that account even when its

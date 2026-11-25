@@ -956,6 +956,23 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
         # The password login still waits for its 2FA, which can be the udata one.
         self.assert200(self.set_up_two_factor("authenticator"))
 
+    @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True)
+    def test_2fa_setup_cancelled_at_proconnect_keeps_the_pending_login(self, proconnect):
+        admin = AdminFactory(
+            email="admin@example.org", password="password", confirmed_at=datetime.now()
+        )
+        self.start_password_login_waiting_for_its_2fa_setup(admin)
+        proconnect.agent_has_session("admin@example.org")
+        self.open_two_factor_setup_page()
+
+        response = self.get(url_for("api.proconnect_two_factor_setup"))
+        response = self.get(url_for("api.proconnect_auth", **proconnect.deny(response.location)))
+
+        assert response.location == f"{CDATA}/setup-two-factor?flash=proconnect_failed"
+        self.assert401(self.get(url_for("api.me")))
+        # The password login still waits for its 2FA, which can be the udata one.
+        self.assert200(self.set_up_two_factor("authenticator"))
+
     def test_2fa_setup_with_proconnect_without_a_pending_login_goes_to_the_login_page(self):
         response = self.get(url_for("api.proconnect_two_factor_setup"))
 
