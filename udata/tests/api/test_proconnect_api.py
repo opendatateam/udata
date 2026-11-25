@@ -470,12 +470,7 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
         self.sign_in(proconnect, "admin@example.org")
         self.get(url_for("security.logout"))
 
-        response = self.post(
-            url_for("security.login"),
-            {"email": admin.email, "password": "password"},
-            headers={"Accept": "application/json"},
-        )
-        assert response.json["response"]["tf_state"] == "setup_from_login"
+        self.start_password_login_waiting_for_its_2fa_setup(admin)
         response = self.set_up_two_factor("authenticator")
 
         self.assert_two_factor_setup_refused(response)
