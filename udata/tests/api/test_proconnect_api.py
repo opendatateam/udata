@@ -923,6 +923,25 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
 
         assert response.location == f"{CDATA}/login"
 
+    @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True)
+    def test_2fa_setup_with_proconnect_refuses_another_identity_at_the_same_address(
+        self, proconnect
+    ):
+        admin = AdminFactory(
+            email="admin@example.org", password="password", confirmed_at=datetime.now()
+        )
+        self.sign_in(proconnect, "admin@example.org")
+        self.get(url_for("security.logout"))
+        self.start_password_login_waiting_for_its_2fa_setup(admin)
+
+        response = self.set_up_two_factor_with_proconnect(
+            proconnect, "admin@example.org", sub="attacker"
+        )
+
+        assert "flash=proconnect_identity_mismatch" in response.location
+        self.assert401(self.get(url_for("api.me")))
+        assert self.identity_of(admin).sub == "sub-of-admin@example.org"
+
     def test_login_sends_an_agent_with_2fa_to_the_cdata_validation_page(self, proconnect):
         UserFactory(
             email="jane@example.org",
