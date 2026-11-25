@@ -50,11 +50,23 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
         )
         assert response.json["response"]["tf_state"] == "setup_from_login"
 
-    def set_up_two_factor_with_proconnect(self, proconnect, email, next=None, **agent):
-        """Leave the 2FA setup of the pending login for ProConnect, as its cdata page offers."""
+    def set_up_two_factor_with_proconnect(
+        self,
+        proconnect,
+        email,
+        next=None,
+        require_second_factor: bool | None = None,
+        **agent,
+    ):
+        """Leave the 2FA setup of the pending login for ProConnect, as its cdata page offers.
+        `require_second_factor` is what the agent's browser makes of the redirection."""
         proconnect.agent_has_session(email, **agent)
-        response = self.get(url_for("api.proconnect_two_factor_setup", next=next))
-        callback = proconnect.authorize(response.location)
+        authorize_url = self.get(url_for("api.proconnect_two_factor_setup", next=next)).location
+        if require_second_factor is not None:
+            authorize_url = proconnect.tamper(
+                authorize_url, require_second_factor=require_second_factor
+            )
+        callback = proconnect.authorize(authorize_url)
         return self.get(url_for("api.proconnect_auth", **callback))
 
     def set_up_two_factor(self, setup):
@@ -915,6 +927,28 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
         assert User.objects(email="jane.dupont@interieur.example").count() == int(
             other_account_exists
         )
+        # The password login still waits for its 2FA, which can be the udata one.
+        self.assert200(self.set_up_two_factor("authenticator"))
+
+    @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True)
+    def test_2fa_setup_with_proconnect_without_its_second_factor_keeps_the_pending_login(
+        self, proconnect
+    ):
+        admin = AdminFactory(
+            email="admin@example.org", password="password", confirmed_at=datetime.now()
+        )
+        self.start_password_login_waiting_for_its_2fa_setup(admin)
+
+        # The agent's browser dropped the requirement from the redirection.
+        response = self.set_up_two_factor_with_proconnect(
+            proconnect, "admin@example.org", second_factor=False, require_second_factor=False
+        )
+
+        assert (
+            response.location == f"{CDATA}/setup-two-factor?flash=proconnect_second_factor_missing"
+        )
+        self.assert401(self.get(url_for("api.me")))
+        assert self.identity_of(admin) is None
         # The password login still waits for its 2FA, which can be the udata one.
         self.assert200(self.set_up_two_factor("authenticator"))
 

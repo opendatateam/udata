@@ -161,6 +161,10 @@ def verify_page_url(flash: str) -> str:
     return cdata_url("/verify", flash=flash) or homepage_url(flash=flash)
 
 
+def two_factor_setup_page_url(flash: str) -> str:
+    return cdata_url("/setup-two-factor", flash=flash) or homepage_url(flash=flash)
+
+
 def login_page_url() -> str:
     """Where a reauthentication goes when the agent isn't signed in anymore."""
     return cdata_url("/login") or homepage_url()
@@ -204,7 +208,6 @@ class ProconnectTwoFactorSetupAPI(API):
         # The pending login stays: the agent can still set up the udata 2FA if ProConnect
         # signs them in to another account.
         session[SETUP_ACCOUNT_KEY] = session["tf_user_id"]
-        session.pop(SECOND_FACTOR_ASKED_KEY, None)
         session[NEXT_KEY] = request.args.get("next")
 
         return authorize_redirect(require_second_factor=True)
@@ -255,10 +258,12 @@ class ProconnectAuthAPI(API):
             # The agent means to protect the account they just gave the password of: signing
             # them in to another one, or creating it, would leave that one without a 2FA.
             if user is None or user.fs_uniquifier != setup_account_uniquifier:
-                flash = "proconnect_other_account"
-                return redirect(
-                    cdata_url("/setup-two-factor", flash=flash) or homepage_url(flash=flash)
-                )
+                return redirect(two_factor_setup_page_url("proconnect_other_account"))
+            # The second factor was required, but the requirement goes through the agent's
+            # browser: without one, the password login stays for the agent to set up the
+            # udata 2FA.
+            if not authentication.second_factor:
+                return redirect(two_factor_setup_page_url("proconnect_second_factor_missing"))
             # This login replaces the password one.
             tf_clean_session()
             session.pop(PENDING_LOGIN_KEY, None)
