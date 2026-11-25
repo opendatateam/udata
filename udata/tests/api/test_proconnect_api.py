@@ -910,6 +910,30 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
 
         self.assert_logged_in_as(admin)
 
+    @pytest.mark.options(
+        SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True, PROCONNECT_REQUIRE_SECOND_FACTOR=True
+    )
+    def test_sysadmin_trusting_proconnect_without_its_second_factor_is_asked_for_it(
+        self, proconnect
+    ):
+        admin = AdminFactory(
+            email="admin@example.org", password="password", confirmed_at=datetime.now()
+        )
+        self.sign_in(proconnect, "admin@example.org")
+        self.get(url_for("security.logout"))
+        self.start_password_login_waiting_for_its_2fa_setup(admin)
+
+        # Its identity provider only sends a code by email, which isn't a second factor.
+        response = self.set_up_two_factor_with_proconnect(
+            proconnect, "admin@example.org", second_factor=False, require_second_factor=False
+        )
+
+        # The udata 2FA is refused to this account: ProConnect is the only way out.
+        assert (
+            response.location == f"{CDATA}/setup-two-factor?flash=proconnect_second_factor_required"
+        )
+        self.assert401(self.get(url_for("api.me")))
+
     @pytest.mark.parametrize("other_account_exists", [False, True])
     @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True)
     def test_2fa_setup_with_proconnect_does_not_sign_in_to_another_account(

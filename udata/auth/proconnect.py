@@ -277,7 +277,13 @@ class ProconnectAuthAPI(API):
             # browser: without one, the password login stays for the agent to set up the
             # udata 2FA.
             if not authentication.second_factor:
-                return redirect(two_factor_setup_page_url("proconnect_second_factor_missing"))
+                # The udata 2FA is refused to an account protected by ProConnect: only its
+                # second factor at ProConnect gets it out.
+                if user.second_factor_at_proconnect_only:
+                    flash = "proconnect_second_factor_required"
+                else:
+                    flash = "proconnect_second_factor_missing"
+                return redirect(two_factor_setup_page_url(flash))
             # This login replaces the password one.
             tf_clean_session()
             session.pop(PENDING_LOGIN_KEY, None)
