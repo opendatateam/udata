@@ -50,6 +50,11 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
         )
         assert response.json["response"]["tf_state"] == "setup_from_login"
 
+    def open_two_factor_setup_page(self):
+        """The cdata page asks for the QR code of a udata setup on load, before the agent can
+        choose ProConnect. Refused for an account protected by ProConnect, as on the page."""
+        self.set_up_two_factor("authenticator")
+
     def set_up_two_factor_with_proconnect(
         self,
         proconnect,
@@ -61,6 +66,7 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
         """Leave the 2FA setup of the pending login for ProConnect, as its cdata page offers.
         `require_second_factor` is what the agent's browser makes of the redirection."""
         proconnect.agent_has_session(email, **agent)
+        self.open_two_factor_setup_page()
         authorize_url = self.get(url_for("api.proconnect_two_factor_setup", next=next)).location
         if require_second_factor is not None:
             authorize_url = proconnect.tamper(
@@ -957,6 +963,22 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
 
         assert response.location == f"{CDATA}/login"
 
+    def test_2fa_setup_with_proconnect_while_changing_the_2fa_goes_to_the_login_page(self):
+        jane = UserFactory(
+            email="jane@example.org", password="password", confirmed_at=datetime.now()
+        )
+        self.post(
+            url_for("security.login"),
+            {"email": jane.email, "password": "password"},
+            headers={"Accept": "application/json"},
+        )
+        # A signed-in user changing their 2FA: no pending login to complete.
+        self.assert200(self.set_up_two_factor("authenticator"))
+
+        response = self.get(url_for("api.proconnect_two_factor_setup"))
+
+        assert response.location == f"{CDATA}/login"
+
     @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True)
     def test_2fa_setup_with_proconnect_refuses_another_identity_at_the_same_address(
         self, proconnect
@@ -983,6 +1005,7 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
         )
         self.start_password_login_waiting_for_its_2fa_setup(admin)
         # The admin leaves for ProConnect from the setup page, and closes the tab there.
+        self.open_two_factor_setup_page()
         self.get(url_for("api.proconnect_two_factor_setup"))
         jane = UserFactory(email="jane@example.org")
 

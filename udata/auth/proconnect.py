@@ -201,8 +201,15 @@ class ProconnectTwoFactorSetupAPI(API):
     def get(self):
         """Complete the login waiting for its 2FA setup with the second factor of ProConnect,
         which then stands for the udata one."""
-        # A browser navigation from the cdata page, whose pending login may have expired.
-        if session.get("tf_state") != "setup_from_login":
+        # A browser navigation from the cdata page, whose pending login may have expired. The
+        # page asks for the QR code of a udata setup on load, which moves the pending login to
+        # `validating_profile`: both states are the pending login, as for flask-security's
+        # `two_factor_setup`. A signed-in user changing their 2FA is in `validating_profile`
+        # too, without a pending login.
+        if "tf_user_id" not in session or session.get("tf_state") not in (
+            "setup_from_login",
+            "validating_profile",
+        ):
             return redirect(login_page_url())
 
         # The pending login stays: the agent can still set up the udata 2FA if ProConnect
