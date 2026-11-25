@@ -438,6 +438,19 @@ class AssistantToolsTest(PytestOnlyDBTestCase):
             "dep__groupby&label__count&dep__sort=asc&page=1&page_size=50"
         ]
 
+    def test_query_data_runs_the_same_query_with_a_purpose(self):
+        deps, _ = self.active(rows=[{"dep": "01", "n_cum_dose1": 3, "label": "x"}])
+        result = self.call(
+            "query_data",
+            deps,
+            purpose="Trouver le maximum de premières doses par département",
+            groupby="dep",
+            aggregate_column="n_cum_dose1",
+            aggregate="max",
+        )
+        assert self.tabular.queries == [self.MAX_BY_DEP]
+        assert result == QueryOutput(table="dep | n_cum_dose1__max\n01 | 3", rows=1)
+
     # create_chart.
 
     AGGREGATED = "dep__groupby&n_cum_dose1__max&dep__sort=asc"

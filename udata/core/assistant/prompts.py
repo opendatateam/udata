@@ -134,5 +134,5 @@ def language_instructions(locale: str) -> str:
     language = Locale.parse(locale).english_name
     return (
         f"Always answer in {language}, and write in {language} every text you pass "
-        "to the tools (titles, descriptions, labels, questions and choices)."
+        "to the tools (titles, descriptions, labels, purposes, questions and choices)."
     )
