@@ -49,9 +49,7 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
 
     def start_password_login_waiting_for_its_2fa_setup(self, user):
         response = self.post(
-            url_for("security.login"),
-            {"email": user.email, "password": "password"},
-            headers={"Accept": "application/json"},
+            url_for("security.login"), {"email": user.email, "password": "password"}
         )
         assert response.json["response"]["tf_state"] == "setup_from_login"
 
@@ -967,11 +965,7 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
         jane = UserFactory(
             email="jane@example.org", password="password", confirmed_at=datetime.now()
         )
-        self.post(
-            url_for("security.login"),
-            {"email": jane.email, "password": "password"},
-            headers={"Accept": "application/json"},
-        )
+        self.post(url_for("security.login"), {"email": jane.email, "password": "password"})
         # A signed-in user changing their 2FA: no pending login to complete.
         self.assert200(self.set_up_two_factor("authenticator"))
 
