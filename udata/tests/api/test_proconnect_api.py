@@ -942,6 +942,21 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
         self.assert401(self.get(url_for("api.me")))
         assert self.identity_of(admin).sub == "sub-of-admin@example.org"
 
+    @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True)
+    def test_abandoned_2fa_setup_with_proconnect_does_not_refuse_the_next_login(self, proconnect):
+        admin = AdminFactory(
+            email="admin@example.org", password="password", confirmed_at=datetime.now()
+        )
+        self.start_password_login_waiting_for_its_2fa_setup(admin)
+        # The admin leaves for ProConnect from the setup page, and closes the tab there.
+        self.get(url_for("api.proconnect_two_factor_setup"))
+        jane = UserFactory(email="jane@example.org")
+
+        response = self.sign_in(proconnect, "jane@example.org")
+
+        assert "flash=connected" in response.location
+        self.assert_logged_in_as(jane)
+
     def test_login_sends_an_agent_with_2fa_to_the_cdata_validation_page(self, proconnect):
         UserFactory(
             email="jane@example.org",
