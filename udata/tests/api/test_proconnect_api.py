@@ -32,9 +32,14 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
         require_second_factor: bool | None = None,
         next: str | None = None,
     ):
-        """`require_second_factor` is what the agent's browser makes of the redirection."""
         proconnect.agent_has_session(email, second_factor=second_factor, sub=sub, amr=amr)
-        authorize_url = self.get(url_for("api.proconnect_login", next=next)).location
+        response = self.get(url_for("api.proconnect_login", next=next))
+        return self.follow_to_proconnect(proconnect, response, require_second_factor)
+
+    def follow_to_proconnect(self, proconnect, response, require_second_factor: bool | None):
+        """Follow udata's redirection to ProConnect, and return udata's answer to the callback.
+        `require_second_factor` is what the agent's browser makes of the redirection."""
+        authorize_url = response.location
         if require_second_factor is not None:
             authorize_url = proconnect.tamper(
                 authorize_url, require_second_factor=require_second_factor
@@ -59,21 +64,16 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
         self,
         proconnect,
         email,
-        next=None,
+        second_factor=True,
+        sub=None,
         require_second_factor: bool | None = None,
-        **agent,
+        next: str | None = None,
     ):
-        """Leave the 2FA setup of the pending login for ProConnect, as its cdata page offers.
-        `require_second_factor` is what the agent's browser makes of the redirection."""
-        proconnect.agent_has_session(email, **agent)
+        """Leave the 2FA setup of the pending login for ProConnect, as its cdata page offers."""
+        proconnect.agent_has_session(email, second_factor=second_factor, sub=sub)
         self.open_two_factor_setup_page()
-        authorize_url = self.get(url_for("api.proconnect_two_factor_setup", next=next)).location
-        if require_second_factor is not None:
-            authorize_url = proconnect.tamper(
-                authorize_url, require_second_factor=require_second_factor
-            )
-        callback = proconnect.authorize(authorize_url)
-        return self.get(url_for("api.proconnect_auth", **callback))
+        response = self.get(url_for("api.proconnect_two_factor_setup", next=next))
+        return self.follow_to_proconnect(proconnect, response, require_second_factor)
 
     def set_up_two_factor(self, setup):
         return self.post(
