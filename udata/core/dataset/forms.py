@@ -39,7 +39,6 @@ __all__ = ("CommunityResourceForm", "DatasetForm", "ResourceForm")
 # Same reasoning as the `url` protection from
 # https://github.com/opendatateam/udata/issues/2544
 HOSTED_RESOURCE_PROTECTED_FIELDS = (
-    "filetype",
     "url",
     "checksum",
     "filesize",
