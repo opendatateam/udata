@@ -242,7 +242,7 @@ class ProconnectAuthAPI(API):
             return reauthenticate()
 
         second_factor_asked = session.pop(SECOND_FACTOR_ASKED_KEY, False)
-        setup_account = session.pop(SETUP_ACCOUNT_KEY, None)
+        setup_account_uniquifier = session.pop(SETUP_ACCOUNT_KEY, None)
         authentication = authenticate()
         proconnect_user = authentication.userinfo
         email = proconnect_user["email"]
@@ -251,10 +251,10 @@ class ProconnectAuthAPI(API):
         user = User.objects(
             proconnect__sub=authentication.sub, proconnect__verified_at__ne=None, deleted=None
         ).first() or datastore.find_user(email=email)
-        if setup_account is not None:
+        if setup_account_uniquifier is not None:
             # The agent means to protect the account they just gave the password of: signing
             # them in to another one, or creating it, would leave that one without a 2FA.
-            if user is None or user.fs_uniquifier != setup_account:
+            if user is None or user.fs_uniquifier != setup_account_uniquifier:
                 flash = "proconnect_other_account"
                 return redirect(
                     cdata_url("/setup-two-factor", flash=flash) or homepage_url(flash=flash)
