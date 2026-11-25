@@ -973,6 +973,22 @@ class ProConnectAuthTest(SessionCookieMixin, PytestOnlyAPITestCase):
 
         assert response.location == f"{CDATA}/login"
 
+    def test_2fa_setup_with_proconnect_while_validating_the_udata_2fa_goes_to_the_login_page(
+        self,
+    ):
+        jane, _secret = self.totp_user(
+            email="jane@example.org", password="password", confirmed_at=datetime.now()
+        )
+        # The login waits for the code of the udata 2FA, not for its setup.
+        response = self.post(
+            url_for("security.login"), {"email": jane.email, "password": "password"}
+        )
+        assert response.json["response"]["tf_state"] == "ready"
+
+        response = self.get(url_for("api.proconnect_two_factor_setup"))
+
+        assert response.location == f"{CDATA}/login"
+
     @pytest.mark.options(SECURITY_TWO_FACTOR_REQUIRED_FOR_ADMIN=True)
     def test_2fa_setup_with_proconnect_refuses_another_identity_at_the_same_address(
         self, proconnect
