@@ -10,7 +10,7 @@ from authlib.integrations.flask_client import OAuth
 from flask import abort, current_app, redirect, request, session, url_for
 from flask_login import user_logged_out
 from flask_security.signals import tf_code_confirmed
-from flask_security.tf_plugin import tf_clean_session
+from flask_security.tf_plugin import tf_check_state, tf_clean_session
 from werkzeug.security import gen_salt
 
 from udata.api import API, api
@@ -203,18 +203,14 @@ class ProconnectTwoFactorSetupAPI(API):
         which then stands for the udata one."""
         # A browser navigation from the cdata page, whose pending login may have expired. The
         # page asks for the QR code of a udata setup on load, which moves the pending login to
-        # `validating_profile`: both states are the pending login, as for flask-security's
-        # `two_factor_setup`. A signed-in user changing their 2FA is in `validating_profile`
-        # too, without a pending login.
-        if "tf_user_id" not in session or session.get("tf_state") not in (
-            "setup_from_login",
-            "validating_profile",
-        ):
+        # `validating_profile`.
+        user = tf_check_state(["setup_from_login", "validating_profile"])
+        if user is None:
             return redirect(login_page_url())
 
         # The pending login stays: the agent can still set up the udata 2FA if ProConnect
         # signs them in to another account.
-        session[SETUP_ACCOUNT_KEY] = session["tf_user_id"]
+        session[SETUP_ACCOUNT_KEY] = user.fs_uniquifier
         session[NEXT_KEY] = request.args.get("next")
 
         return authorize_redirect(require_second_factor=True)
