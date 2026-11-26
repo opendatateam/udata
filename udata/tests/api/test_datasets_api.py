@@ -2,6 +2,7 @@ import gzip
 import json
 from datetime import UTC, datetime, timedelta
 from io import BytesIO
+from unittest.mock import patch
 from uuid import uuid4
 
 import feedparser
@@ -2207,6 +2208,26 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(len(dataset.resources), 1)
         self.assertTrue(dataset.resources[0].url.endswith("test.txt"))
 
+    def test_uploads_of_the_same_file_name_at_the_same_second_get_their_own_file(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        with patch("udata.core.dataset.api.datetime") as mock_datetime:
+            mock_datetime.now.return_value = datetime(2026, 11, 26, 12, 0, 0, tzinfo=UTC)
+            for content in (b"first", b"second"):
+                response = self.post(
+                    url_for("api.upload_new_dataset_resource", dataset=dataset),
+                    {"file": (BytesIO(content), "data.csv")},
+                    json=False,
+                )
+                self.assert201(response)
+
+        dataset.reload()
+        assert sorted(storages.resources.read(r.fs_filename) for r in dataset.resources) == [
+            b"first",
+            b"second",
+        ]
+        assert all(f"/{r.id}/" in r.fs_filename for r in dataset.resources)
+
     def test_create_with_compressed_file(self):
         """A compressed file is described as the archive it is, not as its content"""
         user = self.login()
@@ -3223,6 +3244,26 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(CommunityResource.objects.count(), 1)
         community_resource = CommunityResource.objects.first()
         self.assertEqual(community_resource.dataset, dataset)
+
+    def test_community_uploads_of_the_same_file_name_at_the_same_second_get_their_own_file(self):
+        dataset = DatasetFactory()
+        self.login()
+        with patch("udata.core.dataset.api.datetime") as mock_datetime:
+            mock_datetime.now.return_value = datetime(2026, 11, 26, 12, 0, 0, tzinfo=UTC)
+            for content in (b"first", b"second"):
+                response = self.post(
+                    url_for("api.upload_new_community_resource", dataset=dataset),
+                    {"file": (BytesIO(content), "data.csv")},
+                    json=False,
+                )
+                self.assert201(response)
+
+        community_resources = CommunityResource.objects(dataset=dataset)
+        assert sorted(storages.resources.read(c.fs_filename) for c in community_resources) == [
+            b"first",
+            b"second",
+        ]
+        assert all(f"/{c.id}/" in c.fs_filename for c in community_resources)
 
     def test_community_resource_api_create(self):
         """It should create a community resource from the API"""

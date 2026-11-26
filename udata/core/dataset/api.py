@@ -20,6 +20,7 @@ These changes might lead to backward compatibility breakage meaning:
 import logging
 import os
 from datetime import UTC, datetime
+from uuid import uuid4
 
 import mongoengine
 import requests
@@ -626,8 +627,12 @@ class ResourcesAPI(API):
 
 
 class UploadMixin:
-    def handle_upload(self, dataset):
-        prefix = "/".join((dataset.slug, datetime.now(UTC).strftime("%Y%m%d-%H%M%S")))
+    def handle_upload(self, dataset, resource_id):
+        # The resource id keeps apart two uploads of the same file name in the same
+        # dataset at the same second, which would otherwise share their key.
+        prefix = "/".join(
+            (dataset.slug, str(resource_id), datetime.now(UTC).strftime("%Y%m%d-%H%M%S"))
+        )
         infos = handle_upload(storages.resources, prefix)
         if "html" in infos["mime"]:
             api.abort(415, "Incorrect file content type: HTML")
@@ -651,8 +656,9 @@ class UploadNewDatasetResource(UploadMixin, API):
     def post(self, dataset):
         """Upload a file for a new dataset resource"""
         dataset.permissions["edit_resources"].test()
-        infos = self.handle_upload(dataset)
-        resource = Resource(**infos)
+        resource_id = uuid4()
+        infos = self.handle_upload(dataset, resource_id)
+        resource = Resource(id=resource_id, **infos)
         dataset.add_resource(resource)
         return resource, 201
 
@@ -669,10 +675,11 @@ class UploadNewCommunityResources(UploadMixin, API):
     @api.marshal_with(upload_community_fields, code=201)
     def post(self, dataset):
         """Upload a new community resource"""
-        infos = self.handle_upload(dataset)
+        community_resource_id = uuid4()
+        infos = self.handle_upload(dataset, community_resource_id)
         infos["owner"] = current_user._get_current_object()
         infos["dataset"] = dataset
-        community_resource = CommunityResource.objects.create(**infos)
+        community_resource = CommunityResource.objects.create(id=community_resource_id, **infos)
         return community_resource, 201
 
 
@@ -703,7 +710,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
         dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
         fs_filename_to_remove = resource.fs_filename
-        infos = self.handle_upload(dataset)
+        infos = self.handle_upload(dataset, resource.id)
         for k, v in infos.items():
             resource[k] = v
         dataset.update_resource(resource)
@@ -730,7 +737,7 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
         """Update the file related to a given community resource"""
         community.permissions["edit"].test()
         fs_filename_to_remove = community.fs_filename
-        infos = self.handle_upload(community.dataset)
+        infos = self.handle_upload(community.dataset, community.id)
         community.update(**infos)
         community.reload()
         if fs_filename_to_remove is not None:
