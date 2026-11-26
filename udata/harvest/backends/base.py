@@ -333,20 +333,27 @@ class BaseBackend(ABC):
                 # A stored file the harvest detached from the dataset has no holder left:
                 # delete it once the dataset is saved, as an upload does with the file it
                 # replaces.
-                stored_fs_filenames = (
-                    set(Dataset.objects(pk=item.pk).distinct("resources.fs_filename")) - {None}
-                    if isinstance(item, Dataset) and item.pk
-                    else set()
-                )
+                stored_fs_filenames = set()
+                if isinstance(item, Dataset) and item.pk:
+                    stored_fs_filenames = set(
+                        Dataset.objects(pk=item.pk).distinct("resources.fs_filename")
+                    ) - {None}
                 item.save()
-                if isinstance(item, Dataset):
+                if stored_fs_filenames:
                     for fs_filename in stored_fs_filenames - {
                         r.fs_filename for r in item.resources
                     }:
+                        # The dataset is saved: a storage failure must not fail the item.
                         try:
                             storages.resources.delete(fs_filename)
-                        except FileNotFoundError:
-                            log.warning(f"Detached file {fs_filename} was already missing")
+                        except Exception:
+                            log.exception(f"Could not delete detached file {fs_filename}")
+                        else:
+                            # Reported on the item: a harvested resource should not hold
+                            # a file of ours in the first place.
+                            log.warning(
+                                f"Deleted the stored file {fs_filename}, detached by the harvest"
+                            )
 
             if isinstance(item, Dataset):
                 harvest_item.dataset = item
