@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-11-16 15:16+0100\n"
+"POT-Creation-Date: 2026-11-26 13:24+0000\n"
 "PO-Revision-Date: 2025-11-19 13:03+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
@@ -26,11 +26,11 @@ msgstr "Veuillez confirmer votre adresse e-mail"
 msgid "Login instructions"
 msgstr "Instructions de connexion"
 
-#: udata/auth/mails.py:144 udata/settings.py:148
+#: udata/auth/mails.py:145 udata/settings.py:148
 msgid "Your password has been reset"
 msgstr "Votre mot de passe a été réinitialisé"
 
-#: udata/auth/mails.py:153 udata/settings.py:149
+#: udata/auth/mails.py:154 udata/settings.py:149
 msgid "Your password has been changed"
 msgstr "Votre mot de passe a été modifié"
 
@@ -38,50 +38,50 @@ msgstr "Votre mot de passe a été modifié"
 msgid "Password reset instructions"
 msgstr "Instructions de réinitialisation du mot de passe"
 
-#: udata/settings.py:580
+#: udata/settings.py:582
 msgid "This dataset has been archived"
 msgstr "Ce jeu de données a été archivé"
 
-#: udata/uris.py:62
+#: udata/uris.py:60
 #, python-brace-format
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr "URL invalide \"{url}\" : {reason}"
 
-#: udata/tests/api/test_datasets_api.py:1545 udata/tests/test_model.py:439
-#: udata/uris.py:64
+#: udata/tests/api/test_datasets_api.py:1556 udata/tests/test_model.py:442
+#: udata/uris.py:62
 #, python-brace-format
 msgid "Invalid URL \"{url}\""
 msgstr "URL invalide \"{url}\""
 
-#: udata/uris.py:152
+#: udata/uris.py:150
 #, python-brace-format
 msgid "Invalid scheme {0}, allowed schemes: {1}"
 msgstr "Schéma invalide {0}, schémas autorisés : {1}"
 
-#: udata/uris.py:155
+#: udata/uris.py:153
 msgid "Credentials in URL are not allowed"
 msgstr "Les identifiants dans l'URL ne sont pas autorisés"
 
-#: udata/uris.py:159
+#: udata/uris.py:157
 #, python-brace-format
 msgid "Invalid TLD {0}"
 msgstr "Domaine invalide {0}"
 
-#: udata/uris.py:169 udata/uris.py:191
+#: udata/uris.py:167 udata/uris.py:189
 msgid "is a local URL"
 msgstr "est une URL locale"
 
-#: udata/uris.py:186
+#: udata/uris.py:184
 #, python-brace-format
 msgid "{0} is a mask IP"
 msgstr "{0} est une IP de masque"
 
-#: udata/uris.py:189
+#: udata/uris.py:187
 #, python-brace-format
 msgid "{0} is a multicast IP"
 msgstr "{0} est une IP multicast"
 
-#: udata/tests/test_model.py:457 udata/uris.py:193
+#: udata/tests/test_model.py:460 udata/uris.py:191
 msgid "is a private URL"
 msgstr "est une URL privée"
 
@@ -94,69 +94,69 @@ msgstr ""
 "l'instant, nous avons été avertis de cette erreur et la corrigeons dans "
 "les plus brefs délais."
 
-#: udata/api/oauth2.py:68
+#: udata/api/oauth2.py:65
 msgid "Bearer Token"
 msgstr "Bearer Token"
 
-#: udata/api/oauth2.py:71
+#: udata/api/oauth2.py:68
 msgid "Default scope"
 msgstr "Scope par défaut"
 
-#: udata/api/oauth2.py:71
+#: udata/api/oauth2.py:68
 msgid "System administrator rights"
 msgstr "Droits de l'administrateur système"
 
-#: udata/auth/forms.py:27
+#: udata/auth/forms.py:28
 msgid "Captcha code"
 msgstr "Code captcha"
 
-#: udata/auth/forms.py:28
+#: udata/auth/forms.py:29
 msgid "Captcha ID"
 msgstr "ID Captcha"
 
-#: udata/auth/forms.py:34
+#: udata/auth/forms.py:35
 msgid "Invalid Captcha"
 msgstr "Captcha invalide"
 
-#: udata/auth/forms.py:40
+#: udata/auth/forms.py:41
 msgid "First name"
 msgstr "Prénom"
 
-#: udata/auth/forms.py:42
+#: udata/auth/forms.py:43
 msgid "First name is required"
 msgstr "Prénom requis"
 
-#: udata/auth/forms.py:43 udata/auth/forms.py:50 udata/core/checks.py:13
+#: udata/auth/forms.py:44 udata/auth/forms.py:51 udata/core/checks.py:13
 msgid "URLs not allowed in this field"
 msgstr "URLs non autorisées dans ce champ"
 
-#: udata/auth/forms.py:47
+#: udata/auth/forms.py:48
 msgid "Last name"
 msgstr "Nom"
 
-#: udata/auth/forms.py:49
+#: udata/auth/forms.py:50
 msgid "Last name is required"
 msgstr "Nom de famille requis"
 
-#: udata/auth/forms.py:54
+#: udata/auth/forms.py:55
 msgid "J'accepte les conditions générales d'utilisation"
 msgstr "J'accepte les conditions générales d'utilisation"
 
-#: udata/auth/forms.py:56
+#: udata/auth/forms.py:57
 msgid "You must accept the terms of use to continue."
 msgstr "Vous devez accepter les CGU pour continuer."
 
-#: udata/auth/forms.py:75
+#: udata/auth/forms.py:73
 msgid "This account signs in with ProConnect only."
 msgstr "Ce compte se connecte uniquement avec ProConnect."
 
-#: udata/auth/forms.py:88 udata/tests/forms/test_current_user_field.py:194
+#: udata/auth/forms.py:86 udata/tests/forms/test_current_user_field.py:194
 msgid "Password must be changed for security reasons"
 msgstr ""
 "Le mot de passe doit être modifié pour des raisons de sécurité. Veuillez "
 "utiliser la récupération de mot de passe afin d’en définir un nouveau"
 
-#: udata/auth/forms.py:145 udata/tests/api/test_proconnect_api.py:52
+#: udata/auth/forms.py:140 udata/tests/api/test_proconnect_api.py:87
 msgid ""
 "Your account is protected by the two-factor authentication of ProConnect:"
 " sign in with ProConnect to set up another one."
@@ -164,126 +164,145 @@ msgstr ""
 "Votre compte est protégé par l'authentification à deux facteurs de "
 "ProConnect : connectez-vous avec ProConnect pour en configurer une autre."
 
-#: udata/auth/forms.py:156 udata/tests/api/test_security_api.py:142
+#: udata/auth/forms.py:151 udata/tests/api/test_security_api.py:145
 msgid "This account has no password."
 msgstr "Ce compte n'a pas de mot de passe."
 
-#: udata/auth/forms.py:163
+#: udata/auth/forms.py:158
 msgid "New email"
 msgstr "Nouvelle adresse email"
 
-#: udata/auth/forms.py:165
+#: udata/auth/forms.py:160
 msgid "Retype email"
 msgstr "Re-saisir l'adresse email"
 
-#: udata/auth/forms.py:166
+#: udata/auth/forms.py:161
 msgid "Email does not match"
 msgstr "Les adresses emails ne sont pas identiques"
 
-#: udata/auth/forms.py:168 udata/templates/security/change_email.html:10
+#: udata/auth/forms.py:163 udata/templates/security/change_email.html:10
 #: udata/templates/security/change_email.html:16
 msgid "Change email"
 msgstr "Modifier l'adresse email"
 
-#: udata/auth/mails.py:75 udata/auth/mails.py:79 udata/auth/mails.py:100
-#: udata/auth/mails.py:103 udata/tests/api/test_security_api.py:112
+#: udata/auth/mails.py:76 udata/auth/mails.py:80 udata/auth/mails.py:101
+#: udata/auth/mails.py:104 udata/tests/api/test_security_api.py:115
 msgid "Confirm your email address"
 msgstr "Confirmez votre adresse e-mail"
 
-#: udata/auth/mails.py:77
+#: udata/auth/mails.py:78
 #, python-format
 msgid "Welcome to %(site)s!"
 msgstr "Bienvenue sur %(site)s !"
 
-#: udata/auth/mails.py:78 udata/auth/mails.py:102
+#: udata/auth/mails.py:79 udata/auth/mails.py:103
 msgid "Please confirm your email address."
 msgstr "Veuillez confirmer votre adresse e-mail."
 
-#: udata/auth/mails.py:86
+#: udata/auth/mails.py:87
 msgid "Your email address is already associated with an account"
 msgstr "Votre adresse e-mail est déjà associée à un compte"
 
-#: udata/auth/mails.py:89
+#: udata/auth/mails.py:90
 #, python-format
 msgid "Someone (you?) tried to create an account on %(site)s with your email."
 msgstr ""
 "Quelqu'un (vous? ) a essayé de créer un compte sur %(site)s avec votre "
 "email."
 
-#: udata/auth/mails.py:92
+#: udata/auth/mails.py:93
 msgid "If you forgot your password, you can reset it."
 msgstr "Si vous avez oublié votre mot de passe, vous pouvez le réinitialiser."
 
-#: udata/auth/mails.py:93 udata/auth/mails.py:130 udata/auth/mails.py:137
-#: udata/auth/mails.py:160
+#: udata/auth/mails.py:94 udata/auth/mails.py:131 udata/auth/mails.py:138
+#: udata/auth/mails.py:161
 msgid "Reset your password"
 msgstr "Réinitialisez votre mot de passe"
 
-#: udata/auth/mails.py:110
+#: udata/auth/mails.py:111
 msgid "Your account signs in with ProConnect"
 msgstr "Votre compte se connecte avec ProConnect"
 
-#: udata/auth/mails.py:113 udata/auth/mails.py:133
+#: udata/auth/mails.py:114 udata/auth/mails.py:134
 #, python-format
 msgid "Someone requested a password reset for your %(site)s account."
 msgstr ""
 "Quelqu'un a demandé une réinitialisation du mot de passe pour votre "
 "compte %(site)s."
 
-#: udata/auth/mails.py:116 udata/tests/api/test_proconnect_api.py:665
+#: udata/auth/mails.py:117 udata/tests/api/test_proconnect_api.py:770
 msgid "Your account has no password: it signs in with ProConnect only."
 msgstr ""
 "Votre compte n'a pas de mot de passe : il se connecte uniquement avec "
 "ProConnect."
 
-#: udata/auth/mails.py:117 udata/auth/mails.py:136
+#: udata/auth/mails.py:118 udata/auth/mails.py:137
 msgid "If this wasn't you, please ignore this email."
 msgstr "Si ce n'était pas vous, veuillez ignorer cet e-mail."
 
-#: udata/auth/mails.py:118
+#: udata/auth/mails.py:119
 msgid "Sign in with ProConnect"
 msgstr "Se connecter avec ProConnect"
 
-#: udata/auth/mails.py:146
+#: udata/auth/mails.py:147
 msgid "Your data.gouv.fr password has been reset."
 msgstr "Votre mot de passe data.gouv.fr a été réinitialisé."
 
-#: udata/auth/mails.py:156
+#: udata/auth/mails.py:157
 #, python-format
 msgid "Your %(site)s account password has been changed."
 msgstr "Le mot de passe de votre compte %(site)s a été modifié."
 
-#: udata/auth/mails.py:159
+#: udata/auth/mails.py:160
 msgid "If you did not change your password, please reset it."
 msgstr "Si vous n'avez pas changé votre mot de passe, veuillez le réinitialiser."
 
-#: udata/auth/mails.py:167
+#: udata/auth/mails.py:168
 msgid "The email address of your account has changed"
 msgstr "L'adresse e-mail de votre compte a changé"
 
-#: udata/auth/mails.py:170
+#: udata/auth/mails.py:171
 #, python-format
 msgid "The email address of your %(site)s account is now %(email)s."
 msgstr "L'adresse e-mail de votre compte %(site)s est désormais %(email)s."
 
-#: udata/auth/mails.py:174 udata/auth/mails.py:198
+#: udata/auth/mails.py:175 udata/auth/mails.py:215
 msgid "If this wasn't you, contact us right away."
 msgstr "Si ce n'était pas vous, contactez-nous immédiatement."
 
-#: udata/auth/mails.py:181
+#: udata/auth/mails.py:182
 msgid "User can't access mail account"
 msgstr "L'utilisateur ne peut pas accéder à son compte mail"
 
-#: udata/auth/mails.py:183
+#: udata/auth/mails.py:184
 #, python-format
 msgid "%(email)s can not access mail account"
 msgstr "%(email)s ne peut pas accéder à son compte mail"
 
-#: udata/auth/mails.py:190
+#: udata/auth/mails.py:191
+msgid "A new API key was created on your account"
+msgstr ""
+
+#: udata/auth/mails.py:194
+#, python-format
+msgid ""
+"A new API key, %(name)s, was created on your %(site)s account. It acts on"
+" your behalf until it is revoked."
+msgstr ""
+
+#: udata/auth/mails.py:199
+msgid "If this wasn't you, revoke it right away and contact us."
+msgstr ""
+
+#: udata/auth/mails.py:200
+msgid "Manage your API keys"
+msgstr ""
+
+#: udata/auth/mails.py:207
 msgid "Your account now signs in with ProConnect only"
 msgstr "Votre compte se connecte désormais uniquement avec ProConnect"
 
-#: udata/auth/mails.py:193
+#: udata/auth/mails.py:210
 #, python-format
 msgid ""
 "Your %(site)s account now signs in with ProConnect and its two-factor "
@@ -335,25 +354,30 @@ msgstr "Souhaitez-vous générer des données d'exemple ?"
 msgid "Your udata instance is ready!"
 msgstr "Votre instance udata est prête !"
 
-#: udata/core/checks.py:33
+#: udata/core/checks.py:25
+#, python-format
+msgid "Cannot modify %(field)s after creation"
+msgstr ""
+
+#: udata/core/checks.py:35
 msgid "Invalid email address"
 msgstr "Adresse e-mail invalide"
 
-#: udata/core/owned.py:66 udata/forms/fields.py:681
+#: udata/core/owned.py:66 udata/forms/fields.py:678
 #: udata/tests/api/test_dataservices_api.py:603
 msgid "You can only set yourself as owner"
 msgstr "Vous ne pouvez définir que vous-même en tant que propriétaire"
 
-#: udata/core/owned.py:80
+#: udata/core/owned.py:79
 msgid "Unknown organization"
 msgstr "Organisation inconnue"
 
-#: udata/core/discussions/models.py:225 udata/core/owned.py:84
-#: udata/forms/fields.py:716 udata/tests/api/test_dataservices_api.py:616
+#: udata/core/discussions/models.py:236 udata/core/owned.py:83
+#: udata/forms/fields.py:713 udata/tests/api/test_dataservices_api.py:616
 msgid "Permission denied for this organization"
 msgstr "Permission refusée pour cette organisation"
 
-#: udata/core/owned.py:125
+#: udata/core/owned.py:124
 msgid "An object belongs either to a user or to an organization, not both"
 msgstr ""
 "Un objet appartient soit à un utilisateur, soit à une organisation, pas "
@@ -487,60 +511,51 @@ msgstr ""
 msgid "You can only set one condition for a given access audience role"
 msgstr "Vous ne pouvez définir qu'une seule condition pour une audience donnée"
 
-#: udata/core/assistant/api.py:101
+#: udata/core/assistant/api.py:93
 msgid "The conversation has no user message."
 msgstr "La conversation ne contient aucun message utilisateur."
 
-#: udata/core/assistant/api.py:105 udata/core/assistant/api.py:110
-#: udata/core/assistant/api.py:114 udata/core/assistant/api.py:157
+#: udata/core/assistant/api.py:100
 msgid "Only text messages are accepted."
 msgstr "Seuls les messages texte sont acceptés."
 
-#: udata/core/assistant/api.py:116
+#: udata/core/assistant/api.py:102
 msgid "A user message cannot be empty."
 msgstr "Un message utilisateur ne peut pas être vide."
 
-#: udata/core/assistant/api.py:122
+#: udata/core/assistant/api.py:108
 #, python-format
 msgid "Your message is too long (%(max)s characters maximum)."
 msgstr "Votre message est trop long (%(max)s caractères maximum)."
 
-#: udata/core/assistant/api.py:152 udata/core/assistant/api.py:440
-msgid "Invalid request body."
-msgstr "Corps de requête invalide."
-
-#: udata/core/assistant/api.py:437
-msgid "Invalid conversation id."
-msgstr "Identifiant de conversation invalide."
-
-#: udata/core/assistant/api.py:129
+#: udata/core/assistant/api.py:121
 msgid "This conversation can no longer be read. Start a new one."
 msgstr "Cette conversation ne peut plus être lue. Démarrez-en une nouvelle."
 
-#: udata/core/assistant/api.py:192
+#: udata/core/assistant/api.py:178
 msgid "Invalid resource_id: a resource UUID is expected."
 msgstr "resource_id invalide : un UUID de ressource est attendu."
 
-#: udata/core/assistant/api.py:200
+#: udata/core/assistant/api.py:179
 msgid "Invalid visualization context."
 msgstr "Contexte de visualisation invalide."
 
-#: udata/core/assistant/api.py:268
+#: udata/core/assistant/api.py:247
 msgid "The AI service is receiving too many requests. Try again in a few moments."
 msgstr "Le service d'IA reçoit trop de demandes. Réessayez dans quelques instants."
 
-#: udata/core/assistant/api.py:271 udata/core/assistant/api.py:416
-#: udata/core/assistant/api.py:419
+#: udata/core/assistant/api.py:250 udata/core/assistant/api.py:387
+#: udata/core/assistant/api.py:390
 msgid "The assistant is not available."
 msgstr "L'assistant n'est pas disponible."
 
-#: udata/core/assistant/api.py:273
+#: udata/core/assistant/api.py:252
 msgid "The response was too long and was interrupted. Ask for a simpler chart."
 msgstr ""
 "La réponse était trop longue et a été interrompue. Demandez un graphique "
 "plus simple."
 
-#: udata/core/assistant/api.py:276
+#: udata/core/assistant/api.py:255
 msgid ""
 "The request needed too many steps. Rephrase it or split it into simpler "
 "ones."
@@ -548,27 +563,35 @@ msgstr ""
 "Cette demande nécessite trop d’étapes. Reformulez-la ou découpez-la en "
 "demandes plus simples."
 
-#: udata/core/assistant/api.py:280
+#: udata/core/assistant/api.py:259
 msgid "The AI service is temporarily unavailable. Try again later."
 msgstr "Le service d'IA est momentanément indisponible. Réessayez plus tard."
 
-#: udata/core/assistant/api.py:282
+#: udata/core/assistant/api.py:261
 msgid "The conversation is too long for the assistant. Start a new one."
 msgstr ""
 "La conversation est trop longue pour l'assistant. Commencez-en une "
 "nouvelle."
 
-#: udata/core/assistant/api.py:283 udata/core/assistant/api.py:386
+#: udata/core/assistant/api.py:262 udata/core/assistant/api.py:362
 msgid "An error occurred while generating the response."
 msgstr "Une erreur est survenue lors de la génération de la réponse."
 
-#: udata/core/assistant/api.py:317
+#: udata/core/assistant/api.py:292
 msgid "The response took too long and was interrupted."
 msgstr "La réponse a pris trop de temps et a été interrompue."
 
-#: udata/core/assistant/api.py:319
+#: udata/core/assistant/api.py:294
 msgid "The response was interrupted."
 msgstr "La réponse a été interrompue."
+
+#: udata/core/assistant/api.py:402
+msgid "Invalid request body."
+msgstr "Corps de requête invalide."
+
+#: udata/core/assistant/api.py:407
+msgid "Invalid conversation id."
+msgstr "Identifiant de conversation invalide."
 
 #: udata/core/contact_point/api.py:60
 msgid "An existing contact point already exists with these informations."
@@ -637,7 +660,7 @@ msgid "A contact point cannot change owner."
 msgstr "Un point de contact ne peut pas changer de propriétaire."
 
 #: udata/core/contact_point/models.py:114
-#: udata/tests/api/test_datasets_api.py:1455
+#: udata/tests/api/test_datasets_api.py:1466
 #, python-brace-format
 msgid "Contact point {id} does not belong to the owner of this object"
 msgstr "Le point de contact {id} n'appartient pas au propriétaire de cet objet"
@@ -662,17 +685,17 @@ msgstr "Dernières APIs"
 msgid "Dataservice serving high value datasets"
 msgstr "API servant des jeux de données de haute valeur"
 
-#: udata/core/dataservices/models.py:221
+#: udata/core/dataservices/models.py:220
 msgid "dataservice"
 msgstr "API"
 
-#: udata/core/dataservices/models.py:314 udata/core/dataset/models.py:673
-#: udata/mongo/datetime_fields.py:61
+#: udata/core/dataservices/models.py:313 udata/core/dataset/models.py:678
+#: udata/mongo/datetime_fields.py:62
 msgid "Creation date"
 msgstr "Date de création"
 
-#: udata/core/dataservices/models.py:321 udata/core/dataset/models.py:679
-#: udata/mongo/datetime_fields.py:68
+#: udata/core/dataservices/models.py:320 udata/core/dataset/models.py:684
+#: udata/mongo/datetime_fields.py:69
 msgid "Last modification date"
 msgstr "Date de dernière modification"
 
@@ -704,16 +727,16 @@ msgstr "a mis à jour une ressource"
 msgid "removed a resource from a dataset"
 msgstr "a supprimé une ressource d'un jeu de données"
 
-#: udata/core/dataset/api.py:369
+#: udata/core/dataset/api.py:370
 #, python-brace-format
 msgid "Datasets search: {q}"
 msgstr "Recherche de jeux de données : {q}"
 
-#: udata/core/dataset/api.py:371
+#: udata/core/dataset/api.py:372
 msgid "Filtered datasets"
 msgstr "Jeux de données filtrés"
 
-#: udata/core/dataset/api.py:373
+#: udata/core/dataset/api.py:374
 msgid "Latest datasets"
 msgstr "Derniers jeux de données"
 
@@ -1068,43 +1091,43 @@ msgstr ""
 "Restreint la visibilité du jeu de données à vous ou votre organisation "
 "seulement."
 
-#: udata/core/dataset/models.py:102
+#: udata/core/dataset/models.py:103
 msgid "Pivotal data"
 msgstr "Données pivot"
 
-#: udata/core/dataset/models.py:103
+#: udata/core/dataset/models.py:104
 msgid "Reference data public service"
 msgstr "Service public de la donnée de référence"
 
-#: udata/core/dataset/models.py:104
+#: udata/core/dataset/models.py:105
 msgid "Inspire"
 msgstr "INSPIRE"
 
-#: udata/core/dataset/models.py:105
+#: udata/core/dataset/models.py:106
 msgid "High value datasets"
 msgstr "Données de forte valeur"
 
-#: udata/core/dataset/models.py:106
+#: udata/core/dataset/models.py:107
 msgid "Certified statistic series"
 msgstr "Séries statistiques labellisées"
 
-#: udata/core/dataset/models.py:107
+#: udata/core/dataset/models.py:108
 msgid "Statistical series of general interest"
 msgstr "Séries statistiques reconnues d’intérêt général"
 
-#: udata/core/dataset/models.py:188
+#: udata/core/dataset/models.py:189
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr "Un schéma doit contenir un nom ou une URL lorsqu'une version est fournie."
 
-#: udata/core/dataset/models.py:220 udata/tests/api/test_datasets_api.py:1553
-#: udata/tests/api/test_datasets_api.py:1564
+#: udata/core/dataset/models.py:221 udata/tests/api/test_datasets_api.py:1564
+#: udata/tests/api/test_datasets_api.py:1575
 #, python-brace-format
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr ""
 "Le nom du schéma \"{schema}\" n'est pas une valeur autorisée. Valeurs "
 "autorisées : {values}"
 
-#: udata/core/dataset/models.py:239 udata/tests/api/test_datasets_api.py:1576
+#: udata/core/dataset/models.py:238 udata/tests/api/test_datasets_api.py:1587
 #, python-brace-format
 msgid ""
 "Version \"{version}\" is not an allowed value for the schema \"{name}\". "
@@ -1113,36 +1136,36 @@ msgstr ""
 "La version \"{version}\" n'est pas une valeur autorisée pour le schéma "
 "\"{name}\". Versions autorisées : {values}"
 
-#: udata/core/dataset/models.py:511 udata/core/dataset/rdf.py:759
-#: udata/tests/dataset/test_dataset_rdf.py:1003
-#: udata/tests/dataset/test_dataset_rdf.py:1016
+#: udata/core/dataset/models.py:510 udata/core/dataset/rdf.py:755
+#: udata/tests/dataset/test_dataset_rdf.py:992
+#: udata/tests/dataset/test_dataset_rdf.py:1005
 msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
-#: udata/core/dataset/models.py:630
+#: udata/core/dataset/models.py:629
 msgid "Future date of update"
 msgstr "Future date de mise à jour"
 
-#: udata/core/dataset/models.py:687
+#: udata/core/dataset/models.py:692
 msgid "Last update of the dataset resources"
 msgstr "Dernière mise à jour des ressources de ce jeu de données"
 
-#: udata/core/dataset/models.py:753
+#: udata/core/dataset/models.py:758
 msgid "dataset"
 msgstr "jeu de données"
 
-#: udata/core/dataset/models.py:817
+#: udata/core/dataset/models.py:822
 msgid "A dataset with a DOI cannot be deleted, it can only be archived"
 msgstr ""
 "Un jeu de données avec un DOI ne peut pas être supprimé, il peut "
 "seulement être archivé"
 
-#: udata/core/dataset/models.py:822
+#: udata/core/dataset/models.py:827
 msgid "A dataset with a DOI cannot be made private"
 msgstr "Un jeu de données avec un DOI ne peut pas être rendu privé"
 
-#: udata/core/dataset/rdf.py:757 udata/tests/dataset/test_dataset_rdf.py:973
-#: udata/tests/dataset/test_dataset_rdf.py:990
+#: udata/core/dataset/rdf.py:753 udata/tests/dataset/test_dataset_rdf.py:962
+#: udata/tests/dataset/test_dataset_rdf.py:979
 #, python-brace-format
 msgid "{format} resource"
 msgstr "Ressource {format}"
@@ -1205,7 +1228,7 @@ msgstr "Voir la discussion"
 msgid "message"
 msgstr "message"
 
-#: udata/core/discussions/models.py:265
+#: udata/core/discussions/models.py:268
 msgid "discussion"
 msgstr "discussion"
 
@@ -1256,7 +1279,7 @@ msgstr "chaque {0.period_singular}"
 msgid "every {0.every} {0.period}"
 msgstr "chaque {0.every} {0.period}"
 
-#: udata/core/legal/mails.py:81
+#: udata/core/legal/mails.py:82
 #, python-format
 msgid ""
 "Our %(terms_link)s specify in point %(article)s that the platform is not "
@@ -1280,7 +1303,7 @@ msgstr ""
 "contraires aux présentes modalités d'utilisation, il agit rapidement pour"
 " les supprimer ou les rendre inaccessibles\"."
 
-#: udata/core/legal/mails.py:95
+#: udata/core/legal/mails.py:96
 msgid ""
 "The platform is not \"intended to disseminate advertising content, "
 "promotions of private interests, content contrary to public order, "
@@ -1303,7 +1326,7 @@ msgstr ""
 "d'utilisation, il agit rapidement pour les supprimer ou les rendre "
 "inaccessibles\"."
 
-#: udata/core/legal/mails.py:107
+#: udata/core/legal/mails.py:108
 #, python-format
 msgid ""
 "You may contest this decision within two months of its notification by "
@@ -1316,25 +1339,25 @@ msgstr ""
 "pouvez saisir la juridiction administrative par l'application "
 "\"%(telerecours_link)s\"."
 
-#: udata/core/legal/mails.py:114
+#: udata/core/legal/mails.py:115
 msgid "You may contest this decision by contacting us."
 msgstr "Vous pouvez contester cette décision en nous contactant."
 
-#: udata/core/legal/mails.py:117
+#: udata/core/legal/mails.py:118
 #, python-format
 msgid "Your %(content_type)s has been deleted."
 msgstr "Votre %(content_type)s a été supprimé."
 
-#: udata/core/legal/mails.py:120
+#: udata/core/legal/mails.py:121
 msgid "Best regards,"
 msgstr "Cordialement,"
 
-#: udata/core/legal/mails.py:122
+#: udata/core/legal/mails.py:123
 #, python-format
 msgid "%(site)s team member"
 msgstr "Membre de l'équipe %(site)s"
 
-#: udata/core/legal/mails.py:126
+#: udata/core/legal/mails.py:127
 #, python-format
 msgid "Deletion of your %(content_type)s"
 msgstr "Suppression de votre %(content_type)s"
@@ -1693,7 +1716,7 @@ msgstr "a mis à jour une réutilisation"
 msgid "deleted a reuse"
 msgstr "a supprimé une réutilisation"
 
-#: udata/core/reuse/api.py:116
+#: udata/core/reuse/api.py:114
 msgid "Latests reuses"
 msgstr "Dernières réutilisations"
 
@@ -1923,12 +1946,12 @@ msgstr "a mis à jour un élément dans une thématique"
 msgid "removed an element from a topic"
 msgstr "a supprimé un élément d'une thématique"
 
-#: udata/core/topic/models.py:39 udata/tests/apiv2/test_topics.py:1061
-#: udata/tests/apiv2/test_topics.py:1074
+#: udata/core/topic/models.py:41 udata/tests/apiv2/test_topics.py:1155
+#: udata/tests/apiv2/test_topics.py:1168
 msgid "A topic element must have a title or an element."
 msgstr "Un élément de thématique doit avoir un titre ou un élément."
 
-#: udata/core/topic/models.py:125
+#: udata/core/topic/models.py:163
 msgid "collection"
 msgstr "collection"
 
@@ -1964,7 +1987,7 @@ msgstr "a suivi une réutilisation"
 msgid "followed an organization"
 msgstr "a suivi une organisation"
 
-#: udata/core/user/mails.py:10 udata/tests/api/test_me_api.py:600
+#: udata/core/user/mails.py:10 udata/tests/api/test_me_api.py:632
 msgid "Account deletion"
 msgstr "Suppression de compte"
 
@@ -2023,7 +2046,7 @@ msgstr ""
 "vous aurez toujours la possibilité de recréer un compte sur la plateforme"
 " %(site)s."
 
-#: udata/core/user/models.py:286
+#: udata/core/user/models.py:287
 msgid "account"
 msgstr "compte"
 
@@ -2133,7 +2156,7 @@ msgstr ""
 "Voici ce qui s'est passé sur ce que vous suivez depuis notre dernier "
 "message."
 
-#: udata/flask_mongoengine/fields.py:50
+#: udata/flask_mongoengine/fields.py:49
 msgid "Not a valid choice"
 msgstr "Choix invalide"
 
@@ -2158,7 +2181,7 @@ msgstr "URL invalide"
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr "Le mot-clé \"%(tag)s\" doit avoir entre %(min)d et %(max)d caractères."
 
-#: udata/forms/fields.py:366 udata/forms/fields.py:425
+#: udata/forms/fields.py:366 udata/forms/fields.py:424
 #, python-brace-format
 msgid "{0} does not exists"
 msgstr "{0} n'existe pas"
@@ -2173,30 +2196,30 @@ msgstr "Champ \"id\" manquant"
 msgid "Expect a \"{0}\" class but \"{1}\" was found"
 msgstr "Attend une classe \"{0}\" mais \"{1}\" a été trouvée"
 
-#: udata/forms/fields.py:412 udata/tests/forms/test_model_field.py:40
+#: udata/forms/fields.py:411 udata/tests/forms/test_model_field.py:40
 #: udata/tests/forms/test_model_field.py:55
 msgid "Expect both class and identifier"
 msgstr "Attends à la fois une classe et un identifiant"
 
-#: udata/forms/fields.py:457
+#: udata/forms/fields.py:456
 #, python-brace-format
 msgid "Model for {0} not found"
 msgstr "Modèle pour {0} non trouvé"
 
-#: udata/forms/fields.py:491
+#: udata/forms/fields.py:490
 #, python-brace-format
 msgid "Unknown identifiers: {identifiers}"
 msgstr "Identifiants inconnus : {identifiers}"
 
-#: udata/forms/fields.py:630 udata/forms/fields.py:633
+#: udata/forms/fields.py:627 udata/forms/fields.py:630
 msgid "Date must be a string"
 msgstr "La date doit être une chaîne de caractères"
 
-#: udata/forms/fields.py:642
+#: udata/forms/fields.py:639
 msgid "Unable to parse date range"
 msgstr "Incapable de comprendre la date"
 
-#: udata/forms/fields.py:674 udata/forms/fields.py:709
+#: udata/forms/fields.py:671 udata/forms/fields.py:706
 #: udata/tests/forms/test_publish_as_field.py:214
 #: udata/tests/forms/test_publish_as_field.py:315
 #: udata/tests/forms/test_publish_as_field.py:333
@@ -2207,7 +2230,7 @@ msgstr ""
 "Impossible de modifier le propriétaire après la création. Veuillez "
 "utiliser la fonctionnalité de transfert."
 
-#: udata/forms/fields.py:679 udata/forms/fields.py:714
+#: udata/forms/fields.py:676 udata/forms/fields.py:711
 msgid "You must be authenticated"
 msgstr "Vous devez être authentifié"
 
@@ -2268,19 +2291,19 @@ msgstr "Moissonneurs validés"
 msgid "Refused harvesters"
 msgstr "Moissonneurs refusés"
 
-#: udata/harvest/backends/dcat.py:385
+#: udata/harvest/backends/dcat.py:386
 msgid "Remote URL prefix"
 msgstr "Préfixe d'URL distante"
 
-#: udata/harvest/backends/dcat.py:388
+#: udata/harvest/backends/dcat.py:389
 msgid "A prefix used to build the remote URL of the harvested items."
 msgstr "Un préfixe utilisé pour construire l'URL distante des éléments récoltés."
 
-#: udata/harvest/backends/dcat.py:596
+#: udata/harvest/backends/dcat.py:595
 msgid "GeoDCAT-AP"
 msgstr "GeoDCAT-AP"
 
-#: udata/harvest/backends/dcat.py:597
+#: udata/harvest/backends/dcat.py:596
 msgid "Request GeoDCAT-AP to the CSW server (must be supported by the server)."
 msgstr ""
 "Requêter GeoDCAT-AP auprès du serveur CSW (doit être supporté par le "
