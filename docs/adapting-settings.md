@@ -555,11 +555,19 @@ API key sent to the provider. The endpoint answers `503` when `AI_BASE_URL` is s
 
 ### AI_MODELS
 
-**default**: `[{"name": "gpt-oss-120b", "max_output_tokens": 8192, "reasoning_effort": None}]`
+**default**:
 
-Provider models available to the assistant, which uses the first one. Each model is a dict:
+```python
+[
+    {"name": "gpt-oss-120b", "label": "GPT-OSS-120B", "max_output_tokens": 8192, "reasoning_effort": None},
+    {"name": "mistral-medium-3-5", "label": "Mistral Medium 3.5", "max_output_tokens": 8192, "reasoning_effort": None},
+]
+```
+
+Provider models offered to the user in the assistant. The first one is the default model. A conversation keeps the model it started with. Each model is a dict:
 
 * `name` (required): name of the provider model. With Albert, use the `id` of a model listed by `GET /v1/models`, never one of its `aliases`: Albert renames aliases without notice.
+* `label`: name displayed to the user. Missing, the `name` is displayed.
 * `max_output_tokens`: bound on the tokens of each model response, reasoning included. Missing or `None` keeps the provider default.
 * `reasoning_effort`: reasoning effort sent to the provider (`openai_reasoning_effort`). Missing or `None` keeps the provider default; `"none"` disables reasoning on models that would otherwise stream it.
 

@@ -20,9 +20,32 @@ from udata.http import user_agent
 MODEL_RETRIES = 2
 
 
-def get_agent() -> Agent[AssistantDeps, str]:
-    """Build the assistant agent configured from the Flask settings."""
-    model_config = current_app.config["AI_MODELS"][0]
+class UnknownModel(ValueError):
+    """The requested model is not one of the configured `AI_MODELS`."""
+
+
+def find_model(name: str | None) -> dict:
+    """Return the `AI_MODELS` entry named `name`, or the first (default) one for `None`."""
+    models = current_app.config["AI_MODELS"]
+    if name is None:
+        return models[0]
+    for model_config in models:
+        if model_config["name"] == name:
+            return model_config
+    raise UnknownModel(name)
+
+
+def model_choices() -> list[dict]:
+    """The models offered to the user, in `AI_MODELS` order, the first being the default."""
+    return [
+        {"id": m["name"], "label": m.get("label") or m["name"], "default": i == 0}
+        for i, m in enumerate(current_app.config["AI_MODELS"])
+    ]
+
+
+def get_agent(model_name: str | None = None) -> Agent[AssistantDeps, str]:
+    """Build the assistant agent for `model_name` (default: the first configured model)."""
+    model_config = find_model(model_name)
     model = OpenAIChatModel(
         model_config["name"],
         provider=OpenAIProvider(

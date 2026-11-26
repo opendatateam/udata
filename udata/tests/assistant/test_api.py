@@ -4,6 +4,7 @@ import json
 import logging
 import threading
 import time
+from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from uuid import uuid4
 
@@ -24,12 +25,13 @@ from pydantic_ai.exceptions import (
 from pydantic_ai.messages import ModelRequest, ModelResponse, UserPromptPart
 from pydantic_ai.models.function import DeltaToolCall, FunctionModel
 from pydantic_ai.models.test import TestModel
+from pydantic_ai.usage import RunUsage
 from werkzeug.wrappers import Request
 
 from udata.core.api_token.models import ApiToken
 from udata.core.assistant import api as api_module
 from udata.core.assistant.agent import get_agent
-from udata.core.assistant.api import MAX_REQUEST_BYTES, MAX_USER_MESSAGE_CHARS
+from udata.core.assistant.api import MAX_REQUEST_BYTES, MAX_USER_MESSAGE_CHARS, usage_metadata
 from udata.core.assistant.models import AssistantConversation
 from udata.core.assistant.tools import MODEL_REQUEST_LIMIT
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
@@ -93,6 +95,23 @@ def test_escape_untrusted_neutralizes_the_tags(text):
 )
 def test_escape_untrusted_keeps_other_text(text):
     assert api_module._escape_untrusted(text) == text
+
+
+def test_usage_metadata_counts_the_tokens_of_the_turn():
+    assert usage_metadata(RunUsage(input_tokens=1200, output_tokens=300)) == {
+        "inputTokens": 1200,
+        "outputTokens": 300,
+        "totalTokens": 1500,
+    }
+
+
+@pytest.mark.parametrize(
+    "usage",
+    [RunUsage(input_tokens=1200, output_tokens=300, unmeasured_requests=1), RunUsage()],
+    ids=["a-response-omitted-it", "nothing-counted"],
+)
+def test_usage_metadata_is_none_unless_every_token_is_counted(usage):
+    assert usage_metadata(usage) is None
 
 
 class AssistantChatAPITest(PytestOnlyAPITestCase):
@@ -1072,3 +1091,169 @@ class AssistantChatDisconnectTest(PytestOnlyAPITestCase):
         release.set()
         assert elapsed < 1
         assert any("still running" in r.getMessage() for r in caplog.records)
+
+
+MODELS = [{"name": "first", "label": "First"}, {"name": "second", "label": "Second"}]
+
+
+class AssistantChatModelTest(PytestOnlyAPITestCase):
+    """The user picks one of AI_MODELS; a conversation stays on its model."""
+
+    def _chat(self, model=..., msg_id="msg-1", **extra):
+        """One turn of the PAYLOAD conversation; `model` is left out of the body by default."""
+        body = {**PAYLOAD, "messages": [user_message("Bonjour", msg_id)], **extra}
+        if model is not ...:
+            body["model"] = model
+        response = self.post(url_for("api.assistant_chat"), data=body)
+        if response.status_code == 200:
+            response.get_data()
+        return response
+
+    def _get_agent(self, mocker):
+        return mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model())
+
+    def test_the_models_are_listed(self):
+        self.app.config["AI_MODELS"] = MODELS
+        self.login()
+        response = self.get(url_for("api.assistant_models"))
+        assert response.status_code == 200
+        assert response.json == [
+            {"id": "first", "label": "First", "default": True},
+            {"id": "second", "label": "Second", "default": False},
+        ]
+
+    def test_chat_uses_the_requested_model(self, mocker):
+        self.app.config["AI_MODELS"] = MODELS
+        get_agent = self._get_agent(mocker)
+        self.login()
+        assert self._chat("second").status_code == 200
+        get_agent.assert_called_once_with("second")
+
+    @pytest.mark.parametrize("model", [..., None], ids=["absent", "null"])
+    def test_chat_uses_the_first_model_without_one(self, mocker, model):
+        self.app.config["AI_MODELS"] = MODELS
+        get_agent = self._get_agent(mocker)
+        self.login()
+        assert self._chat(model).status_code == 200
+        get_agent.assert_called_once_with("first")
+        assert AssistantConversation.objects.get().ai_model == "first"
+
+    @pytest.mark.parametrize("model", ["third", "", 42, ["first"]])
+    def test_chat_rejects_an_unknown_model(self, mocker, model):
+        self.app.config["AI_MODELS"] = MODELS
+        get_agent = self._get_agent(mocker)
+        # The refusal comes before every backend: Mongo, api-tabular, the resource lookup.
+        conversations = mocker.patch("udata.core.assistant.api.AssistantConversation")
+        tabular = mocker.patch("udata.core.assistant.api.TabularClient")
+        load_resource = mocker.patch("udata.core.assistant.api.load_active_resource")
+        self.login()
+        response = self._chat(model, resource_id=str(uuid4()))
+        assert response.status_code == 400
+        assert response.json["message"] == "Modèle inconnu pour l'assistant."
+        get_agent.assert_not_called()
+        conversations.objects.assert_not_called()
+        conversations.assert_not_called()
+        tabular.assert_not_called()
+        load_resource.assert_not_called()
+
+    def test_a_conversation_keeps_its_model(self, mocker):
+        self.app.config["AI_MODELS"] = MODELS
+        get_agent = self._get_agent(mocker)
+        user = self.login()
+        assert self._chat("first").status_code == 200
+        assert AssistantConversation.objects.get(user=user).ai_model == "first"
+        get_agent.reset_mock()
+
+        other = self._chat("second", msg_id="msg-2")
+        assert other.status_code == 409
+        assert other.json["message"] == (
+            "Cette conversation utilise un autre modèle. Démarrez-en une nouvelle."
+        )
+        get_agent.assert_not_called()
+
+        assert self._chat("first", msg_id="msg-3").status_code == 200
+        get_agent.assert_called_once_with("first")
+
+    def test_a_conversation_stored_without_model_takes_the_requested_one(self, mocker):
+        self.app.config["AI_MODELS"] = MODELS
+        self._get_agent(mocker)
+        user = self.login()
+        AssistantConversation(user=user, chat_id=PAYLOAD["id"]).save()
+        assert self._chat("second").status_code == 200
+        assert AssistantConversation.objects.get(user=user).ai_model == "second"
+
+    def test_chat_reports_the_usage_of_the_whole_turn(self, mocker, tabular):
+        """The tokens of every model request of the turn, not those of the last response."""
+        resource = ResourceFactory(title="Subventions 2025")
+        DatasetFactory(title="Aides aux communes", resources=[resource])
+        tabular.add_resource(resource.id, {"dep": "string"})
+        mocker.patch(
+            "udata.core.assistant.api.get_agent",
+            return_value=agent_with_model(RecordingModel(call_tools=["query_data"])),
+        )
+        user = self.login()
+        response = self.post(
+            url_for("api.assistant_chat"), data={**PAYLOAD, "resource_id": str(resource.id)}
+        )
+        assert response.status_code == 200
+        chunks = [
+            json.loads(line.removeprefix("data: "))
+            for line in response.get_data(as_text=True).splitlines()
+            if line.startswith("data: {")
+        ]
+        types = [chunk["type"] for chunk in chunks]
+        assert types.count("message-metadata") == 1
+        assert types.index("message-metadata") < types.index("finish")
+        metadata = chunks[types.index("message-metadata")]["messageMetadata"]
+        assert "timestamp" in metadata["pydantic_ai"]
+
+        stored = AssistantConversation.objects.get(user=user).model_messages()
+        responses = [m for m in stored if isinstance(m, ModelResponse)]
+        assert len(responses) == 2  # before and after the tool call
+        input_tokens = sum(r.usage.input_tokens for r in responses)
+        output_tokens = sum(r.usage.output_tokens for r in responses)
+        assert metadata["usage"] == {
+            "inputTokens": input_tokens,
+            "outputTokens": output_tokens,
+            "totalTokens": input_tokens + output_tokens,
+        }
+
+    def test_a_turn_with_a_response_without_usage_clears_the_usage(self, mocker):
+        """An explicit null: the AI SDK merges metadata, a missing key would keep an earlier usage."""
+
+        class WithoutUsage(TestModel):
+            """Streams its answers like a provider that reports no usage."""
+
+            @asynccontextmanager
+            async def request_stream(self, *args, **kwargs):
+                async with super().request_stream(*args, **kwargs) as streamed:
+                    streamed._usage_received = False
+                    yield streamed
+
+        mocker.patch(
+            "udata.core.assistant.api.get_agent", return_value=agent_with_model(WithoutUsage())
+        )
+        self.login()
+        response = self.post(url_for("api.assistant_chat"), data=PAYLOAD)
+        assert response.status_code == 200
+        metadata = [
+            json.loads(line.removeprefix("data: "))
+            for line in response.get_data(as_text=True).splitlines()
+            if line.startswith("data: {")
+        ]
+        (chunk,) = [c for c in metadata if c["type"] == "message-metadata"]
+        assert chunk["messageMetadata"]["usage"] is None
+        assert "timestamp" in chunk["messageMetadata"]["pydantic_ai"]
+
+    def test_a_failed_turn_reports_no_usage(self, mocker):
+        self.login()
+
+        async def failing_model(messages, info):
+            raise RuntimeError("boom")
+            yield  # an async generator, as stream_function expects
+
+        model = FunctionModel(stream_function=failing_model)
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
+        body = self.post(url_for("api.assistant_chat"), data=PAYLOAD).get_data(as_text=True)
+        assert '"type":"error"' in body
+        assert "usage" not in body

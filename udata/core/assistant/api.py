@@ -18,7 +18,7 @@ from uuid import UUID
 from flask import Response, current_app, request, stream_with_context
 from flask_login import current_user
 from pydantic import BaseModel, ValidationError, field_validator
-from pydantic_ai import Agent, CancellationToken, RunContext
+from pydantic_ai import Agent, AgentRunResultEvent, CancellationToken, RunContext
 from pydantic_ai.capabilities import Hooks
 from pydantic_ai.exceptions import (
     AgentRunError,
@@ -41,11 +41,16 @@ from pydantic_ai.models import ModelRequestContext
 from pydantic_ai.ui import SSE_CONTENT_TYPE
 from pydantic_ai.ui.vercel_ai import VercelAIAdapter, VercelAIEventStream
 from pydantic_ai.ui.vercel_ai.request_types import TextUIPart, UIMessage
-from pydantic_ai.ui.vercel_ai.response_types import AbortChunk, BaseChunk, ErrorChunk
-from pydantic_ai.usage import UsageLimits
+from pydantic_ai.ui.vercel_ai.response_types import (
+    AbortChunk,
+    BaseChunk,
+    ErrorChunk,
+    MessageMetadataChunk,
+)
+from pydantic_ai.usage import RunUsage, UsageLimits
 
-from udata.api import API, api
-from udata.core.assistant.agent import get_agent
+from udata.api import API, api, fields
+from udata.core.assistant.agent import UnknownModel, find_model, get_agent, model_choices
 from udata.core.assistant.history import asks, compact_history
 from udata.core.assistant.models import AssistantConversation
 from udata.core.assistant.prompts import language_instructions
@@ -125,8 +130,10 @@ def _save_conversation(
     conversation: AssistantConversation,
     messages: list[ModelMessage],
     active: ActiveResource | None,
+    model_name: str,
 ) -> None:
     conversation.messages = AssistantConversation.stored_messages(messages)
+    conversation.ai_model = model_name
     conversation.subject = active.dataset if active else None
     conversation.save()
 
@@ -154,10 +161,12 @@ def _context_hook(context: str) -> Hooks:
 
 
 class ChatContext(BaseModel):
-    """The ``resource_id`` and ``visualization`` of the body, outside the Vercel AI protocol."""
+    """The ``resource_id``, ``visualization`` and ``model`` the body adds to the protocol."""
 
     resource_id: UUID | None = None
     visualization: dict | None = None
+    # The `name` of an AI_MODELS entry; the default model when absent.
+    model: str | None = None
 
     @field_validator("visualization")
     @classmethod
@@ -169,16 +178,18 @@ class ChatContext(BaseModel):
         return visualization
 
 
-def _extract_context(extra: dict | None) -> tuple[str | None, dict | None]:
+def _extract_context(extra: dict | None) -> tuple[str | None, dict | None, str | None]:
     """The validated context of the body: a 400 if a field is invalid."""
     try:
         context = ChatContext.model_validate(extra or {})
     except ValidationError as error:
         if error.errors()[0]["loc"] == ("resource_id",):
             api.abort(400, _("Invalid resource_id: a resource UUID is expected."))
+        if error.errors()[0]["loc"] == ("model",):
+            api.abort(400, _("Unknown assistant model."))
         api.abort(400, _("Invalid visualization context."))
     resource_id = str(context.resource_id) if context.resource_id else None
-    return resource_id, context.visualization
+    return resource_id, context.visualization, context.model
 
 
 def _escape_untrusted(text: str) -> str:
@@ -262,11 +273,34 @@ def _error_message(error: Exception) -> str:
     return _("An error occurred while generating the response.")
 
 
+def usage_metadata(usage: RunUsage) -> dict[str, int] | None:
+    """The tokens of a turn as the AI SDK names them, None unless they are all known."""
+    # A response without usage makes the totals lower bounds: better none than a wrong one.
+    if usage.unmeasured_requests or not usage.total_tokens:
+        return None
+    return {
+        "inputTokens": usage.input_tokens,
+        "outputTokens": usage.output_tokens,
+        "totalTokens": usage.total_tokens,
+    }
+
+
 class AssistantEventStream(VercelAIEventStream):
     """Vercel AI event stream whose error and abort events carry localized messages.
 
     Raw failures ("Connection error.", provider error bodies) stay in the server logs.
+    The end-of-turn metadata also carries the turn's token usage.
     """
+
+    async def handle_run_result(self, event: AgentRunResultEvent) -> AsyncIterator[BaseChunk]:
+        usage = usage_metadata(event.result.usage)
+        async for chunk in super().handle_run_result(event):
+            if isinstance(chunk, MessageMetadataChunk):
+                # The AI SDK merges metadata: an explicit null clears an earlier stream's usage.
+                chunk = MessageMetadataChunk(
+                    message_metadata={**chunk.message_metadata, "usage": usage}
+                )
+            yield chunk
 
     async def on_error(self, error: Exception) -> AsyncIterator[BaseChunk]:
         # Configuration problems and bugs go to Sentry, provider hiccups and limits do not.
@@ -374,6 +408,36 @@ def _stream_in_thread(
             log.warning("Assistant chat stream still running after the client left")
 
 
+def _assistant_enabled() -> bool:
+    return bool(current_app.config["AI_BASE_URL"])
+
+
+def _assistant_ready() -> bool:
+    """Whether the assistant answers: enabled, and with the key its provider needs."""
+    return _assistant_enabled() and bool(current_app.config["AI_API_KEY"])
+
+
+model_fields = api.model(
+    "AssistantModel",
+    {
+        "id": fields.String(description="The identifier to send as `model` to the chat"),
+        "label": fields.String(description="The name to display to the user"),
+        "default": fields.Boolean(description="Whether it is the model used by default"),
+    },
+)
+
+
+@ns.route("/models/", endpoint="assistant_models")
+class AssistantModelsAPI(API):
+    @api.secure
+    @api.doc("assistant_models")
+    @api.marshal_list_with(model_fields)
+    def get(self):
+        """List the models offered to the user by the assistant"""
+        # Empty rather than a 503: clients load it on every page that shows the assistant.
+        return model_choices() if _assistant_ready() else []
+
+
 @ns.route("/chat/", endpoint="assistant_chat")
 class AssistantChatAPI(API):
     @api.secure
@@ -382,11 +446,10 @@ class AssistantChatAPI(API):
         """Stream an assistant reply as Vercel AI SSE events"""
         # One byte over: werkzeug cuts a chunked body at the limit instead of refusing it.
         request.max_content_length = MAX_REQUEST_BYTES + 1
-        # Without AI_BASE_URL the assistant is off; without a key it is misconfigured.
-        if not current_app.config["AI_BASE_URL"]:
-            api.abort(503, _("The assistant is not available."))
-        if not current_app.config["AI_API_KEY"]:
-            log.error("Assistant enabled without an AI provider API key (AI_API_KEY)")
+        if not _assistant_ready():
+            if _assistant_enabled():
+                # Not in _assistant_ready: the models list asks it on every page view.
+                log.error("Assistant enabled without an AI provider API key (AI_API_KEY)")
             api.abort(503, _("The assistant is not available."))
 
         # Requiring JSON blocks cross-site form posts: this API has no CSRF token.
@@ -400,7 +463,11 @@ class AssistantChatAPI(API):
             run_input = VercelAIAdapter.build_run_input(body)
         except ValidationError:
             api.abort(400, _("Invalid request body."))
-        resource_id, visualization = _extract_context(run_input.model_extra)
+        resource_id, visualization, model_name = _extract_context(run_input.model_extra)
+        try:
+            model = find_model(model_name)
+        except UnknownModel:
+            api.abort(400, _("Unknown assistant model."))
         run_input.messages = _check_new_turn(run_input.messages)
         chat_id = run_input.id
         if not 0 < len(chat_id) <= MAX_CHAT_ID_LENGTH:
@@ -410,6 +477,9 @@ class AssistantChatAPI(API):
             user=user, chat_id=chat_id
         ).first() or AssistantConversation(user=user, chat_id=chat_id)
         message_history = _stored_history(conversation)
+        # Keeps the stored history from mixing models, whatever the client.
+        if conversation.ai_model and conversation.ai_model != model["name"]:
+            api.abort(409, _("This conversation uses another model. Start a new one."))
 
         tabular = TabularClient()
         active = load_active_resource(resource_id, tabular) if resource_id else None
@@ -419,7 +489,7 @@ class AssistantChatAPI(API):
             columns=active.profile.columns() if active and active.profile else None,
             profile_error=active.profile_error if active else None,
         )
-        agent = get_agent()
+        agent = get_agent(model["name"])
         adapter = AssistantAdapter(
             agent,
             run_input,
@@ -437,7 +507,7 @@ class AssistantChatAPI(API):
                 capabilities=[_context_hook(context)] if context else None,
                 # A failed or interrupted run is not kept: the client drops that turn too.
                 on_complete=lambda result: _save_conversation(
-                    conversation, compact_history(result.all_messages()), active
+                    conversation, compact_history(result.all_messages()), active, model["name"]
                 ),
                 deps=deps,
                 instructions=instructions,

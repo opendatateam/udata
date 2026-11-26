@@ -32,6 +32,8 @@ class AssistantConversation(Datetimed, Document):
     chat_id = StringField(required=True)
     user = ReferenceField("User", required=True)
     subject = ReferenceField("Dataset")
+    # The `name` of the model that answers: the stored history never mixes two models.
+    ai_model = StringField()
     messages = ListField(EmbeddedDocumentField(AssistantMessage))
 
     meta = {

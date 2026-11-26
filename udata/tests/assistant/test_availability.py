@@ -51,3 +51,22 @@ class AssistantAvailabilityTest(PytestOnlyAPITestCase):
         )
         assert response.status_code == 503
         agent.assert_not_called()
+
+    def test_the_models_require_authentication(self):
+        assert self.get(url_for("api.assistant_models")).status_code == 401
+
+    def test_a_disabled_assistant_offers_no_model(self):
+        self.login()
+        response = self.get(url_for("api.assistant_models"))
+        assert response.status_code == 200
+        assert response.json == []
+
+    @pytest.mark.options(AI_BASE_URL="http://albert.test/v1", AI_API_KEY=None)
+    def test_a_misconfigured_assistant_offers_no_model(self, caplog):
+        self.login()
+        with caplog.at_level("ERROR", logger="udata.core.assistant.api"):
+            response = self.get(url_for("api.assistant_models"))
+        assert response.status_code == 200
+        assert response.json == []
+        # Every page that shows the assistant loads the list: not an error event each time.
+        assert caplog.text == ""

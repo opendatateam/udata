@@ -677,10 +677,21 @@ class Defaults:
     # The assistant is disabled while AI_BASE_URL is None.
     AI_BASE_URL = None
     AI_API_KEY = None
-    # The assistant uses the first one. `name`: the `id` of a model listed by `GET /v1/models`,
-    # never one of its `aliases`.
+    # The first one is the default model, the others are offered to the user. `name`: the `id` of
+    # a model listed by `GET /v1/models`, never one of its `aliases`. `label`: the name displayed.
     AI_MODELS = [
-        {"name": "gpt-oss-120b", "max_output_tokens": 8192, "reasoning_effort": None},
+        {
+            "name": "gpt-oss-120b",
+            "label": "GPT-OSS-120B",
+            "max_output_tokens": 8192,
+            "reasoning_effort": None,
+        },
+        {
+            "name": "mistral-medium-3-5",
+            "label": "Mistral Medium 3.5",
+            "max_output_tokens": 8192,
+            "reasoning_effort": None,
+        },
     ]
 
     # JSON-LD settings
