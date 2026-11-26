@@ -293,6 +293,9 @@ class CkanBackend(BaseBackend):
             resource.description = parse_html(res.get("description"))
             resource.url = res["url"]
             resource.filetype = "remote"
+            # The source wins over a file uploaded onto the harvested resource: it becomes a
+            # link again, and its file is deleted once the dataset is saved.
+            resource.fs_filename = None
             resource.format = res.get("format")
             resource.mime = res.get("mimetype")
             resource.hash = res.get("hash")

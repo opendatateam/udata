@@ -14,6 +14,7 @@ from mongoengine.errors import ValidationError as MongoValidationError
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 from udata import uris
+from udata.core import storages
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.harvest import HarvestMetadata
@@ -329,7 +330,23 @@ class BaseBackend(ABC):
                 if item.pk is None:
                     item.id = ObjectId()
             else:
+                # A stored file the harvest detached from the dataset has no holder left:
+                # delete it once the dataset is saved, as an upload does with the file it
+                # replaces.
+                stored_fs_filenames = (
+                    set(Dataset.objects(pk=item.pk).distinct("resources.fs_filename")) - {None}
+                    if isinstance(item, Dataset) and item.pk
+                    else set()
+                )
                 item.save()
+                if isinstance(item, Dataset):
+                    for fs_filename in stored_fs_filenames - {
+                        r.fs_filename for r in item.resources
+                    }:
+                        try:
+                            storages.resources.delete(fs_filename)
+                        except FileNotFoundError:
+                            log.warning(f"Detached file {fs_filename} was already missing")
 
             if isinstance(item, Dataset):
                 harvest_item.dataset = item

@@ -1,11 +1,14 @@
 import json
 import random
 from datetime import date, datetime, timedelta
+from io import BytesIO
 
 import pytest
 from mongoengine.connection import get_db
 
+from udata.core import storages
 from udata.core.dataset.constants import UpdateFrequency
+from udata.core.dataset.factories import ResourceFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.harvest import actions
@@ -531,6 +534,45 @@ class CkanBackendTest(PytestOnlyDBTestCase):
         dataset.reload()
         assert len(dataset.resources) == 1
         assert dataset.resources[0].id == resource_id
+
+    @pytest.mark.ckan_data("minimal")
+    def test_reharvesting_turns_an_uploaded_resource_back_into_a_link(
+        self, source, result, kwargs, instance_path
+    ):
+        dataset = dataset_for(result)
+        fs_filename = storages.resources.save(BytesIO(b"uploaded"), filename="uploaded.csv")
+        resource = dataset.resources[0]
+        resource.filetype = "file"
+        resource.fs_filename = fs_filename
+        resource.url = storages.resources.url(fs_filename, external=True)
+        dataset.save()
+
+        actions.run(source)
+
+        dataset.reload()
+        assert dataset.resources[0].filetype == "remote"
+        assert dataset.resources[0].fs_filename is None
+        assert dataset.resources[0].url == kwargs["resource_url"]
+        assert not storages.resources.exists(fs_filename)
+
+    @pytest.mark.ckan_data("minimal")
+    def test_reharvesting_keeps_the_file_of_another_resource(self, source, result, instance_path):
+        dataset = dataset_for(result)
+        fs_filename = storages.resources.save(BytesIO(b"uploaded"), filename="uploaded.csv")
+        dataset.resources.append(
+            ResourceFactory(
+                filetype="file",
+                fs_filename=fs_filename,
+                url=storages.resources.url(fs_filename, external=True),
+            )
+        )
+        dataset.save()
+
+        actions.run(source)
+
+        dataset.reload()
+        assert dataset.resources[1].fs_filename == fs_filename
+        assert storages.resources.exists(fs_filename)
 
     @pytest.mark.ckan_data("two_resources")
     def test_reharvesting_correlates_on_the_remote_id_not_the_position(
