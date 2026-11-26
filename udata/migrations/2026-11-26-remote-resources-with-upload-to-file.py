@@ -11,13 +11,10 @@ a foreign url.
 
 import logging
 
-from mongoengine.connection import get_db
-
 log = logging.getLogger(__name__)
 
 
 def migrate(db):
-    db = get_db()
     switched = 0
     kept = 0
     datasets = db.dataset.find(
@@ -35,12 +32,20 @@ def migrate(db):
             if resource.get("filetype") != "remote" or not fs_filename:
                 continue
             if not (resource.get("url") or "").endswith(f"/{fs_filename}"):
+                log.info(
+                    f"Kept remote: dataset {dataset['_id']}, resource {resource['_id']}, "
+                    f"fs_filename {fs_filename}, url {resource.get('url')}"
+                )
                 kept += 1
                 continue
             db.dataset.update_one(
                 {"_id": dataset["_id"]},
                 {"$set": {"resources.$[resource].filetype": "file"}},
                 array_filters=[{"resource._id": resource["_id"]}],
+            )
+            log.info(
+                f"Switched to file: dataset {dataset['_id']}, resource {resource['_id']}, "
+                f"fs_filename {fs_filename}"
             )
             switched += 1
     log.info(f"{switched} resources switched to file.")
