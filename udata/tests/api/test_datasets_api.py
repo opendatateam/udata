@@ -3245,6 +3245,26 @@ class CommunityResourceAPITest(APITestCase):
         community_resource = CommunityResource.objects.first()
         self.assertEqual(community_resource.dataset, dataset)
 
+    def test_community_uploads_of_the_same_file_name_at_the_same_second_get_their_own_file(self):
+        dataset = DatasetFactory()
+        self.login()
+        with patch("udata.core.dataset.api.datetime") as mock_datetime:
+            mock_datetime.now.return_value = datetime(2026, 11, 26, 12, 0, 0, tzinfo=UTC)
+            for content in (b"first", b"second"):
+                response = self.post(
+                    url_for("api.upload_new_community_resource", dataset=dataset),
+                    {"file": (BytesIO(content), "data.csv")},
+                    json=False,
+                )
+                self.assert201(response)
+
+        community_resources = CommunityResource.objects(dataset=dataset)
+        assert sorted(storages.resources.read(c.fs_filename) for c in community_resources) == [
+            b"first",
+            b"second",
+        ]
+        assert all(f"/{c.id}/" in c.fs_filename for c in community_resources)
+
     def test_community_resource_api_create(self):
         """It should create a community resource from the API"""
         dataset = DatasetFactory()
