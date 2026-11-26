@@ -10,7 +10,7 @@ from udata.core.dataset.factories import (
 from udata.db import migrations
 from udata.tests.api import PytestOnlyDBTestCase
 
-MIGRATION = "2026-11-27-shared-hosted-files-single-owner.py"
+MIGRATION = "2026-11-27-shared-hosted-files-single-resource.py"
 FS_FILENAME = "my-dataset/20250711-211430/data.csv"
 URL = f"https://static.example.org/resources/{FS_FILENAME}"
 

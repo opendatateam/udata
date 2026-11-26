@@ -49,16 +49,16 @@ def migrate(db):
     for fs_filename, holders in shared.items():
         holders.sort(key=lambda h: (h["deleted"] is not None, h["created"], str(h["resource"])))
         if fs_filename in community_fs_filenames:
-            owner = None
+            host = None
             log.info(f"Kept by a community resource: fs_filename {fs_filename}")
         else:
-            owner, *_ = holders
+            host, *_ = holders
             log.info(
-                f"Owner: dataset {owner['dataset']}, resource {owner['resource']}, "
+                f"Keeps the file: dataset {host['dataset']}, resource {host['resource']}, "
                 f"fs_filename {fs_filename}"
             )
         for holder in holders:
-            if holder is owner:
+            if holder is host:
                 continue
             db.dataset.update_one(
                 {"_id": holder["dataset"]},
