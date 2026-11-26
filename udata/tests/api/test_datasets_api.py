@@ -730,6 +730,7 @@ class DatasetAPITest(APITestCase):
         with self.api_user():
             response = self.post(url_for("api.datasets"), data)
         self.assert400(response)
+        assert "filetype" in response.json["errors"]["resources"][0]
         assert Dataset.objects.count() == 0
 
     def test_dataset_api_create_resource_without_filetype_is_rejected(self):
@@ -738,6 +739,7 @@ class DatasetAPITest(APITestCase):
         with self.api_user():
             response = self.post(url_for("api.datasets"), data)
         self.assert400(response)
+        assert "filetype" in response.json["errors"]["resources"][0]
         assert Dataset.objects.count() == 0
 
     def test_dataset_api_create_with_resources_dict(self):
@@ -1273,6 +1275,7 @@ class DatasetAPITest(APITestCase):
         data["resources"][0]["filesize"] = 123456
         response = self.put(url_for("api.dataset", dataset=dataset), data)
         self.assert400(response)
+        assert "filetype" in response.json["errors"]["resources"][0]
         dataset.reload()
         self.assertEqual(dataset.resources[0].filetype, "remote")
         self.assertEqual(dataset.resources[0].format, "url")
@@ -1286,8 +1289,21 @@ class DatasetAPITest(APITestCase):
         data["resources"][0]["filetype"] = "remote"
         response = self.put(url_for("api.dataset", dataset=dataset), data)
         self.assert400(response)
+        assert "filetype" in response.json["errors"]["resources"][0]
         dataset.reload()
         self.assertEqual(dataset.resources[0].filetype, "file")
+
+    def test_dataset_api_update_resource_without_filetype_keeps_remote(self):
+        user = self.login()
+        remote = ResourceFactory(filetype="remote")
+        dataset = DatasetFactory(owner=user, resources=[remote])
+        data = dataset.to_dict()
+        data["resources"] = [{"id": str(remote.id), "title": "new title"}]
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        self.assertEqual(dataset.resources[0].title, "new title")
+        self.assertEqual(dataset.resources[0].filetype, "remote")
 
     def test_dataset_api_update_without_resources(self):
         """It should update a dataset from the API without resources"""
@@ -2411,6 +2427,22 @@ class DatasetResourceAPITest(APITestCase):
         )
         self.assertEqual(self.dataset.last_modified, initial_last_modified)
 
+    def test_reorder_keeps_the_filetype_of_links_and_hosted_files(self):
+        # cdata only sends the ids
+        remote = ResourceFactory(filetype="remote")
+        hosted = ResourceFactory()
+        dataset = DatasetFactory(owner=self.user, resources=[remote, hosted])
+
+        response = self.put(
+            url_for("api.resources", dataset=dataset),
+            [{"id": str(hosted.id)}, {"id": str(remote.id)}],
+        )
+
+        self.assert200(response)
+        dataset.reload()
+        assert [r.id for r in dataset.resources] == [hosted.id, remote.id]
+        assert [r.filetype for r in dataset.resources] == ["file", "remote"]
+
     def test_invalid_reorder(self):
         self.dataset.resources = ResourceFactory.build_batch(3)
         self.dataset.save()
@@ -2704,6 +2736,7 @@ class DatasetResourceAPITest(APITestCase):
         ]
         response = self.put(url_for("api.resources", dataset=dataset), data)
         self.assert400(response)
+        assert "filetype" in response.json["errors"][0]
         dataset.reload()
         self.assertEqual(dataset.resources[0].filetype, "remote")
         self.assertEqual(dataset.resources[0].format, "url")

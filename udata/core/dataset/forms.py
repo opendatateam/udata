@@ -91,7 +91,6 @@ class BaseResourceForm(ModelForm):
         _("File type"),
         [validators.DataRequired()],
         choices=list(RESOURCE_FILETYPES),
-        default="file",
         description=_("Whether the resource is an uploaded file, a remote file or an API"),
     )
     type = fields.RadioField(
