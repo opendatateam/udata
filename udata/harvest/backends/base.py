@@ -14,6 +14,7 @@ from mongoengine.errors import ValidationError as MongoValidationError
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 from udata import uris
+from udata.core import storages
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.harvest import HarvestMetadata
@@ -329,7 +330,34 @@ class BaseBackend(ABC):
                 if item.pk is None:
                     item.id = ObjectId()
             else:
+                # An uploaded file no resource of the dataset holds anymore after the harvest
+                # has no holder left: delete it once the dataset is saved, as an upload does
+                # with the file it replaces.
+                stored_fs_filenames = set()
+                if isinstance(item, Dataset) and item.pk:
+                    stored_fs_filenames = set(
+                        Dataset.objects(pk=item.pk).distinct("resources.fs_filename")
+                    ) - {None}
                 item.save()
+                if stored_fs_filenames:
+                    for fs_filename in stored_fs_filenames - {
+                        r.fs_filename for r in item.resources
+                    }:
+                        # The dataset is saved: a storage failure must not fail the item.
+                        try:
+                            storages.resources.delete(fs_filename)
+                        except Exception:
+                            log.exception(
+                                f"Could not delete the uploaded file {fs_filename} "
+                                "the harvest source replaced"
+                            )
+                        else:
+                            # Reported on the item: a harvested resource should not hold
+                            # a file of ours in the first place.
+                            log.warning(
+                                f"Deleted the uploaded file {fs_filename}: "
+                                "the harvest source replaced its resource"
+                            )
 
             if isinstance(item, Dataset):
                 harvest_item.dataset = item

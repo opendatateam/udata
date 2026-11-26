@@ -3,6 +3,7 @@ from abc import ABC
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from io import BytesIO
 from urllib.parse import urlparse
 
 import pytest
@@ -13,6 +14,7 @@ from pytest_mock import MockerFixture
 from typing_extensions import override
 from voluptuous import Schema
 
+from udata.core import storages
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset import tasks
@@ -217,6 +219,29 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             assert dataset.harvest.source_id == str(source.id)
             assert dataset.harvest.domain == source.domain
             assert dataset.harvest.remote_id.startswith("dataset-")
+
+    @pytest.mark.parametrize("dryrun", [False, True], ids=["liverun", "dryrun"])
+    def test_a_rebuild_deletes_the_file_it_drops(self, dryrun, instance_path):
+        source = HarvestSourceFactory()
+        MockBackend(source, mock_items=[DatasetFactory.build(remote_id="rebuilt")]).harvest()
+        dataset = Dataset.objects.get(harvest__remote_id="rebuilt")
+        fs_filename = storages.resources.save(BytesIO(b"uploaded"), filename="uploaded.csv")
+        dataset.resources.append(
+            ResourceFactory(
+                filetype="file",
+                fs_filename=fs_filename,
+                url=storages.resources.url(fs_filename, external=True),
+            )
+        )
+        dataset.save()
+
+        MockBackend(
+            source,
+            dryrun=dryrun,
+            mock_items=[DatasetFactory.build(remote_id="rebuilt", resources=[])],
+        ).harvest()
+
+        assert storages.resources.exists(fs_filename) == dryrun
 
     def test_has_feature_defaults(self):
         backend = MockBackend(HarvestSourceFactory())
