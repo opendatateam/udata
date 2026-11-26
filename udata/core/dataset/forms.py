@@ -128,7 +128,9 @@ class BaseResourceForm(ModelForm):
                     _("Only remote resources can be created without an upload")
                 )
         elif field.data != self._obj.filetype:
-            raise validators.ValidationError(_("Cannot modify filetype after creation"))
+            raise validators.ValidationError(
+                _("Cannot modify %(field)s after creation", field="filetype")
+            )
 
     def populate_obj(self, obj):
         # Only protect existing hosted files: a brand new resource has no url

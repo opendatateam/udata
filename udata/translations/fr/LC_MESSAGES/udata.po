@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2026-11-26 13:53+0000\n"
+"POT-Creation-Date: 2026-11-26 14:31+0000\n"
 "PO-Revision-Date: 2025-11-19 13:03+0000\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
@@ -356,7 +356,7 @@ msgstr "Souhaitez-vous générer des données d'exemple ?"
 msgid "Your udata instance is ready!"
 msgstr "Votre instance udata est prête !"
 
-#: udata/core/checks.py:25
+#: udata/core/checks.py:25 udata/core/dataset/forms.py:132
 #, python-format
 msgid "Cannot modify %(field)s after creation"
 msgstr "Impossible de modifier %(field)s après la création"
@@ -951,11 +951,11 @@ msgstr "Nom du schéma"
 msgid "Version of the schema"
 msgstr "Version du schéma"
 
-#: udata/core/dataset/forms.py:85 udata/core/dataset/forms.py:183
+#: udata/core/dataset/forms.py:85 udata/core/dataset/forms.py:185
 msgid "Title"
 msgstr "Titre"
 
-#: udata/core/dataset/forms.py:88 udata/core/dataset/forms.py:187
+#: udata/core/dataset/forms.py:88 udata/core/dataset/forms.py:189
 msgid "Description"
 msgstr "Description"
 
@@ -1005,97 +1005,93 @@ msgstr "La taille du fichier en octets"
 msgid "Only remote resources can be created without an upload"
 msgstr "Seules les ressources distantes peuvent être créées sans fichier uploadé"
 
-#: udata/core/dataset/forms.py:131
-msgid "Cannot modify filetype after creation"
-msgstr "Le type de fichier ne peut pas être modifié après la création"
-
-#: udata/core/dataset/forms.py:158
+#: udata/core/dataset/forms.py:160
 msgid "Related dataset"
 msgstr "Jeu de données concerné"
 
-#: udata/core/dataset/forms.py:160 udata/core/dataset/forms.py:239
+#: udata/core/dataset/forms.py:162 udata/core/dataset/forms.py:241
 msgid "Publish as"
 msgstr "Publier en tant que"
 
-#: udata/core/dataset/forms.py:185
+#: udata/core/dataset/forms.py:187
 msgid "Acronym"
 msgstr "Sigle"
 
-#: udata/core/dataset/forms.py:185
+#: udata/core/dataset/forms.py:187
 msgid "An optional acronym"
 msgstr "Un acronyme facultatif"
 
-#: udata/core/dataset/forms.py:189
+#: udata/core/dataset/forms.py:191
 msgid "The details about the dataset (collection process, specifics...)."
 msgstr ""
 "Les détails sur le jeu de données (processus de collecte, "
 "spécificités...)."
 
-#: udata/core/dataset/forms.py:192
+#: udata/core/dataset/forms.py:194
 msgid "Short description"
 msgstr "Description courte"
 
-#: udata/core/dataset/forms.py:194
+#: udata/core/dataset/forms.py:196
 msgid "A short description of the dataset."
 msgstr "Une courte description du jeu de données."
 
-#: udata/core/dataset/forms.py:196
+#: udata/core/dataset/forms.py:198
 msgid "License"
 msgstr "Licence"
 
-#: udata/core/dataset/forms.py:203
+#: udata/core/dataset/forms.py:205
 msgid "Authorization request URL"
 msgstr "URL de la demande d'autorisation"
 
-#: udata/core/dataset/forms.py:205
+#: udata/core/dataset/forms.py:207
 msgid "Access type reason category"
 msgstr "Catégorie de raison du type d'accès"
 
-#: udata/core/dataset/forms.py:209
+#: udata/core/dataset/forms.py:211
 msgid "Access type reason"
 msgstr "Raison du type d'accès"
 
-#: udata/core/dataset/forms.py:211
+#: udata/core/dataset/forms.py:213
 msgid "Update frequency"
 msgstr "Fréquence de mise à jour"
 
-#: udata/core/dataset/forms.py:221
+#: udata/core/dataset/forms.py:223
 msgid "The frequency at which data are updated."
 msgstr "La fréquence à laquelle les données sont mises à jour."
 
-#: udata/core/dataset/forms.py:223
+#: udata/core/dataset/forms.py:225
 msgid "Expected frequency date"
 msgstr "Date de mise à jour prévue"
 
-#: udata/core/dataset/forms.py:227
+#: udata/core/dataset/forms.py:229
 msgid "Temporal coverage"
 msgstr "Couverture temporelle"
 
-#: udata/core/dataset/forms.py:227
+#: udata/core/dataset/forms.py:229
 msgid "The period covered by the data"
 msgstr "La période couverte par les données"
 
-#: udata/core/dataset/forms.py:230 udata/core/spatial/forms.py:85
+#: udata/core/dataset/forms.py:232 udata/core/spatial/forms.py:85
 msgid "Spatial coverage"
 msgstr "Couverture spatiale"
 
-#: udata/core/dataset/forms.py:230
+#: udata/core/dataset/forms.py:232
 msgid "The geographical area covered by the data."
 msgstr "La zone géographique couverte par les données."
 
-#: udata/core/dataset/forms.py:232
+#: udata/core/dataset/forms.py:234
 msgid "Tags"
 msgstr "Mots-clés"
 
-#: udata/core/dataset/forms.py:232
+#: udata/core/dataset/forms.py:234
 msgid "Some taxonomy keywords"
 msgstr "Quelques mots-clés pour la taxonomie"
 
-#: udata/core/dataset/forms.py:234
+#: udata/core/dataset/forms.py:236
 msgid "Private"
 msgstr "Privé"
 
-#: udata/core/dataset/forms.py:235
+#: udata/core/dataset/forms.py:237
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr ""
 "Restreint la visibilité du jeu de données à vous ou votre organisation "
@@ -2777,4 +2773,7 @@ msgstr "Suppression de votre compte {site} inactif"
 #~ "L'assistant est activé mais la clé "
 #~ "d'API du fournisseur d'IA (AI_API_KEY) "
 #~ "n'est pas configurée."
+
+#~ msgid "Cannot modify filetype after creation"
+#~ msgstr "Le type de fichier ne peut pas être modifié après la création"
 
