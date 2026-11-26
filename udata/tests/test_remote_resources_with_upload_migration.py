@@ -81,6 +81,26 @@ class RemoteResourcesWithUploadMigrationTest(PytestOnlyDBTestCase):
         assert dataset.resources[0].fs_filename is None
         assert community.fs_filename == fs_filename
 
+    def test_remote_community_resource_targeting_its_stored_file_becomes_file(self):
+        community = CommunityResourceFactory(filetype="remote", fs_filename=FS_FILENAME, url=URL)
+
+        migrate()
+
+        community.reload()
+        assert community.filetype == "file"
+        assert community.fs_filename == FS_FILENAME
+
+    def test_remote_community_resource_whose_url_was_edited_loses_its_fs_filename(self):
+        community = CommunityResourceFactory(
+            filetype="remote", fs_filename=FS_FILENAME, url="https://example.org/other.csv"
+        )
+
+        migrate()
+
+        community.reload()
+        assert community.filetype == "remote"
+        assert community.fs_filename is None
+
     def test_each_resource_of_a_dataset_is_migrated(self):
         dataset = DatasetFactory(
             resources=[

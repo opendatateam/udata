@@ -3443,6 +3443,7 @@ class CommunityResourceAPITest(APITestCase):
         }
         response = self.put(url_for("api.community_resource", community=community_resource), data)
         self.assert400(response)
+        assert "filetype" in response.json["errors"]
         self.assertEqual(CommunityResource.objects.first().filetype, "file")
 
     def test_community_resource_cannot_update_filetype_remote_to_file(self):
@@ -3461,12 +3462,13 @@ class CommunityResourceAPITest(APITestCase):
         }
         response = self.put(url_for("api.community_resource", community=community_resource), data)
         self.assert400(response)
+        assert "filetype" in response.json["errors"]
         updated = CommunityResource.objects.first()
         self.assertEqual(updated.filetype, "remote")
         self.assertEqual(updated.format, "url")
 
     def test_community_resource_update_remote_without_filetype(self):
-        """Omitting filetype keeps the current one instead of the form default"""
+        """Omitting filetype keeps the current one"""
         user = self.login()
         community_resource = CommunityResourceFactory(
             dataset=DatasetFactory(), owner=user, filetype="remote"

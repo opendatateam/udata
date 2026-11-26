@@ -119,7 +119,7 @@ class BaseResourceForm(ModelForm):
     def validate_filetype(self, field):
         # Only an upload makes a hosted file, and uploads never go through this
         # form: they build the resource or set the filetype themselves. Every
-        # other path creating or editing a resource does, nested dataset
+        # other API endpoint creating or editing a resource does, nested dataset
         # entries included, so a resource created here is a link.
         if self._obj is None:
             if field.data != "remote":

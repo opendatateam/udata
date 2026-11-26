@@ -13,6 +13,9 @@ being unset by `2026-11-25-backfilled-links-unset-fs-filename.py`. A resource
 whose url targets something else, or whose file is held by a community resource
 (the 2020 backfill set a `fs_filename` on those links too), is a link: its
 `fs_filename` is unset, the file is left untouched on the storage.
+
+Community resources follow the same rule on their url: a reupload onto a remote
+community resource left it remote too.
 """
 
 import logging
@@ -61,5 +64,25 @@ def migrate(db):
                 update,
                 array_filters=[{"resource._id": resource["_id"]}],
             )
+    communities = db.community_resource.find(
+        {"filetype": "remote", "fs_filename": {"$ne": None}}, {"fs_filename": 1, "url": 1}
+    )
+    for community in communities:
+        fs_filename = community["fs_filename"]
+        if (community.get("url") or "").endswith(f"/{fs_filename}"):
+            update = {"$set": {"filetype": "file"}}
+            log.info(
+                f"Switched to file: community resource {community['_id']}, "
+                f"fs_filename {fs_filename}"
+            )
+            switched += 1
+        else:
+            update = {"$unset": {"fs_filename": ""}}
+            log.info(
+                f"Unset fs_filename: community resource {community['_id']}, "
+                f"fs_filename {fs_filename}, url {community.get('url')}"
+            )
+            unset += 1
+        db.community_resource.update_one({"_id": community["_id"]}, update)
     log.info(f"{switched} resources switched to file.")
     log.info(f"{unset} resources kept remote with their fs_filename unset.")
