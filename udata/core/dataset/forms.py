@@ -39,7 +39,6 @@ __all__ = ("CommunityResourceForm", "DatasetForm", "ResourceForm")
 # Same reasoning as the `url` protection from
 # https://github.com/opendatateam/udata/issues/2544
 HOSTED_RESOURCE_PROTECTED_FIELDS = (
-    "filetype",
     "url",
     "checksum",
     "filesize",
@@ -92,7 +91,6 @@ class BaseResourceForm(ModelForm):
         _("File type"),
         [validators.DataRequired()],
         choices=list(RESOURCE_FILETYPES),
-        default="file",
         description=_("Whether the resource is an uploaded file, a remote file or an API"),
     )
     type = fields.RadioField(
@@ -117,6 +115,21 @@ class BaseResourceForm(ModelForm):
     )
     extras = fields.ExtrasField()
     schema = fields.FormField(SchemaForm)
+
+    def validate_filetype(self, field):
+        # Only an upload makes a hosted file, and uploads never go through this
+        # form: they build the resource or set the filetype themselves. Every
+        # other API endpoint creating or editing a resource does, nested dataset
+        # entries included, so a resource created here is a link.
+        if self._obj is None:
+            if field.data != "remote":
+                raise validators.ValidationError(
+                    _("Only remote resources can be created without an upload")
+                )
+        elif field.data != self._obj.filetype:
+            raise validators.ValidationError(
+                _("Cannot modify %(field)s after creation", field="filetype")
+            )
 
     def populate_obj(self, obj):
         # Only protect existing hosted files: a brand new resource has no url
