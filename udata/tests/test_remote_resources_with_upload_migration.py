@@ -4,7 +4,7 @@ from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.db import migrations
 from udata.tests.api import PytestOnlyDBTestCase
 
-MIGRATION = "2026-11-25-remote-resources-with-upload-to-file.py"
+MIGRATION = "2026-11-26-remote-resources-with-upload-to-file.py"
 FS_FILENAME = "my-dataset/20240101-120000/data.csv"
 
 
