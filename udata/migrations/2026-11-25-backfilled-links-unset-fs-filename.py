@@ -28,25 +28,10 @@ def migrate(db):
             ]
         )
     ]
-    log.info(f"{len(shared_fs_filenames)} fs_filenames shared by several resources.")
     links = {"filetype": "remote", "fs_filename": {"$in": shared_fs_filenames}}
-    link_count = 0
-    for dataset in db.dataset.find(
-        {"resources": {"$elemMatch": links}},
-        {"resources._id": 1, "resources.filetype": 1, "resources.fs_filename": 1},
-    ):
-        for resource in dataset["resources"]:
-            if resource.get("filetype") == "remote" and resource.get("fs_filename") in (
-                shared_fs_filenames
-            ):
-                log.info(
-                    f"Unset fs_filename: dataset {dataset['_id']}, resource {resource['_id']}, "
-                    f"fs_filename {resource['fs_filename']}"
-                )
-                link_count += 1
     result = db.dataset.update_many(
         {"resources": {"$elemMatch": links}},
         {"$unset": {"resources.$[link].fs_filename": ""}},
         array_filters=[{f"link.{key}": value for key, value in links.items()}],
     )
-    log.info(f"{link_count} links in {result.modified_count} datasets processed.")
+    log.info(f"{result.modified_count} datasets processed.")
