@@ -1,6 +1,10 @@
 from mongoengine.connection import get_db
 
-from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.dataset.factories import (
+    CommunityResourceFactory,
+    DatasetFactory,
+    ResourceFactory,
+)
 from udata.db import migrations
 from udata.tests.api import PytestOnlyDBTestCase
 
@@ -62,8 +66,23 @@ class RemoteResourcesWithUploadMigrationTest(PytestOnlyDBTestCase):
         assert dataset.resources[0].filetype == "remote"
         assert dataset.resources[0].fs_filename is None
 
-    def test_no_remote_resource_keeps_a_fs_filename(self):
-        DatasetFactory(
+    def test_link_to_a_community_resource_file_loses_its_fs_filename(self):
+        fs_filename = "other-dataset/community/20150302-120940/data.xlsx"
+        url = f"https://static.example.org/resources/{fs_filename}"
+        community = CommunityResourceFactory(filetype="file", fs_filename=fs_filename, url=url)
+        link = ResourceFactory(filetype="remote", fs_filename=fs_filename, url=url)
+        dataset = DatasetFactory(resources=[link])
+
+        migrate()
+
+        dataset.reload()
+        community.reload()
+        assert dataset.resources[0].filetype == "remote"
+        assert dataset.resources[0].fs_filename is None
+        assert community.fs_filename == fs_filename
+
+    def test_each_resource_of_a_dataset_is_migrated(self):
+        dataset = DatasetFactory(
             resources=[
                 ResourceFactory(filetype="remote", fs_filename=FS_FILENAME, url=URL),
                 ResourceFactory(
@@ -76,9 +95,6 @@ class RemoteResourcesWithUploadMigrationTest(PytestOnlyDBTestCase):
 
         migrate()
 
-        assert (
-            get_db().dataset.count_documents(
-                {"resources": {"$elemMatch": {"filetype": "remote", "fs_filename": {"$ne": None}}}}
-            )
-            == 0
-        )
+        dataset.reload()
+        assert [r.filetype for r in dataset.resources] == ["file", "remote"]
+        assert [r.fs_filename for r in dataset.resources] == [FS_FILENAME, None]

@@ -8,10 +8,11 @@ Until opendatateam/udata#3254 a hosted file could also be switched to remote,
 then given any url.
 
 A resource whose url still targets its stored file is switched to file: it is
-the only holder of that file, the links sharing it with another resource being
-unset by `2026-11-25-backfilled-links-unset-fs-filename.py`. A resource whose
-url targets something else is a link: its `fs_filename` is unset, the file is
-left untouched on the storage.
+the only holder of that file, the links sharing it with another dataset resource
+being unset by `2026-11-25-backfilled-links-unset-fs-filename.py`. A resource
+whose url targets something else, or whose file is held by a community resource
+(the 2020 backfill set a `fs_filename` on those links too), is a link: its
+`fs_filename` is unset, the file is left untouched on the storage.
 """
 
 import logging
@@ -20,6 +21,9 @@ log = logging.getLogger(__name__)
 
 
 def migrate(db):
+    community_fs_filenames = set(
+        db.community_resource.distinct("fs_filename", {"fs_filename": {"$ne": None}})
+    )
     switched = 0
     unset = 0
     datasets = db.dataset.find(
@@ -36,7 +40,9 @@ def migrate(db):
             fs_filename = resource.get("fs_filename")
             if resource.get("filetype") != "remote" or not fs_filename:
                 continue
-            if (resource.get("url") or "").endswith(f"/{fs_filename}"):
+            if fs_filename not in community_fs_filenames and (resource.get("url") or "").endswith(
+                f"/{fs_filename}"
+            ):
                 update = {"$set": {"resources.$[resource].filetype": "file"}}
                 log.info(
                     f"Switched to file: dataset {dataset['_id']}, resource {resource['_id']}, "
