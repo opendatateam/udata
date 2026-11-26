@@ -13,7 +13,7 @@ from udata.tests.helpers import assert_emit
 
 @pytest.mark.options(PUBLISH_ON_RESOURCE_EVENTS=True, RESOURCES_ANALYSER_URI="http://local.dev")
 class DatasetEventsTest(PytestOnlyDBTestCase):
-    @patch("requests.post")
+    @patch("requests.Session.post")
     @pytest.mark.options(RESOURCES_ANALYSER_API_KEY=None)
     def test_publish_message_resource_created_no_api_key(self, mock_req):
         dataset = DatasetFactory()
@@ -35,7 +35,7 @@ class DatasetEventsTest(PytestOnlyDBTestCase):
             headers={},  # No RESOURCES_ANALYSER_API_KEY, no headers.
         )
 
-    @patch("requests.post")
+    @patch("requests.Session.post")
     @pytest.mark.options(RESOURCES_ANALYSER_API_KEY="foobar-api-key")
     def test_publish_message_resource_created(self, mock_req):
         dataset = DatasetFactory()
@@ -57,7 +57,7 @@ class DatasetEventsTest(PytestOnlyDBTestCase):
             headers={"Authorization": "Bearer foobar-api-key"},
         )
 
-    @patch("requests.put")
+    @patch("requests.Session.put")
     @pytest.mark.options(RESOURCES_ANALYSER_API_KEY="foobar-api-key")
     def test_publish_message_resource_modified(self, mock_req):
         resource = ResourceFactory(schema=Schema(url="http://localhost/my-schema"))
@@ -81,7 +81,7 @@ class DatasetEventsTest(PytestOnlyDBTestCase):
             headers={"Authorization": "Bearer foobar-api-key"},
         )
 
-    @patch("requests.delete")
+    @patch("requests.Session.delete")
     @pytest.mark.options(RESOURCES_ANALYSER_API_KEY="foobar-api-key")
     def test_publish_message_resource_removed(self, mock_req):
         resource = ResourceFactory()

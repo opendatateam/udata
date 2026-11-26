@@ -47,6 +47,7 @@ from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.storages.utils import CHECKSUM_TYPE
 from udata.core.topic.models import Topic
 from udata.frontend.markdown import md
+from udata.http import http_session
 from udata.i18n import gettext as _
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 from udata.utils import get_by, get_rss_feed_list
@@ -332,8 +333,8 @@ class DatasetListAPI(API):
     def get(self):
         """List or search all datasets"""
         args = dataset_parser.parse()
-        datasets = Dataset.objects.visible_by_user(
-            current_user, mongoengine.Q(private=False, archived=None, deleted=None)
+        datasets = Dataset.objects.visible_by_current_user(
+            mongoengine.Q(private=False, archived=None, deleted=None)
         )
         datasets = dataset_parser.parse_filters(datasets, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
@@ -817,7 +818,7 @@ class ResourceAnalysisAPI(ResourceMixin, API):
         try:
             # Hydra only probes the resource (HEAD, GET and CORS requests, 5 s each) before
             # answering, the download and the analysis itself are queued on its side.
-            r = requests.post(
+            r = http_session().post(
                 f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/checks",
                 json={"resource_id": str(resource.id), "force_analysis": True},
                 headers=analyser_headers(),

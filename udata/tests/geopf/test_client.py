@@ -11,6 +11,7 @@ from udata.geopf.client import (
     _extract_file_identifier,
     _GeopfSession,
 )
+from udata.http import USER_AGENT
 from udata.tests import PytestOnlyTestCase
 from udata.tests.geopf import (
     TEST_API_BASE,
@@ -276,12 +277,13 @@ class GeopfClientProcessingTest(PytestOnlyTestCase):
 
 @TEST_GEOPF_CONF
 class GeopfClientTaggingTest(PytestOnlyTestCase):
-    def test_tag_entity_sends_datasheet_name(self, rmock):
-        rmock.post(f"{TEST_API_URL}/uploads/u1/tags", json={})
+    def test_tag_entity_sends_tags(self, rmock):
+        rmock.post(f"{TEST_API_URL}/stored_data/sd1/tags", json={})
+        tags = {"datasheet_name": "my-sheet", "upload_id": "u1", "proc_int_id": "e1"}
         GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).tag_entity(
-            "uploads", "u1", "my-sheet"
+            "stored_data", "sd1", tags
         )
-        assert rmock.last_request.json() == {"datasheet_name": "my-sheet"}
+        assert rmock.last_request.json() == tags
 
 
 @TEST_GEOPF_CONF
@@ -311,6 +313,17 @@ class GeopfClientOfferingsTest(PytestOnlyTestCase):
         assert rmock.call_count == 2
         assert rmock.request_history[0].qs["page"] == ["1"]
         assert rmock.request_history[1].qs["page"] == ["2"]
+
+    def test_list_vector_pyramids_filters_on_vectordb_tag(self, rmock):
+        pyramids = [{"_id": "pyr-1", "tags": {"vectordb_id": "sd-1"}}]
+        rmock.get(f"{TEST_API_URL}/stored_data", json=pyramids)
+        result = GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).list_vector_pyramids(
+            "sd-1"
+        )
+        assert result == pyramids
+        qs = rmock.last_request.qs
+        assert qs["type"] == ["rok4-pyramid-vector"]
+        assert qs["tags[vectordb_id]"] == ["sd-1"]
 
 
 @TEST_GEOPF_CONF
@@ -417,6 +430,7 @@ class GeopfClientAuthTest(PytestOnlyTestCase):
         rmock.get(f"{TEST_API_URL}/offerings", json=[])
         GeopfClient(token=TEST_TOKEN, datastore_id=TEST_DATASTORE_ID).list_offerings("sd-1")
         assert rmock.last_request.headers["Authorization"] == f"Bearer {TEST_TOKEN}"
+        assert rmock.last_request.headers["User-Agent"] == USER_AGENT
 
     def test_no_datastore_id_raises_on_datastore_scoped_call(self):
         with pytest.raises(GeopfError):

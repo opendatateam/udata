@@ -2,11 +2,11 @@ import json
 import logging
 
 import click
-import requests
 from bson import ObjectId
 
 from udata.commands import cli, exit_with_error, success
 from udata.core.dataset.constants import DEFAULT_LICENSE
+from udata.http import http_session
 from udata.models import Dataset, License
 
 from . import actions
@@ -31,7 +31,7 @@ FLAGS_MAP = {
 def licenses(source=DEFAULT_LICENSE_FILE):
     """Feed the licenses from a JSON file"""
     if source.startswith("http"):
-        json_licenses = requests.get(source).json()
+        json_licenses = http_session().get(source).json()
     else:
         with open(source) as fp:
             json_licenses = json.load(fp)

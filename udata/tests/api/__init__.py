@@ -49,7 +49,7 @@ class APITestCaseMixin:
         self.client = app.test_client()
 
     @contextmanager
-    def api_user(self, user=None):
+    def api_user(self, user=None, scopes=None):
         """
         Context manager for API key authentication.
 
@@ -58,7 +58,7 @@ class APITestCaseMixin:
                 response = self.get(url)
         """
         self._user = user or UserFactory()
-        _token, plaintext = ApiToken.generate(self._user)
+        _token, plaintext = ApiToken.generate(self._user, scopes=scopes)
         self._api_key = plaintext
         yield self._user
         self._user = None

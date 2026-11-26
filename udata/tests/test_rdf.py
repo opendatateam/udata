@@ -1,3 +1,8 @@
+import ast
+import hashlib
+import inspect
+import json
+
 import pytest
 from rdflib import (
     BNode,
@@ -5,6 +10,7 @@ from rdflib import (
     Literal,
     URIRef,
 )
+from rdflib import parser as rdflib_parser
 from rdflib.resource import Resource as RdfResource
 
 from udata.core.organization.factories import OrganizationFactory
@@ -19,6 +25,7 @@ from udata.rdf import (
     FORMAT_MAP,
     ORG,
     RDF,
+    RDFS,
     SKOS,
     VCARD,
     contact_point_from_foaf,
@@ -27,10 +34,12 @@ from udata.rdf import (
     contact_points_to_rdf,
     guess_format,
     negociate_content,
+    serialize_value,
     vocabulary_key,
     want_rdf,
 )
-from udata.tests import TestCase
+from udata.ssrf import BlockedAddressError
+from udata.tests import PytestOnlyTestCase, TestCase
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import argvalues
 
@@ -82,6 +91,117 @@ class ContentNegociationTest(TestCase):
             self.assertFalse(want_rdf())
 
 
+@pytest.mark.usefixtures("no_ambient_proxy")
+class RdflibLocationTest(PytestOnlyTestCase):
+    def test_guarded_rdflib_loader_is_the_reviewed_one(self):
+        # udata.rdf guards rdflib through two private names: an rdflib upgrade that changes the
+        # code around them could reopen the SSRF without any behaviour test noticing.
+        # The names are already replaced here: read the originals from the module source.
+        module_source = inspect.getsource(rdflib_parser)
+        reviewed = {
+            "_create_input_source_from_location": "51aba9c10f00e1f48391b1dc0c820abb9435fb3de836430e0c1184076b2583c3",
+            "URLInputSource": "bfbb31e44e090c3112d0f1b12b6e3b3d64c4850f7247682193537f945aa7323e",
+        }
+        found = {
+            node.name: ast.get_source_segment(module_source, node)
+            for node in ast.parse(module_source).body
+            if getattr(node, "name", None) in reviewed
+        }
+        assert found.keys() == reviewed.keys()
+        for name, source in found.items():
+            assert hashlib.sha256(source.encode()).hexdigest() == reviewed[name], (
+                f"rdflib changed {name}, which udata.rdf relies on to guard its loader: "
+                "review its diff, then update this hash"
+            )
+
+    def test_parsed_url_is_fetched(self, rmock):
+        rmock.get(
+            "http://data.test.org/catalog.ttl",
+            text=f"<http://data.test.org/catalog> a <{DCAT.Catalog}> .",
+            headers={"Content-Type": "text/turtle; charset=utf-8"},
+        )
+
+        graph = Graph().parse("http://data.test.org/catalog.ttl")
+
+        assert (URIRef("http://data.test.org/catalog"), RDF.type, DCAT.Catalog) in graph
+
+    def test_parsed_local_path_is_never_read(self, tmp_path):
+        catalog = tmp_path / "catalog.ttl"
+        catalog.write_text(f"<http://data.test.org/catalog> a <{DCAT.Catalog}> .")
+
+        with pytest.raises(BlockedAddressError, match="scheme ''"):
+            Graph().parse(str(catalog), format="turtle")
+
+    def test_remote_context_is_fetched(self, rmock):
+        rmock.get("http://data.test.org/context.jsonld", json={"@context": {"@vocab": str(DCAT)}})
+        data = json.dumps(
+            {
+                "@context": "http://data.test.org/context.jsonld",
+                "@id": "http://data.test.org/catalog",
+                "@type": "Catalog",
+            }
+        )
+
+        graph = Graph().parse(data=data, format="json-ld")
+
+        assert (URIRef("http://data.test.org/catalog"), RDF.type, DCAT.Catalog) in graph
+
+    def test_remote_context_follows_its_jsonld_alternate(self, rmock):
+        rmock.get(
+            "http://data.test.org/vocab",
+            text="<html></html>",
+            headers={
+                "Content-Type": "text/html",
+                "Link": '</vocab/context.jsonld>; rel="alternate"; type="application/ld+json"',
+            },
+        )
+        rmock.get(
+            "http://data.test.org/vocab/context.jsonld", json={"@context": {"@vocab": str(DCAT)}}
+        )
+        data = json.dumps(
+            {
+                "@context": "http://data.test.org/vocab",
+                "@id": "http://data.test.org/catalog",
+                "@type": "Catalog",
+            }
+        )
+
+        graph = Graph().parse(data=data, format="json-ld")
+
+        assert (URIRef("http://data.test.org/catalog"), RDF.type, DCAT.Catalog) in graph
+
+    def test_remote_context_alternate_goes_through_the_guard(self, rmock):
+        rmock.get(
+            "http://data.test.org/vocab",
+            text="<html></html>",
+            headers={
+                "Content-Type": "text/html",
+                "Link": '<file:///etc/passwd>; rel="alternate"; type="application/ld+json"',
+            },
+        )
+        data = json.dumps({"@context": "http://data.test.org/vocab", "@type": "Catalog"})
+
+        with pytest.raises(BlockedAddressError, match="scheme 'file'"):
+            Graph().parse(data=data, format="json-ld")
+
+    @pytest.mark.options(URLS_ALLOW_LOCAL=False)
+    def test_remote_context_on_a_loopback_address_is_blocked(self):
+        # Deliberately no rmock: requests_mock substitutes the session adapter,
+        # which is precisely the guard under test.
+        data = json.dumps({"@context": "http://127.0.0.1:9/context.jsonld", "@type": "Catalog"})
+
+        with pytest.raises(BlockedAddressError, match="loopback"):
+            Graph().parse(data=data, format="json-ld")
+
+    def test_remote_context_is_never_read_from_a_local_file(self, tmp_path):
+        context = tmp_path / "context.jsonld"
+        context.write_text(json.dumps({"@context": {"@vocab": str(DCAT)}}))
+        data = json.dumps({"@context": context.as_uri(), "@type": "Catalog"})
+
+        with pytest.raises(BlockedAddressError, match="scheme 'file'"):
+            Graph().parse(data=data, format="json-ld")
+
+
 class GuessFormatTest:
     @pytest.mark.parametrize("suffix,expected", FORMAT_MAP.items())
     def test_guess_from_extension(self, suffix, expected):
@@ -96,6 +216,65 @@ class GuessFormatTest:
 
     def test_unkown_mime(self):
         assert guess_format("unknown/mime") is None
+
+
+class RdfUtilsTest(PytestOnlyTestCase):
+    @pytest.mark.parametrize(
+        "value,expected",
+        argvalues(
+            [
+                (URIRef("http://example.com/foo"), "http://example.com/foo", "uriref"),
+                (Literal("foo"), "foo", "literal-str"),
+                (Literal(42), 42, "literal-int"),
+                (Literal("foo", lang="fr"), "foo", "literal-lang"),
+                (BNode(), None, "bnode"),
+                (
+                    Graph().resource(URIRef("http://example.com/foo")),
+                    "http://example.com/foo",
+                    "resource-uriref",
+                ),
+                (Graph().resource(Literal("foo")), "foo", "resource-literal"),
+                (Graph().resource(BNode()), None, "resource-bnode"),
+            ]
+        ),
+    )
+    def test_serialize_value_types(self, value, expected):
+        assert serialize_value(value) == expected
+
+    @pytest.mark.parametrize(
+        "unwrap,expected",
+        argvalues(
+            [
+                ([DCT.title], "title", "title"),
+                ([RDFS.label], "label", "label"),
+                ([SKOS.prefLabel], "http://example.com/foo", "missing"),
+                ([SKOS.altLabel], "http://example.com/foo", "empty"),
+                ([SKOS.note], "http://example.com/foo", "bnode"),
+                ([RDFS.label, DCT.title], "label", "in-order"),
+                ([SKOS.prefLabel, DCT.title], "title", "skip-missing"),
+                ([SKOS.altLabel, DCT.title], "title", "skip-empty"),
+                ([SKOS.note, DCT.title], "title", "skip-bnode"),
+                ([], "http://example.com/foo", "no-list"),
+                (None, "http://example.com/foo", "none"),
+            ]
+        ),
+    )
+    def test_serialize_value_unwrap(self, unwrap, expected):
+        graph = Graph()
+        node = URIRef("http://example.com/foo")
+        graph.add((node, DCT.title, Literal("title")))
+        graph.add((node, RDFS.label, Literal("label")))
+        graph.add((node, SKOS.altLabel, Literal("")))
+        graph.add((node, SKOS.note, BNode()))
+
+        assert serialize_value(graph.resource(node), unwrap=unwrap) == expected
+
+    def test_serialize_value_unwrap_no_match_bnode(self):
+        graph = Graph()
+        node = BNode()
+        graph.add((node, DCT.title, Literal("title")))
+
+        assert serialize_value(graph.resource(node), unwrap=[SKOS.prefLabel]) is None
 
 
 class ContactToRdfTest:

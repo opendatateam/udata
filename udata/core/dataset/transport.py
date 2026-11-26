@@ -1,7 +1,7 @@
-import requests
 from flask import current_app
 
 from udata.commands import error, success
+from udata.http import http_session
 from udata.models import Dataset
 from udata.tasks import job
 
@@ -35,7 +35,7 @@ def map_transport_datasets(self):
         error("TRANSPORT_DATASETS_URL variable must be set.")
         return
 
-    response = requests.get(source)
+    response = http_session().get(source)
     if response.status_code != 200:
         error("Remote platform unreachable.")
         return

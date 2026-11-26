@@ -20,7 +20,14 @@ from flask_restx.reqparse import RequestParser
 from flask_storage import UnauthorizedFileType
 
 from udata.app import csrf
-from udata.auth import Permission, PermissionDenied, RoleNeed, authenticate_request, current_user
+from udata.auth import (
+    Permission,
+    PermissionDenied,
+    RoleNeed,
+    admin_permission,
+    authenticate_request,
+    current_user,
+)
 from udata.i18n import get_locale
 from udata.mongo import db
 
@@ -89,7 +96,7 @@ class UDataApi(Api):
         def wrapper(*args, **kwargs):
             if (
                 not current_user.is_anonymous
-                and not current_user.sysadmin
+                and not admin_permission.can()
                 and current_app.config["READ_ONLY_MODE"]
                 and any(ext in str(func) for ext in current_app.config["METHOD_BLOCKLIST"])
             ):
@@ -134,7 +141,10 @@ class UDataApi(Api):
                         self.abort(401, "Expired API token")
                     self.abort(401, "Invalid API token")
 
-                if not authenticate_request(api_token.user):
+                drop_sysadmin_permission = "sysadmin" not in api_token.scopes
+                if not authenticate_request(
+                    api_token.user, drop_sysadmin_permission=drop_sysadmin_permission
+                ):
                     self.abort(401, "Inactive user")
                 # Authenticating the owner is what grants the token their rights; the
                 # token itself is kept so that what it does is attributed to it.
@@ -424,6 +434,7 @@ def init_app(app):
     import udata.core.followers.api  # noqa
     import udata.core.jobs.api  # noqa
     import udata.core.reports.api  # noqa
+    import udata.core.assistant.api  # noqa
     import udata.core.site.api  # noqa
     import udata.core.tags.api  # noqa
     import udata.core.topic.apiv2  # noqa

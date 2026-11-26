@@ -127,7 +127,7 @@ class RevokeTokenTest(PytestOnlyDBTestCase):
 
         with (
             patch("udata.geopf.auth.oauth") as mock_oauth,
-            patch("udata.geopf.auth.requests.post") as mock_post,
+            patch("requests.Session.post") as mock_post,
         ):
             mock_oauth.geopf.load_server_metadata.return_value = {
                 "revocation_endpoint": "https://sso.example.com/revoke"
@@ -154,7 +154,7 @@ class RevokeTokenTest(PytestOnlyDBTestCase):
 
         with (
             patch("udata.geopf.auth.oauth") as mock_oauth,
-            patch("udata.geopf.auth.requests.post") as mock_post,
+            patch("requests.Session.post") as mock_post,
         ):
             mock_oauth.geopf.load_server_metadata.return_value = {
                 "revocation_endpoint": "https://sso.example.com/revoke"

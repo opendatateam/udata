@@ -403,7 +403,9 @@ def save_token(token, request):
 def check_credentials():
     try:
         with require_oauth.acquire() as token:
-            if authenticate_request(token.user):
+            # The `admin` scope isn't enforced on OAuth2 tokens yet: the stored ones hold
+            # `default` or nothing, and their sysadmins rely on them for their rights.
+            if authenticate_request(token.user, drop_sysadmin_permission=False):
                 g.api_credential = token
                 token.update(set__last_used_at=datetime.now(UTC))
         return True

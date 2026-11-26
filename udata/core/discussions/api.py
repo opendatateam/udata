@@ -13,6 +13,7 @@ from .models import (
     Discussion,
     Message,
     check_organization_voice,
+    subject_is_readable,
 )
 
 ns = api.namespace("discussions", "Discussion related operations")
@@ -93,6 +94,8 @@ class DiscussionAPI(API):
     def post(self, id):
         """Add comment and optionally close a discussion given its ID"""
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
+        if not subject_is_readable(discussion.subject):
+            api.abort(404)
         if discussion.closed:
             api.abort(403, "Can't add comments on a closed discussion")
 

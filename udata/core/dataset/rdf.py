@@ -498,13 +498,10 @@ def temporal_from_resource(resource):
     - a `dct:PeriodOfTime` with schema.org `startDate` and `endDate` properties
     - a `dct:PeriodOfTime` with DCAT `startDate` and `endDate` properties
     - an inline gov.uk Time Interval value
-    - an URI reference to a gov.uk Time Interval ontology
-      http://reference.data.gov.uk/
+
+    Only the triples present in the harvested graph are read: the resource URI is never
+    dereferenced, as it is attacker-controlled and would make the server fetch it.
     """
-    if isinstance(resource.identifier, URIRef):
-        # Fetch remote ontology if necessary
-        g = Graph().parse(str(resource.identifier))
-        resource = g.resource(resource.identifier)
     return (
         maybe_date_range(resource.value(SCHEMA.startDate), resource.value(SCHEMA.endDate))
         or maybe_date_range(resource.value(DCAT.startDate), resource.value(DCAT.endDate))

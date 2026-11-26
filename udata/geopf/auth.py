@@ -7,9 +7,10 @@ since geopf API calls happen from Celery tasks.
 import logging
 from datetime import UTC, datetime
 
-import requests
 from authlib.integrations.flask_client import OAuth
 from flask import current_app
+
+from udata.http import USER_AGENT, http_session
 
 from .client import GeopfReauthRequired
 from .models import GeopfToken
@@ -28,6 +29,7 @@ def init_app(app):
             client_secret=app.config.get("GEOPF_OAUTH_CLIENT_SECRET"),
             server_metadata_url=app.config.get("GEOPF_OAUTH_OPENID_CONF_URL"),
             client_kwargs={"scope": app.config.get("GEOPF_OAUTH_SCOPE")},
+            user_agent=USER_AGENT,
         )
 
 
@@ -65,7 +67,7 @@ def revoke_token(geopf_token: GeopfToken) -> None:
     try:
         metadata = oauth.geopf.load_server_metadata()
         revocation_endpoint = metadata["revocation_endpoint"]
-        resp = requests.post(
+        resp = http_session().post(
             revocation_endpoint,
             data={
                 "token": geopf_token.refresh_token,

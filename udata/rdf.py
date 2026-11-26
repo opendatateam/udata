@@ -5,13 +5,18 @@ This module centralize udata-wide RDF helpers and configuration
 import logging
 import re
 from collections.abc import Iterator
+from email.message import Message
 from html.parser import HTMLParser
-from typing import cast
-from urllib.parse import quote
+from io import BytesIO
+from typing import BinaryIO, TextIO, cast
+from urllib.parse import quote, urlsplit
+from urllib.request import Request
+from urllib.response import addinfourl
 
 import mongoengine
 from flask import abort, current_app, request, url_for
 from rdflib import BNode, Graph, Literal, URIRef
+from rdflib import parser as rdflib_parser
 from rdflib.namespace import (
     DCTERMS,
     FOAF,
@@ -24,6 +29,7 @@ from rdflib.namespace import (
     NamespaceManager,
     split_uri,
 )
+from rdflib.parser import InputSource
 from rdflib.resource import Resource as RdfResource
 from rdflib.term import _is_valid_uri
 from rdflib.util import SUFFIX_FORMAT_MAP
@@ -36,8 +42,10 @@ from udata.core.owned import ownership_filter
 from udata.core.user.models import User
 from udata.frontend.markdown import parse_html
 from udata.harvest.filters import normalize_tag
+from udata.http import ssrf_policy, ssrf_session
 from udata.models import Schema
 from udata.mongo.errors import FieldValidationError
+from udata.ssrf import BlockedAddressError
 from udata.tags import slug as slugify_tag
 from udata.utils import uniquify
 
@@ -84,6 +92,46 @@ FORMAT_MAP = SUFFIX_FORMAT_MAP.copy()
 FORMAT_MAP["json"] = "json-ld"
 FORMAT_MAP["jsonld"] = "json-ld"
 FORMAT_MAP["xml"] = "xml"
+
+
+# Whenever rdflib is handed a location instead of data (`Graph.parse(<url>)`, a remote JSON-LD
+# `@context` or `@import`), it opens it itself. Those locations come from harvested catalogs, so
+# rdflib's two ways of opening them are guarded, and the rest of its loader is left untouched:
+# - `_create_input_source_from_location` reads local paths and `file://` URIs with `open()`:
+#   only the schemes the SSRF policy allows get through to it;
+# - `_urlopen`, its only network call, fetches the request rdflib built through the
+#   SSRF-guarded session.
+_create_input_source_from_location = rdflib_parser._create_input_source_from_location
+
+
+def _create_input_source_from_allowed_location(
+    file: BinaryIO | TextIO | None,
+    format: str | None,
+    input_source: InputSource | None,
+    location: str,
+) -> tuple[URIRef, bool, BinaryIO | TextIO | None, InputSource | None]:
+    scheme = urlsplit(location).scheme
+    if scheme not in ssrf_policy().allowed_schemes:
+        raise BlockedAddressError(f"scheme {scheme!r} is not allowed")
+    return _create_input_source_from_location(file, format, input_source, location)
+
+
+def _guarded_urlopen(request: Request) -> addinfourl:
+    response = ssrf_session().request(
+        request.get_method(),
+        request.full_url,
+        headers=dict(request.header_items()),
+        data=request.data,
+    )
+    response.raise_for_status()
+    headers = Message()
+    for name, value in response.headers.items():
+        headers[name] = value
+    return addinfourl(BytesIO(response.content), headers, response.url, response.status_code)
+
+
+rdflib_parser._create_input_source_from_location = _create_input_source_from_allowed_location
+rdflib_parser._urlopen = _guarded_urlopen  # pyright: ignore[reportPrivateImportUsage]
 
 # Map serialization formats to MIME types
 RDF_MIME_TYPES = {
@@ -253,15 +301,16 @@ def serialize_value(value: RdfResource | URIRef | Literal, unwrap: list[URIRef] 
     If the value is a RdfResource:
         - if `unwrap` is set, look for children of the RdfResource in the order they are listed in
           `unwrap`, and return the value of the first matching element (if any),
-        - otherwise return the identifier of the RdfResource.
+        - else if the RdfResource identifier is a URIRef or a Literal, return it as a string.
     """
-    if isinstance(value, (URIRef, Literal)):
-        return value.toPython()
-    elif isinstance(value, RdfResource):
+    if isinstance(value, RdfResource):
         for uriref in unwrap or []:
             if val := rdf_value(value, uriref):
                 return val
-        return value.identifier.toPython()
+        value = value.identifier
+    if isinstance(value, (URIRef, Literal)):
+        return value.toPython()
+    return None
 
 
 def rdf_unique_values(

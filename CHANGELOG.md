@@ -1,5 +1,39 @@
 # Changelog
 
+## 17.29.0 (2026-11-24)
+
+- feat(assistant): add an AI assistant that builds charts from a resource ([#4076](https://github.com/opendatateam/udata/pull/4076))
+- fix(datasets): list the resources of a dataset stored without them ([#4130](https://github.com/opendatateam/udata/pull/4130))
+- fix(discussions): refuse to discuss a subject the user cannot read ([#4124](https://github.com/opendatateam/udata/pull/4124))
+- fix(geopf): handle TMS services ([#4131](https://github.com/opendatateam/udata/pull/4131))
+- fix(geopf): services urls and resource title ([#4128](https://github.com/opendatateam/udata/pull/4128))
+- fix(harvest): empty DCAT text nodes yield their node id as contents ([#4121](https://github.com/opendatateam/udata/pull/4121))
+
+
+## 17.28.0 (2026-11-23)
+
+- chore(deps): update astral-sh/setup-uv action to v10.4.0 ([#4119](https://github.com/opendatateam/udata/pull/4119))
+- chore(deps): upgrade dependencies and use major-only upper bounds ([#4112](https://github.com/opendatateam/udata/pull/4112))
+- feat(api_token): grant the sysadmin rights only to tokens with the sysadmin scope ([#4114](https://github.com/opendatateam/udata/pull/4114))
+- feat(reports): filter reports by subject through a generic reference filter ([#4118](https://github.com/opendatateam/udata/pull/4118))
+
+
+## 17.27.2 (2026-11-19)
+
+- fix: identify every outgoing request as udata with its real version ([#4115](https://github.com/opendatateam/udata/pull/4115))
+- fix(rdf): fetch the locations rdflib opens through udata's HTTP session ([#4117](https://github.com/opendatateam/udata/pull/4117))
+- fix(topics): annotate TopicElementsWriter.__enter__ with Self to satisfy ruff PYI034 ([#4116](https://github.com/opendatateam/udata/pull/4116))
+- perf(topics): save the topic once when writing elements in bulk ([#4107](https://github.com/opendatateam/udata/pull/4107))
+
+
+## 17.27.1 (2026-11-19)
+
+- chore: upgrade ruff to 0.17 and adopt its default rules ([#4037](https://github.com/opendatateam/udata/pull/4037))
+- fix(auth): land a ProConnect login back on the page it started from ([#4111](https://github.com/opendatateam/udata/pull/4111))
+- fix(dataservices): drop the license criterion from the metadata quality score ([#4109](https://github.com/opendatateam/udata/pull/4109))
+- fix(metrics): store null metrics API values as 0 ([#4110](https://github.com/opendatateam/udata/pull/4110))
+
+
 ## 17.27.0 (2026-11-18)
 
 - chore(deps): update dependency dnspython to v2.9.2 [security] ([#4104](https://github.com/opendatateam/udata/pull/4104))
