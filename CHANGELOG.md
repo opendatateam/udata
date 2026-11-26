@@ -1,5 +1,13 @@
 # Changelog
 
+## 17.30.0 (2026-11-26)
+
+- chore(deps): update redis:alpine docker digest to 5af8010 ([#4129](https://github.com/opendatateam/udata/pull/4129))
+- chore: update translations ([#4137](https://github.com/opendatateam/udata/pull/4137))
+- feat(auth): let a login waiting for its 2FA setup complete with the second factor of ProConnect ([#4133](https://github.com/opendatateam/udata/pull/4133))
+- fix(resources): deleting a link to another resource's file no longer deletes it ([#4135](https://github.com/opendatateam/udata/pull/4135))
+
+
 ## 17.29.0 (2026-11-24)
 
 - feat(assistant): add an AI assistant that builds charts from a resource ([#4076](https://github.com/opendatateam/udata/pull/4076))
