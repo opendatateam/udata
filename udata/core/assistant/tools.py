@@ -357,7 +357,7 @@ def register_tools(agent: Agent) -> None:
     @agent.tool(description=QUERY_DATA_DESCRIPTION)
     def query_data(
         ctx: RunContext[AssistantDeps],
-        # First, so the model writes it early in the stream; the tool does not use it.
+        # The query ignores it: the client shows it to the user as the call's intent.
         purpose: Annotated[str | None, Field(description=QUERY_PURPOSE_DESCRIPTION)] = None,
         groupby: str | None = None,
         aggregate_column: str | None = None,
