@@ -281,7 +281,7 @@ msgstr "%(email)s ne peut pas accéder à son compte mail"
 
 #: udata/auth/mails.py:191
 msgid "A new API key was created on your account"
-msgstr ""
+msgstr "Une nouvelle clé d'API a été créée sur votre compte"
 
 #: udata/auth/mails.py:194
 #, python-format
@@ -289,14 +289,16 @@ msgid ""
 "A new API key, %(name)s, was created on your %(site)s account. It acts on"
 " your behalf until it is revoked."
 msgstr ""
+"Une nouvelle clé d'API, %(name)s, a été créée sur votre compte "
+"%(site)s. Elle agit en votre nom jusqu'à sa révocation."
 
 #: udata/auth/mails.py:199
 msgid "If this wasn't you, revoke it right away and contact us."
-msgstr ""
+msgstr "Si ce n'était pas vous, révoquez-la immédiatement et contactez-nous."
 
 #: udata/auth/mails.py:200
 msgid "Manage your API keys"
-msgstr ""
+msgstr "Gérer vos clés d'API"
 
 #: udata/auth/mails.py:207
 msgid "Your account now signs in with ProConnect only"
@@ -357,7 +359,7 @@ msgstr "Votre instance udata est prête !"
 #: udata/core/checks.py:25
 #, python-format
 msgid "Cannot modify %(field)s after creation"
-msgstr ""
+msgstr "Impossible de modifier %(field)s après la création"
 
 #: udata/core/checks.py:35
 msgid "Invalid email address"
@@ -2577,7 +2579,7 @@ msgstr "Du texte :"
 #: udata/tests/test_mail.py:158
 #, python-format
 msgid "Some text %(name)s"
-msgstr ""
+msgstr "Du texte %(name)s"
 
 #: udata/tests/api/test_activities_api.py:33
 msgid "did something to a dataset"
