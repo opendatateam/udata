@@ -696,7 +696,7 @@ class DatasetAPITest(APITestCase):
         """
         data = DatasetFactory.as_dict()
         data["extras"] = {"transport:url": "https://evil.example/x", "string": "value"}
-        data["resources"] = [ResourceFactory.as_dict()]
+        data["resources"] = [ResourceFactory.as_dict(filetype="remote")]
         data["resources"][0]["extras"] = {"check:available": True, "string": "value"}
 
         with self.api_user():
@@ -712,7 +712,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_create_with_resources(self):
         """It should create a dataset with resources from the API"""
         data = DatasetFactory.as_dict()
-        data["resources"] = [ResourceFactory.as_dict() for _ in range(3)]
+        data["resources"] = [ResourceFactory.as_dict(filetype="remote") for _ in range(3)]
 
         with self.api_user():
             response = self.post(url_for("api.datasets"), data)
@@ -722,36 +722,23 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(len(dataset.resources), 3)
 
-    def test_dataset_api_create_populates_hosted_resource_fields(self):
-        """A new hosted resource must be populated normally, not protected
-
-        The protection of server-computed fields only applies to existing
-        hosted files: a brand new resource has no url yet, so its submitted
-        url/checksum/filesize/mime/format must be persisted as-is.
-        """
+    def test_dataset_api_create_cannot_create_hosted_file_without_upload(self):
         data = DatasetFactory.as_dict()
         data["resources"] = [
-            {
-                "title": faker.sentence(),
-                "type": "main",
-                "filetype": "file",
-                "url": faker.url(),
-                "checksum": {"type": "sha1", "value": "0" * 40},
-                "filesize": 1234,
-                "mime": "text/csv",
-                "format": "csv",
-            }
+            {"title": faker.sentence(), "type": "main", "filetype": "file", "url": faker.url()}
         ]
         with self.api_user():
             response = self.post(url_for("api.datasets"), data)
-        self.assert201(response)
+        self.assert400(response)
+        assert Dataset.objects.count() == 0
 
-        resource = Dataset.objects.first().resources[0]
-        self.assertEqual(resource.url, data["resources"][0]["url"])
-        self.assertEqual(resource.checksum.value, "0" * 40)
-        self.assertEqual(resource.filesize, 1234)
-        self.assertEqual(resource.mime, "text/csv")
-        self.assertEqual(resource.format, "csv")
+    def test_dataset_api_create_resource_without_filetype_is_rejected(self):
+        data = DatasetFactory.as_dict()
+        data["resources"] = [{"title": faker.sentence(), "type": "main", "url": faker.url()}]
+        with self.api_user():
+            response = self.post(url_for("api.datasets"), data)
+        self.assert400(response)
+        assert Dataset.objects.count() == 0
 
     def test_dataset_api_create_with_resources_dict(self):
         """Create a dataset w/ resources in a dict instead of list,
@@ -759,7 +746,8 @@ class DatasetAPITest(APITestCase):
         """
         data = DatasetFactory.as_dict()
         data["resources"] = {
-            k: v for k, v in enumerate([ResourceFactory.as_dict() for _ in range(3)])
+            k: v
+            for k, v in enumerate([ResourceFactory.as_dict(filetype="remote") for _ in range(3)])
         }
         with self.api_user():
             response = self.post(url_for("api.datasets"), data)
@@ -925,7 +913,7 @@ class DatasetAPITest(APITestCase):
         dataset = DatasetFactory(owner=user)
         initial_length = len(dataset.resources)
         data = dataset.to_dict()
-        data["resources"].append(ResourceFactory.as_dict())
+        data["resources"].append(ResourceFactory.as_dict(filetype="remote"))
         response = self.put(url_for("api.dataset", dataset=dataset), data)
         self.assert200(response)
         self.assertEqual(Dataset.objects.count(), 1)
@@ -948,7 +936,7 @@ class DatasetAPITest(APITestCase):
         # to_dict() serializes embedded resources with the mongo `_id` key
         data["resources"][0]["id"] = str(initial_id)
         unknown_id = str(uuid4())
-        resource_data = ResourceFactory.as_dict()
+        resource_data = ResourceFactory.as_dict(filetype="remote")
         resource_data["id"] = unknown_id
         data["resources"].append(resource_data)
 
@@ -966,7 +954,7 @@ class DatasetAPITest(APITestCase):
         user = self.login()
         dataset = DatasetFactory(owner=user)
         data = dataset.to_dict()
-        resource_data = ResourceFactory.as_dict()
+        resource_data = ResourceFactory.as_dict(filetype="remote")
         resource_data["id"] = "not-an-uuid"
         data["resources"] = [resource_data]
 
@@ -985,7 +973,7 @@ class DatasetAPITest(APITestCase):
         user = self.login()
         dataset = DatasetFactory(owner=user)
         data = dataset.to_dict()
-        resource_data = ResourceFactory.as_dict()
+        resource_data = ResourceFactory.as_dict(filetype="remote")
         resource_data["id"] = str(victim_id)
         data["resources"] = [resource_data]
 
@@ -1001,7 +989,7 @@ class DatasetAPITest(APITestCase):
         """Same guarantee on creation, where there is no instance to prefill from"""
         self.login()
         chosen_id = str(uuid4())
-        resource_data = ResourceFactory.as_dict()
+        resource_data = ResourceFactory.as_dict(filetype="remote")
         resource_data["id"] = chosen_id
         data = DatasetFactory.as_dict()
         data["resources"] = [resource_data]
@@ -1062,7 +1050,7 @@ class DatasetAPITest(APITestCase):
         user = self.login()
         dataset = DatasetFactory(owner=user)
         data = dataset.to_dict()
-        resource_data = ResourceFactory.as_dict()
+        resource_data = ResourceFactory.as_dict(filetype="remote")
         resource_data["extras"] = {"extra:id": "id"}
         data["resources"].append(resource_data)
         response = self.put(url_for("api.dataset", dataset=dataset), data)
@@ -1076,6 +1064,8 @@ class DatasetAPITest(APITestCase):
         user = self.login()
         dataset = DatasetFactory(owner=user, nb_resources=1)
         data = dataset.to_dict()
+        # to_dict() serializes embedded resources with the mongo `_id` key
+        data["resources"][0]["id"] = str(dataset.resources[0].id)
         data["resources"][0]["extras"] = {"extra:id": "id"}
         response = self.put(url_for("api.dataset", dataset=dataset), data)
         self.assert200(response)
@@ -1574,7 +1564,7 @@ class DatasetAPITest(APITestCase):
         user = self.login()
         dataset = DatasetFactory(owner=user)
         data = dataset.to_dict()
-        resource_data = ResourceFactory.as_dict()
+        resource_data = ResourceFactory.as_dict(filetype="remote")
 
         resource_data["schema"] = {"url": "test"}
         data["resources"].append(resource_data)
@@ -2148,11 +2138,14 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(self.dataset.resources[0].extras, {"extra:id": "id"})
 
     def test_unallowed_create_filetype_file(self):
+        initial_count = len(self.dataset.resources)
         data = ResourceFactory.as_dict()
         data["filetype"] = "file"  # to be explicit
         response = self.post(url_for("api.resources", dataset=self.dataset), data)
-        # should fail because the POST endpoint only supports URL setting for remote resources
         self.assert400(response)
+        assert "filetype" in response.json["errors"]
+        self.dataset.reload()
+        assert len(self.dataset.resources) == initial_count
 
     def test_creating_and_updating_resource_uuid(self):
         uuid_a = "c312cfb0-60f7-417c-9cf9-3d985196b22a"
@@ -2208,7 +2201,7 @@ class DatasetResourceAPITest(APITestCase):
 
     def test_create_with_list_returns_400(self):
         """It should return 400 when sending a list instead of a dict"""
-        data = [ResourceFactory.as_dict()]
+        data = [ResourceFactory.as_dict(filetype="remote")]
         response = self.post(url_for("api.resources", dataset=self.dataset), data)
         self.assert400(response)
 
@@ -3519,16 +3512,15 @@ class CommunityResourceAPITest(APITestCase):
         self.assertIsNone(community_resource.organization)
 
     def test_community_resource_api_unallowed_create_filetype_file(self):
-        """It should create a remote community resource from the API"""
         self.login()
         dataset = DatasetFactory()
         attrs = CommunityResourceFactory.as_dict()
         attrs["filetype"] = "file"  # to be explicit
         attrs["dataset"] = str(dataset.id)
         response = self.post(url_for("api.community_resources"), attrs)
-        # should fail because the POST endpoint only supports URL setting
-        # for remote community resources
         self.assert400(response)
+        assert "filetype" in response.json["errors"]
+        assert CommunityResource.objects.count() == 0
 
     def test_community_resource_api_create_remote_needs_dataset(self):
         """
@@ -3551,7 +3543,7 @@ class CommunityResourceAPITest(APITestCase):
         dataset identifier
         """
         self.login()
-        attrs = CommunityResourceFactory.as_dict()
+        attrs = CommunityResourceFactory.as_dict(filetype="remote")
         attrs["dataset"] = "xxx"
         response = self.post(url_for("api.community_resources"), attrs)
         self.assertStatus(response, 400)

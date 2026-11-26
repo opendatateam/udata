@@ -588,9 +588,6 @@ class ResourcesAPI(API):
         dataset.permissions["edit_resources"].test()
         form = api.validate(ResourceFormWithoutId)
         resource = Resource()
-
-        if form._fields.get("filetype").data != "remote":
-            api.abort(400, "This endpoint only supports remote resources")
         form.populate_obj(resource)
         dataset.add_resource(resource)
         return resource, 201
@@ -865,8 +862,6 @@ class CommunityResourcesAPI(API):
     def post(self):
         """Create a new community resource"""
         form = api.validate(CommunityResourceForm)
-        if form._fields.get("filetype").data != "remote":
-            api.abort(400, "This endpoint only supports remote community resources")
         resource = CommunityResource()
         form.populate_obj(resource)
         if not resource.dataset:
