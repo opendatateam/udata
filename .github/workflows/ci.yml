@@ -101,6 +101,14 @@ jobs:
           uv run ruff check .
           uv run ruff format --check .
 
+      - name: Check French translations are complete
+        # Catalogs are regenerated first: a string added in the code without
+        # running `inv i18n --update` is not in the .po yet, so it would not
+        # count as untranslated
+        run: |
+          uv run inv i18n --update
+          uv run pybabel compile -D udata -d udata/translations -l fr --statistics 2>&1 | grep -F "(100%)"
+
       - name: Initialize Elasticsearch indices
         run: |
           echo 'ELASTICSEARCH_URL = "http://localhost:9200"' > udata.cfg
