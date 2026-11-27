@@ -6,6 +6,7 @@ from udata.core.organization.permissions import (
     OrganizationEditorNeed,
 )
 from udata.core.owned import Owned
+from udata.core.post.models import Post
 
 from .models import Discussion, Message
 
@@ -29,12 +30,16 @@ def organization_voice_needs(organization, subject) -> list:
 def DiscussionAuthorOrSubjectOwnerPermission(discussion: Discussion):
     author_permission = DiscussionAuthorPermission(discussion)
 
-    # A `Post` is a valid discussion subject but is not `Owned`: it has no `organization`,
-    # and only sysadmins may edit it — which `Permission` already grants on every permission.
-    if not isinstance(discussion.subject, Owned):
+    subject = discussion.subject
+    # A `Post` is `Owned` but only its external pages are managed by their owner, any other
+    # post by sysadmins only. Its own edit permission already says so.
+    if isinstance(subject, Post):
+        return subject.permissions["edit"].union(author_permission)
+
+    if not isinstance(subject, Owned):
         return author_permission
 
-    return OwnablePermission(discussion.subject).union(author_permission)
+    return OwnablePermission(subject).union(author_permission)
 
 
 class DiscussionAuthorPermission(Permission):

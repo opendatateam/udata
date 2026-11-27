@@ -12,9 +12,14 @@ BODY_TYPES = OrderedDict(
     ]
 )
 
+# Owned by users or organizations and rendered by external sites (eg. a vertical),
+# never on the main site.
+EXTERNAL_PAGE = "external_page"
+
 POST_KINDS = OrderedDict(
     [
         ("news", _("News")),
         ("page", _("Page")),
+        (EXTERNAL_PAGE, _("External page")),
     ]
 )
