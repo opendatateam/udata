@@ -418,6 +418,34 @@ class AssistantChatAPITest(PytestOnlyAPITestCase):
         assert updated["status"] == "ok"
         assert updated["patch"] == {"y_axis": {"unit": "doses"}}
 
+    def test_the_query_purpose_reaches_the_client_as_the_tool_input(self, mocker, tabular):
+        user = self.login()
+        resource = ResourceFactory(title="Doses")
+        DatasetFactory(title="Vaccins", owner=user, resources=[resource])
+        tabular.add_resource(resource.id, {"dep": "string"})
+        args = {"purpose": "Lister les départements", "columns": ["dep"]}
+
+        async def query_then_answer(messages, info):
+            if any(getattr(p, "part_kind", "") == "tool-return" for m in messages for p in m.parts):
+                yield "Voici les départements."
+            else:
+                yield {0: DeltaToolCall(name="query_data", json_args=json.dumps(args))}
+
+        mocker.patch(
+            "udata.core.assistant.api.get_agent",
+            return_value=agent_with_model(FunctionModel(stream_function=query_then_answer)),
+        )
+        response = self.post(
+            url_for("api.assistant_chat"), data={**PAYLOAD, "resource_id": str(resource.id)}
+        )
+        chunks = [
+            json.loads(line[len("data: ") :])
+            for line in response.get_data(as_text=True).splitlines()
+            if line.startswith("data: {")
+        ]
+        inputs = [c["input"] for c in chunks if c.get("type") == "tool-input-available"]
+        assert inputs == [args]
+
     def test_chat_normalizes_an_uppercase_resource_id(self, mocker, tabular):
         resource = ResourceFactory(title="Subventions 2025")
         DatasetFactory(resources=[resource])

@@ -10,10 +10,10 @@ import json
 import logging
 import threading
 from dataclasses import dataclass, field
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic_ai import Agent, RunContext
 
 from udata.core.assistant.charts import (
@@ -321,10 +321,15 @@ def serialize_dataset_metadata(dataset: Dataset) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2)
 
 
+QUERY_PURPOSE_DESCRIPTION = (
+    "One short sentence, written for the user, saying what this query looks for. Always give it."
+)
+
 # Tool descriptions given explicitly, as f-strings, to quote the page size.
 QUERY_DATA_DESCRIPTION = f"""\
 Query the active resource (read only) to check the data before a chart.
 
+Give `purpose` on every call: the sentence is shown to the user to explain the step.
 An aggregate without `groupby` is allowed: it gives an overall total.
 To group, set `groupby`, `aggregate_column` and `aggregate`
 (avg, sum, count, min, max). Without an explicit sort, a grouping is sorted
@@ -352,6 +357,8 @@ def register_tools(agent: Agent) -> None:
     @agent.tool(description=QUERY_DATA_DESCRIPTION)
     def query_data(
         ctx: RunContext[AssistantDeps],
+        # The query ignores it: the client shows it to the user as the call's intent.
+        purpose: Annotated[str | None, Field(description=QUERY_PURPOSE_DESCRIPTION)] = None,
         groupby: str | None = None,
         aggregate_column: str | None = None,
         aggregate: Aggregate | None = None,
