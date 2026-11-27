@@ -17,6 +17,7 @@ from uuid import UUID
 
 from flask import Response, current_app, request, stream_with_context
 from flask_login import current_user
+from mongoengine.errors import NotUniqueError
 from pydantic import BaseModel, ValidationError, field_validator
 from pydantic_ai import Agent, AgentRunResultEvent, CancellationToken, RunContext
 from pydantic_ai.capabilities import Hooks
@@ -50,7 +51,13 @@ from pydantic_ai.ui.vercel_ai.response_types import (
 from pydantic_ai.usage import RunUsage, UsageLimits
 
 from udata.api import API, api, fields
-from udata.core.assistant.agent import UnknownModel, find_model, get_agent, model_choices
+from udata.core.assistant.agent import (
+    UnknownModel,
+    default_model,
+    find_model,
+    get_agent,
+    offered_models,
+)
 from udata.core.assistant.history import asks, compact_history
 from udata.core.assistant.models import AssistantConversation
 from udata.core.assistant.prompts import language_instructions
@@ -126,6 +133,29 @@ def _stored_history(conversation: AssistantConversation) -> list[ModelMessage]:
         api.abort(409, _("This conversation can no longer be read. Start a new one."))
 
 
+class ConcurrentFirstTurn(Exception):
+    """Another first turn of the same chat saved the conversation first."""
+
+
+def _conversation_model(conversation: AssistantConversation, requested: dict | None) -> dict:
+    """The model of the turn: the conversation's own, which a request can only confirm."""
+    if not conversation.ai_model:
+        return requested or default_model()
+    try:
+        model = find_model(conversation.ai_model)
+    except UnknownModel:
+        api.abort(
+            409,
+            _(
+                "This conversation cannot continue: its model is no longer offered. Start a new one."
+            ),
+        )
+    # Keeps the stored history from mixing models, whatever the client.
+    if requested and requested["name"] != model["name"]:
+        api.abort(409, _("This conversation uses another model. Start a new one."))
+    return model
+
+
 def _save_conversation(
     conversation: AssistantConversation,
     messages: list[ModelMessage],
@@ -135,7 +165,11 @@ def _save_conversation(
     conversation.messages = AssistantConversation.stored_messages(messages)
     conversation.ai_model = model_name
     conversation.subject = active.dataset if active else None
-    conversation.save()
+    try:
+        conversation.save()
+    except NotUniqueError as error:
+        # Only an insert clashes: a first turn of the same chat was saved meanwhile.
+        raise ConcurrentFirstTurn(conversation.chat_id) from error
 
 
 def _context_hook(context: str) -> Hooks:
@@ -165,8 +199,14 @@ class ChatContext(BaseModel):
 
     resource_id: UUID | None = None
     visualization: dict | None = None
-    # The `name` of an AI_MODELS entry; the default model when absent.
-    model: str | None = None
+    # The AI_MODELS entry the client names; absent, the conversation's model or the default one.
+    model: dict | None = None
+
+    @field_validator("model", mode="before")
+    @classmethod
+    def _configured(cls, name: object) -> dict | None:
+        # Any other value than a configured name, a number or a list included, is unknown.
+        return None if name is None else find_model(name)
 
     @field_validator("visualization")
     @classmethod
@@ -178,7 +218,7 @@ class ChatContext(BaseModel):
         return visualization
 
 
-def _extract_context(extra: dict | None) -> tuple[str | None, dict | None, str | None]:
+def _extract_context(extra: dict | None) -> tuple[str | None, dict | None, dict | None]:
     """The validated context of the body: a 400 if a field is invalid."""
     try:
         context = ChatContext.model_validate(extra or {})
@@ -270,6 +310,8 @@ def _error_message(error: Exception) -> str:
         return _("The AI service is temporarily unavailable. Try again later.")
     if isinstance(error, ModelContextWindowExceededError):
         return _("The conversation is too long for the assistant. Start a new one.")
+    if isinstance(error, ConcurrentFirstTurn):
+        return _("This conversation was continued elsewhere in the meantime. Start a new one.")
     return _("An error occurred while generating the response.")
 
 
@@ -278,11 +320,7 @@ def usage_metadata(usage: RunUsage) -> dict[str, int] | None:
     # A response without usage makes the totals lower bounds: better none than a wrong one.
     if usage.unmeasured_requests or not usage.total_tokens:
         return None
-    return {
-        "inputTokens": usage.input_tokens,
-        "outputTokens": usage.output_tokens,
-        "totalTokens": usage.total_tokens,
-    }
+    return {"inputTokens": usage.input_tokens, "outputTokens": usage.output_tokens}
 
 
 class AssistantEventStream(VercelAIEventStream):
@@ -296,7 +334,7 @@ class AssistantEventStream(VercelAIEventStream):
         usage = usage_metadata(event.result.usage)
         async for chunk in super().handle_run_result(event):
             if isinstance(chunk, MessageMetadataChunk):
-                # The AI SDK merges metadata: an explicit null clears an earlier stream's usage.
+                # Null rather than left out: the usage is reported, as unknown.
                 chunk = MessageMetadataChunk(
                     message_metadata={**chunk.message_metadata, "usage": usage}
                 )
@@ -311,7 +349,7 @@ class AssistantEventStream(VercelAIEventStream):
             | ModelQuotaExceededError
             | IncompleteToolCall,
         )
-        operational = isinstance(error, AgentRunError) and not misconfigured
+        operational = isinstance(error, AgentRunError | ConcurrentFirstTurn) and not misconfigured
         level = logging.WARNING if operational else logging.ERROR
         log.log(level, "Assistant agent run failed: %s", error, exc_info=error)
         async for chunk in super().on_error(error):
@@ -412,9 +450,12 @@ def _assistant_enabled() -> bool:
     return bool(current_app.config["AI_BASE_URL"])
 
 
-def _assistant_ready() -> bool:
-    """Whether the assistant answers: enabled, and with the key its provider needs."""
-    return _assistant_enabled() and bool(current_app.config["AI_API_KEY"])
+def _missing_setting() -> str | None:
+    """The setting an enabled assistant lacks to answer, if any."""
+    for setting in ("AI_API_KEY", "AI_MODELS"):
+        if not current_app.config[setting]:
+            return setting
+    return None
 
 
 model_fields = api.model(
@@ -422,7 +463,6 @@ model_fields = api.model(
     {
         "id": fields.String(description="The identifier to send as `model` to the chat"),
         "label": fields.String(description="The name to display to the user"),
-        "default": fields.Boolean(description="Whether it is the model used by default"),
     },
 )
 
@@ -433,23 +473,56 @@ class AssistantModelsAPI(API):
     @api.doc("assistant_models")
     @api.marshal_list_with(model_fields)
     def get(self):
-        """List the models offered to the user by the assistant"""
-        # Empty rather than a 503: clients load it on every page that shows the assistant.
-        return model_choices() if _assistant_ready() else []
+        """List the models offered to the user by the assistant
+
+        The first one is the default model.
+        """
+        return offered_models()
+
+
+chat_fields = api.model(
+    "AssistantChat",
+    {
+        "id": fields.String(required=True, description="The conversation id, unique per user"),
+        "messages": fields.List(
+            fields.Raw,
+            required=True,
+            description="The Vercel AI UI messages; only the user's new turn is read",
+        ),
+        "resource_id": fields.String(description="The UUID of the resource the user explores"),
+        "visualization": fields.Raw(description="The current state of the user's chart"),
+        "model": fields.String(
+            description=(
+                "The `id` of a model listed by `/assistant/models/`. Absent, the conversation's"
+                " model, or the default one for a new conversation"
+            )
+        ),
+    },
+)
 
 
 @ns.route("/chat/", endpoint="assistant_chat")
 class AssistantChatAPI(API):
     @api.secure
     @api.doc("assistant_chat")
+    @api.expect(chat_fields)
+    @api.response(400, "Invalid body, context, model or conversation id")
+    @api.response(
+        409,
+        "The conversation uses another model, its model is no longer offered,"
+        " or it can no longer be read",
+    )
+    @api.response(413, "Body or user message too long")
+    @api.response(415, "The body is not JSON")
+    @api.response(503, "The assistant is disabled or a setting is missing")
     def post(self):
         """Stream an assistant reply as Vercel AI SSE events"""
         # One byte over: werkzeug cuts a chunked body at the limit instead of refusing it.
         request.max_content_length = MAX_REQUEST_BYTES + 1
-        if not _assistant_ready():
-            if _assistant_enabled():
-                # Not in _assistant_ready: the models list asks it on every page view.
-                log.error("Assistant enabled without an AI provider API key (AI_API_KEY)")
+        if not _assistant_enabled():
+            api.abort(503, _("The assistant is not available."))
+        if missing := _missing_setting():
+            log.error("Assistant enabled without its %s setting", missing)
             api.abort(503, _("The assistant is not available."))
 
         # Requiring JSON blocks cross-site form posts: this API has no CSRF token.
@@ -463,11 +536,7 @@ class AssistantChatAPI(API):
             run_input = VercelAIAdapter.build_run_input(body)
         except ValidationError:
             api.abort(400, _("Invalid request body."))
-        resource_id, visualization, model_name = _extract_context(run_input.model_extra)
-        try:
-            model = find_model(model_name)
-        except UnknownModel:
-            api.abort(400, _("Unknown assistant model."))
+        resource_id, visualization, requested_model = _extract_context(run_input.model_extra)
         run_input.messages = _check_new_turn(run_input.messages)
         chat_id = run_input.id
         if not 0 < len(chat_id) <= MAX_CHAT_ID_LENGTH:
@@ -477,9 +546,7 @@ class AssistantChatAPI(API):
             user=user, chat_id=chat_id
         ).first() or AssistantConversation(user=user, chat_id=chat_id)
         message_history = _stored_history(conversation)
-        # Keeps the stored history from mixing models, whatever the client.
-        if conversation.ai_model and conversation.ai_model != model["name"]:
-            api.abort(409, _("This conversation uses another model. Start a new one."))
+        model = _conversation_model(conversation, requested_model)
 
         tabular = TabularClient()
         active = load_active_resource(resource_id, tabular) if resource_id else None
@@ -489,7 +556,7 @@ class AssistantChatAPI(API):
             columns=active.profile.columns() if active and active.profile else None,
             profile_error=active.profile_error if active else None,
         )
-        agent = get_agent(model["name"])
+        agent = get_agent(model)
         adapter = AssistantAdapter(
             agent,
             run_input,

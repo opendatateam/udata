@@ -1,4 +1,4 @@
-"""The assistant disabled or misconfigured: its endpoint answers 503.
+"""The assistant disabled or misconfigured: its chat endpoint answers 503.
 
 Apart from test_api.py, whose module options enable the assistant for every test.
 """
@@ -55,18 +55,19 @@ class AssistantAvailabilityTest(PytestOnlyAPITestCase):
     def test_the_models_require_authentication(self):
         assert self.get(url_for("api.assistant_models")).status_code == 401
 
-    def test_a_disabled_assistant_offers_no_model(self):
+    @pytest.mark.options(AI_BASE_URL="http://albert.test/v1", AI_API_KEY="test-key", AI_MODELS=[])
+    def test_an_assistant_without_models_answers_503_and_is_logged(self, mocker, caplog):
+        agent = mocker.patch("udata.core.assistant.api.get_agent")
+        self.login()
+        with caplog.at_level("ERROR", logger="udata.core.assistant.api"):
+            response = self.post(url_for("api.assistant_chat"), data=PAYLOAD)
+        assert response.status_code == 503
+        assert "AI_MODELS" in caplog.text
+        agent.assert_not_called()
+
+    def test_a_disabled_assistant_still_lists_its_models(self):
+        self.app.config["AI_MODELS"] = [{"name": "first"}]
         self.login()
         response = self.get(url_for("api.assistant_models"))
         assert response.status_code == 200
-        assert response.json == []
-
-    @pytest.mark.options(AI_BASE_URL="http://albert.test/v1", AI_API_KEY=None)
-    def test_a_misconfigured_assistant_offers_no_model(self, caplog):
-        self.login()
-        with caplog.at_level("ERROR", logger="udata.core.assistant.api"):
-            response = self.get(url_for("api.assistant_models"))
-        assert response.status_code == 200
-        assert response.json == []
-        # Every page that shows the assistant loads the list: not an error event each time.
-        assert caplog.text == ""
+        assert response.json == [{"id": "first", "label": "first"}]

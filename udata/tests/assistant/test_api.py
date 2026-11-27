@@ -11,6 +11,7 @@ from uuid import uuid4
 import pytest
 from flask import url_for
 from flask.testing import EnvironBuilder
+from mongoengine.errors import ValidationError as MongoValidationError
 from pydantic_ai.exceptions import (
     IncompleteToolCall,
     ModelAuthenticationError,
@@ -30,7 +31,7 @@ from werkzeug.wrappers import Request
 
 from udata.core.api_token.models import ApiToken
 from udata.core.assistant import api as api_module
-from udata.core.assistant.agent import get_agent
+from udata.core.assistant.agent import default_model, get_agent
 from udata.core.assistant.api import MAX_REQUEST_BYTES, MAX_USER_MESSAGE_CHARS, usage_metadata
 from udata.core.assistant.models import AssistantConversation
 from udata.core.assistant.tools import MODEL_REQUEST_LIMIT
@@ -74,8 +75,8 @@ class RecordingModel(TestModel):
 
 
 def agent_with_model(model=None):
-    """get_agent() with the model swapped for a TestModel."""
-    agent = get_agent()
+    """The default model's agent with the model swapped for a TestModel."""
+    agent = get_agent(default_model())
     agent.model = model or TestModel()
     return agent
 
@@ -101,7 +102,6 @@ def test_usage_metadata_counts_the_tokens_of_the_turn():
     assert usage_metadata(RunUsage(input_tokens=1200, output_tokens=300)) == {
         "inputTokens": 1200,
         "outputTokens": 300,
-        "totalTokens": 1500,
     }
 
 
@@ -1118,8 +1118,8 @@ class AssistantChatModelTest(PytestOnlyAPITestCase):
         response = self.get(url_for("api.assistant_models"))
         assert response.status_code == 200
         assert response.json == [
-            {"id": "first", "label": "First", "default": True},
-            {"id": "second", "label": "Second", "default": False},
+            {"id": "first", "label": "First"},
+            {"id": "second", "label": "Second"},
         ]
 
     def test_chat_uses_the_requested_model(self, mocker):
@@ -1127,16 +1127,41 @@ class AssistantChatModelTest(PytestOnlyAPITestCase):
         get_agent = self._get_agent(mocker)
         self.login()
         assert self._chat("second").status_code == 200
-        get_agent.assert_called_once_with("second")
+        get_agent.assert_called_once_with(MODELS[1])
 
     @pytest.mark.parametrize("model", [..., None], ids=["absent", "null"])
-    def test_chat_uses_the_first_model_without_one(self, mocker, model):
+    def test_a_new_conversation_without_model_uses_the_first_one(self, mocker, model):
         self.app.config["AI_MODELS"] = MODELS
         get_agent = self._get_agent(mocker)
         self.login()
         assert self._chat(model).status_code == 200
-        get_agent.assert_called_once_with("first")
+        get_agent.assert_called_once_with(MODELS[0])
         assert AssistantConversation.objects.get().ai_model == "first"
+
+    @pytest.mark.parametrize("model", [..., None], ids=["absent", "null"])
+    def test_a_conversation_without_model_in_the_request_keeps_its_own(self, mocker, model):
+        """Even when the default model changed since: AI_MODELS reordered by a deployment."""
+        self.app.config["AI_MODELS"] = list(reversed(MODELS))
+        get_agent = self._get_agent(mocker)
+        user = self.login()
+        AssistantConversation(user=user, chat_id=PAYLOAD["id"], ai_model="first").save()
+        assert self._chat(model).status_code == 200
+        get_agent.assert_called_once_with(MODELS[0])
+        assert AssistantConversation.objects.get(user=user).ai_model == "first"
+
+    @pytest.mark.parametrize("model", [..., "first"], ids=["absent", "the-default"])
+    def test_a_conversation_whose_model_was_removed_cannot_continue(self, mocker, model):
+        self.app.config["AI_MODELS"] = MODELS
+        get_agent = self._get_agent(mocker)
+        user = self.login()
+        AssistantConversation(user=user, chat_id=PAYLOAD["id"], ai_model="retired").save()
+        response = self._chat(model)
+        assert response.status_code == 409
+        assert response.json["message"] == (
+            "Cette conversation ne peut pas continuer : son modèle n'est plus proposé."
+            " Démarrez-en une nouvelle."
+        )
+        get_agent.assert_not_called()
 
     @pytest.mark.parametrize("model", ["third", "", 42, ["first"]])
     def test_chat_rejects_an_unknown_model(self, mocker, model):
@@ -1172,15 +1197,39 @@ class AssistantChatModelTest(PytestOnlyAPITestCase):
         get_agent.assert_not_called()
 
         assert self._chat("first", msg_id="msg-3").status_code == 200
-        get_agent.assert_called_once_with("first")
+        get_agent.assert_called_once_with(MODELS[0])
 
-    def test_a_conversation_stored_without_model_takes_the_requested_one(self, mocker):
-        self.app.config["AI_MODELS"] = MODELS
-        self._get_agent(mocker)
+    def test_a_conversation_is_never_stored_without_its_model(self):
         user = self.login()
-        AssistantConversation(user=user, chat_id=PAYLOAD["id"]).save()
-        assert self._chat("second").status_code == 200
-        assert AssistantConversation.objects.get(user=user).ai_model == "second"
+        with pytest.raises(MongoValidationError):
+            AssistantConversation(user=user, chat_id=PAYLOAD["id"]).save()
+
+    def test_a_concurrent_first_turn_keeps_the_conversation_and_its_model(self, mocker, caplog):
+        """Two first turns of one chat: the one saved first wins, the other is not kept."""
+        self.app.config["AI_MODELS"] = MODELS
+        user = self.login()
+
+        async def answer_after_a_concurrent_first_turn(messages, info):
+            AssistantConversation(user=user, chat_id=PAYLOAD["id"], ai_model="first").save()
+            yield "Bonjour"
+
+        model = FunctionModel(stream_function=answer_after_a_concurrent_first_turn)
+        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
+        body = self._chat("second").get_data(as_text=True)
+        chunks = [
+            json.loads(line.removeprefix("data: "))
+            for line in body.splitlines()
+            if line.startswith("data: {")
+        ]
+        [error] = [chunk for chunk in chunks if chunk["type"] == "error"]
+        assert error["errorText"] == (
+            "Cette conversation a été poursuivie ailleurs entre-temps. Démarrez-en une nouvelle."
+        )
+        stored = AssistantConversation.objects.get(user=user)
+        assert stored.ai_model == "first"
+        assert stored.messages == []
+        [record] = [r for r in caplog.records if r.name == "udata.core.assistant.api"]
+        assert record.levelno == logging.WARNING
 
     def test_chat_reports_the_usage_of_the_whole_turn(self, mocker, tabular):
         """The tokens of every model request of the turn, not those of the last response."""
@@ -1212,15 +1261,9 @@ class AssistantChatModelTest(PytestOnlyAPITestCase):
         assert len(responses) == 2  # before and after the tool call
         input_tokens = sum(r.usage.input_tokens for r in responses)
         output_tokens = sum(r.usage.output_tokens for r in responses)
-        assert metadata["usage"] == {
-            "inputTokens": input_tokens,
-            "outputTokens": output_tokens,
-            "totalTokens": input_tokens + output_tokens,
-        }
+        assert metadata["usage"] == {"inputTokens": input_tokens, "outputTokens": output_tokens}
 
-    def test_a_turn_with_a_response_without_usage_clears_the_usage(self, mocker):
-        """An explicit null: the AI SDK merges metadata, a missing key would keep an earlier usage."""
-
+    def test_a_turn_with_a_response_without_usage_reports_a_null_usage(self, mocker):
         class WithoutUsage(TestModel):
             """Streams its answers like a provider that reports no usage."""
 
@@ -1244,16 +1287,3 @@ class AssistantChatModelTest(PytestOnlyAPITestCase):
         (chunk,) = [c for c in metadata if c["type"] == "message-metadata"]
         assert chunk["messageMetadata"]["usage"] is None
         assert "timestamp" in chunk["messageMetadata"]["pydantic_ai"]
-
-    def test_a_failed_turn_reports_no_usage(self, mocker):
-        self.login()
-
-        async def failing_model(messages, info):
-            raise RuntimeError("boom")
-            yield  # an async generator, as stream_function expects
-
-        model = FunctionModel(stream_function=failing_model)
-        mocker.patch("udata.core.assistant.api.get_agent", return_value=agent_with_model(model))
-        body = self.post(url_for("api.assistant_chat"), data=PAYLOAD).get_data(as_text=True)
-        assert '"type":"error"' in body
-        assert "usage" not in body

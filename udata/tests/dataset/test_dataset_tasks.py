@@ -44,7 +44,9 @@ class DatasetTasksTest(PytestOnlyDBTestCase):
 
         discussion = DiscussionFactory(subject=datasets[0])
         for d in datasets:
-            AssistantConversation.objects.create(chat_id=str(d.id), user=user, subject=d)
+            AssistantConversation.objects.create(
+                chat_id=str(d.id), user=user, subject=d, ai_model="gpt-oss-120b"
+            )
 
         follower = Follow.objects.create(follower=user, following=datasets[0])
 

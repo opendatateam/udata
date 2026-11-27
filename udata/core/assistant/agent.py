@@ -24,28 +24,29 @@ class UnknownModel(ValueError):
     """The requested model is not one of the configured `AI_MODELS`."""
 
 
-def find_model(name: str | None) -> dict:
-    """Return the `AI_MODELS` entry named `name`, or the first (default) one for `None`."""
-    models = current_app.config["AI_MODELS"]
-    if name is None:
-        return models[0]
-    for model_config in models:
+def find_model(name: str) -> dict:
+    """Return the `AI_MODELS` entry named `name`."""
+    for model_config in current_app.config["AI_MODELS"]:
         if model_config["name"] == name:
             return model_config
     raise UnknownModel(name)
 
 
-def model_choices() -> list[dict]:
+def default_model() -> dict:
+    """The first `AI_MODELS` entry."""
+    return current_app.config["AI_MODELS"][0]
+
+
+def offered_models() -> list[dict]:
     """The models offered to the user, in `AI_MODELS` order, the first being the default."""
     return [
-        {"id": m["name"], "label": m.get("label") or m["name"], "default": i == 0}
-        for i, m in enumerate(current_app.config["AI_MODELS"])
+        {"id": m["name"], "label": m.get("label") or m["name"]}
+        for m in current_app.config["AI_MODELS"]
     ]
 
 
-def get_agent(model_name: str | None = None) -> Agent[AssistantDeps, str]:
-    """Build the assistant agent for `model_name` (default: the first configured model)."""
-    model_config = find_model(model_name)
+def get_agent(model_config: dict) -> Agent[AssistantDeps, str]:
+    """Build the assistant agent for an `AI_MODELS` entry."""
     model = OpenAIChatModel(
         model_config["name"],
         provider=OpenAIProvider(

@@ -545,13 +545,13 @@ The chart assistant (`POST /api/1/assistant/chat/`) talks to an OpenAI-compatibl
 
 **default**: `None`
 
-Base URL of the OpenAI-compatible provider API (ex: `https://albert.api.etalab.gouv.fr/v1`). The assistant is disabled, and its endpoint answers `503`, while it is `None`.
+Base URL of the OpenAI-compatible provider API (ex: `https://albert.api.etalab.gouv.fr/v1`). The assistant is disabled, and its chat endpoint answers `503`, while it is `None`.
 
 ### AI_API_KEY
 
 **default**: `None`
 
-API key sent to the provider. The endpoint answers `503` when `AI_BASE_URL` is set without it.
+API key sent to the provider. The chat endpoint answers `503` when `AI_BASE_URL` is set without it.
 
 ### AI_MODELS
 
@@ -564,12 +564,14 @@ API key sent to the provider. The endpoint answers `503` when `AI_BASE_URL` is s
 ]
 ```
 
-Provider models offered to the user in the assistant. The first one is the default model. A conversation keeps the model it started with. Each model is a dict:
+Provider models offered to the user in the assistant, listed by `GET /api/1/assistant/models/` whatever the other settings. The first one is the default model. The chat endpoint answers `503` when the list is empty. Each model is a dict:
 
 * `name` (required): name of the provider model. With Albert, use the `id` of a model listed by `GET /v1/models`, never one of its `aliases`: Albert renames aliases without notice.
 * `label`: name displayed to the user. Missing, the `name` is displayed.
 * `max_output_tokens`: bound on the tokens of each model response, reasoning included. Missing or `None` keeps the provider default.
 * `reasoning_effort`: reasoning effort sent to the provider (`openai_reasoning_effort`). Missing or `None` keeps the provider default; `"none"` disables reasoning on models that would otherwise stream it.
+
+A conversation keeps the model it started with, by its `name`: reordering the list changes the default model of new conversations only. A conversation whose model is renamed or removed can no longer continue: the chat endpoint answers `409` and the user starts a new one.
 
 ### TABULAR_API_URL
 

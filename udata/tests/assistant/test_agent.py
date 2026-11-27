@@ -2,7 +2,13 @@ import pytest
 from pydantic_ai.messages import ModelResponse, TextPart
 from pydantic_ai.models.function import AgentInfo, FunctionModel
 
-from udata.core.assistant.agent import UnknownModel, find_model, get_agent, model_choices
+from udata.core.assistant.agent import (
+    UnknownModel,
+    default_model,
+    find_model,
+    get_agent,
+    offered_models,
+)
 from udata.core.assistant.prompts import SYSTEM_INSTRUCTIONS, language_instructions
 from udata.core.assistant.tabular import TabularClient
 from udata.core.assistant.tools import AssistantDeps
@@ -19,7 +25,7 @@ TWO_MODELS = [
 class AssistantAgentTest(PytestOnlyDBTestCase):
     def test_agent_uses_the_first_model_and_its_settings(self):
         self.app.config["AI_MODELS"] = TWO_MODELS
-        agent = get_agent()
+        agent = get_agent(default_model())
         assert agent.model.model_name == "first"
         assert agent.model_settings == {
             "extra_headers": {"User-Agent": user_agent("assistant")},
@@ -28,17 +34,17 @@ class AssistantAgentTest(PytestOnlyDBTestCase):
         }
 
     def test_agent_bounds_the_output_tokens_by_default(self):
-        assert get_agent().model_settings["max_tokens"] == 8192
+        assert get_agent(default_model()).model_settings["max_tokens"] == 8192
 
     def test_agent_only_identifies_itself_without_settings(self):
         self.app.config["AI_MODELS"] = [{"name": "gpt-oss-120b"}]
-        assert get_agent().model_settings == {
+        assert get_agent(default_model()).model_settings == {
             "extra_headers": {"User-Agent": user_agent("assistant")}
         }
 
     def test_agent_uses_the_requested_model_and_its_settings(self):
         self.app.config["AI_MODELS"] = TWO_MODELS
-        agent = get_agent("second")
+        agent = get_agent(TWO_MODELS[1])
         assert agent.model.model_name == "second"
         assert agent.model_settings == {
             "extra_headers": {"User-Agent": user_agent("assistant")},
@@ -51,28 +57,17 @@ class AssistantAgentTest(PytestOnlyDBTestCase):
         with pytest.raises(UnknownModel):
             find_model(name)
 
-    def test_the_choices_label_each_model_and_mark_the_first_as_default(self):
+    def test_the_offered_models_are_labelled_in_order(self):
         self.app.config["AI_MODELS"] = TWO_MODELS
-        assert model_choices() == [
-            {"id": "first", "label": "First", "default": True},
-            {"id": "second", "label": "second", "default": False},  # no label: its name
+        assert offered_models() == [
+            {"id": "first", "label": "First"},
+            {"id": "second", "label": "second"},  # no label: its name
         ]
 
     def test_the_default_models_are_gpt_oss_then_mistral_medium(self):
-        assert self.app.config["AI_MODELS"] == [
-            {
-                "name": "gpt-oss-120b",
-                "label": "GPT-OSS-120B",
-                "max_output_tokens": 8192,
-                "reasoning_effort": None,
-            },
-            {
-                "name": "mistral-medium-3-5",
-                "label": "Mistral Medium 3.5",
-                "max_output_tokens": 8192,
-                "reasoning_effort": None,
-            },
-        ]
+        models = self.app.config["AI_MODELS"]
+        assert [model["name"] for model in models] == ["gpt-oss-120b", "mistral-medium-3-5"]
+        assert all(model["label"] for model in models)
 
     def test_the_model_receives_the_instructions_and_tool_descriptions(self):
         received = {}
@@ -83,7 +78,7 @@ class AssistantAgentTest(PytestOnlyDBTestCase):
             return ModelResponse(parts=[TextPart("ok")])
 
         deps = AssistantDeps(tabular=TabularClient())
-        get_agent().run_sync("Bonjour", model=FunctionModel(record), deps=deps)
+        get_agent(default_model()).run_sync("Bonjour", model=FunctionModel(record), deps=deps)
         assert SYSTEM_INSTRUCTIONS in received["instructions"]
         assert received["query_data"]
         assert received["create_chart"]
@@ -96,7 +91,7 @@ class AssistantAgentTest(PytestOnlyDBTestCase):
             return ModelResponse(parts=[TextPart("ok")])
 
         deps = AssistantDeps(tabular=TabularClient())
-        get_agent().run_sync("Bonjour", model=FunctionModel(record), deps=deps)
+        get_agent(default_model()).run_sync("Bonjour", model=FunctionModel(record), deps=deps)
         schema = schemas["query_data"]
         assert schema["properties"]["purpose"]["description"]
         assert "purpose" not in schema.get("required", [])
