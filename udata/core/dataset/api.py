@@ -774,7 +774,10 @@ class ResourceAPI(ResourceMixin, API):
         # protected from client override in BaseResourceForm.populate_obj.
         # update_resource saves the updated resource dict to the database
         form.populate_obj(resource)
-        resource.last_modified_internal = datetime.now(UTC)
+        # Only a new content is a modification: a new remote URL here, a new file on the
+        # upload endpoint
+        if "url" in resource._get_changed_fields():
+            resource.last_modified_internal = datetime.now(UTC)
 
         # populate_obj is bugged when sending a None value we want to remove the existing
         # value. We don't want to remove the existing value if no "schema" is sent.
@@ -904,7 +907,8 @@ class CommunityResourceAPI(API):
         form.populate_obj(community)
         if not community.organization and not community.owner:
             community.owner = current_user._get_current_object()
-        community.last_modified_internal = datetime.now(UTC)
+        if "url" in community._get_changed_fields():
+            community.last_modified_internal = datetime.now(UTC)
         community.save()
         return community
 
